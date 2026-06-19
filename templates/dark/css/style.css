@@ -1,0 +1,27 @@
+/* =============================================================================
+ *  templates/dark/css/style.css — dark theme.
+ * -----------------------------------------------------------------------------
+ *  Demonstrates the theming approach: pull in the base layout from the light
+ *  theme, then redefine only the colour variables. No layout is duplicated.
+ *  (The dark theme has no PHP template files of its own, so the loader falls
+ *  back to the light theme's markup automatically.)
+ * ========================================================================== */
+
+@import url("../../light/css/style.css");
+
+:root {
+    --bg:           #15171c;
+    --surface:      #1e2128;
+    --surface-2:    #262a33;
+    --border:       #333845;
+    --text:         #e6e8ee;
+    --text-muted:   #9aa1ad;
+    --primary:      #4f8cff;
+    --primary-text: #0c0e12;
+    --ok:           #4cc77f;
+    --error:        #ff6b5e;
+}
+
+/* A couple of dark-specific tweaks where flat colours read better than filters. */
+.msg-ok    { background: #14301f; }
+.msg-error { background: #3a1714; }

@@ -1,0 +1,327 @@
+/* =============================================================================
+ *  templates/light/css/style.css — base theme.
+ * -----------------------------------------------------------------------------
+ *  All colours are CSS custom properties on :root, and everything else is laid
+ *  out in terms of those variables. A new theme (e.g. dark) can therefore just
+ *  @import this file and redefine the variables — no need to copy layout rules.
+ *  This is the only stylesheet; there are no inline styles in the app.
+ * ========================================================================== */
+
+:root {
+    --bg:           #f4f5f7;
+    --surface:      #ffffff;
+    --surface-2:    #f7f7f9;
+    --border:       #e2e4e9;
+    --text:         #1f2330;
+    --text-muted:   #6b7280;
+    --primary:      #2d6cdf;
+    --primary-text: #ffffff;
+    --ok:           #157f3b;
+    --error:        #c0392b;
+    --radius:       8px;
+    --maxw:         960px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---- Top bar -------------------------------------------------------------- */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.topbar-inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.topnav a { margin-left: 1rem; }
+
+/* ---- Content shell -------------------------------------------------------- */
+.content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
+
+/* ---- Cards ---------------------------------------------------------------- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+.card-narrow { max-width: 380px; margin: 2rem auto; }
+
+/* ---- Messages ------------------------------------------------------------- */
+.msg { padding: 0.6rem 0.9rem; border-radius: var(--radius); margin: 0 0 1rem; }
+.msg-ok    { background: #e8f6ee; color: var(--ok); }
+.msg-error { background: #fdecea; color: var(--error); }
+.muted     { color: var(--text-muted); font-size: 0.92rem; }
+
+/* ---- Forms ---------------------------------------------------------------- */
+label { display: block; font-weight: 600; margin: 0.8rem 0 0.25rem; }
+input, select, textarea {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1rem;
+}
+.field-check label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
+.field-check input { width: auto; }
+
+.btn {
+    display: inline-block;
+    margin-top: 1.2rem;
+    padding: 0.6rem 1.2rem;
+    border: 0;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.btn-primary { background: var(--primary); color: var(--primary-text); }
+.btn-primary:hover { filter: brightness(0.95); text-decoration: none; }
+
+/* ---- Admin panel ---------------------------------------------------------- */
+.admin h1 { font-size: 1.4rem; }
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.25rem;
+}
+.tab {
+    padding: 0.55rem 0.9rem;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+.tab:hover { text-decoration: none; background: var(--surface-2); }
+.tab-active {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border);
+    margin-bottom: -2px;
+    font-weight: 600;
+}
+
+.tab-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+    padding: 1.25rem;
+}
+
+/* ---- Options form layout -------------------------------------------------- */
+.options-form fieldset {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 0 0 1.25rem;
+    padding: 0.5rem 1rem 1rem;
+}
+.options-form legend { font-weight: 700; padding: 0 0.4rem; }
+.options-form .field { margin-bottom: 0.5rem; }
+
+/* ---- Updater -------------------------------------------------------------- */
+.update-log {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1.25rem;
+}
+
+/* ---- Admin: small buttons & danger ---------------------------------------- */
+.btn-small { margin-top: 0; padding: 0.35rem 0.7rem; font-size: 0.85rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+.btn-small:hover { background: var(--border); text-decoration: none; }
+.btn-danger { background: var(--error); color: #fff; border-color: var(--error); }
+
+/* ---- Admin: data tables --------------------------------------------------- */
+.grid { width: 100%; border-collapse: collapse; }
+.grid th, .grid td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.grid th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); }
+.nowrap { white-space: nowrap; }
+
+/* Inline mini-forms inside a table cell (users actions). */
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.row-actions .inline { display: flex; gap: 0.25rem; align-items: center; }
+.row-actions input[type="email"], .row-actions input[type="password"] { width: 11rem; padding: 0.35rem 0.5rem; font-size: 0.85rem; }
+
+/* ---- New event: per-day blocks -------------------------------------------- */
+.day-block { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; padding: 0.5rem 1rem 1rem; }
+.day-block legend { font-weight: 700; padding: 0 0.4rem; }
+.day-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+@media (max-width: 560px) { .day-grid { grid-template-columns: 1fr; } }
+
+/* ---- Thumbnails grid ------------------------------------------------------ */
+.thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+.thumb-item { margin: 0; text-align: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem; }
+.thumb-item img { max-width: 100%; height: 110px; object-fit: contain; display: block; margin: 0 auto 0.4rem; }
+
+/* ---- Logs filter / archive links ------------------------------------------ */
+.log-filter { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.log-filter select { width: auto; min-width: 14rem; }
+.link-cell { display: flex; gap: 0.4rem; align-items: center; }
+.link-cell input { font-size: 0.8rem; }
+
+/* ===========================================================================
+ *  FRONT END — event view, game cards, add-game flow
+ * ======================================================================== */
+
+/* ---- Event header & day tabs ---------------------------------------------- */
+.event-header h1 { margin-bottom: 0.2rem; }
+.event-date { color: var(--text-muted); margin-top: 0; }
+.event-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
+
+.day-tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; border-bottom: 2px solid var(--border); margin: 1rem 0 1.5rem; }
+.day-tab { padding: 0.5rem 0.9rem; color: var(--text-muted); border: 1px solid transparent; border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; }
+.day-tab:hover { background: var(--surface-2); text-decoration: none; }
+.day-tab-active { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -2px; font-weight: 600; }
+.day-tab-date { display: block; font-size: 0.75rem; color: var(--text-muted); }
+
+/* ---- Tables --------------------------------------------------------------- */
+.table-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+.table-title { font-size: 1rem; color: var(--text-muted); margin: 0 0 0.75rem; }
+.no-games { margin: 0.5rem 0 1rem; }
+.add-game-btn { margin-top: 0.5rem; }
+.add-table-form { margin: 1rem 0 2rem; }
+
+/* ---- Game cards ----------------------------------------------------------- */
+.game-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+.game-card { display: flex; gap: 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; background: var(--surface-2); }
+.game-thumb img { width: 90px; height: 90px; object-fit: contain; border-radius: 6px; background: var(--surface); }
+.game-main { flex: 1; min-width: 0; }
+.game-name { margin: 0 0 0.3rem; font-size: 1.1rem; }
+.game-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+.game-time, .game-length { color: var(--text-muted); font-size: 0.9rem; }
+.game-brings, .game-rules, .game-comment { margin: 0.25rem 0; font-size: 0.92rem; }
+.game-comment { color: var(--text-muted); }
+
+/* Weight colour buckets: green (easy) -> red (heavy). */
+.weight-badge { display: inline-block; min-width: 2rem; text-align: center; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; color: #fff; }
+.weight-1 { background: #2e9e5b; }
+.weight-2 { background: #86b300; }
+.weight-3 { background: #d6a400; }
+.weight-4 { background: #e0701a; }
+.weight-5 { background: #cf3b2e; }
+
+/* ---- Players -------------------------------------------------------------- */
+.players { margin-top: 0.5rem; }
+.players-label { font-size: 0.85rem; color: var(--text-muted); }
+.player-list { list-style: none; margin: 0.3rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.player { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.88rem; }
+.player-reserve { opacity: 0.7; font-style: italic; }
+.reserve-tag { color: var(--text-muted); font-size: 0.8rem; }
+
+/* ---- Add-game gate & form ------------------------------------------------- */
+.gate-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.btn-big { padding: 0.85rem 1.2rem; font-size: 1.05rem; }
+.field-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+@media (max-width: 620px) { .field-row { grid-template-columns: 1fr 1fr; } }
+.game-form textarea { width: 100%; }
+
+.thumb-picker { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.thumb-opt { display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; }
+.thumb-opt img { height: 150px; width: auto; max-width: 150px; object-fit: contain; border: 2px solid transparent; border-radius: 6px; background: var(--surface); }
+.thumb-opt input { margin-bottom: 0.25rem; }
+.thumb-opt input:checked + img { border-color: var(--primary); }
+.thumb-none-box { display: inline-flex; align-items: center; justify-content: center; height: 150px; width: 100px; border: 1px dashed var(--border); border-radius: 6px; color: var(--text-muted); }
+.bgg-thumb { max-height: 200px; border-radius: 6px; display: block; }
+
+/* ---- BGG results list ----------------------------------------------------- */
+.bgg-list { list-style: none; margin: 0; padding: 0; }
+.bgg-list li a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.bgg-list li a:hover { background: var(--surface-2); text-decoration: none; }
+.bgg-list img { width: 48px; height: 48px; object-fit: contain; }
+.bgg-year { color: var(--text-muted); }
+
+/* ---- Signup button + player delete ---------------------------------------- */
+.signup-btn { margin-top: 0.5rem; }
+.player { display: inline-flex; align-items: center; gap: 0.35rem; }
+.player-del { color: var(--error); font-weight: 700; text-decoration: none; line-height: 1; padding: 0 0.15rem; }
+.player-del:hover { text-decoration: none; transform: scale(1.2); }
+
+/* ---- Polls ---------------------------------------------------------------- */
+.poll-card { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 0.75rem; background: #eef3fc; }
+.tpl-dark .poll-card { background: #1b2436; }
+.poll-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+.poll-tag { background: var(--primary); color: var(--primary-text); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+.poll-by { font-size: 0.92rem; }
+.poll-options { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.poll-option { display: flex; align-items: center; gap: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.6rem; }
+.poll-opt-thumb { height: 50px; width: 50px; object-fit: contain; }
+.poll-opt-name { flex: 1; min-width: 0; font-weight: 600; }
+.poll-opt-votes { color: var(--text-muted); font-size: 0.88rem; white-space: nowrap; }
+
+/* Poll build screen */
+.poll-candidate-list { list-style: none; margin: 0.3rem 0 1rem; padding: 0; }
+.poll-candidate-list li { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
+.poll-candidate-list .cand-name { flex: 1; font-weight: 600; }
+.poll-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.gate-poll { margin-top: 0.75rem; }
+
+/* ---- Timeline ------------------------------------------------------------- */
+html { scroll-behavior: smooth; }
+.timeline { margin: 1rem 0 2.5rem; }
+.timeline-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.tl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.tl-inner { position: relative; min-width: 700px; padding: 0 0 0.5rem; }
+
+.tl-hours { position: relative; height: 1.6rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; }
+.tl-hour { position: absolute; top: 0.3rem; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+.tl-hour::before { content: ""; position: absolute; top: -0.3rem; left: 50%; height: 0.3rem; border-left: 1px solid var(--border); }
+
+.tl-table-no { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); background: var(--surface-2); padding: 0.25rem 0.5rem; margin-top: 0.25rem; }
+.tl-lane { position: relative; height: 3rem; margin: 0.25rem 0; }
+.tl-game { position: absolute; top: 0; height: 100%; min-width: 2.5rem; box-sizing: border-box; overflow: hidden;
+           background: var(--primary); color: var(--primary-text); border-radius: 5px; padding: 0.2rem 0.4rem;
+           font-size: 0.8rem; line-height: 1.15; text-decoration: none; }
+.tl-game:hover { filter: brightness(0.95); text-decoration: none; }
+.tl-name { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-sub { display: block; font-size: 0.72rem; opacity: 0.9; }
+.tl-count-full { color: #ffd5d0; font-weight: 700; }
+.tl-game { } /* count red on light theme handled below for contrast */
+
+/* ---- Game actions / edit-delete / archived / discussions ------------------ */
+.game-name-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.game-actions { display: inline-flex; gap: 0.3rem; }
+.game-archived { background: #fbe9e7; border-color: #e6b0aa; opacity: 0.75; }
+.tpl-dark .game-archived { background: #3a1f1c; border-color: #6b3b34; }
+.game-archived .game-name { text-decoration: line-through; }
+
+.delgame-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+
+.discussion { margin-top: 0.6rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
+.comment-list { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.comment-list li { font-size: 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.5rem; }
+.c-name { font-weight: 600; }
+.comment-add summary { cursor: pointer; color: var(--primary); font-size: 0.9rem; }
+.comment-add form { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* ---- User panel ----------------------------------------------------------- */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width: 520px) { .stats-grid { grid-template-columns: 1fr; } }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.stat-label { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.4rem; }
+.stat-nums { display: flex; gap: 1.5rem; }
+.stat-nums span { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+.stat-nums small { display: block; font-size: 0.75rem; font-weight: 400; color: var(--text-muted); }
+.profile-forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.profile-card h3 { margin-top: 0; font-size: 1rem; }
+.reset-sub { font-size: 1rem; }
+
+/* ---- Messaging envelope --------------------------------------------------- */
+.msg-icon { text-decoration: none; color: var(--primary); font-size: 1rem; line-height: 1; padding: 0 0.25rem; }
+.msg-icon:hover { color: var(--primary-hover, var(--primary)); filter: brightness(0.9); }
+.game-name-row .msg-icon { margin-left: 0.25rem; }

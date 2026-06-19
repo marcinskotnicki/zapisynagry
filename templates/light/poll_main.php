@@ -1,0 +1,86 @@
+<?php
+/* =============================================================================
+ *  templates/light/poll_main.php — the poll build screen. Presentation only.
+ * -----------------------------------------------------------------------------
+ *  The working screen while assembling a poll (the data lives in the session
+ *  draft until "Finish"). Top: poll-level fields (proposer name/email, start
+ *  time, rules, comment, add-self). Middle: the candidate list with per-row
+ *  remove buttons. Bottom: the three action buttons, distinguished by the "do"
+ *  value add_poll.php reads (addgame / finish / cancel).
+ *
+ *  RENDER VARS:
+ *    $table — the table the poll is for.
+ *    $draft — the session draft (poll-level fields + ['games'] candidates).
+ *    $error — message above the form, or null.
+ *    $csrf  — hidden CSRF field.
+ * ============================================================================= */
+?>
+<div class="card">
+    <h1><?= e(t('addpoll_title')) ?></h1>
+
+    <?php if (!empty($error)): ?>
+        <p class="msg msg-error"><?= e($error) ?></p>
+    <?php endif; ?>
+
+    <form method="post" action="add_poll.php?table=<?= (int)$table['id'] ?>" class="poll-form">
+        <?= $csrf ?>
+        <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
+
+        <div class="field-row">
+            <div class="field">
+                <label for="p_name"><?= e(t('poll_name')) ?></label>
+                <input type="text" id="p_name" name="name" value="<?= e($draft['name']) ?>">
+            </div>
+            <div class="field">
+                <label for="p_email"><?= e(t('poll_email')) ?></label>
+                <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
+            </div>
+            <div class="field">
+                <label for="p_start"><?= e(t('poll_start')) ?></label>
+                <input type="time" id="p_start" name="start_time" value="<?= e($draft['start_time']) ?>">
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="p_explain"><?= e(t('poll_explain')) ?></label>
+            <select id="p_explain" name="explain_rules">
+                <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
+                    <option value="<?= $code ?>"<?= (int)$draft['explain_rules'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="p_comment"><?= e(t('poll_comment')) ?></label>
+            <textarea id="p_comment" name="comment" rows="2"><?= e($draft['comment']) ?></textarea>
+        </div>
+
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="add_self" value="1" <?= (int)$draft['add_self'] === 1 ? 'checked' : '' ?>>
+                <?= e(t('poll_addself')) ?>
+            </label>
+        </div>
+
+        <h3><?= e(t('poll_candidates')) ?></h3>
+        <?php if (empty($draft['games'])): ?>
+            <p class="muted"><?= e(t('poll_no_candidates')) ?></p>
+        <?php else: ?>
+            <ul class="poll-candidate-list">
+                <?php foreach ($draft['games'] as $idx => $g): // remove button value is "rem:<idx>" ?>
+                    <li>
+                        <span class="cand-name"><?= e($g['name']) ?></span>
+                        <span class="muted"><?= e(t('poll_req_short', (int)$g['required_players'])) ?></span>
+                        <button type="submit" name="do" value="rem:<?= (int)$idx ?>" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <div class="poll-buttons">
+            <button type="submit" name="do" value="addgame" class="btn"><?= e(t('poll_addgame')) ?></button>
+            <button type="submit" name="do" value="finish" class="btn btn-primary"><?= e(t('poll_finish')) ?></button>
+            <button type="submit" name="do" value="cancel" class="btn"><?= e(t('cancel')) ?></button>
+        </div>
+    </form>
+</div>
