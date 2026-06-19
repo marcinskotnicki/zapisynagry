@@ -33,7 +33,7 @@ if (!$table || !$event || (int)$event['is_archived'] === 1 || !opt_bool('allow_p
 function poll_candidate_defaults() {
     return [
         'name' => '', 'length_minutes' => 60, 'weight' => 2.0, 'max_players' => 4,
-        'thumbnail' => '', 'bgg_id' => '', 'required_players' => 4, 'source' => 'manual',
+        'thumbnail' => '', 'bgg_id' => '', 'language' => '', 'required_players' => 4, 'source' => 'manual',
     ];
 }
 
@@ -51,6 +51,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'required_players' => max(1, (int)($_POST['required_players'] ?? 1)),
         'thumbnail'        => trim($_POST['thumbnail'] ?? ''),
         'bgg_id'           => (int)($_POST['bgg_id'] ?? 0),
+        'language'         => trim($_POST['language'] ?? ''),
         'source'           => ($_POST['source'] ?? 'manual') === 'bgg' ? 'bgg' : 'manual',
     ];
     if ($cand['name'] === '') {

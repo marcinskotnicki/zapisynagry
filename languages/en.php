@@ -216,6 +216,7 @@ return [
     'f_thumbnail'         => 'Thumbnail',
     'f_no_thumb'          => 'No thumbnail',
     'f_brings'            => 'Who brings the game',
+    'f_language'              => 'Language',
     'f_email'             => 'Email',
     'f_explain'           => 'Do you explain the rules?',
     'f_addself'           => 'Add yourself as first player?',

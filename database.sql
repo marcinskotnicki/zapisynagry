@@ -193,6 +193,7 @@ CREATE TABLE games (
     start_time       TEXT NOT NULL,              -- 'HH:MM'
     thumbnail        TEXT,                        -- local path OR BGG image URL
     bgg_id           INTEGER,                     -- NULL if not from BGG
+    language         TEXT,                        -- edition/language of the copy (e.g. 'PL'); free text
     brings_name      TEXT,                        -- who brings the game (shown)
     brings_email     TEXT,                        -- stored, NEVER shown publicly
     brings_user_id   INTEGER,                     -- for "games brought" stats
@@ -293,6 +294,7 @@ CREATE TABLE poll_games (
     max_players      INTEGER NOT NULL DEFAULT 4,
     thumbnail        TEXT,
     bgg_id           INTEGER,
+    language         TEXT,                        -- edition/language of the copy (mirrors games.language)
     required_players INTEGER NOT NULL DEFAULT 1, -- votes >= this => option wins
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE

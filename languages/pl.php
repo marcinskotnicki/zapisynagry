@@ -208,6 +208,7 @@ return [
     'f_thumbnail'         => 'Miniatura',
     'f_no_thumb'          => 'Brak miniatury',
     'f_brings'            => 'Kto przynosi grę',
+    'f_language'              => 'Wersja językowa',
     'f_email'             => 'E-mail',
     'f_explain'           => 'Czy tłumaczysz zasady?',
     'f_addself'           => 'Dodać siebie jako pierwszego gracza?',
