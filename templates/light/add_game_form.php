@@ -103,6 +103,11 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
         <?php endif; ?>
 
+        <div class="field">
+            <label for="language"><?= e(t('f_language')) ?></label>
+            <input type="text" id="language" name="language" value="<?= e($game['language']) ?>">
+        </div>
+
         <div class="field-row">
             <div class="field">
                 <label for="brings_name"><?= e(t('f_brings')) ?></label>

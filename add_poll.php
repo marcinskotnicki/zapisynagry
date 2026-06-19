@@ -106,15 +106,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Insert each candidate; collect their new ids for self-voting.
                 $cg = db()->prepare(
                     'INSERT INTO poll_games
-                     (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,required_players)
-                     VALUES (?,?,?,?,?,?,?,?)'
+                     (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players)
+                     VALUES (?,?,?,?,?,?,?,?,?)'
                 );
                 $candIds = [];
                 foreach ($draft['games'] as $g) {
                     $cg->execute([
                         $pollId, $g['name'], $g['length_minutes'], $g['weight'], $g['max_players'],
                         $g['thumbnail'] !== '' ? $g['thumbnail'] : null,
-                        $g['bgg_id'] ?: null, $g['required_players'],
+                        $g['bgg_id'] ?: null,
+                        $g['language'] !== '' ? $g['language'] : null,
+                        $g['required_players'],
                     ]);
                     $candIds[] = (int)db()->lastInsertId();
                 }

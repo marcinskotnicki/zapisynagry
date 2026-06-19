@@ -81,13 +81,14 @@ function poll_resolve_candidate($poll, $cand) {
         db_run(
             'INSERT INTO games
              (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-              thumbnail,bgg_id,brings_name,brings_email,brings_user_id,explain_rules,comment,added_by_user_id)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+              thumbnail,bgg_id,language,brings_name,brings_email,brings_user_id,explain_rules,comment,added_by_user_id)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
                 $poll['table_id'], $poll['event_id'], $poll['day_id'],
                 $cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
                 $poll['start_time'],
                 $cand['thumbnail'] ?: null, $cand['bgg_id'] ?: null,
+                $cand['language'] ?: null,
                 $poll['proposer_name'] ?: null, $poll['proposer_email'] ?: null,
                 $poll['proposer_user_id'], $poll['explain_rules'],
                 $poll['comment'] ?: null, $poll['proposer_user_id'],

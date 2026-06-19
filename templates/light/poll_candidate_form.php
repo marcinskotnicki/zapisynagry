@@ -91,6 +91,11 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             </div>
         <?php endif; ?>
 
+        <div class="field">
+            <label for="language"><?= e(t('f_language')) ?></label>
+            <input type="text" id="language" name="language" value="<?= e($cand['language']) ?>">
+        </div>
+
         <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
         <a class="btn" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('cancel')) ?></a>
     </form>

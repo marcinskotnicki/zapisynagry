@@ -76,7 +76,7 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         $thumbnail = (int)$game['bgg_id'] ? $game['thumbnail'] : trim($_POST['thumbnail'] ?? '');
         db_run(
             'UPDATE games SET name=?, length_minutes=?, weight=?, max_players=?, start_time=?,
-                    thumbnail=?, brings_name=?, brings_email=?, explain_rules=?, comment=? WHERE id=?',
+                    thumbnail=?, language=?, brings_name=?, brings_email=?, explain_rules=?, comment=? WHERE id=?',
             [
                 $name,
                 max(0, (int)($_POST['length_minutes'] ?? 0)),
@@ -84,6 +84,7 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
                 max(1, (int)($_POST['max_players'] ?? 1)),
                 $start,
                 $thumbnail !== '' ? $thumbnail : null,
+                trim($_POST['language'] ?? '') ?: null,
                 trim($_POST['brings_name'] ?? '') ?: null,
                 trim($_POST['brings_email'] ?? '') ?: null,
                 min(2, max(0, (int)($_POST['explain_rules'] ?? 0))),
