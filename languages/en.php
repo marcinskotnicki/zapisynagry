@@ -361,4 +361,12 @@ The link expires in one hour.',
     'msg_envelope'          => 'Send a message',
     'msg_subject'           => 'Message from %s',
     'msg_empty'             => 'Please write a message.',
+    // ---- Classic theme labels -------------------------------------------------
+    'cl_weight'             => 'weight',
+    'cl_players'            => 'players',
+    'cl_start'              => 'Starts',
+    'cl_version'            => 'Version',
+    'cl_comment'            => 'Comment',
+    'player_n'              => 'Player %d',
+    'resign'                => 'Resign',
 ];

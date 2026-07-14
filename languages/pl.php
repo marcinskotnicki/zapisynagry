@@ -353,4 +353,12 @@ Link wygasa za godzinę.',
     'msg_envelope'          => 'Wyślij wiadomość',
     'msg_subject'           => 'Wiadomość od %s',
     'msg_empty'             => 'Napisz wiadomość.',
+    // ---- Classic theme labels -------------------------------------------------
+    'cl_weight'             => 'waga',
+    'cl_players'            => 'graczy',
+    'cl_start'              => 'Rozpoczęcie',
+    'cl_version'            => 'Wersja',
+    'cl_comment'            => 'Komentarz',
+    'player_n'              => 'Gracz %d',
+    'resign'                => 'Wypisz się',
 ];

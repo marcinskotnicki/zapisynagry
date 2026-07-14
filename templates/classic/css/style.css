@@ -1,0 +1,147 @@
+/* =============================================================================
+ *  templates/classic/css/style.css — the "classic" theme.
+ * -----------------------------------------------------------------------------
+ *  Mimics the old (pre-rebuild) layout for people who don't like change:
+ *    * games on a table flow HORIZONTALLY (flex row, wrapping),
+ *    * each game is a dark rounded card (charcoal gradient) with red accents,
+ *      centred rows, and a red "waga" band,
+ *    * the player list sits in a light grey panel TO THE RIGHT of the card,
+ *      as numbered slots — filled ones show the name (+ rules note in green),
+ *      empty ones are dark "sign up" buttons.
+ *
+ *  Only the palette + the game card/table layout differ from light; everything
+ *  else (forms, admin, timeline...) inherits light's CSS via the @import and
+ *  light's PHP views via the template fallback. The card's markup itself is
+ *  overridden in templates/classic/game_card.php (new gc-* classes, styled here).
+ * ============================================================================= */
+@import url("../../light/css/style.css");
+
+/* ---- Palette (from the old app's look) ------------------------------------ */
+:root {
+    --bg:        #ececec;   /* light grey page, so the dark cards pop */
+    --primary:   #c40000;   /* the classic red accent */
+    --primary-text: #ffffff;
+
+    /* classic-only extras (used by the gc-* rules below) */
+    --gc-dark-1: #3d3d3d;   /* card gradient top */
+    --gc-dark-2: #1f1f1f;   /* card gradient bottom */
+    --gc-band:   #2a2a2a;   /* info row band */
+    --gc-red:    #c40000;   /* waga band / delete buttons */
+    --gc-green:  #2eb82e;   /* rules labels */
+    --gc-panel:  #e3e3e3;   /* player panel background */
+    --gc-row:    #d6d6d6;   /* player row band */
+}
+
+/* ---- Horizontal tables ----------------------------------------------------- *
+ * The one-line layout change: games/polls on a table flow left-to-right and
+ * wrap. Cards must not stretch, so each gets a fixed flex basis.
+ * ---------------------------------------------------------------------------- */
+.tpl-classic .game-list { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+.tpl-classic .poll-card { flex: 0 0 340px; }
+
+/* ---- The classic game card (gc-*) ------------------------------------------ *
+ * Two side-by-side pieces: .gc-info (dark card) + .gc-players (light panel).
+ * ---------------------------------------------------------------------------- */
+.tpl-classic .game-card {
+    display: flex; align-items: flex-start; gap: 0;
+    flex: 0 0 auto;
+    background: transparent; border: none; padding: 0; box-shadow: none;
+}
+
+/* Left: the dark info card */
+.tpl-classic .gc-info {
+    width: 235px; flex: 0 0 235px;
+    background: linear-gradient(var(--gc-dark-1), var(--gc-dark-2));
+    color: #eee; text-align: center;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    padding-bottom: 0.6rem;
+    position: relative; z-index: 1;   /* sits above the panel's tucked-under edge */
+}
+
+/* The action "tabs" peeking from the top-left (delete red, edit grey) */
+.tpl-classic .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-classic .gc-tab {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 6px; text-decoration: none; color: #fff;
+    background: #555;
+}
+.tpl-classic .gc-tab:hover { filter: brightness(1.15); text-decoration: none; }
+.tpl-classic .gc-tab-del { background: var(--gc-red); }
+
+.tpl-classic .gc-thumb { padding: 0.5rem 0 0.2rem; }
+.tpl-classic .gc-thumb img { max-width: 150px; max-height: 190px; border: 3px solid #111; box-shadow: 0 0 0 1px #000; }
+
+.tpl-classic .gc-name { color: #fff; font-size: 1.05rem; margin: 0.4rem 0.5rem; }
+
+/* Info bands: red for waga, charcoal for the rest, black for comments */
+.tpl-classic .gc-band { padding: 0.3rem 0.5rem; font-size: 0.85rem; color: #ddd; }
+.tpl-classic .gc-band strong { color: #fff; font-weight: 600; }
+.tpl-classic .gc-band + .gc-band { border-top: 1px solid rgba(255, 255, 255, .06); }
+.tpl-classic .gc-waga { background: var(--gc-red); color: #fff; font-weight: 600; }
+.tpl-classic .gc-row  { background: var(--gc-band); }
+.tpl-classic .gc-rules { color: var(--gc-green); font-weight: 600; background: var(--gc-band); }
+.tpl-classic .gc-comment { background: #0d0d0d; font-size: 0.8rem; line-height: 1.35; }
+.tpl-classic .gc-comment .c-name { color: #bbb; }
+
+/* Discussion inside the dark card */
+.tpl-classic .gc-info .discussion { border-top: none; margin: 0; padding: 0; }
+.tpl-classic .gc-info .comment-list { gap: 0; margin: 0; }
+.tpl-classic .gc-info .comment-list li { background: #0d0d0d; border: none; border-radius: 0; color: #ccc; border-top: 1px solid rgba(255,255,255,.06); }
+.tpl-classic .gc-addcomment { margin-top: 0.5rem; }
+.tpl-classic .gc-addcomment summary {
+    display: inline-block; cursor: pointer; list-style: none;
+    background: #4a4a4a; color: #fff; border-radius: 999px;   /* the "+ Dodaj komentarz" pill */
+    padding: 0.25rem 0.9rem; font-size: 0.8rem;
+}
+.tpl-classic .gc-addcomment summary::-webkit-details-marker { display: none; }
+.tpl-classic .gc-addcomment form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.tpl-classic .gc-addcomment input, .tpl-classic .gc-addcomment textarea { width: 100%; box-sizing: border-box; }
+
+/* Right: the light player panel, tucked slightly under the card */
+.tpl-classic .gc-players {
+    background: var(--gc-panel);
+    border-radius: 10px;
+    padding: 0.6rem 0.6rem 0.6rem 1.2rem;
+    margin-left: -0.6rem; margin-top: 1.6rem;   /* the classic overlap */
+    min-width: 250px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+}
+.tpl-classic .gc-slot {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: var(--gc-row); border-radius: 4px;
+    padding: 0.3rem 0.5rem; margin-bottom: 0.35rem;
+    font-size: 0.85rem; color: #333;
+}
+.tpl-classic .gc-slot strong { color: #111; }
+.tpl-classic .gc-knows { color: var(--gc-green); font-size: 0.78rem; }
+.tpl-classic .gc-slot-q { flex: 1 1 100%; font-size: 0.8rem; color: #444; padding-left: 0.2rem; }
+
+/* Resign: the small red button on a filled slot */
+.tpl-classic .gc-resign {
+    margin-left: auto;
+    background: var(--gc-red); color: #fff;
+    font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 0.2rem 0.45rem; border-radius: 5px; text-decoration: none; white-space: nowrap;
+}
+.tpl-classic .gc-resign:hover { filter: brightness(1.15); text-decoration: none; }
+
+/* Empty slot: the dark "sign up" button row */
+.tpl-classic .gc-signup {
+    display: block; text-align: left;
+    background: #1a1a1a; color: #fff;
+    border-radius: 5px; padding: 0.35rem 0.7rem; margin-bottom: 0.35rem;
+    font-size: 0.85rem; text-decoration: none;
+}
+.tpl-classic .gc-signup:hover { background: #000; text-decoration: none; }
+
+/* Reserve entries below the numbered slots */
+.tpl-classic .gc-reserve { opacity: 0.75; font-style: italic; }
+
+/* Archived (soft-deleted) classic card keeps the dark shell, dimmed */
+.tpl-classic .game-archived .gc-info { opacity: 0.55; }
+.tpl-classic .game-archived .gc-name { text-decoration: line-through; }
+
+/* Envelope icons need to be visible on both dark + light halves */
+.tpl-classic .gc-info .msg-icon { color: #ffb3ab; }
+.tpl-classic .gc-players .msg-icon { color: var(--gc-red); }
