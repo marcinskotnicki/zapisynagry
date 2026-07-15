@@ -280,6 +280,18 @@ function update_run($root) {
         @unlink($tmpDbFile);                         // always remove the throwaway DB
     }
 
+    // The new PHP files are on disk, but PHP's opcode cache (OPcache) may keep
+    // serving the OLD compiled versions — a browser hard-refresh cannot touch
+    // this server-side cache, and on hosts with timestamp revalidation disabled
+    // it never expires on its own. Reset it so the update takes effect
+    // immediately. (Static files like CSS are unaffected by OPcache, which is
+    // why theme changes can appear while PHP changes seem "missing".)
+    if (function_exists('opcache_reset')) {
+        @opcache_reset();
+        $results[] = t('update_cache_reset');
+    }
+    clearstatcache(true);                        // also drop PHP's file-stat cache
+
     $results[] = t('update_done');
     return $results;
 }

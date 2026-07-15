@@ -365,4 +365,5 @@ Link wygasa za godzinę.',
     'front_no_event'        => 'Nie ma jeszcze żadnego wydarzenia.',
     'opt_game_languages'    => 'Wersje językowe gier (jedna na linię)',
     'f_language_none'       => '— nie podano —',
+    'update_cache_reset'    => 'Zresetowano cache PHP (nowy kod działa od razu)',
 ];

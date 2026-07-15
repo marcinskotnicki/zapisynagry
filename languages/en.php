@@ -373,4 +373,5 @@ The link expires in one hour.',
     'front_no_event'        => 'There is no event yet.',
     'opt_game_languages'    => 'Game language options (one per line)',
     'f_language_none'       => '— not specified —',
+    'update_cache_reset'    => 'PHP cache reset (new code active immediately)',
 ];
