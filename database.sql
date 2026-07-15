@@ -68,6 +68,10 @@ INSERT INTO options (key, value) VALUES
     ('msg_below_event',       ''),     -- optional custom text under the event name
     ('msg_adding_game',       ''),     -- optional custom text on the add-game screen
     ('msg_assigning_player',  ''),     -- optional custom text on the signup screen
+    ('game_languages',        'PL
+EN
+niezależna językowo
+inna'),                                -- game-language dropdown options, ONE PER LINE (admin-editable)
 
     -- ---- Defaults -----------------------------------------------------------
     ('default_event_name',    'Spotkanie planszowe'), -- prefilled new-event name

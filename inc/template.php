@@ -103,14 +103,19 @@ function tpl_file($name) {
  * @param array  $vars  key => value pairs exposed as $key inside the template.
  * @return void          Echoes directly to the output buffer.
  */
-function tpl_render($name, array $vars = []) {
-    $file = tpl_file($name);
-    if ($file === null) {
-        echo "<!-- template '$name' not found -->";
+function tpl_render($__tpl_name, array $__tpl_vars = []) {
+    // NOTE the odd local names: extract(..., EXTR_SKIP) refuses to overwrite
+    // existing locals, so ordinary names here would silently SWALLOW render
+    // vars with the same name (a $vars['name'] used to arrive as the template
+    // name instead of the value — the "admin_new_event" bug). The __tpl_
+    // prefix makes a collision with real render vars practically impossible.
+    $__tpl_file = tpl_file($__tpl_name);
+    if ($__tpl_file === null) {
+        echo "<!-- template '$__tpl_name' not found -->";
         return;
     }
-    extract($vars, EXTR_SKIP);
-    include $file;
+    extract($__tpl_vars, EXTR_SKIP);
+    include $__tpl_file;
 }
 
 /**

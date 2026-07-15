@@ -369,4 +369,8 @@ The link expires in one hour.',
     'cl_comment'            => 'Comment',
     'player_n'              => 'Player %d',
     'resign'                => 'Resign',
+    // ---- Front placeholder -----------------------------------------------------
+    'front_no_event'        => 'There is no event yet.',
+    'opt_game_languages'    => 'Game language options (one per line)',
+    'f_language_none'       => '— not specified —',
 ];

@@ -93,7 +93,20 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
 
         <div class="field">
             <label for="language"><?= e(t('f_language')) ?></label>
-            <input type="text" id="language" name="language" value="<?= e($cand['language']) ?>">
+            <?php
+            // Same admin-configured dropdown as the game form (see add_game_form).
+            $langOpts = game_language_options();
+            $curLang  = (string)($cand['language'] ?? '');
+            ?>
+            <select id="language" name="language">
+                <option value=""><?= e(t('f_language_none')) ?></option>
+                <?php foreach ($langOpts as $lo): ?>
+                    <option value="<?= e($lo) ?>"<?= $curLang === $lo ? ' selected' : '' ?>><?= e($lo) ?></option>
+                <?php endforeach; ?>
+                <?php if ($curLang !== '' && !in_array($curLang, $langOpts, true)): ?>
+                    <option value="<?= e($curLang) ?>" selected><?= e($curLang) ?></option>
+                <?php endif; ?>
+            </select>
         </div>
 
         <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>

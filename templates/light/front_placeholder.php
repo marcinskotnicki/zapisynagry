@@ -15,12 +15,11 @@
 <div class="card">
     <?php if (empty($event)): // the normal case: nothing scheduled yet ?>
         <h1><?= e(opt('venue_name') ?: t('app_name')) ?></h1>
-        <p class="muted">No event yet.</p>
+        <p class="muted"><?= e(t('front_no_event')) ?></p>
         <?php if (is_admin()): // only admins can create one, so only they see the button ?>
             <p><a class="btn btn-primary" href="admin.php?tab=new_event"><?= e(t('tab_new_event')) ?></a></p>
         <?php endif; ?>
     <?php else: // defensive fallback (index.php uses front_event for a real event) ?>
         <h1><?= e($event['name']) ?></h1>
-        <p class="muted">Front-end view is built in the next phase.</p>
     <?php endif; ?>
 </div>

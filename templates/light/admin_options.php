@@ -26,6 +26,12 @@ $text = function($key, $type = 'text') {
     echo '<div class="field"><label for="' . e($key) . '">' . e(t('opt_' . $key)) . '</label>';
     echo '<input type="' . e($type) . '" id="' . e($key) . '" name="' . e($key) . '" value="' . e(opt($key)) . '"></div>';
 };
+// Multi-line textarea row: for options where each LINE is one entry (e.g.
+// the game-language choices). Prefilled from opt($key), saved verbatim.
+$textarea = function($key, $rows = 4) {
+    echo '<div class="field"><label for="' . e($key) . '">' . e(t('opt_' . $key)) . '</label>';
+    echo '<textarea id="' . e($key) . '" name="' . e($key) . '" rows="' . (int)$rows . '">' . e(opt($key)) . '</textarea></div>';
+};
 // Checkbox toggle row (value "1"): checked when the stored value is exactly "1".
 // An unchecked box is simply absent from POST — the controller treats that as "0".
 $toggle = function($key) {
@@ -57,6 +63,7 @@ $toggle = function($key) {
         $text('msg_below_event');
         $text('msg_adding_game');
         $text('msg_assigning_player');
+        $textarea('game_languages');             // one dropdown choice per line
         ?>
     </fieldset>
 

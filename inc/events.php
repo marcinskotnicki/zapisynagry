@@ -191,6 +191,21 @@ function weight_bucket($w) {
 }
 
 /**
+ * The admin-configured game-language choices (the 'game_languages' option,
+ * one per line). Blank lines are skipped; order is preserved. Used by the
+ * add/edit game and poll-candidate forms to build the language dropdown.
+ * @return string[]
+ */
+function game_language_options() {
+    $out = [];
+    foreach (preg_split('/\R/', opt('game_languages')) as $line) {   // \R = any newline style
+        $line = trim($line);
+        if ($line !== '') $out[] = $line;
+    }
+    return $out;
+}
+
+/**
  * Localized label for the "do you explain the rules" code (0/1/2).
  * Stored as an int code; the human text lives in the language files.
  * @return string

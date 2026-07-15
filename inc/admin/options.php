@@ -20,7 +20,7 @@ $OPTION_VALUES = [
     'venue_name', 'email_address', 'email_login', 'email_password',
     'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
     'captcha_site_key', 'captcha_secret_key', 'timeline_extension',
-    'msg_below_event', 'msg_adding_game', 'msg_assigning_player',
+    'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
     'verification_method',

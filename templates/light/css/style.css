@@ -273,7 +273,12 @@ input, select, textarea {
 
 /* ---- Timeline ------------------------------------------------------------- */
 html { scroll-behavior: smooth; }
-.timeline { margin: 1rem 0 2.5rem; }
+/* Full-bleed: stretch the timeline to the viewport edges (the schedule is
+   wide, so it escapes the centred column) with a small breathing padding.
+   50% - 50vw pulls each side out to the viewport edge; body clips the few px
+   of scrollbar-width overshoot this trick can cause. */
+body { overflow-x: hidden; }
+.timeline { margin: 1rem calc(50% - 50vw) 2.5rem; padding: 0 1rem; }
 .timeline-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
 .tl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .tl-inner { position: relative; min-width: 700px; padding: 0 0 0.5rem; }

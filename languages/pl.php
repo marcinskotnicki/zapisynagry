@@ -361,4 +361,8 @@ Link wygasa za godzinę.',
     'cl_comment'            => 'Komentarz',
     'player_n'              => 'Gracz %d',
     'resign'                => 'Wypisz się',
+    // ---- Front placeholder -----------------------------------------------------
+    'front_no_event'        => 'Nie ma jeszcze żadnego wydarzenia.',
+    'opt_game_languages'    => 'Wersje językowe gier (jedna na linię)',
+    'f_language_none'       => '— nie podano —',
 ];

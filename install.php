@@ -190,6 +190,17 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $adminPass2 = (string)($_POST['admin_pass2'] ?? '');
     $venueName  = trim($_POST['venue_name'] ?? '');
 
+    // Optional email + integration settings (all skippable; they land in the
+    // options table and can be set/changed later in the admin Options tab).
+    $optSeed = [
+        'email_smtp_server' => trim($_POST['email_smtp_server'] ?? ''),
+        'email_smtp_port'   => trim($_POST['email_smtp_port']   ?? ''),
+        'email_address'     => trim($_POST['email_address']     ?? ''),
+        'email_login'       => trim($_POST['email_login']       ?? ''),
+        'email_password'    => (string)($_POST['email_password'] ?? ''),
+        'bgg_api_code'      => trim($_POST['bgg_api_code']      ?? ''),
+    ];
+
     $errors = [];
     if (!filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) $errors[] = 'Admin email is not valid.';
     if ($adminName === '')                               $errors[] = 'Admin display name is required.';
@@ -283,6 +294,14 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($venueName !== '') {
             $pdo->prepare('UPDATE options SET value=? WHERE key=?')->execute([$venueName, 'venue_name']);
         }
+        // Store whichever optional email/BGG settings were provided; blanks keep
+        // the seeded defaults (everything remains editable in admin Options).
+        $optStmt = $pdo->prepare('UPDATE options SET value=? WHERE key=?');
+        foreach ($optSeed as $optKey => $optVal) {
+            if ($optVal !== '') {
+                $optStmt->execute([$optVal, $optKey]);
+            }
+        }
     } catch (Throwable $ex) {
         echo '<p class="bad">Could not create the admin account: ' . e($ex->getMessage()) . '</p>';
         page_foot(); exit;
@@ -357,6 +376,18 @@ echo '<label>Repeat password</label><input type="password" name="admin_pass2" re
 
 echo '<h2 style="font-size:1.1rem">Basics</h2>';
 echo '<label>Venue name (optional)</label><input name="venue_name">';
+
+// All optional: outgoing email + BGG. The app installs fine without them, but
+// email features (notifications, recovery, verification codes, messaging) and
+// the BGG bearer code won't work until set — here or later in admin Options.
+echo '<h2 style="font-size:1.1rem">Email &amp; integrations (optional)</h2>';
+echo '<label>SMTP server</label><input name="email_smtp_server" placeholder="smtp.example.com">';
+echo '<label>SMTP port</label><input name="email_smtp_port" inputmode="numeric" placeholder="587 (STARTTLS) / 465 (TLS)">';
+echo '<label>Email address (From)</label><input type="email" name="email_address">';
+echo '<label>Email login (SMTP user)</label><input name="email_login">';
+echo '<label>Email password</label><input type="password" name="email_password">';
+echo '<label>BGG API code</label><input name="bgg_api_code">';
+echo '<p class="muted">You can skip these and fill them in later under Admin &rarr; Options.</p>';
 
 echo '<button type="submit">Install now</button>';
 echo '</form>';
