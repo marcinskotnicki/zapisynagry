@@ -36,7 +36,10 @@
  * The one-line layout change: games/polls on a table flow left-to-right and
  * wrap. Cards must not stretch, so each gets a fixed flex basis.
  * ---------------------------------------------------------------------------- */
-.tpl-classic .game-list { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+.tpl-classic .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+/* ^ flex-direction:row is REQUIRED: light's base rule sets .game-list to
+   flex-direction:column, and overriding display alone would inherit it —
+   producing a wrapping... column. (Learned the hard way.) */
 .tpl-classic .poll-card { flex: 0 0 340px; }
 
 /* ---- The classic game card (gc-*) ------------------------------------------ *
