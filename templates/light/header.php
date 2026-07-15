@@ -52,4 +52,8 @@ $page_title = $page_title ?? t('app_name');
         </nav>
     </div>
 </header>
-<main class="content">
+<?php // <main> is full-width; .content is the centred, width-capped column.
+      // Full-bleed sections (e.g. the timeline) render OUTSIDE .content via the
+      // footer's $after_content slot — no negative-margin tricks needed. ?>
+<main>
+<div class="content">

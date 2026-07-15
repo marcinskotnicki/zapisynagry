@@ -4,7 +4,8 @@
  * -----------------------------------------------------------------------------
  *  PRESENTATION ONLY. The main event view: title, optional day tabs (multi-day
  *  events), each table with its interleaved game/poll cards, the add-table
- *  control (or "cap reached" note), and the timeline at the bottom.
+ *  control (or "cap reached" note). The timeline is rendered separately by
+ *  index.php through the footer's full-width slot, not by this view.
  *
  *  Game vs poll cards are dispatched per item type to sub-templates
  *  (game_card / poll_card). In the read-only archive view ($readonly), all the
@@ -18,7 +19,6 @@
  *    $tables      — active day's tables, each with ['items'] (games + polls).
  *    $can_add     — may the viewer add tables/games?
  *    $max_reached — table cap hit (hide the add-table button, show a note).
- *    $timeline    — timeline data (or null/empty when the day has no games).
  *    $csrf        — hidden CSRF field (for the add-table form).
  * ============================================================================= */
 // In read-only mode every internal link must keep the share token so the viewer
@@ -85,8 +85,6 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
 <?php elseif ($can_add && $max_reached): ?>
     <p class="msg muted"><?= e(t('add_table_max')) ?></p>
 <?php endif; ?>
-
-<?php // Timeline (only when the day actually has games to plot). ?>
-<?php if (!empty($timeline)): ?>
-    <?php tpl_render('timeline', ['timeline' => $timeline]); ?>
-<?php endif; ?>
+<?php // NOTE: the timeline is NOT rendered here. index.php captures the timeline
+      // template and passes it to the footer's $after_content slot, so it sits
+      // outside the width-capped .content column (full page width). ?>

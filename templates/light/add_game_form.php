@@ -60,7 +60,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
             <div class="field">
                 <label for="weight"><?= e(t('f_weight')) ?></label>
-                <input type="number" id="weight" name="weight" min="1" max="5" step="0.1" value="<?= e($game['weight']) ?>">
+                <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($game['weight']) ?>">
             </div>
             <div class="field">
                 <label for="max_players"><?= e(t('f_maxplayers')) ?></label>

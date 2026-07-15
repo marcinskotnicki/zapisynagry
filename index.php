@@ -58,8 +58,11 @@ $max        = opt_int('max_tables');
 $maxReached = ($max > 0 && $dayRow && event_table_count($dayRow['id']) >= $max);
 $canAdd     = !$readonly && can_add_games();
 
-// Timeline for the active day (null when there are no games to draw).
-$timeline = $dayRow ? timeline_build($dayRow, $tables, opt_int('timeline_extension')) : null;
+// Timeline for the active day (null when there are no games to draw). It's
+// captured to a string and handed to the FOOTER's $after_content slot, so it
+// renders outside the width-capped .content column at full page width.
+$timeline     = $dayRow ? timeline_build($dayRow, $tables, opt_int('timeline_extension')) : null;
+$timelineHtml = $timeline ? tpl_capture('timeline', ['timeline' => $timeline]) : '';
 
 tpl_render('header', ['page_title' => $event['name']]);
 tpl_render('front_event', [
@@ -72,7 +75,6 @@ tpl_render('front_event', [
     'tables'      => $tables,
     'can_add'     => $canAdd,
     'max_reached' => $maxReached,
-    'timeline'    => $timeline,
     'csrf'        => csrf_field(),
 ]);
-tpl_render('footer');
+tpl_render('footer', ['after_content' => $timelineHtml]);

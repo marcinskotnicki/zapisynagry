@@ -25,3 +25,19 @@
 /* A couple of dark-specific tweaks where flat colours read better than filters. */
 .msg-ok    { background: #14301f; }
 .msg-error { background: #3a1714; }
+
+/* ---- Dark layout: two games per row ----------------------------------------- *
+ * Each theme gets its own table layout: light stacks games vertically, classic
+ * flows them horizontally, dark shows a 2-column grid (collapsing to one column
+ * on narrow screens). align-items:start keeps short cards from stretching to
+ * match tall neighbours.
+ * ----------------------------------------------------------------------------- */
+.tpl-dark .game-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+@media (max-width: 860px) {
+    .tpl-dark .game-list { grid-template-columns: 1fr; }
+}

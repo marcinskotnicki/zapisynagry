@@ -145,3 +145,11 @@
 /* Envelope icons need to be visible on both dark + light halves */
 .tpl-classic .gc-info .msg-icon { color: #ffb3ab; }
 .tpl-classic .gc-players .msg-icon { color: var(--gc-red); }
+
+/* ---- Full page width ------------------------------------------------------- *
+ * The classic layout flows games horizontally, so it uses the whole screen:
+ * lift light's max-width cap from the content column and the top bar. The
+ * flex .game-list above then fills each row and wraps only when out of space.
+ * ---------------------------------------------------------------------------- */
+.tpl-classic .content     { max-width: none; }
+.tpl-classic .topbar-inner { max-width: none; }

@@ -273,15 +273,12 @@ input, select, textarea {
 
 /* ---- Timeline ------------------------------------------------------------- */
 html { scroll-behavior: smooth; }
-/* Full-bleed: stretch the timeline to the viewport edges (the schedule is
-   wide, so it escapes the centred column) with a small breathing padding.
-   50% - 50vw pulls each side out to the viewport edge; body clips the few px
-   of scrollbar-width overshoot this trick can cause. */
-body { overflow-x: hidden; }
-.timeline { margin: 1rem calc(50% - 50vw) 2.5rem; padding: 0 1rem; }
+/* The timeline renders OUTSIDE the .content column (via the footer's
+   after_content slot), so it is naturally full page width — just pad it. */
+.timeline { margin: 1rem 0 2.5rem; padding: 0 1rem; }
 .timeline-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
 .tl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.tl-inner { position: relative; min-width: 700px; padding: 0 0 0.5rem; }
+.tl-inner { position: relative; min-width: 700px; padding: 0 1.6rem 0.5rem; } /* side padding: the edge hour labels are centred on their tick (translateX(-50%)), so without it the last label overflows a few px and forces a useless scrollbar */
 
 .tl-hours { position: relative; height: 1.6rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; }
 .tl-hour { position: absolute; top: 0.3rem; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
