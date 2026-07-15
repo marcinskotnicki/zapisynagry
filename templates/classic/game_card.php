@@ -69,8 +69,10 @@
 
             <h3 class="gc-name"><?= e($g['name']) ?></h3>
 
-            <?php // Red waga band; Polish-style decimal comma to match the old look. ?>
-            <div class="gc-band gc-waga"><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
+            <?php // Waga band, coloured by the 1..5 weight bucket (like the other
+                  // themes); Polish-style decimal comma to match the old look. ?>
+            <?php $bucket = weight_bucket($g['weight']); ?>
+            <div class="gc-band gc-waga weight-<?= $bucket ?>"><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_players')) ?>: <strong><?= count($confirmed) ?> / <?= $max ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_start')) ?>: <strong><?= e($g['start_time']) ?></strong></div>
             <?php if (!empty($g['brings_name'])): ?>

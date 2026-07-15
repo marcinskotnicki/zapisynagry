@@ -71,7 +71,6 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /* ---- BGG detail -> prefilled candidate form ------------------------------ */
 if (isset($_GET['id'])) {
-    require __DIR__ . '/inc/bgg.php';                // (already required above; harmless)
     $detail = bgg_thing((int)$_GET['id']);
     $cand = poll_candidate_defaults();
     if ($detail) {

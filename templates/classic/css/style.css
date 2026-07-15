@@ -82,6 +82,14 @@
 .tpl-classic .gc-band strong { color: #fff; font-weight: 600; }
 .tpl-classic .gc-band + .gc-band { border-top: 1px solid rgba(255, 255, 255, .06); }
 .tpl-classic .gc-waga { background: var(--gc-red); color: #fff; font-weight: 600; }
+/* Weight bucket colours (same palette as light's .weight-N badges): the band
+   goes green -> red with difficulty instead of being always red. The plain
+   .gc-waga red above stays as a fallback if no bucket class is present. */
+.tpl-classic .gc-waga.weight-1 { background: #2e9e5b; }
+.tpl-classic .gc-waga.weight-2 { background: #86b300; }
+.tpl-classic .gc-waga.weight-3 { background: #d6a400; }
+.tpl-classic .gc-waga.weight-4 { background: #e0701a; }
+.tpl-classic .gc-waga.weight-5 { background: #cf3b2e; }
 .tpl-classic .gc-row  { background: var(--gc-band); }
 .tpl-classic .gc-rules { color: var(--gc-green); font-weight: 600; background: var(--gc-band); }
 .tpl-classic .gc-comment { background: #0d0d0d; font-size: 0.8rem; line-height: 1.35; }
