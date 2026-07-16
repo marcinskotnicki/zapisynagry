@@ -359,7 +359,7 @@ The link expires in one hour.',
     'msg_send'              => 'Send',
     'msg_sent'              => 'Your message has been sent.',
     'msg_envelope'          => 'Send a message',
-    'msg_subject'           => 'Message from %s',
+    'msg_subject'           => 'Message from %s regarding: %s',
     'msg_empty'             => 'Please write a message.',
     // ---- Classic theme labels -------------------------------------------------
     'cl_weight'             => 'weight',

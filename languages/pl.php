@@ -351,7 +351,7 @@ Link wygasa za godzinę.',
     'msg_send'              => 'Wyślij',
     'msg_sent'              => 'Wiadomość została wysłana.',
     'msg_envelope'          => 'Wyślij wiadomość',
-    'msg_subject'           => 'Wiadomość od %s',
+    'msg_subject'           => 'Wiadomość od %s w sprawie: %s',
     'msg_empty'             => 'Napisz wiadomość.',
     // ---- Classic theme labels -------------------------------------------------
     'cl_weight'             => 'waga',
