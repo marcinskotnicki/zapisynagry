@@ -382,3 +382,8 @@ html { scroll-behavior: smooth; }
 /* Admin-only "@" on players whose signup is bound to an account (hover shows
    which). Makes write-time account binding VISIBLE instead of a DB mystery. */
 .p-acct { font-size: 0.7em; color: var(--text-muted); margin-left: 0.15rem; cursor: help; vertical-align: super; }
+
+/* "signed up by X" — tiny line under a player whose entry was created by a
+   DIFFERENT logged-in account, so the person themselves isn't confused about
+   the missing remove button. (~10px; bump the rem if too small in practice.) */
+.p-signedby { display: block; font-size: 0.62rem; line-height: 1.2; color: var(--text-muted); }

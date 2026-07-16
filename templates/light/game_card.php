@@ -84,6 +84,14 @@
                                 <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): // remove this signup ?>
                                     <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>">&times;</a>
                                 <?php endif; ?>
+                                <?php // "Signed up by X": the entry is bound to an account whose name
+                                      // DIFFERS from the typed player name — i.e. someone signed up someone
+                                      // else. Shown to everyone, so the signed-up person understands why
+                                      // they don't get a remove button as a guest.
+                                if (!empty($p['user_id']) && !empty($p['account_name'])
+                                    && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
+                                    <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; ?>
                     </ul>

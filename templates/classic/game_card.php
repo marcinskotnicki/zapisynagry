@@ -126,6 +126,11 @@
                 <?php if ($p !== null): // filled slot ?>
                     <div class="gc-slot">
                         <span><?= e(t('player_n', $i + 1)) ?>: <strong><?= e($p['name']) ?></strong><?php if (is_admin() && !empty($p['user_id'])): // admin-only account-bound marker ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?>
+                            <?php // Same "signed up by X" note as the light theme (see there for the why).
+                            if (!empty($p['user_id']) && !empty($p['account_name'])
+                                && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
+                                <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                            <?php endif; ?>
                             <?php $kn = knows_rules_label($p['knows_rules']); ?>
                             <?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
                         </span>

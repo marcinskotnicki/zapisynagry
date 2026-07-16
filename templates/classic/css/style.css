@@ -196,3 +196,6 @@
     }
     .tpl-classic .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
 }
+
+/* "signed up by X" on the grey player panel */
+.tpl-classic .p-signedby { color: #666; }

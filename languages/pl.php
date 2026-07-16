@@ -389,4 +389,5 @@ Link wygasa za godzinę.',
     'msg_sender_name'                 => 'Twoje imię',
     'msg_sender_email'                => 'Twój e-mail',
     'player_account_bound'            => 'Zapis powiązany z kontem: %s',
+    'player_signed_by'                => 'zapisane przez: %s',
 ];

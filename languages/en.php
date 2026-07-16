@@ -397,4 +397,5 @@ The link expires in one hour.',
     'msg_sender_name'                 => 'Your name',
     'msg_sender_email'                => 'Your email',
     'player_account_bound'            => 'Entry bound to account: %s',
+    'player_signed_by'                => 'signed up by %s',
 ];
