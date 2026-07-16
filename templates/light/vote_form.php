@@ -33,10 +33,10 @@
         <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
 
         <label for="email"><?= e(t('signup_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
         <?php if (opt('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
         <?php endif; ?>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
 
         <label for="knows"><?= e(t('signup_knows')) ?></label>
         <select id="knows" name="knows">

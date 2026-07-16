@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_signup_name');
     } elseif (opt_bool('require_email') && $form['email'] === '') {
         $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
     } else {
         // Confirmed unless the game is already full RIGHT NOW (re-checked here,
         // not from a value computed earlier, so the race resolves correctly).

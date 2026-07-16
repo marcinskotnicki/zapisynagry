@@ -40,12 +40,15 @@ require __DIR__ . '/template.php';
 require __DIR__ . '/auth.php';
 
 // ---- 3. Wire everything up for this request --------------------------------
-auth_init();        // start session (current_user(), csrf_*, flash all need it)
+// ORDER MATTERS here:
+//  - The timezone is pinned FIRST: stored timestamps use SQLite's
+//    datetime('now') = UTC, and auth_init() below compares remember-token
+//    expiries with PHP date() — both must be on the same (UTC) clock.
+//  - options_load() runs BEFORE auth_init(): the session restore inside
+//    auth_init() reads opt_int('login_days'); with a cold cache it would see
+//    the default 0 and mis-set every token/cookie lifetime to the 1-day floor.
+date_default_timezone_set('UTC');
 options_load();     // pull settings into memory (opt* now usable)
+auth_init();        // start session (current_user(), csrf_*, flash all need it)
 lang_load();        // pick + load language strings (t() now usable)
 tpl_init();         // pick active theme (tpl_render() now usable)
-
-// A tiny default timezone so datetime('now') logging and tokens are sane.
-// (Stored timestamps use SQLite's datetime('now') = UTC; we keep PHP aligned so
-//  PHP-side time() comparisons — e.g. reset-token expiry — match the DB.)
-date_default_timezone_set('UTC');

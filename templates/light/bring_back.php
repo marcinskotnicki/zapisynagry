@@ -28,10 +28,10 @@
         <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
 
         <label for="email"><?= e(t('bringback_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
         <?php if (opt('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
         <?php endif; ?>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
 
         <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
         <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>

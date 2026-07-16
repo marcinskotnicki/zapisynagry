@@ -391,4 +391,6 @@ The link expires in one hour.',
     'f_link'                          => 'Link (optional)',
     'cl_more_slots'                   => '… and %d more free seats',
     'vote_email_dup'                  => 'This email address has already voted for this game.',
+    'error_email_invalid'             => 'Please enter a valid email address.',
+    'opt_login_days'                  => 'Login duration (days; 0 = browser session only)',
 ];

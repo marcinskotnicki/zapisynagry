@@ -131,10 +131,10 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
             <div class="field">
                 <label for="brings_email"><?= e(t('f_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+                <input type="email" id="brings_email" name="brings_email" value="<?= e($game['brings_email']) ?>">
                 <?php if (opt('msg_email_field') !== ''): ?>
                     <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
                 <?php endif; ?>
-                <input type="email" id="brings_email" name="brings_email" value="<?= e($game['brings_email']) ?>">
             </div>
         </div>
 

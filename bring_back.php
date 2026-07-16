@@ -40,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_name_required');
     } elseif (opt_bool('require_email') && $form['email'] === '') {
         $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
     } else {
         // Reactivate AND re-own: the restorer becomes bringer + added_by owner.
         db_run(

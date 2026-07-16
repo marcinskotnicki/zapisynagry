@@ -21,7 +21,7 @@ $OPTION_VALUES = [
     'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
     'captcha_site_key', 'captcha_secret_key', 'timeline_extension',
     'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',
-    'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours',
+    'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
     'verification_method',
@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'timeline_extension':
             case 'email_smtp_port':
             case 'poll_default_deadline_hours':
+            case 'login_days':
                 $val = (string)max(0, (int)$val);          // non-negative integers only
                 break;
             case 'default_language':

@@ -68,6 +68,7 @@ INSERT INTO options (key, value) VALUES
     ('msg_below_event',       ''),     -- optional custom text under the event name
     ('msg_adding_game',       ''),     -- optional custom text on the add-game screen
     ('msg_assigning_player',  ''),     -- optional custom text on the signup screen
+    ('login_days',            '365'),  -- how long logins persist (days); 0 = browser session only
     ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
     ('msg_adding_poll',       ''),     -- optional custom text above the add-poll form
     ('msg_voting',            ''),     -- optional custom text on the vote form
@@ -118,6 +119,19 @@ CREATE TABLE users (
     display_name  TEXT NOT NULL,
     is_admin      INTEGER NOT NULL DEFAULT 0,    -- 0/1
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Persistent logins ("remember me"). One row per logged-in DEVICE: the cookie
+-- holds a random token, this table stores only its sha256 (a leaked DB cannot
+-- be replayed as cookies). Sliding expiry: active use pushes expires_at ahead.
+-- Logging out deletes that device's row; expired rows are purged on new logins.
+CREATE TABLE auth_tokens (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    token_hash  TEXT NOT NULL,                    -- sha256(raw cookie value)
+    expires_at  TEXT NOT NULL,                    -- 'Y-m-d H:i:s', server time
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Password recovery: one-time tokens emailed as a reset link.

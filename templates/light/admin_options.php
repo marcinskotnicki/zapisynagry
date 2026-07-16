@@ -65,6 +65,7 @@ $toggle = function($key) {
         $text('msg_assigning_player');
         $textarea('game_languages');             // one dropdown choice per line
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
+        $text('login_days', 'number');                    // persistent-login lifetime; 0 = session only
         $text('msg_adding_poll');
         $text('msg_voting');
         $text('msg_email_field');

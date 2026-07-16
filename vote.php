@@ -65,6 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_signup_name');
     } elseif (opt_bool('require_email') && $form['email'] === '') {
         $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
     } elseif ($form['email'] !== '' && db_val(
             'SELECT 1 FROM poll_votes WHERE poll_game_id = ? AND email = ? COLLATE NOCASE',
             [$pgId, $form['email']])) {

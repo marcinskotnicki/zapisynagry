@@ -90,6 +90,22 @@ function is_valid_time($s) {
 }
 
 /**
+ * True if $s looks like a plausible email address (the X@Y.Z shape).
+ * filter_var does the heavy lifting; the extra regex pins down "the domain
+ * must contain a dot" explicitly, so the contract doesn't silently depend on
+ * a PHP version's idea of dotless domains. Deliberately NOT stricter than
+ * this — the goal is to catch "ksjhdfgkshdfk", not to out-lawyer RFC 5322.
+ * Callers only check NON-EMPTY values: whether an empty email is acceptable
+ * stays a separate decision (the 'require_email' option).
+ * @param string $email
+ * @return bool
+ */
+function email_valid($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false
+        && preg_match('/@[^@]+\.[^@]+$/', $email) === 1;
+}
+
+/**
  * The current (non-archived) event row, or null if none exists yet.
  *
  * There is at most one current event; if several somehow exist we take the

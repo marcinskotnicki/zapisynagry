@@ -383,4 +383,6 @@ Link wygasa za godzinę.',
     'f_link'                          => 'Link (opcjonalnie)',
     'cl_more_slots'                   => '… i jeszcze %d wolnych miejsc',
     'vote_email_dup'                  => 'Ten adres e-mail już zagłosował na tę grę.',
+    'error_email_invalid'             => 'Podaj poprawny adres e-mail.',
+    'opt_login_days'                  => 'Czas zalogowania (dni; 0 = tylko do zamknięcia przeglądarki)',
 ];

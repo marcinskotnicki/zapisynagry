@@ -69,6 +69,8 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         $error = t('error_name_required');
     } elseif (opt_bool('require_email') && trim($_POST['brings_email'] ?? '') === '') {
         $error = t('error_email_required');
+    } elseif (trim($_POST['brings_email'] ?? '') !== '' && !email_valid(trim($_POST['brings_email'] ?? ''))) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
     } else {
         $startChanged = ($start !== $game['start_time']);   // for the notification
         // A BGG game's image is locked: keep the stored thumbnail; manual games

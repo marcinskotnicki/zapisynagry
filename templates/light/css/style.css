@@ -362,7 +362,7 @@ html { scroll-behavior: smooth; }
 .tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
 
 /* ---- Small annotations --------------------------------------------------------- */
-.field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.1rem 0 0.25rem; }
+.field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; } /* sits BELOW its input (a note above the field breaks row alignment in horizontal form layouts) */
 .poll-deadline { font-size: 0.85rem; color: var(--text-muted); margin: 0.35rem 0; }
 .poll-end-btn { margin-left: auto; }
 

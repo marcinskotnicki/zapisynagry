@@ -37,10 +37,10 @@
             </div>
             <div class="field">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
+                <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
                 <?php if (opt('msg_email_field') !== ''): // optional admin note above email inputs ?>
                     <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
                 <?php endif; ?>
-                <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
             </div>
             <div class="field">
                 <?php // Hours BEFORE the start when voting closes; 0 disables the deadline. ?>

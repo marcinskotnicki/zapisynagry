@@ -87,6 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($do === 'finish') {
         if (empty($draft['games'])) {
             $error = t('poll_need_game');                  // a poll needs at least one candidate
+        } elseif ($draft['email'] !== '' && !email_valid($draft['email'])) {
+            $error = t('error_email_invalid');             // non-empty but not X@Y.Z-shaped
         } else {
             // Persist poll + candidates (+ optional proposer self-votes) atomically.
             db()->beginTransaction();

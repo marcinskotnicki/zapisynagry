@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'email') {
         $newEmail = trim($_POST['email'] ?? '');
-        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+        if (!email_valid($newEmail)) {         // shared X@Y.Z check (inc/helpers.php)
             flash_set(t('up_email_invalid'));
         } elseif (db_one('SELECT id FROM users WHERE email = ? AND id <> ?', [$newEmail, $u['id']])) {
             flash_set(t('up_email_taken'));        // email is the login -> must stay unique

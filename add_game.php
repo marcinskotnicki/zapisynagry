@@ -101,6 +101,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_name_required');
     } elseif (opt_bool('require_email') && $form['brings_email'] === '') {
         $error = t('error_email_required');
+    } elseif ($form['brings_email'] !== '' && !email_valid($form['brings_email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
     } elseif (!captcha_verify()) {
         $error = t('error_captcha');
     }
