@@ -52,9 +52,20 @@ function tpl_exists($name) {
  * Which theme to use this request: per-user cookie, else admin default, else base.
  * @return string  A theme name guaranteed to exist (base is always present).
  */
+/**
+ * May the CURRENT VISITOR change the theme? Two admin toggles decide:
+ * 'allow_user_template' for accounts, 'allow_guest_template' for guests.
+ * Gates both the switcher UI and (in tpl_current) whether the cookie is even
+ * honoured — so flipping a toggle off immediately neutralises old cookies.
+ * @return bool
+ */
+function tpl_switch_allowed() {
+    return opt_bool(is_logged_in() ? 'allow_user_template' : 'allow_guest_template');
+}
+
 function tpl_current() {
     $cookie = $_COOKIE['template'] ?? '';
-    if (tpl_exists($cookie)) return $cookie;
+    if (tpl_switch_allowed() && tpl_exists($cookie)) return $cookie;
 
     $default = opt('default_template', BASE_TEMPLATE);
     if (tpl_exists($default)) return $default;

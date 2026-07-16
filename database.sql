@@ -106,7 +106,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
     ('allow_messaging',              '0'),
-    ('allow_guest_messaging',        '0');  -- 1 = anyone may send messages; 0 = logged-in accounts only
+    ('allow_guest_messaging',        '0'),  -- 1 = anyone may send messages; 0 = logged-in accounts only
+    ('allow_user_template',          '1'),  -- 1 = logged-in users may pick a theme (user panel)
+    ('allow_guest_template',         '1'),  -- 1 = guests may pick a theme (topbar dropdown)
+    ('allow_user_language',          '1'),  -- 1 = logged-in users may pick a language (user panel)
+    ('allow_guest_language',         '1');  -- 1 = guests may pick a language (topbar dropdown)
 
 
 -- =============================================================================

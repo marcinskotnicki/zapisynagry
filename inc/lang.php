@@ -47,10 +47,20 @@ function lang_exists($code) {
  * option, then the first file on disk so the UI is never rendered key-less.
  * @return string  A language code that is guaranteed to exist on disk.
  */
+/**
+ * May the CURRENT VISITOR change the language? (Mirrors tpl_switch_allowed:
+ * 'allow_user_language' for accounts, 'allow_guest_language' for guests.)
+ * @return bool
+ */
+function lang_switch_allowed() {
+    return opt_bool(is_logged_in() ? 'allow_user_language' : 'allow_guest_language');
+}
+
 function lang_current() {
-    // 1) Per-user choice from the switcher (validated, so it's safe to trust).
+    // 1) Per-user choice from the switcher — honoured only while the admin
+    //    allows switching for this visitor type (cookie is validated anyway).
     $cookie = $_COOKIE['lang'] ?? '';
-    if (lang_exists($cookie)) return $cookie;
+    if (lang_switch_allowed() && lang_exists($cookie)) return $cookie;
 
     // 2) Admin default.
     $default = opt('default_language', 'en');

@@ -33,4 +33,7 @@
     </form>
 
     <p class="muted"><a href="recover.php"><?= e(t('forgot_password')) ?></a></p>
+    <?php if (opt('registration_mode') === 'registration'): // self-registration entry point ?>
+        <p class="muted"><a href="register.php"><?= e(t('reg_link')) ?></a></p>
+    <?php endif; ?>
 </div>

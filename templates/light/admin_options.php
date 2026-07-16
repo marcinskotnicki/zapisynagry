@@ -2,7 +2,7 @@
 /* =============================================================================
  *  templates/light/admin_options.php — the Options tab form. Presentation only.
  * -----------------------------------------------------------------------------
- *  Renders every admin-editable setting, grouped into three fieldsets:
+ *  Renders every admin-editable setting, grouped into fieldsets (settings, custom texts, defaults, toggles):
  *    1. Settings  — venue/email/SMTP, caps, BGG + captcha keys, event messages.
  *    2. Defaults  — defaults for new events, plus the default language/theme.
  *    3. Toggles   — on/off features + the registration & verification mode pickers.
@@ -47,8 +47,8 @@ $toggle = function($key) {
     <fieldset>
         <legend><?= e(t('opt_group_settings')) ?></legend>
         <?php
-        // Venue + outgoing-mail/SMTP credentials, then caps, integration keys,
-        // and the three optional on-page messages.
+        // Venue + outgoing-mail/SMTP credentials, then caps and integration keys.
+        // (The optional on-page texts moved to their own fieldset below.)
         $text('venue_name');
         $text('email_address');
         $text('email_login');
@@ -60,12 +60,21 @@ $toggle = function($key) {
         $text('captcha_site_key');
         $text('captcha_secret_key');
         $text('timeline_extension', 'number');   // hours added past the day's end
-        $text('msg_below_event');
-        $text('msg_adding_game');
-        $text('msg_assigning_player');
         $textarea('game_languages');             // one dropdown choice per line
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
         $text('login_days', 'number');                    // persistent-login lifetime; 0 = session only
+        ?>
+    </fieldset>
+
+    <fieldset>
+        <legend><?= e(t('opt_group_texts')) ?></legend>
+        <?php
+        // The six optional custom texts, in the order a visitor meets them:
+        // homepage banner, add-game form, signup form, add-poll form, vote form,
+        // and the note above every email field. Empty = not rendered.
+        $text('msg_below_event');
+        $text('msg_adding_game');
+        $text('msg_assigning_player');
         $text('msg_adding_poll');
         $text('msg_voting');
         $text('msg_email_field');
@@ -141,6 +150,10 @@ $toggle = function($key) {
         $toggle('use_captcha');
         $toggle('allow_messaging');
         $toggle('allow_guest_messaging');      // messaging open to guests too, not just accounts
+        $toggle('allow_user_template');         // accounts may pick a theme (user panel)
+        $toggle('allow_guest_template');        // guests may pick a theme (topbar)
+        $toggle('allow_user_language');         // accounts may pick a language (user panel)
+        $toggle('allow_guest_language');        // guests may pick a language (topbar)
         $toggle('allow_custom_game_links');
         ?>
     </fieldset>

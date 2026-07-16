@@ -30,6 +30,7 @@ $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'send_emails', 'require_email', 'allow_polls', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links',
+    'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

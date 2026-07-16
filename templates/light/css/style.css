@@ -387,3 +387,7 @@ html { scroll-behavior: smooth; }
    DIFFERENT logged-in account, so the person themselves isn't confused about
    the missing remove button. (~10px; bump the rem if too small in practice.) */
 .p-signedby { display: block; font-size: 0.62rem; line-height: 1.2; color: var(--text-muted); }
+
+/* Topbar theme/language pickers (guests) */
+.topbar-prefs { display: flex; gap: 0.35rem; align-items: center; margin-left: 0.8rem; }
+.topbar-prefs select { font-size: 0.8rem; padding: 0.15rem 0.25rem; }

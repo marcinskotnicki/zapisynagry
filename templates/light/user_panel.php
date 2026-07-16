@@ -73,5 +73,40 @@
             <input type="password" id="new_password2" name="new_password2" required>
             <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
         </form>
+
+        <?php // Theme / language preference (cookie-based, like the guest picker).
+              // Each select renders only if the admin allows switching for ACCOUNTS
+              // (allow_user_template / allow_user_language); the whole card hides
+              // when neither is allowed or there is nothing to choose from. ?>
+        <?php $upTpl  = tpl_switch_allowed()  && count(tpl_available())  > 1;
+              $upLang = lang_switch_allowed() && count(lang_available()) > 1; ?>
+        <?php if ($upTpl || $upLang): ?>
+        <form method="post" action="prefs.php" class="card profile-card">
+            <h3><?= e(t('up_prefs')) ?></h3>
+            <?= csrf_field() ?>
+            <input type="hidden" name="back" value="user.php">
+            <?php if ($upTpl): ?>
+                <div class="field">
+                    <label for="pref_tpl"><?= e(t('pref_template')) ?></label>
+                    <select id="pref_tpl" name="template">
+                        <?php foreach (tpl_available() as $tn): ?>
+                            <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
+            <?php if ($upLang): ?>
+                <div class="field">
+                    <label for="pref_lang"><?= e(t('pref_language')) ?></label>
+                    <select id="pref_lang" name="lang">
+                        <?php foreach (lang_available() as $lc): ?>
+                            <option value="<?= e($lc) ?>"<?= $lc === ($GLOBALS['LANG_CODE'] ?? '') ? ' selected' : '' ?>><?= e(strtoupper($lc)) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-small btn-primary"><?= e(t('pref_save')) ?></button>
+        </form>
+        <?php endif; ?>
     </div>
 </div>
