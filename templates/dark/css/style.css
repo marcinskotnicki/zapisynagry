@@ -40,3 +40,6 @@
 @media (max-width: 860px) {
     .tpl-dark .game-list { grid-template-columns: 1fr; }
 }
+
+/* Game-name links stay readable on dark cards */
+.tpl-dark .game-name a { color: var(--text); }

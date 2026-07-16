@@ -58,6 +58,7 @@ function game_form_defaults($table, $day) {
         'thumbnail'      => '',     // manual: predefined path; bgg: image URL
         'bgg_id'         => '',
         'language'       => '',
+        'link'           => '',     // manual games only: optional external URL
         'source'         => 'manual',
     ];
 }
@@ -87,6 +88,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'bgg_id'         => (int)($_POST['bgg_id'] ?? 0),
         'thumbnail'      => trim($_POST['thumbnail'] ?? ''),
         'language'       => trim($_POST['language'] ?? ''),
+        'link'           => game_link_sanitize($_POST['link'] ?? ''),
     ];
     if (!is_valid_time($form['start_time'])) {
         // Bad/blank time -> fall back to the table's next slot rather than reject.
@@ -110,14 +112,15 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run(
                 'INSERT INTO games
                  (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-                  thumbnail,bgg_id,language,brings_name,brings_email,brings_user_id,explain_rules,comment,added_by_user_id)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                  thumbnail,bgg_id,language,link,brings_name,brings_email,brings_user_id,explain_rules,comment,added_by_user_id)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [
                     $table['id'], $event['id'], $day['id'], $form['name'],
                     $form['length_minutes'], $form['weight'], $form['max_players'], $form['start_time'],
                     $form['thumbnail'] !== '' ? $form['thumbnail'] : null,   // store NULL, not ''
                     $form['bgg_id'] ?: null,
                     $form['language'] !== '' ? $form['language'] : null,
+                    $form['link'] !== '' ? $form['link'] : null,
                     $form['brings_name'] !== '' ? $form['brings_name'] : null,
                     $form['brings_email'] !== '' ? $form['brings_email'] : null,
                     $uid, $form['explain_rules'],

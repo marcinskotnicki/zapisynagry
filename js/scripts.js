@@ -17,6 +17,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         initDateCascade();
         initCopyButtons();
+        initHashHighlight();
     });
 
     /* ---- 1. Date cascade --------------------------------------------------- */
@@ -61,5 +62,26 @@
                 }
             });
         });
+    }
+
+    /* ---- 3. "Just interacted" highlight ------------------------------------ *
+     * After signing up / voting / adding (the controllers redirect to #game-N
+     * or #poll-N) and on timeline clicks, mark the card the hash points at
+     * with .active — one card at a time. CSS decides what .active looks like.
+     * ------------------------------------------------------------------------- */
+    function initHashHighlight() {
+        function apply() {
+            // Clear the previous highlight first: exactly one card is .active.
+            document.querySelectorAll('.game-card.active, .poll-card.active').forEach(function (n) {
+                n.classList.remove('active');
+            });
+            if (location.hash.length < 2) return;
+            var el = document.getElementById(location.hash.substring(1));
+            if (el && (el.classList.contains('game-card') || el.classList.contains('poll-card'))) {
+                el.classList.add('active');
+            }
+        }
+        window.addEventListener('hashchange', apply);   // timeline / in-page clicks
+        apply();                                        // arriving via a redirect anchor
     }
 })();

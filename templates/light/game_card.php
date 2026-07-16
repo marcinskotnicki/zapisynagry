@@ -40,7 +40,8 @@
 
         <div class="game-main">
             <div class="game-name-row">
-                <h3 class="game-name"><?= e($g['name']) ?></h3>
+                <?php $gLink = game_link($g); // BGG page, or the custom link (option-gated) ?>
+                <h3 class="game-name"><?php if ($gLink): ?><a href="<?= e($gLink) ?>" target="_blank" rel="noopener"><?= e($g['name']) ?></a><?php else: ?><?= e($g['name']) ?><?php endif; ?></h3>
                 <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): // owner/admin/unregistered ?>
                     <span class="game-actions">
                         <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
@@ -64,7 +65,7 @@
             <?php if (!empty($g['language'])): ?>
                 <p class="game-language"><?= e(t('f_language')) ?>: <strong><?= e($g['language']) ?></strong></p>
             <?php endif; ?>
-            <p class="game-rules"><?= e(explain_rules_label($g['explain_rules'])) ?></p>
+            <p class="game-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></p>
             <?php if (!empty($g['comment'])): ?>
                 <p class="game-comment"><?= nl2br(e($g['comment'])) ?></p>
             <?php endif; ?>

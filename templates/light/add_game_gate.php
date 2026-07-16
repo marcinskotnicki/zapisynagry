@@ -26,7 +26,11 @@ $title      = $title     ?? t('addgame_title');
         <p class="event-msg"><?= e(opt('msg_adding_game')) ?></p>
     <?php endif; ?>
 
-    <form method="post" action="<?= e($action) ?>?table=<?= (int)$table['id'] ?>" class="gate-form">
+    <?php // The visual hierarchy (top to bottom, most to least used): BGG add is
+          // the big primary button; start-a-poll is a medium secondary; manual
+          // (outside BGG) is a small secondary — it submits the SAME form from
+          // outside it via the form="" attribute, so the typed name still travels. ?>
+    <form method="post" action="<?= e($action) ?>?table=<?= (int)$table['id'] ?>" class="gate-form" id="gate-form">
         <?= $csrf ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
@@ -37,18 +41,20 @@ $title      = $title     ?? t('addgame_title');
             <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
                 <?= e(t('addgame_from_bgg')) ?>
             </button>
-            <button type="submit" name="go" value="manual" class="btn">
-                <?= e(t('addgame_manual')) ?>
-            </button>
         </div>
     </form>
 
-    <?php // The "third button": start a poll instead (game gate only, polls on). ?>
-    <?php if ($show_poll && opt_bool('allow_polls')): ?>
+    <?php if ($show_poll && opt_bool('allow_polls')): // medium: start a poll instead ?>
         <p class="gate-poll">
-            <a class="btn" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('addpoll_button')) ?></a>
+            <a class="btn btn-secondary" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('addpoll_button')) ?></a>
         </p>
     <?php endif; ?>
+
+    <p class="gate-manual">
+        <button type="submit" form="gate-form" name="go" value="manual" class="btn btn-secondary btn-small-gate">
+            <?= e(t('addgame_manual')) ?>
+        </button>
+    </p>
 
     <p class="muted"><a href="index.php"><?= e(t('back')) ?></a></p>
 </div>

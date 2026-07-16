@@ -327,3 +327,47 @@ html { scroll-behavior: smooth; }
 .msg-icon { text-decoration: none; color: var(--primary); font-size: 1rem; line-height: 1; padding: 0 0.25rem; }
 .msg-icon:hover { color: var(--primary-hover, var(--primary)); filter: brightness(0.9); }
 .game-name-row .msg-icon { margin-left: 0.25rem; }
+
+/* ---- Gate button hierarchy -------------------------------------------------- *
+ * Most-used to least-used, top to bottom: [add from BGG] is the big primary;
+ * [start a poll] is a medium secondary; [add outside BGG] is a small secondary
+ * (same colour family as the poll button, visibly smaller).
+ * ----------------------------------------------------------------------------- */
+.btn-secondary { background: #7d92ac; color: #fff; }   /* toned-down cousin of --primary */
+.btn-secondary:hover { filter: brightness(0.95); text-decoration: none; }
+.gate-poll { margin-top: 0.6rem; }
+.gate-poll .btn { display: block; text-align: center; margin-top: 0; padding: 0.7rem 1.1rem; font-size: 0.98rem; }
+.gate-manual { margin-top: 0.6rem; text-align: center; }
+.btn-small-gate { margin-top: 0; padding: 0.45rem 0.9rem; font-size: 0.85rem; }
+
+/* ---- Polls on the timeline --------------------------------------------------- *
+ * Provisional blocks (default 2h — the winner's real length is unknown): the
+ * poll-card accent colours + a dashed outline signal "not settled yet".
+ * ------------------------------------------------------------------------------ */
+.tl-game.tl-poll { background: #eef3fc; color: var(--text); border: 1px dashed var(--primary); }
+.tl-game.tl-poll .tl-sub { color: var(--text-muted); }
+.tpl-dark .tl-game.tl-poll { background: #1b2436; color: var(--text); }
+
+/* ---- Rules / knows-rules colour coding --------------------------------------- *
+ * Shared tone classes from rules_tone(): 0 -> good (explains / knows, green),
+ * 1 -> mid (summary / somewhat, neutral amber), 2 -> bad (won't / doesn't, red).
+ * ------------------------------------------------------------------------------ */
+.rules-good { color: #2e9e5b; }
+.rules-mid  { color: #b58900; }
+.rules-bad  { color: #cf3b2e; }
+
+/* ---- Discussion zebra --------------------------------------------------------- */
+/* Alternating comment backgrounds: subtle, but enough to separate rows. */
+.comment-list li:nth-child(even) { background: rgba(0, 0, 0, 0.045); }
+.tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
+
+/* ---- Small annotations --------------------------------------------------------- */
+.field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.1rem 0 0.25rem; }
+.poll-deadline { font-size: 0.85rem; color: var(--text-muted); margin: 0.35rem 0; }
+.poll-end-btn { margin-left: auto; }
+
+/* ---- "Just interacted" highlight ------------------------------------------------ *
+ * scripts.js toggles .active on the card the URL hash points at (after signups,
+ * votes, timeline clicks...). Deliberately subtle — tune to taste.
+ * --------------------------------------------------------------------------------- */
+.game-card.active, .poll-card.active { box-shadow: 0 0 0 3px rgba(43, 108, 196, 0.35); }

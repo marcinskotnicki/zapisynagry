@@ -46,6 +46,9 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'start_time'    => $day['start_time'],
         'explain_rules' => 0,
         'add_self'      => 1,
+        // Voting closes this many hours BEFORE the poll's start; admin default,
+        // overridable per poll on the form. 0 = no automatic deadline.
+        'deadline_hours' => opt_int('poll_default_deadline_hours'),
         'games'         => [],          // candidate list, each an assoc array
     ];
 }
@@ -64,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $draft['start_time']    = is_valid_time($_POST['start_time'] ?? '') ? $_POST['start_time'] : $draft['start_time'];
     $draft['explain_rules'] = min(2, max(0, (int)($_POST['explain_rules'] ?? 0)));
     $draft['add_self']      = isset($_POST['add_self']) ? 1 : 0;
+    $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
 
     if ($do === 'addgame') {
         redirect('add_poll_game.php?table=' . $tableId);   // go append a candidate
@@ -87,11 +91,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Persist poll + candidates (+ optional proposer self-votes) atomically.
             db()->beginTransaction();
             try {
+                // Deadline: N hours before the poll's planned start (day date +
+                // start time). 0 hours = no automatic deadline (NULL). If the
+                // computed moment is already in the past (poll created late),
+                // clamp to +1 hour from now so a fresh poll always gets SOME
+                // voting window instead of resolving on the very next pageview.
+                $deadline = null;
+                if ((int)$draft['deadline_hours'] > 0) {
+                    $dayDate  = db_val('SELECT day_date FROM event_days WHERE id = ?', [$day['id']]);
+                    $startTs  = strtotime(($dayDate ?: date('Y-m-d')) . ' ' . $draft['start_time']);
+                    $deadTs   = $startTs - (int)$draft['deadline_hours'] * 3600;
+                    if ($deadTs <= time()) $deadTs = time() + 3600;   // the clamp
+                    $deadline = date('Y-m-d H:i:s', $deadTs);
+                }
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,add_self)
-                     VALUES (?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,add_self,deadline)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -99,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $u['id'] ?? null,
                         $draft['comment'] !== '' ? $draft['comment'] : null,
                         $draft['start_time'], $draft['explain_rules'], $draft['add_self'],
+                        $deadline,
                     ]
                 );
                 $pollId = (int)db()->lastInsertId();
@@ -145,9 +163,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 log_action('poll_create', $draft['name'] . ' (' . count($draft['games']) . ' games)');
                 unset($_SESSION['poll_draft']);            // draft persisted -> clear it
                 // Seeded votes might already settle a candidate (e.g. required 1),
-                // in which case this resolves the poll into a game immediately.
-                poll_check_resolve($pollId);
-                redirect('index.php?day=' . $activeDay);
+                // in which case this resolves the poll into a game immediately —
+                // then jump to the game card; otherwise jump to the new poll.
+                $newGameId = poll_check_resolve($pollId);
+                if ($newGameId) {
+                    redirect('index.php?day=' . $activeDay . '#game-' . $newGameId);
+                }
+                redirect('index.php?day=' . $activeDay . '#poll-' . $pollId);
             }
         }
     }

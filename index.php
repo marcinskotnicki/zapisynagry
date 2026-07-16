@@ -11,12 +11,20 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
+require __DIR__ . '/inc/polls.php';    // poll_resolve_expired() below (events.php only
+                                       // loads it lazily, inside event_tables_full)
 require __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards
+require __DIR__ . '/inc/notify.php';   // a deadline resolution sends the conclusion email
 
 // Decide which event to show: live (interactive) or an archived one (read-only).
 $resolved = event_resolve();
 $event    = $resolved['event'];
 $readonly = $resolved['readonly'];
+
+// POOR MAN'S CRON: shared hosting has no scheduler, so expired poll deadlines
+// are settled here, on ordinary visits to the front page (cheap no-op when
+// nothing is due). See poll_resolve_expired() in inc/polls.php.
+poll_resolve_expired();
 
 // No event at all yet -> the simple placeholder (prompt admin to create one).
 if (!$event) {

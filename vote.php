@@ -49,12 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run('DELETE FROM poll_votes WHERE poll_game_id = ? AND user_id = ?', [$pgId, $uid]);
             log_action('poll_unvote', $cand['name']);
         }
-        redirect('index.php?day=' . $activeDay);
+        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);
     }
 
     // Recording a vote: a logged-in user can't vote twice for the same candidate.
     if ($uid && poll_user_voted($pgId, $uid)) {
-        redirect('index.php?day=' . $activeDay);   // already voted; no duplicate
+        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);   // already voted; no duplicate
     }
 
     $form['name']  = trim((string)$form['name']);
@@ -65,6 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_signup_name');
     } elseif (opt_bool('require_email') && $form['email'] === '') {
         $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && db_val(
+            'SELECT 1 FROM poll_votes WHERE poll_game_id = ? AND email = ? COLLATE NOCASE',
+            [$pgId, $form['email']])) {
+        // Anti-rigging: one vote per email per OPTION (case-insensitive). Guests
+        // without an email can't be deduplicated this way — that's as far as a
+        // no-registration flow can reasonably go.
+        $error = t('vote_email_dup');
     } else {
         db_run(
             'INSERT INTO poll_votes (poll_game_id, poll_id, name, email, knows_rules, user_id)
@@ -79,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($newGameId) {
             redirect('index.php?day=' . $activeDay . '#game-' . $newGameId);
         }
-        redirect('index.php?day=' . $activeDay);
+        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);
     }
 }
 

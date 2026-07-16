@@ -64,6 +64,10 @@ $toggle = function($key) {
         $text('msg_adding_game');
         $text('msg_assigning_player');
         $textarea('game_languages');             // one dropdown choice per line
+        $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
+        $text('msg_adding_poll');
+        $text('msg_voting');
+        $text('msg_email_field');
         ?>
     </fieldset>
 
@@ -135,6 +139,7 @@ $toggle = function($key) {
         $toggle('allow_discussions');
         $toggle('use_captcha');
         $toggle('allow_messaging');
+        $toggle('allow_custom_game_links');
         ?>
     </fieldset>
 

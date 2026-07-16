@@ -206,6 +206,56 @@ function game_language_options() {
 }
 
 /**
+ * Visual tone for the 0/1/2 rules codes, shared by BOTH code families
+ * (explain_rules and knows_rules — 0 is the positive answer in each):
+ *   0 -> 'good' (green: will explain / knows), 1 -> 'mid' (neutral: summary /
+ *   somewhat), 2 -> 'bad' (red: won't explain / doesn't know).
+ * Templates append it to a class prefix (e.g. "rules-good"); the colours live
+ * in each theme's CSS.
+ * @param int|null $code
+ * @return string  'good' | 'mid' | 'bad'
+ */
+function rules_tone($code) {
+    $code = (int)$code;
+    return $code === 0 ? 'good' : ($code === 1 ? 'mid' : 'bad');
+}
+
+/**
+ * Clean a user-supplied game link: trim, auto-prepend https:// when the person
+ * typed a bare domain, then validate. Returns '' when the input is empty or
+ * doesn't survive validation (so callers can store NULL).
+ * @param string $raw
+ * @return string
+ */
+function game_link_sanitize($raw) {
+    $raw = trim((string)$raw);
+    if ($raw === '') return '';
+    if (!preg_match('#^https?://#i', $raw)) $raw = 'https://' . $raw;   // bare domain convenience
+    return filter_var($raw, FILTER_VALIDATE_URL) ? $raw : '';
+}
+
+/**
+ * The external link for a game, or null when there is none to offer:
+ *   - BGG games link to their boardgamegeek.com page (always allowed);
+ *   - manual games may carry a user-supplied URL in games.link, which is only
+ *     honoured while the 'allow_custom_game_links' option is on and the stored
+ *     value still looks like an http(s) URL (defence in depth: it's validated
+ *     on save too, but the option can be toggled after links were saved).
+ * @param array $g  A games row.
+ * @return string|null
+ */
+function game_link($g) {
+    if (!empty($g['bgg_id'])) {
+        return 'https://boardgamegeek.com/boardgame/' . (int)$g['bgg_id'];
+    }
+    if (!empty($g['link']) && opt_bool('allow_custom_game_links')
+        && preg_match('#^https?://#i', $g['link'])) {
+        return $g['link'];
+    }
+    return null;
+}
+
+/**
  * Localized label for the "do you explain the rules" code (0/1/2).
  * Stored as an int code; the human text lives in the language files.
  * @return string
@@ -232,27 +282,44 @@ function knows_rules_label($code) {
  *  further if any game ends later. Games on a table are packed into "lanes" so
  *  overlapping ones sit on separate rows. Positions are percentages of the span
  *  (the template turns them into inline left/width — a justified dynamic style).
- *  Polls are intentionally excluded; they appear only once resolved into games.
- *  Returns null when the day has no games.
+ *  Polls appear as provisional 2-hour blocks (nobody knows the winner's real
+ *  length yet); once resolved they show as normal game blocks.
+ *  Returns null when the day has nothing to draw.
  *
  *  OUTPUT SHAPE (consumed by templates/light/timeline.php):
  *    ['hours'  => [ ['label'=>'14:00','left'=>33.3], ... ],
  *     'tables' => [ ['number'=>1, 'lanes'=> [ [block, block...], [block...] ] ], ... ]]
- *  where a block = ['id','name','start_time','cur','max','full','left','width'].
+ *  where a block = ['type'('game'|'poll'),'id','name','start_time','cur','max','full','left','width'].
  * --------------------------------------------------------------------------- */
 function timeline_build($dayRow, $tables, $extHours) {
     // The visible window: day start .. day end + extension hours.
     $startMin = hhmm_to_min($dayRow['start_time']);
     $endMin   = hhmm_to_min($dayRow['end_time']) + max(0, (int)$extHours) * 60;
 
-    // First pass: collect drawable games per table, and grow $endMin to fit any
-    // game that runs past the nominal window (the spec's "just extend it").
+    // First pass: collect drawable items per table, and grow $endMin to fit any
+    // item that runs past the nominal window (the spec's "just extend it").
     $hasGames  = false;
     $tableData = [];
     foreach ($tables as $tbl) {
         $games = [];
         foreach ($tbl['items'] as $it) {
-            if ($it['type'] !== 'game') continue;          // polls are not on the timeline
+            if ($it['type'] === 'poll') {
+                // Polls appear as provisional blocks. Nobody knows how long the
+                // winning game will run, so they get a flat DEFAULT of 2 hours —
+                // roughly the average game — purely for display.
+                $p  = $it['data'];
+                $ps = hhmm_to_min($p['start_time']);
+                $pe = $ps + 120;                           // the 2h display default
+                if ($pe > $endMin) $endMin = $pe;          // stretch to fit, like games
+                $games[] = [
+                    'type' => 'poll',
+                    'id' => (int)$p['id'], 'name' => t('poll_label'), 'start_time' => $p['start_time'],
+                    'start' => $ps, 'end' => $pe, 'cur' => 0, 'max' => 0,
+                ];
+                $hasGames = true;
+                continue;
+            }
+            if ($it['type'] !== 'game') continue;
             $g  = $it['data'];
             if ((int)$g['is_archived'] === 1) continue;    // soft-deleted games are hidden here
             $gs = hhmm_to_min($g['start_time']);
@@ -262,6 +329,7 @@ function timeline_build($dayRow, $tables, $extHours) {
             $cur = 0;
             foreach ($g['players'] as $p) { if ((int)$p['is_reserve'] === 0) $cur++; }
             $games[] = [
+                'type' => 'game',
                 'id' => (int)$g['id'], 'name' => $g['name'], 'start_time' => $g['start_time'],
                 'start' => $gs, 'end' => $ge, 'cur' => $cur, 'max' => (int)$g['max_players'],
             ];
@@ -291,8 +359,10 @@ function timeline_build($dayRow, $tables, $extHours) {
         $lanes = [];
         foreach ($td['games'] as $g) {
             // Convert start/length to left/width as percentages of the span. The
-            // 0.5% min width keeps a very short game clickable.
+            // 0.5% min width keeps a very short game clickable. 'type' rides
+            // along so the template can link #game-N vs #poll-N and style polls.
             $block = [
+                'type' => $g['type'],
                 'id' => $g['id'], 'name' => $g['name'], 'start_time' => $g['start_time'],
                 'cur' => $g['cur'], 'max' => $g['max'],
                 'full' => ($g['max'] > 0 && $g['cur'] >= $g['max']),

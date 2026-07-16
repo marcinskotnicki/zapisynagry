@@ -45,6 +45,11 @@
     }
     $max      = (int)$g['max_players'];
     $isFull   = count($confirmed) >= $max;
+    // SLOT CAP: some games allow 100+ players; rendering a button per free seat
+    // would flood the panel. Show at most 10 slots — but always keep at least
+    // one empty signup row visible while seats remain (so a full-looking list
+    // grows as people join). The hidden remainder is summarised in a note.
+    $shownSlots = min($max, max(10, count($confirmed) + 1));
     $canMsg   = !$readonly && is_logged_in() && opt_bool('allow_messaging');
     ?>
     <article class="game-card" id="game-<?= (int)$g['id'] ?>">
@@ -67,7 +72,8 @@
                 <div class="gc-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></div>
             <?php endif; ?>
 
-            <h3 class="gc-name"><?= e($g['name']) ?></h3>
+            <?php $gLink = game_link($g); // BGG page, or the custom link (option-gated) ?>
+            <h3 class="gc-name"><?php if ($gLink): ?><a href="<?= e($gLink) ?>" target="_blank" rel="noopener"><?= e($g['name']) ?></a><?php else: ?><?= e($g['name']) ?><?php endif; ?></h3>
 
             <?php // Waga band, coloured by the 1..5 weight bucket (like the other
                   // themes); Polish-style decimal comma to match the old look. ?>
@@ -81,7 +87,7 @@
             <?php if (!empty($g['language'])): ?>
                 <div class="gc-band gc-row"><?= e(t('cl_version')) ?>: <strong><?= e($g['language']) ?></strong></div>
             <?php endif; ?>
-            <div class="gc-band gc-rules"><?= e(explain_rules_label($g['explain_rules'])) ?></div>
+            <div class="gc-band gc-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></div>
 
             <?php if (!empty($g['comment'])): ?>
                 <div class="gc-band gc-comment"><?= e(t('cl_comment')) ?>:<br><?= nl2br(e($g['comment'])) ?></div>
@@ -115,13 +121,13 @@
 
         <?php // Right panel: numbered slots 1..max, then reserves. ?>
         <div class="gc-players">
-            <?php for ($i = 0; $i < $max; $i++): ?>
+            <?php for ($i = 0; $i < $shownSlots; $i++): ?>
                 <?php $p = $confirmed[$i] ?? null; ?>
                 <?php if ($p !== null): // filled slot ?>
                     <div class="gc-slot">
                         <span><?= e(t('player_n', $i + 1)) ?>: <strong><?= e($p['name']) ?></strong>
                             <?php $kn = knows_rules_label($p['knows_rules']); ?>
-                            <?php if ($kn !== ''): ?><span class="gc-knows">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
+                            <?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
                         </span>
                         <?php if ($canMsg && !empty($p['email'])): ?>
                             <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
@@ -136,6 +142,9 @@
                     <div class="gc-slot"><span class="muted"><?= e(t('player_n', $i + 1)) ?>: —</span></div>
                 <?php endif; ?>
             <?php endfor; ?>
+            <?php if ($max > $shownSlots): // the summarised hidden free seats ?>
+                <p class="gc-more-slots"><?= e(t('cl_more_slots', $max - $shownSlots)) ?></p>
+            <?php endif; ?>
 
             <?php foreach ($reserves as $p): // reserves listed under the slots ?>
                 <div class="gc-slot gc-reserve">

@@ -20,10 +20,30 @@ $canVote = !$readonly && can_signup();
         <span class="poll-tag"><?= e(t('poll_label')) ?></span>
         <span class="game-time"><?= e($poll['start_time']) ?></span>
         <?php if (!empty($poll['proposer_name'])): ?>
-            <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong></span>
+            <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong>
+                <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging') && !empty($poll['proposer_email'])): // mail the proposer ?>
+                    <a class="msg-icon" href="message.php?poll_owner=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                <?php endif; ?>
+            </span>
+        <?php endif; ?>
+        <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging')): // mail everyone who voted ?>
+            <a class="msg-icon" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+        <?php endif; ?>
+        <?php
+        // "End voting now": the proposer's own account, or an admin. Accounts
+        // only — guest-created polls just wait for threshold/deadline.
+        $uid = current_user()['id'] ?? 0;
+        $canEnd = !$readonly && is_logged_in()
+                  && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
+        ?>
+        <?php if ($canEnd): ?>
+            <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
         <?php endif; ?>
     </div>
-    <p class="game-rules"><?= e(explain_rules_label($poll['explain_rules'])) ?></p>
+    <?php if (!empty($poll['deadline'])): // when voting closes (auto-resolves after) ?>
+        <p class="poll-deadline"><?= e(t('poll_deadline')) ?>: <strong><?= e(substr($poll['deadline'], 0, 16)) ?></strong></p>
+    <?php endif; ?>
+    <p class="game-rules rules-<?= rules_tone($poll['explain_rules']) ?>"><?= e(explain_rules_label($poll['explain_rules'])) ?></p>
     <?php if (!empty($poll['comment'])): ?>
         <p class="game-comment"><?= nl2br(e($poll['comment'])) ?></p>
     <?php endif; ?>
@@ -34,7 +54,11 @@ $canVote = !$readonly && can_signup();
                 <?php if (!empty($c['thumbnail'])): ?>
                     <img class="poll-opt-thumb" src="<?= e($c['thumbnail']) ?>" alt="">
                 <?php endif; ?>
-                <span class="poll-opt-name"><?= e($c['name']) ?></span>
+                <?php if (!empty($c['bgg_id'])): // candidates link to their BGG page ?>
+                    <a class="poll-opt-name" href="https://boardgamegeek.com/boardgame/<?= (int)$c['bgg_id'] ?>" target="_blank" rel="noopener"><?= e($c['name']) ?></a>
+                <?php else: ?>
+                    <span class="poll-opt-name"><?= e($c['name']) ?></span>
+                <?php endif; ?>
                 <span class="poll-opt-votes"><?= e(t('poll_votes', (int)$c['votes'], (int)$c['required_players'])) ?></span>
                 <?php if ($canVote): ?>
                     <?php if (!empty($c['voted'])): // already voted -> offer to cancel (inline POST) ?>

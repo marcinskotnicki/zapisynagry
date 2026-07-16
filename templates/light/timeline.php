@@ -36,14 +36,22 @@
                 <div class="tl-table-no"><?= e(t('table_label', $tbl['number'])) ?></div>
                 <?php foreach ($tbl['lanes'] as $lane): // each lane is a row of non-overlapping blocks ?>
                     <div class="tl-lane">
-                        <?php foreach ($lane as $b): // one game block, positioned + sized by % ?>
-                            <a class="tl-game" href="#game-<?= (int)$b['id'] ?>"
-                               style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
-                                <span class="tl-name"><?= e($b['name']) ?></span>
-                                <span class="tl-sub"><?= e($b['start_time']) ?>,
-                                    <span class="tl-count<?= $b['full'] ? ' tl-count-full' : '' ?>"><?= (int)$b['cur'] ?>/<?= (int)$b['max'] ?></span>
-                                </span>
-                            </a>
+                        <?php foreach ($lane as $b): // one block, positioned + sized by % ?>
+                            <?php if (($b['type'] ?? 'game') === 'poll'): // provisional 2h poll block ?>
+                                <a class="tl-game tl-poll" href="#poll-<?= (int)$b['id'] ?>"
+                                   style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
+                                    <span class="tl-name"><?= e($b['name']) ?></span>
+                                    <span class="tl-sub"><?= e($b['start_time']) ?></span>
+                                </a>
+                            <?php else: ?>
+                                <a class="tl-game" href="#game-<?= (int)$b['id'] ?>"
+                                   style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
+                                    <span class="tl-name"><?= e($b['name']) ?></span>
+                                    <span class="tl-sub"><?= e($b['start_time']) ?>,
+                                        <span class="tl-count<?= $b['full'] ? ' tl-count-full' : '' ?>"><?= (int)$b['cur'] ?>/<?= (int)$b['max'] ?></span>
+                                    </span>
+                                </a>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
                 <?php endforeach; ?>

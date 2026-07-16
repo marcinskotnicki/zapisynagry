@@ -68,6 +68,11 @@ INSERT INTO options (key, value) VALUES
     ('msg_below_event',       ''),     -- optional custom text under the event name
     ('msg_adding_game',       ''),     -- optional custom text on the add-game screen
     ('msg_assigning_player',  ''),     -- optional custom text on the signup screen
+    ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
+    ('msg_adding_poll',       ''),     -- optional custom text above the add-poll form
+    ('msg_voting',            ''),     -- optional custom text on the vote form
+    ('msg_email_field',       ''),     -- optional note shown above every email input
+    ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
     ('game_languages',        'PL
 EN
 niezależna językowo
@@ -198,6 +203,7 @@ CREATE TABLE games (
     thumbnail        TEXT,                        -- local path OR BGG image URL
     bgg_id           INTEGER,                     -- NULL if not from BGG
     language         TEXT,                        -- edition/language of the copy (e.g. 'PL'); free text
+    link             TEXT,                        -- custom external URL for non-BGG games (BGG games link by bgg_id)
     brings_name      TEXT,                        -- who brings the game (shown)
     brings_email     TEXT,                        -- stored, NEVER shown publicly
     brings_user_id   INTEGER,                     -- for "games brought" stats
@@ -276,6 +282,7 @@ CREATE TABLE polls (
     start_time       TEXT NOT NULL,              -- 'HH:MM'
     explain_rules    INTEGER NOT NULL DEFAULT 0,
     add_self         INTEGER NOT NULL DEFAULT 1,
+    deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (table_id)         REFERENCES game_tables(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id)         REFERENCES events(id)      ON DELETE CASCADE,

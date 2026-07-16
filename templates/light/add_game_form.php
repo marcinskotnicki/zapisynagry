@@ -131,6 +131,9 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
             <div class="field">
                 <label for="brings_email"><?= e(t('f_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+                <?php if (opt('msg_email_field') !== ''): ?>
+                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php endif; ?>
                 <input type="email" id="brings_email" name="brings_email" value="<?= e($game['brings_email']) ?>">
             </div>
         </div>
@@ -150,6 +153,15 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                     <input type="checkbox" name="add_self" value="1" <?= (int)$game['add_self'] === 1 ? 'checked' : '' ?>>
                     <?= e(t('f_addself')) ?>
                 </label>
+            </div>
+        <?php endif; ?>
+
+        <?php // Custom link: manual games only (BGG games link via bgg_id) and only
+              // while the admin allows it. Bare domains get https:// on save. ?>
+        <?php if (!$isBgg && opt_bool('allow_custom_game_links')): ?>
+            <div class="field">
+                <label for="link"><?= e(t('f_link')) ?></label>
+                <input type="url" id="link" name="link" value="<?= e($game['link'] ?? '') ?>" placeholder="https://">
             </div>
         <?php endif; ?>
 

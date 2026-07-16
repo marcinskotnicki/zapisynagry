@@ -164,3 +164,35 @@
  * ---------------------------------------------------------------------------- */
 .tpl-classic .content     { max-width: none; }
 .tpl-classic .topbar-inner { max-width: none; }
+
+/* ---- Rules / knows colour coding (classic) ---------------------------------- *
+ * The dark card + grey panel need their own tone colours (the light theme's
+ * text colours would vanish on these backgrounds).
+ * ------------------------------------------------------------------------------ */
+.tpl-classic .gc-rules.rules-good { color: var(--gc-green); }
+.tpl-classic .gc-rules.rules-mid  { color: #e0c341; }
+.tpl-classic .gc-rules.rules-bad  { color: #ff6b5e; }
+.tpl-classic .gc-knows.rules-good { color: var(--gc-green); }
+.tpl-classic .gc-knows.rules-mid  { color: #9a8400; }
+.tpl-classic .gc-knows.rules-bad  { color: #cf3b2e; }
+
+/* Game-name links keep the card's white (with a hint they're clickable) */
+.tpl-classic .gc-name a { color: #fff; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,.5); }
+.tpl-classic .gc-name a:hover { border-bottom-style: solid; }
+
+/* The "… and N more free slots" note under the capped slot list */
+.tpl-classic .gc-more-slots { font-size: 0.78rem; color: #555; font-style: italic; margin: 0.1rem 0 0.4rem 0.2rem; }
+
+/* Comment zebra on the near-black bands: lift every other row slightly */
+.tpl-classic .gc-info .comment-list li:nth-child(even) { background: #181818; }
+
+/* ---- Mobile: stack the player panel BELOW the card --------------------------- */
+@media (max-width: 700px) {
+    .tpl-classic .game-card { flex-direction: column; }
+    .tpl-classic .gc-players {
+        margin-left: 0; margin-top: 0.5rem;   /* undo the desktop side-tuck */
+        width: 100%; box-sizing: border-box; min-width: 0;
+        padding-left: 0.6rem;
+    }
+    .tpl-classic .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
+}

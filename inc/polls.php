@@ -150,3 +150,69 @@ function poll_full($pollRow) {
     $pollRow['games'] = $cands;
     return $pollRow;
 }
+
+/* =============================================================================
+ *  DEADLINE RESOLUTION — polls that must conclude even without a full table.
+ * -----------------------------------------------------------------------------
+ *  Each poll may carry a `deadline` ('Y-m-d H:i:s', server time), computed at
+ *  creation as N hours BEFORE the poll's planned start (admin default in the
+ *  'poll_default_deadline_hours' option, overridable per poll). Once it passes,
+ *  the poll resolves to the CURRENT LEADER instead of waiting for a threshold:
+ *    winner = highest fill ratio (votes / required_players);
+ *    tie    -> the earlier-created candidate (lower id) wins.
+ *  There is no cron on shared hosting, so the sweep runs opportunistically on
+ *  page visits (index.php calls poll_resolve_expired()).
+ * ============================================================================= */
+
+/**
+ * Pick the deadline winner of a poll: best fill ratio, ties broken by lower id.
+ * Returns the winning poll_games row, or null if the poll has no candidates.
+ * @param int $pollId
+ * @return array|null
+ */
+function poll_pick_winner($pollId) {
+    $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollId]);
+    $best = null;
+    $bestRatio = -1.0;
+    foreach ($cands as $c) {
+        // required_players >= 1 is enforced on input, but guard the division anyway.
+        $ratio = poll_candidate_votes($c['id']) / max(1, (int)$c['required_players']);
+        if ($ratio > $bestRatio) {                 // strictly better only: on a tie the
+            $bestRatio = $ratio;                   // earlier candidate (lower id, seen
+            $best = $c;                            // first in this ORDER BY id loop) stays
+        }
+    }
+    return $best;
+}
+
+/**
+ * Resolve a poll RIGHT NOW to its current leader (deadline hit, or the proposer
+ * ended it early). Reuses poll_resolve_candidate(), so voters become players and
+ * the poll is cleaned up exactly like a threshold resolution.
+ * @param int $pollId
+ * @return int|null  The new game id, or null (no such poll / no candidates / failure).
+ */
+function poll_force_resolve($pollId) {
+    $poll = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
+    if (!$poll) return null;
+    $winner = poll_pick_winner($pollId);
+    if (!$winner) return null;                     // a poll with zero candidates can't resolve
+    return poll_resolve_candidate($poll, $winner);
+}
+
+/**
+ * Sweep: resolve every poll whose deadline has passed. Called on normal page
+ * visits (poor man's cron) — cheap when nothing is due (one indexed-ish SELECT).
+ * @return int  How many polls were resolved.
+ */
+function poll_resolve_expired() {
+    $due = db_all(
+        'SELECT id FROM polls WHERE deadline IS NOT NULL AND deadline <= ?',
+        [date('Y-m-d H:i:s')]                      // server-local time, same clock the deadline was written with
+    );
+    $n = 0;
+    foreach ($due as $row) {
+        if (poll_force_resolve((int)$row['id'])) $n++;
+    }
+    return $n;
+}

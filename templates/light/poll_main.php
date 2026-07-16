@@ -18,6 +18,10 @@
 <div class="card">
     <h1><?= e(t('addpoll_title')) ?></h1>
 
+    <?php if (opt('msg_adding_poll') !== ''): // optional admin-configured note ?>
+        <p class="event-msg"><?= e(opt('msg_adding_poll')) ?></p>
+    <?php endif; ?>
+
     <?php if (!empty($error)): ?>
         <p class="msg msg-error"><?= e($error) ?></p>
     <?php endif; ?>
@@ -33,7 +37,15 @@
             </div>
             <div class="field">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
+                <?php if (opt('msg_email_field') !== ''): // optional admin note above email inputs ?>
+                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php endif; ?>
                 <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
+            </div>
+            <div class="field">
+                <?php // Hours BEFORE the start when voting closes; 0 disables the deadline. ?>
+                <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
+                <input type="number" id="p_deadline" name="deadline_hours" min="0" value="<?= (int)$draft['deadline_hours'] ?>">
             </div>
             <div class="field">
                 <label for="p_start"><?= e(t('poll_start')) ?></label>

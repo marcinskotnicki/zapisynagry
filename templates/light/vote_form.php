@@ -17,6 +17,10 @@
     <h1><?= e(t('vote_title')) ?></h1>
     <p class="muted"><?= e($cand['name']) ?></p>
 
+    <?php if (opt('msg_voting') !== ''): // optional admin-configured note ?>
+        <p class="event-msg"><?= e(opt('msg_voting')) ?></p>
+    <?php endif; ?>
+
     <?php if (!empty($error)): ?>
         <p class="msg msg-error"><?= e($error) ?></p>
     <?php endif; ?>
@@ -29,6 +33,9 @@
         <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
 
         <label for="email"><?= e(t('signup_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+        <?php if (opt('msg_email_field') !== ''): ?>
+            <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+        <?php endif; ?>
         <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
 
         <label for="knows"><?= e(t('signup_knows')) ?></label>

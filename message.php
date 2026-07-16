@@ -19,11 +19,15 @@ if (!opt_bool('allow_messaging')) redirect('index.php');
 $me  = current_user();
 $pid = (int)($_GET['player'] ?? $_POST['player'] ?? 0);
 $gid = (int)($_GET['game']   ?? $_POST['game']   ?? 0);
+$pwid = (int)($_GET['poll_owner'] ?? $_POST['poll_owner'] ?? 0);   // message the poll's proposer
+$plid = (int)($_GET['poll']       ?? $_POST['poll']       ?? 0);   // message everyone who voted
 
-// Resolve the target: a single player, or a whole game's players.
+// Resolve the target: a single player, a whole game's players, a poll's
+// proposer, or a poll's voters. Exactly one of the four ids is expected.
 $recipients = [];
 $targetLabel = '';
 $game = null;
+$poll = null;
 
 if ($pid) {
     // One player — only if they actually left an email (else nothing to send to).
@@ -40,15 +44,33 @@ if ($pid) {
         $recipients = array_column($rows, 'email');
         $targetLabel = t('msg_to_game', $game['name']);
     }
+} elseif ($pwid) {
+    // The poll's proposer — only if they left an email.
+    $poll = db_one('SELECT * FROM polls WHERE id = ?', [$pwid]);
+    if (!$poll || empty($poll['proposer_email'])) redirect('index.php');
+    $recipients = [$poll['proposer_email']];
+    $targetLabel = t('msg_to_poll_owner', $poll['proposer_name'] ?: '?');
+} elseif ($plid) {
+    // Everyone who voted in the poll, on any candidate (distinct, non-empty).
+    $poll = db_one('SELECT * FROM polls WHERE id = ?', [$plid]);
+    if ($poll) {
+        $rows = db_all('SELECT DISTINCT email FROM poll_votes WHERE poll_id = ? AND email IS NOT NULL AND email <> ""', [$plid]);
+        $recipients = array_column($rows, 'email');
+        $targetLabel = t('msg_to_poll');
+    }
 }
 
-// Must have a live game and at least one recipient, else bail to the front page.
-$event = $game ? db_one('SELECT is_archived FROM events WHERE id = ?', [$game['event_id']]) : null;
-if (!$game || !$event || (int)$event['is_archived'] === 1 || empty($recipients)) {
+// Must have a live parent (game or poll) and at least one recipient.
+$parentEventId = $game['event_id'] ?? $poll['event_id'] ?? 0;
+$event = $parentEventId ? db_one('SELECT is_archived FROM events WHERE id = ?', [$parentEventId]) : null;
+if ((!$game && !$poll) || !$event || (int)$event['is_archived'] === 1 || empty($recipients)) {
     redirect('index.php');
 }
-$day = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$parentDayId = $game['day_id'] ?? $poll['day_id'];
+$day = db_one('SELECT day_index FROM event_days WHERE id = ?', [$parentDayId]);
 $activeDay = (int)($day['day_index'] ?? 1);
+// Where "back" leads: the game card or the poll card.
+$backAnchor = $game ? ('#game-' . (int)$game['id']) : ('#poll-' . (int)$poll['id']);
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -66,15 +88,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         log_action('message_sent', $targetLabel);
         flash_set(t('msg_sent'));
-        redirect('index.php?day=' . $activeDay . '#game-' . (int)$game['id']);
+        redirect('index.php?day=' . $activeDay . $backAnchor);
     }
 }
 
 tpl_render('header', ['page_title' => t('msg_title')]);
 tpl_render('message_form', [
     'target_label' => $targetLabel,
-    'player'       => $pid,                       // non-zero => single-player mode
-    'game_id'      => $pid ? 0 : (int)$game['id'], // else the whole-game mode
+    // Exactly one of these four is non-zero; the template emits the matching
+    // hidden field so the POST lands back in the same mode.
+    'player'       => $pid,
+    'game_id'      => $gid ? (int)$game['id'] : 0,
+    'poll_owner'   => $pwid,
+    'poll_id'      => $plid,
     'recipients'   => count($recipients),
     'error'        => $error,
     'csrf'         => csrf_field(),
