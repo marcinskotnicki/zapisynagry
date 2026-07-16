@@ -388,4 +388,5 @@ Link wygasa za godzinę.',
     'opt_allow_guest_messaging'       => 'Pozwalaj niezalogowanym wysyłać wiadomości',
     'msg_sender_name'                 => 'Twoje imię',
     'msg_sender_email'                => 'Twój e-mail',
+    'player_account_bound'            => 'Zapis powiązany z kontem: %s',
 ];

@@ -125,7 +125,7 @@
                 <?php $p = $confirmed[$i] ?? null; ?>
                 <?php if ($p !== null): // filled slot ?>
                     <div class="gc-slot">
-                        <span><?= e(t('player_n', $i + 1)) ?>: <strong><?= e($p['name']) ?></strong>
+                        <span><?= e(t('player_n', $i + 1)) ?>: <strong><?= e($p['name']) ?></strong><?php if (is_admin() && !empty($p['user_id'])): // admin-only account-bound marker ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?>
                             <?php $kn = knows_rules_label($p['knows_rules']); ?>
                             <?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
                         </span>

@@ -73,7 +73,12 @@ function event_tables_full($dayId) {
         $discussions = opt_bool('allow_discussions');
         foreach ($games as $g) {
             // Players ordered confirmed-first (is_reserve 0 before 1), then by id.
-            $g['players'] = db_all('SELECT * FROM players WHERE game_id = ? ORDER BY is_reserve, id', [$g['id']]);
+            // account_name rides along so admins can SEE which entries are bound
+            // to an account (the @ marker in the cards) — NULL for guest entries.
+            $g['players'] = db_all(
+                'SELECT p.*, u.display_name AS account_name
+                 FROM players p LEFT JOIN users u ON u.id = p.user_id
+                 WHERE p.game_id = ? ORDER BY p.is_reserve, p.id', [$g['id']]);
             // Only pay for the comments query when discussions are enabled.
             $g['comments'] = $discussions
                 ? db_all('SELECT * FROM comments WHERE game_id = ? ORDER BY id', [$g['id']])

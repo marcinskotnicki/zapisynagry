@@ -23,9 +23,13 @@ if (!$valid) $viewId = (int)($current['id'] ?? 0);
 
 // Most recent 500 entries for the chosen event (newest first). The cap keeps a
 // long-running event's log page bounded.
+// account_name shows which ACCOUNT (if any) performed the action — the
+// difference between "typed the name Czarek" and "was logged in as Czarek".
 $logs = $viewId
-    ? db_all('SELECT created_at, action, detail, actor_name, ip
-              FROM logs WHERE event_id = ? ORDER BY id DESC LIMIT 500', [$viewId])
+    ? db_all('SELECT l.created_at, l.action, l.detail, l.actor_name, l.ip,
+                     u.display_name AS account_name
+              FROM logs l LEFT JOIN users u ON u.id = l.actor_user_id
+              WHERE l.event_id = ? ORDER BY l.id DESC LIMIT 500', [$viewId])
     : [];
 
 $tab_body = tpl_capture('admin_logs', [

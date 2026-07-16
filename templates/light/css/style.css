@@ -378,3 +378,7 @@ html { scroll-behavior: smooth; }
  * dark's grid, so this one rule covers all themes (their sheets import this).
  * ------------------------------------------------------------------------------- */
 .game-list > .game-archived { order: 99; }
+
+/* Admin-only "@" on players whose signup is bound to an account (hover shows
+   which). Makes write-time account binding VISIBLE instead of a DB mystery. */
+.p-acct { font-size: 0.7em; color: var(--text-muted); margin-left: 0.15rem; cursor: help; vertical-align: super; }

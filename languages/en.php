@@ -396,4 +396,5 @@ The link expires in one hour.',
     'opt_allow_guest_messaging'       => 'Allow guests (not logged in) to send messages',
     'msg_sender_name'                 => 'Your name',
     'msg_sender_email'                => 'Your email',
+    'player_account_bound'            => 'Entry bound to account: %s',
 ];

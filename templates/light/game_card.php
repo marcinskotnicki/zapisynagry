@@ -77,7 +77,7 @@
                     <ul class="player-list">
                         <?php foreach ($g['players'] as $p): ?>
                             <li class="player<?= (int)$p['is_reserve'] === 1 ? ' player-reserve' : '' ?>">
-                                <?= e($p['name']) ?><?php if ((int)$p['is_reserve'] === 1): ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span><?php endif; ?>
+                                <?= e($p['name']) ?><?php if (is_admin() && !empty($p['user_id'])): // admin-only: entry is BOUND to an account (created while its owner was logged in) ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?><?php if ((int)$p['is_reserve'] === 1): ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span><?php endif; ?>
                                 <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): // message this player ?>
                                     <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                                 <?php endif; ?>
