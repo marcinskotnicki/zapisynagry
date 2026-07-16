@@ -371,3 +371,10 @@ html { scroll-behavior: smooth; }
  * votes, timeline clicks...). Deliberately subtle — tune to taste.
  * --------------------------------------------------------------------------------- */
 .game-card.active, .poll-card.active { box-shadow: 0 0 0 3px rgba(43, 108, 196, 0.35); }
+
+/* ---- Soft-deleted games sink to the end -------------------------------------- *
+ * Archived (soft-deleted) cards render in place but DISPLAY last on their table:
+ * `order` works identically for light's flex column, classic's flex row, and
+ * dark's grid, so this one rule covers all themes (their sheets import this).
+ * ------------------------------------------------------------------------------- */
+.game-list > .game-archived { order: 99; }

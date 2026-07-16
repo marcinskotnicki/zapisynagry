@@ -105,7 +105,8 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('allow_polls',                  '1'),
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
-    ('allow_messaging',              '0');
+    ('allow_messaging',              '0'),
+    ('allow_guest_messaging',        '0');  -- 1 = anyone may send messages; 0 = logged-in accounts only
 
 
 -- =============================================================================

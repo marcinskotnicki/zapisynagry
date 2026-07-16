@@ -21,12 +21,12 @@ $canVote = !$readonly && can_signup();
         <span class="game-time"><?= e($poll['start_time']) ?></span>
         <?php if (!empty($poll['proposer_name'])): ?>
             <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong>
-                <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging') && !empty($poll['proposer_email'])): // mail the proposer ?>
+                <?php if (!$readonly && messaging_allowed() && !empty($poll['proposer_email'])): // mail the proposer ?>
                     <a class="msg-icon" href="message.php?poll_owner=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                 <?php endif; ?>
             </span>
         <?php endif; ?>
-        <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging')): // mail everyone who voted ?>
+        <?php if (!$readonly && messaging_allowed()): // mail everyone who voted ?>
             <a class="msg-icon" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
         <?php endif; ?>
         <?php

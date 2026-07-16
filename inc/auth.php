@@ -175,6 +175,20 @@ function current_user() {
 }
 
 /**
+ * May the current visitor use the messaging (envelope) feature?
+ * Two admin switches stack: 'allow_messaging' turns the whole feature on/off,
+ * and 'allow_guest_messaging' decides whether it's open to everyone or only to
+ * logged-in accounts (the default — guests' messages would otherwise be easy
+ * anonymous spam). Templates use this ONE gate for envelope visibility and
+ * message.php uses it as its access check, so the two can never disagree.
+ * @return bool
+ */
+function messaging_allowed() {
+    if (!opt_bool('allow_messaging')) return false;
+    return is_logged_in() || opt_bool('allow_guest_messaging');
+}
+
+/**
  * True if someone is logged in.
  * @return bool
  */

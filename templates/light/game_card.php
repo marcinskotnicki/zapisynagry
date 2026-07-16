@@ -12,7 +12,7 @@
  *
  *  Control visibility rules:
  *    - edit/delete & per-player delete: verify_can_show_buttons(owner id).
- *    - message envelopes: logged in AND allow_messaging AND not read-only (and,
+ *    - message envelopes: messaging_allowed() AND not read-only (and,
  *      per player, only when that player left an email).
  *    - signup label flips to "reserve" once confirmed players reach max.
  *
@@ -48,7 +48,7 @@
                         <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
                     </span>
                 <?php endif; ?>
-                <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging')): // message all players ?>
+                <?php if (!$readonly && messaging_allowed()): // message all players ?>
                     <a class="msg-icon" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                 <?php endif; ?>
             </div>
@@ -78,7 +78,7 @@
                         <?php foreach ($g['players'] as $p): ?>
                             <li class="player<?= (int)$p['is_reserve'] === 1 ? ' player-reserve' : '' ?>">
                                 <?= e($p['name']) ?><?php if ((int)$p['is_reserve'] === 1): ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span><?php endif; ?>
-                                <?php if (!$readonly && is_logged_in() && opt_bool('allow_messaging') && !empty($p['email'])): // message this player ?>
+                                <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): // message this player ?>
                                     <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                                 <?php endif; ?>
                                 <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): // remove this signup ?>

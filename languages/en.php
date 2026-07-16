@@ -393,4 +393,7 @@ The link expires in one hour.',
     'vote_email_dup'                  => 'This email address has already voted for this game.',
     'error_email_invalid'             => 'Please enter a valid email address.',
     'opt_login_days'                  => 'Login duration (days; 0 = browser session only)',
+    'opt_allow_guest_messaging'       => 'Allow guests (not logged in) to send messages',
+    'msg_sender_name'                 => 'Your name',
+    'msg_sender_email'                => 'Your email',
 ];

@@ -16,7 +16,7 @@
  *  Same data contract and permission rules as light's card:
  *    RENDER VARS: $g (game row incl. ['players'] and ['comments']), $readonly.
  *    - edit/delete tabs + per-player resign: verify_can_show_buttons(owner id).
- *    - message envelopes: logged in AND allow_messaging AND not read-only.
+ *    - message envelopes: messaging_allowed() AND not read-only.
  *    - every slot links to the same sign_up.php; slot numbers are cosmetic.
  *  Styling lives in templates/classic/css/style.css (the gc-* classes).
  * ============================================================================= */
@@ -50,7 +50,7 @@
     // one empty signup row visible while seats remain (so a full-looking list
     // grows as people join). The hidden remainder is summarised in a note.
     $shownSlots = min($max, max(10, count($confirmed) + 1));
-    $canMsg   = !$readonly && is_logged_in() && opt_bool('allow_messaging');
+    $canMsg   = !$readonly && messaging_allowed();   // shared gate (guests allowed when toggled)
     ?>
     <article class="game-card" id="game-<?= (int)$g['id'] ?>">
         <div class="gc-info">

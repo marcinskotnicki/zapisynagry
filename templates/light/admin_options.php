@@ -140,6 +140,7 @@ $toggle = function($key) {
         $toggle('allow_discussions');
         $toggle('use_captcha');
         $toggle('allow_messaging');
+        $toggle('allow_guest_messaging');      // messaging open to guests too, not just accounts
         $toggle('allow_custom_game_links');
         ?>
     </fieldset>

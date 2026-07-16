@@ -53,6 +53,14 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
     ];
 }
 $draft = &$_SESSION['poll_draft'];     // reference: edits below mutate the session
+// The draft can be OLDER than the login (e.g. first opened while logged out and
+// abandoned — with persistent logins such drafts linger). Backfill only BLANK
+// proposer fields from the account, so a stale draft still greets a logged-in
+// user with their own details, while anything they actually typed is kept.
+if ($u) {
+    if ($draft['name']  === '') $draft['name']  = $u['display_name'];
+    if ($draft['email'] === '') $draft['email'] = $u['email'];
+}
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -12,11 +12,13 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/mail.php';
-require_login();
+require __DIR__ . '/inc/captcha.php';  // guests get the same captcha as other public forms
 
-if (!opt_bool('allow_messaging')) redirect('index.php');
+// One gate for the whole feature (same helper the envelope icons use):
+// allow_messaging on, and — unless allow_guest_messaging — a logged-in account.
+if (!messaging_allowed()) redirect('index.php');
 
-$me  = current_user();
+$me  = current_user();                 // null for guests (allowed when the toggle is on)
 $pid = (int)($_GET['player'] ?? $_POST['player'] ?? 0);
 $gid = (int)($_GET['game']   ?? $_POST['game']   ?? 0);
 $pwid = (int)($_GET['poll_owner'] ?? $_POST['poll_owner'] ?? 0);   // message the poll's proposer
@@ -73,11 +75,25 @@ $activeDay = (int)($day['day_index'] ?? 1);
 $backAnchor = $game ? ('#game-' . (int)$game['id']) : ('#poll-' . (int)$poll['id']);
 
 $error = null;
+// Sender identity: accounts supply it implicitly; guests must type BOTH a name
+// (for the subject line) and a valid email (for Reply-To — a message nobody can
+// answer is just anonymous spam). Values persist across a validation error.
+$senderName  = $me ? $me['display_name'] : trim($_POST['sender_name']  ?? '');
+$senderEmail = $me ? $me['email']        : trim($_POST['sender_email'] ?? '');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $bodyText = trim($_POST['body'] ?? '');
     if ($bodyText === '') {
         $error = t('msg_empty');
+    } elseif (!$me && $senderName === '') {
+        $error = t('error_signup_name');
+    } elseif (!$me && $senderEmail === '') {
+        $error = t('error_email_required');           // guests always need a reply path
+    } elseif (!$me && !email_valid($senderEmail)) {
+        $error = t('error_email_invalid');
+    } elseif (!$me && !captcha_verify()) {
+        $error = t('error_captcha');                  // no-op when captcha is off
     } else {
         // From = venue (set in send_mail); Reply-To = the sender, so a reply
         // goes to them. One send per recipient.
@@ -87,12 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // The venue prefix is added only when a venue name is actually set,
         // so an unconfigured install doesn't produce a subject like ": ...".
         $re = $game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']);
-        $subject = t('msg_subject', $me['display_name'], $re);
+        $subject = t('msg_subject', $senderName, $re);
         $venue = opt('venue_name');
         if ($venue !== '') {
             $subject = $venue . ': ' . $subject;
         }
-        $replyTo = $me['email'];
+        $replyTo = $senderEmail;
         foreach ($recipients as $to) {
             send_mail($to, $subject, $bodyText, $replyTo);
         }
@@ -112,6 +128,12 @@ tpl_render('message_form', [
     'poll_owner'   => $pwid,
     'poll_id'      => $plid,
     'recipients'   => count($recipients),
+    // Guest mode: the form shows sender name/email inputs (+ captcha when on);
+    // logged-in senders are identified by their account, no extra fields.
+    'is_guest'     => $me === null,
+    'sender_name'  => $senderName,
+    'sender_email' => $senderEmail,
+    'captcha'      => $me === null ? captcha_html() : '',
     'error'        => $error,
     'csrf'         => csrf_field(),
 ]);

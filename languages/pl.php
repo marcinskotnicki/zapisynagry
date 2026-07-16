@@ -385,4 +385,7 @@ Link wygasa za godzinę.',
     'vote_email_dup'                  => 'Ten adres e-mail już zagłosował na tę grę.',
     'error_email_invalid'             => 'Podaj poprawny adres e-mail.',
     'opt_login_days'                  => 'Czas zalogowania (dni; 0 = tylko do zamknięcia przeglądarki)',
+    'opt_allow_guest_messaging'       => 'Pozwalaj niezalogowanym wysyłać wiadomości',
+    'msg_sender_name'                 => 'Twoje imię',
+    'msg_sender_email'                => 'Twój e-mail',
 ];

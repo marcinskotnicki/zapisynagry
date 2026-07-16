@@ -13,6 +13,11 @@
  *    $poll_owner   — poll id when messaging the poll's proposer, or 0.
  *    $poll_id      — poll id when messaging all its voters, or 0.
  *                    Exactly one of the four is non-zero.
+ *    $is_guest     — true when the sender has no account: show name/email inputs
+ *                    (+ captcha) so recipients know who wrote and can reply.
+ *    $sender_name  — repopulated guest name (after a validation error).
+ *    $sender_email — repopulated guest email.
+ *    $captcha      — captcha HTML for guests, '' otherwise.
  *    $recipients   — recipient count (available for display if desired).
  *    $error        — message above the form, or null.
  *    $csrf         — hidden CSRF field.
@@ -39,8 +44,23 @@
             <input type="hidden" name="game" value="<?= (int)$game_id ?>">
         <?php endif; ?>
 
+        <?php if (!empty($is_guest)): // guests must identify themselves (see message.php) ?>
+            <div class="field">
+                <label for="sender_name"><?= e(t('msg_sender_name')) ?> *</label>
+                <input type="text" id="sender_name" name="sender_name" value="<?= e($sender_name) ?>" required>
+            </div>
+            <div class="field">
+                <label for="sender_email"><?= e(t('msg_sender_email')) ?> *</label>
+                <input type="email" id="sender_email" name="sender_email" value="<?= e($sender_email) ?>" required>
+                <?php if (opt('msg_email_field') !== ''): // the shared email-field note ?>
+                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
         <label for="body"><?= e(t('msg_field')) ?></label>
         <textarea id="body" name="body" rows="6" required autofocus></textarea>
+        <?= $captcha ?? '' ?>
 
         <button type="submit" class="btn btn-primary"><?= e(t('msg_send')) ?></button>
         <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
