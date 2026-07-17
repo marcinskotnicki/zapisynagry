@@ -19,7 +19,7 @@
     --ok:           #157f3b;
     --error:        #c0392b;
     --radius:       8px;
-    --maxw:         960px;
+    --maxw:         1200px;   /* roomier column; classic ignores it (full width) */
 }
 
 * { box-sizing: border-box; }
@@ -204,7 +204,9 @@ input, select, textarea {
 .game-main { flex: 1; min-width: 0; }
 .game-name { margin: 0 0 0.3rem; font-size: 1.1rem; }
 .game-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
-.game-time, .game-length { color: var(--text-muted); font-size: 0.9rem; }
+.game-length { color: var(--text-muted); font-size: 0.9rem; }
+/* The start hour is THE key fact on a card — bigger, bolder, accent-coloured. */
+.game-time { color: var(--primary); font-size: 1.15rem; font-weight: 700; }
 .game-brings, .game-rules, .game-comment { margin: 0.25rem 0; font-size: 0.92rem; }
 .game-comment { color: var(--text-muted); }
 
@@ -217,7 +219,14 @@ input, select, textarea {
 .weight-5 { background: #cf3b2e; }
 
 /* ---- Players -------------------------------------------------------------- */
-.players { margin-top: 0.5rem; }
+.players {
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+.tpl-dark .players { background: rgba(255, 255, 255, 0.05); }
 .players-label { font-size: 0.85rem; color: var(--text-muted); }
 .player-list { list-style: none; margin: 0.3rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .player { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.88rem; }
@@ -397,3 +406,22 @@ html { scroll-behavior: smooth; }
    blocks' dashed border overrides this by specificity, unchanged). Bump to 2px
    if the gap gets swallowed at odd mobile zoom levels. */
 .tl-game { border-right: 1px solid var(--surface); }
+
+/* ---- Card visual round (light + dark; classic has its own card) -------------- */
+/* Left column: buttons stack under the thumbnail (the column was empty air). */
+.game-thumb { display: flex; flex-direction: column; gap: 0.45rem; align-items: center; }
+.game-thumb .game-actions { display: flex; flex-direction: column; gap: 0.3rem; width: 90px; }
+.game-thumb .game-actions .btn { margin-top: 0; text-align: center; }
+
+/* Rules-knowledge dot next to each player (colour from .rules-good/mid/bad). */
+.p-knows { font-size: 0.6em; margin-left: 0.3rem; vertical-align: middle; cursor: help; }
+
+/* Signup: the main call to action — bigger and green instead of a small grey. */
+.signup-btn {
+    background: #2e9e5b; color: #fff;
+    padding: 0.5rem 1.1rem; font-size: 0.95rem;
+    margin-top: 0.6rem;
+}
+.signup-btn:hover { filter: brightness(0.93); text-decoration: none; }
+/* Dark theme: additionally push it to the right edge of the players box. */
+.tpl-dark .players .signup-btn { display: block; width: fit-content; margin-left: auto; }

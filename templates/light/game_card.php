@@ -34,20 +34,31 @@
 <?php else: // active game -> the full card ?>
     <?php $bucket = weight_bucket($g['weight']); // 1..5, drives the weight-badge colour class ?>
     <article class="game-card" id="game-<?= (int)$g['id'] ?>">
-        <?php if (!empty($g['thumbnail'])): ?>
-            <div class="game-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></div>
+        <?php
+        // Left column: thumbnail with the edit/delete buttons stacked BELOW it
+        // (the column was mostly empty air under the image). The column renders
+        // whenever there is an image OR buttons — so a manual game without a
+        // thumbnail still gets its controls.
+        $canButtons = !$readonly && verify_can_show_buttons($g['added_by_user_id']);
+        ?>
+        <?php if (!empty($g['thumbnail']) || $canButtons): ?>
+            <div class="game-thumb">
+                <?php if (!empty($g['thumbnail'])): ?>
+                    <img src="<?= e($g['thumbnail']) ?>" alt="">
+                <?php endif; ?>
+                <?php if ($canButtons): ?>
+                    <span class="game-actions">
+                        <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
+                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
+                    </span>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
 
         <div class="game-main">
             <div class="game-name-row">
                 <?php $gLink = game_link($g); // BGG page, or the custom link (option-gated) ?>
                 <h3 class="game-name"><?php if ($gLink): ?><a href="<?= e($gLink) ?>" target="_blank" rel="noopener"><?= e($g['name']) ?></a><?php else: ?><?= e($g['name']) ?><?php endif; ?></h3>
-                <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): // owner/admin/unregistered ?>
-                    <span class="game-actions">
-                        <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
-                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
-                    </span>
-                <?php endif; ?>
                 <?php if (!$readonly && messaging_allowed()): // message all players ?>
                     <a class="msg-icon" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                 <?php endif; ?>
@@ -77,7 +88,7 @@
                     <ul class="player-list">
                         <?php foreach ($g['players'] as $p): ?>
                             <li class="player<?= (int)$p['is_reserve'] === 1 ? ' player-reserve' : '' ?>">
-                                <?= e($p['name']) ?><?php if (is_admin() && !empty($p['user_id'])): // admin-only: entry is BOUND to an account (created while its owner was logged in) ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?><?php if ((int)$p['is_reserve'] === 1): ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span><?php endif; ?>
+                                <?= e($p['name']) ?><?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): // rules-knowledge dot: green knows / amber somewhat / red doesn't; tooltip spells it out ?><span class="p-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>">&#9679;</span><?php endif; ?><?php if (is_admin() && !empty($p['user_id'])): // admin-only: entry is BOUND to an account (created while its owner was logged in) ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?><?php if ((int)$p['is_reserve'] === 1): ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span><?php endif; ?>
                                 <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): // message this player ?>
                                     <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
                                 <?php endif; ?>
