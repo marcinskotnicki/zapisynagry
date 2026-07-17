@@ -207,7 +207,7 @@ input, select, textarea {
 .game-length { color: var(--text-muted); font-size: 0.9rem; }
 /* The start hour is THE key fact on a card — bigger, bolder, accent-coloured. */
 .game-time { color: var(--primary); font-size: 1.15rem; font-weight: 700; }
-.game-time:before {content: '&#128337';}
+.game-time:before {content: '🕑';}
 .game-brings, .game-rules, .game-comment { margin: 0.25rem 0; font-size: 0.92rem; }
 .game-language {font-size: 0.92rem;}
 .game-comment { color: var(--text-muted); }
