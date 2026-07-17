@@ -16,8 +16,9 @@
     --border:       #333845;
     --text:         #e6e8ee;
     --text-muted:   #9aa1ad;
-    --primary:      #4f8cff;
-    --primary-text: #0c0e12;
+    --primary:      #e05248;   /* the dark theme's accent is RED: buttons, links,
+                                  start hours, timeline blobs all flow from here */
+    --primary-text: #ffffff;   /* white reads better on red than the old near-black */
     --ok:           #4cc77f;
     --error:        #ff6b5e;
 }
@@ -43,3 +44,6 @@
 
 /* Game-name links stay readable on dark cards */
 .tpl-dark .game-name a { color: var(--text); }
+
+/* The interaction glow is hardcoded blue in light's sheet — re-tint it red. */
+.tpl-dark .game-card.active, .tpl-dark .poll-card.active { box-shadow: 0 0 0 3px rgba(224, 82, 72, 0.4); }
