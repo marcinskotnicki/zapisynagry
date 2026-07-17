@@ -188,7 +188,7 @@
 
 /* ---- Mobile: stack the player panel BELOW the card --------------------------- */
 @media (max-width: 700px) {
-    .tpl-classic .game-card { flex-direction: column; }
+    .tpl-classic .game-card { flex-direction: column; width:100%}
     .tpl-classic .gc-players {
         margin-left: 0; margin-top: 0.5rem;   /* undo the desktop side-tuck */
         width: 100%; box-sizing: border-box; min-width: 0;
