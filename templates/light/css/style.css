@@ -416,7 +416,7 @@ html { scroll-behavior: smooth; }
 .game-thumb .game-actions .btn { margin-top: 0; text-align: center; font-size: 0.75rem; padding: 0.25rem 0.5rem; } /* deliberately small: secondary actions */
 
 /* Rules-knowledge dot next to each player (colour from .rules-good/mid/bad). */
-.p-knows { font-size: 0.9em; margin-left: 0.3rem; vertical-align: middle; cursor: help; } /* big enough to invite the explanatory hover */
+.p-knows { font-size: 1em; margin-left: 0.3rem; vertical-align: middle; cursor: help; } /* big enough to invite the explanatory hover */
 
 /* Signup: the main call to action — bigger and green instead of a small grey. */
 .signup-btn {
