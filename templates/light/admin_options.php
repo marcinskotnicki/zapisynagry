@@ -144,6 +144,17 @@ $toggle = function($key) {
             </select>
         </div>
 
+        <div class="field">
+            <label for="table_names_mode"><?= e(t('opt_table_names_mode')) ?></label>
+            <select id="table_names_mode" name="table_names_mode">
+                <?php foreach (['off', 'admin', 'add_any', 'any'] as $m): // who may set/edit table names ?>
+                    <option value="<?= e($m) ?>"<?= opt('table_names_mode') === $m ? ' selected' : '' ?>>
+                        <?= e(t('opt_table_names_' . $m)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
         <?php
         $toggle('allow_polls');
         $toggle('allow_discussions');

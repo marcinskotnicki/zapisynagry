@@ -30,11 +30,16 @@ $next  = safe_next($_REQUEST['next'] ?? 'index.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    if (auth_login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
+    // NB: strict === true — auth_login() may also return the (truthy!) string
+    // 'blocked' when the password was right but the account is blocked.
+    $result = auth_login($_POST['email'] ?? '', $_POST['password'] ?? '');
+    if ($result === true) {
         log_action('login', 'User logged in');
         redirect($next);                         // success -> where they were headed
     }
-    $error = t('login_failed');                  // generic (doesn't reveal which field was wrong)
+    $error = $result === 'blocked'
+        ? t('login_blocked')                     // only shown after a CORRECT password
+        : t('login_failed');                     // generic (doesn't reveal which field was wrong)
 }
 
 // Render: header + login card + footer.

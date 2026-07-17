@@ -50,12 +50,37 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
         $count = event_table_count($dayRow['id']);
         if ($max === 0 || $count < $max) {               // respect the cap
             $num = event_next_table_number($dayRow['id']);
-            db_run('INSERT INTO game_tables (event_id, day_id, table_number) VALUES (?,?,?)',
-                   [$event['id'], $dayRow['id'], $num]);
+            // Optional table name: only honoured when the option-gated
+            // permission allows the CURRENT visitor to set one ('' -> NULL).
+            $tname = table_names_can_set() ? trim($_POST['table_name'] ?? '') : '';
+            db_run('INSERT INTO game_tables (event_id, day_id, table_number, table_name) VALUES (?,?,?,?)',
+                   [$event['id'], $dayRow['id'], $num, $tname !== '' ? $tname : null]);
             log_action('table_add', 'Table #' . $num . ' (day ' . $activeDay . ')');
         }
     }
     redirect('index.php?day=' . $activeDay);              // PRG: avoid resubmit on refresh
+}
+
+/* ---- Rename a table (POST, interactive view only) ------------------------ */
+// The tiny edit button on a table block leads to an inline form (see the
+// ?rename_table= handling below); this is where that form lands. An empty
+// name CLEARS the label (back to just "Table #N").
+if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'rename_table') {
+    csrf_check();
+    if (table_names_can_edit()) {
+        $tblId  = (int)($_POST['table_id'] ?? 0);
+        // Table must belong to THIS event's active day (blocks stale/foreign ids).
+        $tblRow = ($tblId && $dayRow)
+            ? db_one('SELECT * FROM game_tables WHERE id = ? AND day_id = ?', [$tblId, $dayRow['id']])
+            : null;
+        if ($tblRow) {
+            $tname = trim($_POST['table_name'] ?? '');
+            db_run('UPDATE game_tables SET table_name = ? WHERE id = ?',
+                   [$tname !== '' ? $tname : null, $tblId]);
+            log_action('table_rename', 'Table #' . $tblRow['table_number'] . ' -> ' . ($tname !== '' ? $tname : '(none)'));
+        }
+    }
+    redirect('index.php?day=' . $activeDay);              // PRG
 }
 
 // Build the day's tables (with nested games + players, polls, comments).
@@ -65,6 +90,13 @@ $tables = $dayRow ? event_tables_full($dayRow['id']) : [];
 $max        = opt_int('max_tables');
 $maxReached = ($max > 0 && $dayRow && event_table_count($dayRow['id']) >= $max);
 $canAdd     = !$readonly && can_add_games();
+
+// Table-name state for the view: whether the add form shows a name input,
+// whether edit buttons render, and which table (if any) is showing its inline
+// rename form right now (?rename_table=<id>, GET only — harmless if forged).
+$canSetNames  = !$readonly && table_names_can_set();
+$canEditNames = !$readonly && table_names_can_edit();
+$renameTable  = $canEditNames ? (int)($_GET['rename_table'] ?? 0) : 0;
 
 // Timeline for the active day (null when there are no games to draw). It's
 // captured to a string and handed to the FOOTER's $after_content slot, so it
@@ -83,6 +115,9 @@ tpl_render('front_event', [
     'tables'      => $tables,
     'can_add'     => $canAdd,
     'max_reached' => $maxReached,
+    'can_set_names'  => $canSetNames,    // show the optional name input on add-table
+    'can_edit_names' => $canEditNames,   // show the tiny per-table rename button
+    'rename_table'   => $renameTable,    // table id whose inline rename form is open (0 = none)
     'csrf'        => csrf_field(),
 ]);
 tpl_render('footer', ['after_content' => $timelineHtml]);

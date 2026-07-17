@@ -162,6 +162,46 @@ function can_signup() {
     return opt_bool('allow_unregistered_signup');
 }
 
+/**
+ * Are table names in use at all? Driven by the 'table_names_mode' option:
+ *   'off'     — feature disabled entirely.
+ *   'admin'   — only admins may set and edit names.
+ *   'add_any' — anyone may set a name when ADDING a table; only admins edit.
+ *   'any'     — anyone may set and edit names.
+ * @return bool
+ */
+function table_names_enabled() {
+    return opt('table_names_mode') !== 'off';
+}
+
+/**
+ * May the current visitor SET a table name while adding a table?
+ * (The add itself is separately gated by can_add_games(); this only decides
+ * whether the optional name input appears / is honoured.)
+ * @return bool
+ */
+function table_names_can_set() {
+    switch (opt('table_names_mode')) {
+        case 'admin':   return is_admin();
+        case 'add_any':
+        case 'any':     return true;
+        default:        return false;   // 'off' (or an unknown value)
+    }
+}
+
+/**
+ * May the current visitor EDIT (rename/clear) an existing table's name?
+ * @return bool
+ */
+function table_names_can_edit() {
+    switch (opt('table_names_mode')) {
+        case 'admin':
+        case 'add_any': return is_admin();
+        case 'any':     return true;
+        default:        return false;   // 'off' (or an unknown value)
+    }
+}
+
 /* ---- Small formatting helpers -------------------------------------------- */
 
 /**

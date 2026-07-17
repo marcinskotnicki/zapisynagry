@@ -25,6 +25,18 @@ $page_title = $page_title ?? t('app_name');
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($page_title) ?> — <?= e(opt('venue_name') ?: t('app_name')) ?></title>
+    <?php
+    // Site icon links, only when the admin uploaded one (Thumbnails tab). The
+    // 'site_icon' option holds a version stamp; ?v= busts favicon caches after
+    // a replacement upload. Files live under /icons with fixed names.
+    $iconV = opt('site_icon');
+    ?>
+    <?php if ($iconV !== ''): ?>
+        <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=<?= e($iconV) ?>">
+        <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?v=<?= e($iconV) ?>">
+        <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=<?= e($iconV) ?>">
+        <link rel="manifest" href="icons/site.webmanifest?v=<?= e($iconV) ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="<?= e(tpl_css_url()) ?>">
     <?php // The one allowed inline JS: expose chosen UI strings to client scripts. ?>
     <script>

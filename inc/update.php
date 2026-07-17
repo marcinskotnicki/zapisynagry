@@ -28,12 +28,13 @@
 
 /**
  * Top-level names the updater must never overwrite/restore.
- * config.php = settings; data/ = the DB; thumbnails/ = uploads; install.php =
- * the self-deleted installer (restoring it would re-expose setup).
+ * config.php = settings; data/ = the DB; thumbnails/ = uploads; icons/ = the
+ * admin-uploaded site icon set; install.php = the self-deleted installer
+ * (restoring it would re-expose setup).
  * @return string[]
  */
 function update_protected_paths() {
-    return ['config.php', 'data', 'thumbnails', 'install.php'];
+    return ['config.php', 'data', 'thumbnails', 'icons', 'install.php'];
 }
 
 /**

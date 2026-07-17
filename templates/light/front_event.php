@@ -19,6 +19,9 @@
  *    $tables      — active day's tables, each with ['items'] (games + polls).
  *    $can_add     — may the viewer add tables/games?
  *    $max_reached — table cap hit (hide the add-table button, show a note).
+ *    $can_set_names  — show the optional table-name input on the add form.
+ *    $can_edit_names — show the tiny rename button on each table block.
+ *    $rename_table   — table id whose inline rename form is open (0 = none).
  *    $csrf        — hidden CSRF field (for the add-table form).
  * ============================================================================= */
 // In read-only mode every internal link must keep the share token so the viewer
@@ -51,7 +54,29 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
 <div class="tables">
     <?php foreach ($tables as $tbl): // one block per table on the active day ?>
         <section class="table-block">
-            <h2 class="table-title"><?= e(t('table_label', (int)$tbl['table_number'])) ?></h2>
+            <?php if ((int)$rename_table === (int)$tbl['id']): // this table's inline rename form is open ?>
+                <form method="post" action="index.php?day=<?= (int)$active_day ?>" class="table-rename-form">
+                    <?= $csrf ?>
+                    <input type="hidden" name="action" value="rename_table">
+                    <input type="hidden" name="table_id" value="<?= (int)$tbl['id'] ?>">
+                    <span class="table-title"><?= e(t('table_label', (int)$tbl['table_number'])) ?></span>
+                    <input type="text" name="table_name" value="<?= e($tbl['table_name'] ?? '') ?>"
+                           placeholder="<?= e(t('table_name_label')) ?>" maxlength="100">
+                    <button type="submit" class="btn btn-small"><?= e(t('save')) ?></button>
+                    <a class="btn btn-small" href="index.php?day=<?= (int)$active_day ?>"><?= e(t('cancel')) ?></a>
+                </form>
+            <?php else: ?>
+                <h2 class="table-title">
+                    <?= e(t('table_label', (int)$tbl['table_number'])) ?>
+                    <?php if (!empty($tbl['table_name']) && table_names_enabled()): // optional label in smaller print after the number ?>
+                        <span class="table-name"><?= e($tbl['table_name']) ?></span>
+                    <?php endif; ?>
+                </h2>
+                <?php if ($can_edit_names): // tiny corner button -> reload with the inline form open ?>
+                    <a class="table-rename-btn" title="<?= e(t('table_rename')) ?>"
+                       href="index.php?day=<?= (int)$active_day ?>&rename_table=<?= (int)$tbl['id'] ?>">&#9998;</a>
+                <?php endif; ?>
+            <?php endif; ?>
 
             <?php if (empty($tbl['items'])): ?>
                 <p class="muted no-games"><?= e(t('no_games')) ?></p>
@@ -80,6 +105,9 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
     <form method="post" action="index.php?day=<?= (int)$active_day ?>" class="add-table-form">
         <?= $csrf ?>
         <input type="hidden" name="action" value="add_table">
+        <?php if ($can_set_names): // optional table name, honoured server-side by the same gate ?>
+            <input type="text" name="table_name" placeholder="<?= e(t('table_name_label')) ?>" maxlength="100">
+        <?php endif; ?>
         <button type="submit" class="btn btn-primary"><?= e(t('add_table')) ?></button>
     </form>
 <?php elseif ($can_add && $max_reached): ?>

@@ -35,19 +35,26 @@ function auth_init() {
 }
 
 /**
- * Attempt a login. Returns true on success (and sets the session), false if
- * the email is unknown or the password is wrong.
+ * Attempt a login. Returns true on success (and sets the session), the string
+ * 'blocked' when the credentials are right but the account is blocked, and
+ * false if the email is unknown or the password is wrong.
  *
  * SECURITY: the same false is returned for "no such email" and "wrong password"
- * so the form can't be used to discover which emails have accounts.
+ * so the form can't be used to discover which emails have accounts. 'blocked'
+ * is only revealed AFTER a correct password, so it leaks nothing to strangers.
+ *
+ * NOTE FOR CALLERS: compare with === true — 'blocked' is truthy!
  *
  * @param string $email
  * @param string $password  Plain text from the form; compared via bcrypt.
- * @return bool
+ * @return bool|string  true | 'blocked' | false
  */
 function auth_login($email, $password) {
     $user = db_one('SELECT * FROM users WHERE email = ?', [trim($email)]);
     if ($user && password_verify($password, $user['password_hash'])) {
+        if ((int)($user['is_blocked'] ?? 0) === 1) {
+            return 'blocked';                      // right password, blocked account
+        }
         // Regenerate the id on privilege change to thwart session fixation.
         session_regenerate_id(true);
         $_SESSION['user_id'] = (int)$user['id'];
@@ -171,6 +178,11 @@ function current_user() {
 
     $id = $_SESSION['user_id'] ?? null;
     $cache = $id ? db_one('SELECT * FROM users WHERE id = ?', [$id]) : null;
+    // A block takes effect IMMEDIATELY: an existing session (or remember-me
+    // rebuild) of a blocked account resolves to "nobody logged in".
+    if ($cache && (int)($cache['is_blocked'] ?? 0) === 1) {
+        $cache = null;
+    }
     return $cache;
 }
 

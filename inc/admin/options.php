@@ -24,7 +24,7 @@ $OPTION_VALUES = [
     'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
-    'verification_method',
+    'verification_method', 'table_names_mode',
 ];
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
@@ -58,6 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'verification_method':
                 // Whitelist of the verification tree's method names.
                 if (!in_array($val, ['none', 'registered', 'email_code', 'email_match'], true)) continue 2;
+                break;
+            case 'table_names_mode':
+                // Whitelist of the table-name permission modes.
+                if (!in_array($val, ['off', 'admin', 'add_any', 'any'], true)) continue 2;
                 break;
         }
         opt_set($key, $val);

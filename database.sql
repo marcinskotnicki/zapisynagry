@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '1');
+INSERT INTO meta (key, value) VALUES ('schema_version', '2');
 
 
 -- =============================================================================
@@ -74,6 +74,7 @@ INSERT INTO options (key, value) VALUES
     ('msg_voting',            ''),     -- optional custom text on the vote form
     ('msg_email_field',       ''),     -- optional note shown above every email input
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
+    ('site_icon',             ''),     -- '' = no site icon; otherwise a version stamp (files live in /icons)
     ('game_languages',        'PL
 EN
 niezależna językowo
@@ -102,6 +103,12 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- (Admins and the original logged-in owner always skip this. If no email
     --  was stored on the item, the action is always free regardless of method.)
     ('verification_method',          'none'),
+    -- table_names_mode: who may set / edit the optional table names:
+    --   'off'     = table names are not used at all
+    --   'admin'   = only admins may set and edit them
+    --   'add_any' = anyone may set a name when ADDING a table; only admins edit
+    --   'any'     = anyone may set and edit table names
+    ('table_names_mode',             'off'),
     ('allow_polls',                  '1'),
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
@@ -123,6 +130,7 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,                 -- password_hash() bcrypt output
     display_name  TEXT NOT NULL,
     is_admin      INTEGER NOT NULL DEFAULT 0,    -- 0/1
+    is_blocked    INTEGER NOT NULL DEFAULT 0,    -- 0/1; blocked accounts cannot log in
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -191,6 +199,7 @@ CREATE TABLE game_tables (
     event_id     INTEGER NOT NULL,               -- denormalised for easy queries
     day_id       INTEGER NOT NULL,
     table_number INTEGER NOT NULL,               -- "table #{table_number}"
+    table_name   TEXT,                           -- optional label shown after the number (option-gated)
     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (event_id) REFERENCES events(id)     ON DELETE CASCADE,
     FOREIGN KEY (day_id)   REFERENCES event_days(id) ON DELETE CASCADE

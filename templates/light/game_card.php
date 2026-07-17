@@ -28,6 +28,9 @@
             <p class="muted"><?= e(t('game_archived_note')) ?></p>
             <?php if (!$readonly): ?>
                 <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>"><?= e(t('bringback_button')) ?></a>
+                <?php if (is_admin()): // admins may remove the archived game for good ?>
+                    <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('game_purge_button')) ?></a>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </article>

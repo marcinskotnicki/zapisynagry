@@ -16,6 +16,8 @@
  *    $num_days — number of days.
  *    $days     — per-day rows ['date','start','end'] (screen 2).
  *    $error    — message above the form, or null.
+ *    $current  — the live event row, or null. When present, screen 1 shows a
+ *                rename form for it above the create-event form.
  *
  *  Day labels: try a full localized label ('day_label_N'); if missing, fall
  *  back to the generic "Day N" pattern.
@@ -33,6 +35,21 @@ $dayLabel = function($i) {
 <?php endif; ?>
 
 <?php if (($stage ?? 'start') === 'start'): ?>
+    <?php if (!empty($current)): // a live event exists -> offer an in-place rename ?>
+        <fieldset class="event-rename">
+            <legend><?= e(t('newevent_current')) ?></legend>
+            <form method="post" action="admin.php?tab=new_event">
+                <?= $csrf ?>
+                <input type="hidden" name="stage" value="rename">
+                <div class="field">
+                    <label for="cur_name"><?= e(t('newevent_name')) ?></label>
+                    <input type="text" id="cur_name" name="current_name" value="<?= e($current['name']) ?>" required>
+                </div>
+                <button type="submit" class="btn"><?= e(t('newevent_rename')) ?></button>
+            </form>
+        </fieldset>
+    <?php endif; ?>
+
     <?php // Screen 1: name + number of days. ?>
     <form method="post" action="admin.php?tab=new_event" class="newevent">
         <?= $csrf ?>

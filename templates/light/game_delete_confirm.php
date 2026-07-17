@@ -11,8 +11,11 @@
  *    $game     — the game being deleted.
  *    $decision — 'allow' | 'email_match' | 'email_code'.
  *    $error    — message above the form, or null.
+ *    $purge    — true when the game is ALREADY soft-deleted (admin permanent
+ *                delete): the archive button is pointless, so it's hidden.
  *    $csrf     — hidden CSRF field.
  * ============================================================================= */
+$purge = !empty($purge);
 ?>
 <div class="card card-narrow">
     <h1><?= e(t('delgame_title')) ?></h1>
@@ -37,7 +40,9 @@
 
         <div class="delgame-buttons">
             <button type="submit" name="choice" value="back" class="btn"><?= e(t('delgame_back')) ?></button>
-            <button type="submit" name="choice" value="archive" class="btn"><?= e(t('delgame_archive')) ?></button>
+            <?php if (!$purge): // already archived -> no point re-archiving ?>
+                <button type="submit" name="choice" value="archive" class="btn"><?= e(t('delgame_archive')) ?></button>
+            <?php endif; ?>
             <button type="submit" name="choice" value="everything" class="btn btn-danger"><?= e(t('delgame_everything')) ?></button>
         </div>
     </form>

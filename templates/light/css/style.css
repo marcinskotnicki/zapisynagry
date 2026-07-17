@@ -425,3 +425,40 @@ html { scroll-behavior: smooth; }
 .signup-btn:hover { filter: brightness(0.93); text-decoration: none; }
 /* Dark theme: additionally push it to the right edge of the players box. */
 .tpl-dark .players .signup-btn { display: block; width: fit-content; margin-left: auto; }
+
+/* ---- Table names (optional labels + the tiny rename controls) ------------ */
+/* The block is the positioning context for the corner rename button. */
+.table-block { position: relative; }
+/* The optional label: smaller and muted, sitting after "Table #N". */
+.table-name { font-size: 0.85em; font-weight: normal; color: var(--text-muted); margin-left: 0.4rem; }
+/* Corner rename button: deliberately tiny — renaming is a rare action. */
+.table-rename-btn {
+    position: absolute; top: 0.5rem; right: 0.75rem;
+    font-size: 0.8rem; color: var(--text-muted); text-decoration: none;
+    opacity: 0.6;
+}
+.table-rename-btn:hover { opacity: 1; text-decoration: none; }
+/* Inline rename form (replaces the title while open). */
+.table-rename-form { display: flex; gap: 0.4rem; align-items: center; margin: 0 0 0.75rem; flex-wrap: wrap; }
+.table-rename-form input[type="text"] { max-width: 220px; }
+/* Optional name input on the add-table form sits next to the button. */
+.add-table-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.add-table-form input[type="text"] { max-width: 220px; }
+
+/* ---- Admin: users tab additions ------------------------------------------ */
+/* "Blocked" badge next to the role. */
+.badge-blocked {
+    display: inline-block; padding: 0.05rem 0.4rem; margin-left: 0.3rem;
+    font-size: 0.75em; border-radius: 3px;
+    background: #c0392b; color: #fff;
+}
+/* Create-user fieldset: keep the form narrow, it's four small fields. */
+.users-create { margin-bottom: 1.5rem; max-width: 420px; }
+
+/* ---- Admin: site icon section (thumbnails tab) --------------------------- */
+.icon-section { margin-bottom: 1.5rem; }
+.icon-section img { vertical-align: middle; margin-right: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+.icon-upload { margin-top: 0.75rem; }
+
+/* ---- Admin: rename-current-event fieldset (new event tab) ---------------- */
+.event-rename { margin-bottom: 1.5rem; max-width: 420px; }
