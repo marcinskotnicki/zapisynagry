@@ -40,6 +40,20 @@ function send_mail($to, $subject, $body, $replyTo = null) {
     // Reject obviously bad addresses up front — also guards the loops in notify.
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
 
+    // Every outgoing subject is prefixed with "<venue>: " (or the current
+    // event's name when no venue is configured), so recipients recognise the
+    // mail without checking the sender. Centralised HERE so all senders —
+    // the seven notify_* triggers, recovery, verification, user messages —
+    // get it for free; the strpos guard keeps a caller-supplied prefix from
+    // doubling up.
+    $prefix = opt('venue_name');
+    if ($prefix === '') {
+        $prefix = current_event()['name'] ?? '';
+    }
+    if ($prefix !== '' && strpos($subject, $prefix . ':') !== 0) {
+        $subject = $prefix . ': ' . $subject;
+    }
+
     $smtpHost = opt('email_smtp_server');
 
     // ---- Preferred path: SMTP via PHPMailer --------------------------------

@@ -97,17 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // From = venue (set in send_mail); Reply-To = the sender, so a reply
         // goes to them. One send per recipient.
-        // Subject: "[venue: ]Message from <sender> regarding: <game / poll>".
-        // Game targets name the game; poll targets (owner or voters) use the
-        // poll label + its start time (a poll has no single game name yet).
-        // The venue prefix is added only when a venue name is actually set,
-        // so an unconfigured install doesn't produce a subject like ": ...".
+        // Subject: "Message from <sender> regarding: <game / poll>" — game
+        // targets name the game; poll targets (owner or voters) use the poll
+        // label + its start time (a poll has no single game name yet). The
+        // "<venue>: " prefix is added centrally by send_mail(), like on every
+        // other outgoing email.
         $re = $game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']);
         $subject = t('msg_subject', $senderName, $re);
-        $venue = opt('venue_name');
-        if ($venue !== '') {
-            $subject = $venue . ': ' . $subject;
-        }
         $replyTo = $senderEmail;
         foreach ($recipients as $to) {
             send_mail($to, $subject, $bodyText, $replyTo);

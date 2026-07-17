@@ -47,3 +47,7 @@
 
 /* The interaction glow is hardcoded blue in light's sheet — re-tint it red. */
 .tpl-dark .game-card.active, .tpl-dark .poll-card.active { box-shadow: 0 0 0 3px rgba(224, 82, 72, 0.4); }
+
+/* Delete stays visually distinct from the red accent: the classic DEEP red.
+   (--error remains #ff6b5e for validation messages; only buttons change.) */
+.tpl-dark .btn-danger { background: #c40000; border-color: #c40000; }

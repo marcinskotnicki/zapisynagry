@@ -84,7 +84,7 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('default_start_time',    '10:00'),
     ('default_end_time',      '22:00'),
     ('default_language',      'pl'),   -- must match a file in /languages
-    ('default_template',      'light'),-- must match a dir in /templates
+    ('default_template',      'classic'),-- must match a dir in /templates; classic eases migration from the old app
 
     -- ---- Toggles (stored as "0"/"1", except the two enumerations) -----------
     ('allow_unregistered_add_games', '1'),

@@ -411,7 +411,7 @@ html { scroll-behavior: smooth; }
 /* Left column: buttons stack under the thumbnail (the column was empty air). */
 .game-thumb { display: flex; flex-direction: column; gap: 0.45rem; align-items: center; }
 .game-thumb .game-actions { display: flex; flex-direction: column; gap: 0.3rem; width: 90px; }
-.game-thumb .game-actions .btn { margin-top: 0; text-align: center; }
+.game-thumb .game-actions .btn { margin-top: 0; text-align: center; font-size: 0.75rem; padding: 0.25rem 0.5rem; } /* deliberately small: secondary actions */
 
 /* Rules-knowledge dot next to each player (colour from .rules-good/mid/bad). */
 .p-knows { font-size: 0.9em; margin-left: 0.3rem; vertical-align: middle; cursor: help; } /* big enough to invite the explanatory hover */
