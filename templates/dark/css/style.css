@@ -40,7 +40,7 @@
 }
 .game-card { padding:0; }
 .game-main, .game-thumb { padding:0.75rem; }
-.game-thumb { background: rgba(255,255,255, 0.03); border-top-left-radius: inherit; border-bottom-left-radius: inherit; width: 23%;}
+.game-thumb { background: rgba(255,255,255, 0.03); border-top-left-radius: inherit; border-bottom-left-radius: inherit; width: 23%; min-width:100px;}
 .game-thumb img {width:90%; height:auto; background:none; }
 @media (max-width: 860px) {
     .tpl-dark .game-list { grid-template-columns: 1fr; }
