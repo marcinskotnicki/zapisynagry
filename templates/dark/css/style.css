@@ -16,7 +16,7 @@
     --border:       #333845;
     --text:         #e6e8ee;
     --text-muted:   #9aa1ad;
-    --primary:      #e05248;   /* the dark theme's accent is RED: buttons, links,
+    --primary:      #8e48e0;   /* the dark theme's accent is purple: buttons, links,
                                   start hours, timeline blobs all flow from here */
     --primary-text: #ffffff;   /* white reads better on red than the old near-black */
     --ok:           #4cc77f;
