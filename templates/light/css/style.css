@@ -446,6 +446,7 @@ html { scroll-behavior: smooth; }
 /* Optional name input on the add-table form sits next to the button. */
 .add-table-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .add-table-form input[type="text"] { max-width: 220px; }
+.add-table-form>* {margin-top:0}
 
 /* ---- Admin: users tab additions ------------------------------------------ */
 /* "Blocked" badge next to the role. */
