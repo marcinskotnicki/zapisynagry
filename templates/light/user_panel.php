@@ -105,7 +105,7 @@
                     </select>
                 </div>
             <?php endif; ?>
-            <button type="submit" class="btn btn-small btn-primary"><?= e(t('pref_save')) ?></button>
+            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
         </form>
         <?php endif; ?>
     </div>

@@ -416,5 +416,4 @@ The link expires in one hour.',
     'pref_template'                   => 'Theme',
     'pref_language'                   => 'Language',
     'up_prefs'                        => 'Preferences',
-    'pref_save'                       => 'Save',
 ];

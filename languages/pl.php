@@ -408,5 +408,4 @@ Link wygasa za godzinę.',
     'pref_template'                   => 'Motyw',
     'pref_language'                   => 'Język',
     'up_prefs'                        => 'Preferencje',
-    'pref_save'                       => 'Zapisz',
 ];

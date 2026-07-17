@@ -391,3 +391,9 @@ html { scroll-behavior: smooth; }
 /* Topbar theme/language pickers (guests) */
 .topbar-prefs { display: flex; gap: 0.35rem; align-items: center; margin-left: 0.8rem; }
 .topbar-prefs select { font-size: 0.8rem; padding: 0.15rem 0.25rem; }
+
+/* 1px breathing gap between back-to-back timeline blocks: a border painted in
+   the lane's own background colour (box-sizing keeps widths intact; the poll
+   blocks' dashed border overrides this by specificity, unchanged). Bump to 2px
+   if the gap gets swallowed at odd mobile zoom levels. */
+.tl-game { border-right: 1px solid var(--surface); }
