@@ -80,7 +80,10 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
             log_action('table_rename', 'Table #' . $tblRow['table_number'] . ' -> ' . ($tname !== '' ? $tname : '(none)'));
         }
     }
-    redirect('index.php?day=' . $activeDay);              // PRG
+    // PRG back to the table's anchor (#table-<id>) so a successful save doesn't
+    // scroll the page to the top. $tblId is safe here: it's an int, and if it
+    // was a bad/foreign id the fragment simply matches nothing (harmless).
+    redirect('index.php?day=' . $activeDay . '#table-' . (int)($_POST['table_id'] ?? 0));
 }
 
 // Build the day's tables (with nested games + players, polls, comments).

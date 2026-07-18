@@ -53,7 +53,10 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
 
 <div class="tables">
     <?php foreach ($tables as $tbl): // one block per table on the active day ?>
-        <section class="table-block">
+        <?php // id anchor: the rename edit/cancel links and the post-save redirect
+              // append #table-<id> so the browser jumps back here instead of the
+              // page top (these are full navigations, not AJAX). ?>
+        <section class="table-block" id="table-<?= (int)$tbl['id'] ?>">
             <?php if ((int)$rename_table === (int)$tbl['id']): // this table's inline rename form is open ?>
                 <form method="post" action="index.php?day=<?= (int)$active_day ?>" class="table-rename-form">
                     <?= $csrf ?>
@@ -63,7 +66,7 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
                     <input type="text" name="table_name" value="<?= e($tbl['table_name'] ?? '') ?>"
                            placeholder="<?= e(t('table_name_label')) ?>" maxlength="100">
                     <button type="submit" class="btn btn-small"><?= e(t('save')) ?></button>
-                    <a class="btn btn-small" href="index.php?day=<?= (int)$active_day ?>"><?= e(t('cancel')) ?></a>
+                    <a class="btn btn-small" href="index.php?day=<?= (int)$active_day ?>#table-<?= (int)$tbl['id'] ?>"><?= e(t('cancel')) ?></a>
                 </form>
             <?php else: ?>
                 <h2 class="table-title">
@@ -74,7 +77,7 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
                 </h2>
                 <?php if ($can_edit_names): // tiny corner button -> reload with the inline form open ?>
                     <a class="table-rename-btn" title="<?= e(t('table_rename')) ?>"
-                       href="index.php?day=<?= (int)$active_day ?>&rename_table=<?= (int)$tbl['id'] ?>">&#9998;</a>
+                       href="index.php?day=<?= (int)$active_day ?>&rename_table=<?= (int)$tbl['id'] ?>#table-<?= (int)$tbl['id'] ?>">&#9998;</a>
                 <?php endif; ?>
             <?php endif; ?>
 
