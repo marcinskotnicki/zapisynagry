@@ -39,7 +39,7 @@ a:hover { text-decoration: underline; }
 .topbar-inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 0.1rem 0.5rem;
+    padding: 0.1rem 0.8rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
