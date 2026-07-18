@@ -14,34 +14,7 @@
  *    $thumbs — existing thumbnails, each {id, filename}.
  * ============================================================================= */
 ?>
-<fieldset class="icon-section">
-    <legend><?= e(t('icon_section')) ?></legend>
-    <p class="muted"><?= e(t('icon_hint')) ?></p>
 
-    <?php if (opt('site_icon') !== ''): // an icon is set -> preview + remove ?>
-        <p>
-            <?php // ?v= busts the browser cache after a replacement upload. ?>
-            <img src="icons/favicon-32.png?v=<?= e(opt('site_icon')) ?>" alt="" width="32" height="32">
-            <img src="icons/apple-touch-icon.png?v=<?= e(opt('site_icon')) ?>" alt="" width="64" height="64">
-        </p>
-        <form method="post" action="admin.php?tab=thumbnails" class="inline">
-            <?= $csrf ?>
-            <input type="hidden" name="action" value="icon_delete">
-            <button class="btn btn-small btn-danger"><?= e(t('icon_delete')) ?></button>
-        </form>
-    <?php else: ?>
-        <p class="muted"><?= e(t('icon_none')) ?></p>
-    <?php endif; ?>
-
-    <form method="post" action="admin.php?tab=thumbnails" enctype="multipart/form-data" class="icon-upload">
-        <?= $csrf ?>
-        <input type="hidden" name="action" value="icon_upload">
-        <div class="field">
-            <input type="file" name="icon" accept="image/*" required>
-        </div>
-        <button type="submit" class="btn btn-primary"><?= e(t('icon_upload')) ?></button>
-    </form>
-</fieldset>
 
 <form method="post" action="admin.php?tab=thumbnails" enctype="multipart/form-data" class="thumb-upload">
     <?= $csrf ?>
@@ -69,4 +42,32 @@
         </figure>
     <?php endforeach; ?>
 </div>
+<fieldset class="icon-section">
+<legend><?= e(t('icon_section')) ?></legend>
+<p class="muted"><?= e(t('icon_hint')) ?></p>
+
+<?php if (opt('site_icon') !== ''): // an icon is set -> preview + remove ?>
+<p>
+<?php // ?v= busts the browser cache after a replacement upload. ?>
+<img src="icons/favicon-32.png?v=<?= e(opt('site_icon')) ?>" alt="" width="32" height="32">
+<img src="icons/apple-touch-icon.png?v=<?= e(opt('site_icon')) ?>" alt="" width="64" height="64">
+</p>
+<form method="post" action="admin.php?tab=thumbnails" class="inline">
+<?= $csrf ?>
+<input type="hidden" name="action" value="icon_delete">
+<button class="btn btn-small btn-danger"><?= e(t('icon_delete')) ?></button>
+</form>
+<?php else: ?>
+<p class="muted"><?= e(t('icon_none')) ?></p>
+<?php endif; ?>
+
+<form method="post" action="admin.php?tab=thumbnails" enctype="multipart/form-data" class="icon-upload">
+<?= $csrf ?>
+<input type="hidden" name="action" value="icon_upload">
+<div class="field">
+<input type="file" name="icon" accept="image/*" required>
+</div>
+<button type="submit" class="btn btn-primary"><?= e(t('icon_upload')) ?></button>
+</form>
+</fieldset>
 <?php endif; ?>
