@@ -39,13 +39,13 @@ a:hover { text-decoration: underline; }
 .topbar-inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 0.7rem 1rem;
+    padding: 0.1rem 0.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); }
-.topnav a { margin-left: 1rem; }
+.brand { font-weight: 700; font-size: 0.8rem; color: var(--text); }
+.topnav a { margin-left: 1rem; font-size: 0.8rem; }
 
 /* ---- Content shell -------------------------------------------------------- */
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
