@@ -54,6 +54,7 @@ function game_form_defaults($table, $day) {
         'brings_email'   => current_user()['email'] ?? '',
         'explain_rules'  => 0,
         'add_self'       => 1,
+        'require_email'  => 0,      // per-game email rule (shown only in option mode 2)
         'comment'        => '',
         'thumbnail'      => '',     // manual: predefined path; bgg: image URL
         'bgg_id'         => '',
@@ -83,6 +84,9 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'brings_email'   => trim($_POST['brings_email'] ?? ''),
         'explain_rules'  => min(2, max(0, (int)($_POST['explain_rules'] ?? 0))),  // 0..2
         'add_self'       => isset($_POST['add_self']) ? 1 : 0,
+        // Per-game email rule: only meaningful (and only shown on the form) in
+        // option mode 2, so ignore the checkbox entirely in other modes.
+        'require_email'  => (email_require_mode() === 2 && isset($_POST['require_email'])) ? 1 : 0,
         'comment'        => trim($_POST['comment'] ?? ''),
         'source'         => ($_POST['source'] ?? 'manual') === 'bgg' ? 'bgg' : 'manual',
         'bgg_id'         => (int)($_POST['bgg_id'] ?? 0),
@@ -95,11 +99,13 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $form['start_time'] = event_next_start_time($table['id'], $day['start_time']);
     }
 
-    // Validate (name required; email if the admin requires it; captcha if on).
+    // Validate (name required; email if the admin requires it globally, OR if
+    // the proposer ticked "require email" — demanding it of others means
+    // providing your own; captcha if on).
     $error = null;
     if ($form['name'] === '') {
         $error = t('error_name_required');
-    } elseif (opt_bool('require_email') && $form['brings_email'] === '') {
+    } elseif ((email_require_mode() === 1 || $form['require_email'] === 1) && $form['brings_email'] === '') {
         $error = t('error_email_required');
     } elseif ($form['brings_email'] !== '' && !email_valid($form['brings_email'])) {
         $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
@@ -114,8 +120,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run(
                 'INSERT INTO games
                  (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-                  thumbnail,bgg_id,language,link,brings_name,brings_email,brings_user_id,explain_rules,comment,added_by_user_id)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                  thumbnail,bgg_id,language,link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [
                     $table['id'], $event['id'], $day['id'], $form['name'],
                     $form['length_minutes'], $form['weight'], $form['max_players'], $form['start_time'],
@@ -125,7 +131,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     $form['link'] !== '' ? $form['link'] : null,
                     $form['brings_name'] !== '' ? $form['brings_name'] : null,
                     $form['brings_email'] !== '' ? $form['brings_email'] : null,
-                    $uid, $form['explain_rules'],
+                    $uid, $form['explain_rules'], $form['require_email'],
                     $form['comment'] !== '' ? $form['comment'] : null,
                     $uid,                                                    // added_by = bringer
                 ]

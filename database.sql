@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '2');
+INSERT INTO meta (key, value) VALUES ('schema_version', '3');
 
 
 -- =============================================================================
@@ -94,6 +94,9 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- no accounts (the two toggles above are then irrelevant).
     ('registration_mode',            'registration'),
     ('send_emails',                  '0'),
+    -- require_email: 0 = emails never required, 1 = always required,
+    -- 2 = per-game: the proposer decides via a checkbox when adding a game or
+    --     poll (and must then give their OWN email too).
     ('require_email',                '0'),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
@@ -236,6 +239,7 @@ CREATE TABLE games (
     brings_email     TEXT,                        -- stored, NEVER shown publicly
     brings_user_id   INTEGER,                     -- for "games brought" stats
     explain_rules    INTEGER NOT NULL DEFAULT 0,  -- see code map above
+    require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; per-game email rule (only honoured when option require_email = 2)
     comment          TEXT,
     added_by_user_id INTEGER,                     -- NULL if added while unregistered
     is_archived      INTEGER NOT NULL DEFAULT 0,  -- soft-deleted ("keep archived")
@@ -309,6 +313,7 @@ CREATE TABLE polls (
     comment          TEXT,
     start_time       TEXT NOT NULL,              -- 'HH:MM'
     explain_rules    INTEGER NOT NULL DEFAULT 0,
+    require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; votes need an email (only honoured when option require_email = 2); carried into the resolved game
     add_self         INTEGER NOT NULL DEFAULT 1,
     deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),

@@ -46,6 +46,7 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'start_time'    => $day['start_time'],
         'explain_rules' => 0,
         'add_self'      => 1,
+        'require_email' => 0,           // per-poll email rule (shown only in option mode 2)
         // Voting closes this many hours BEFORE the poll's start; admin default,
         // overridable per poll on the form. 0 = no automatic deadline.
         'deadline_hours' => opt_int('poll_default_deadline_hours'),
@@ -75,6 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $draft['start_time']    = is_valid_time($_POST['start_time'] ?? '') ? $_POST['start_time'] : $draft['start_time'];
     $draft['explain_rules'] = min(2, max(0, (int)($_POST['explain_rules'] ?? 0)));
     $draft['add_self']      = isset($_POST['add_self']) ? 1 : 0;
+    // Per-poll email rule: only meaningful (and only on the form) in mode 2.
+    $draft['require_email'] = (email_require_mode() === 2 && isset($_POST['require_email'])) ? 1 : 0;
     $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
 
     if ($do === 'addgame') {
@@ -95,6 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($do === 'finish') {
         if (empty($draft['games'])) {
             $error = t('poll_need_game');                  // a poll needs at least one candidate
+        } elseif ((int)$draft['require_email'] === 1 && $draft['email'] === '') {
+            // The proposer demands emails from voters -> their own is mandatory.
+            $error = t('error_email_required');
         } elseif ($draft['email'] !== '' && !email_valid($draft['email'])) {
             $error = t('error_email_invalid');             // non-empty but not X@Y.Z-shaped
         } else {
@@ -117,15 +123,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,add_self,deadline)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,add_self,deadline)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
                         $draft['email'] !== '' ? $draft['email'] : null,
                         $u['id'] ?? null,
                         $draft['comment'] !== '' ? $draft['comment'] : null,
-                        $draft['start_time'], $draft['explain_rules'], $draft['add_self'],
+                        $draft['start_time'], $draft['explain_rules'],
+                        (int)$draft['require_email'], $draft['add_self'],
                         $deadline,
                     ]
                 );

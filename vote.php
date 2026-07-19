@@ -63,7 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($form['name'] === '') {
         $error = t('error_signup_name');
-    } elseif (opt_bool('require_email') && $form['email'] === '') {
+    } elseif (email_required_for_poll($poll) && $form['email'] === '') {
+        // Required globally (mode 1) or because THIS poll's proposer demands it.
         $error = t('error_email_required');
     } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
         $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
@@ -95,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 tpl_render('header', ['page_title' => t('vote_title')]);
 tpl_render('vote_form', [
     'cand'  => $cand,
+    'poll'  => $poll,      // for the per-poll email-required marker
     'form'  => $form,
     'error' => $error,
     'csrf'  => csrf_field(),

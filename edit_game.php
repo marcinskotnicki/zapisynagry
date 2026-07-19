@@ -41,6 +41,13 @@ if (!$event || (int)$event['is_archived'] === 1 || (int)$game['is_archived'] ===
 $decision = verify_decision($game['added_by_user_id'], $game['brings_email']);
 if ($decision === 'deny') { redirect('index.php?day=' . $activeDay); }
 
+// GET = the edit button was clicked: leave a trace right away, so even an
+// attempt that's abandoned (or fails the challenge later) shows in the logs.
+// The success path still adds its own game_edit row on save.
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    log_action('game_edit_attempt', $game['name']);
+}
+
 // "Unlocked" = no challenge needed (owner/admin) OR already passed this session.
 $unlocked = ($decision === 'allow') || !empty($_SESSION['edit_ok'][$gameId]);
 $error = null;
@@ -65,9 +72,18 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     if (!is_valid_time($start)) $start = $game['start_time'];      // keep old time if invalid
     $name = trim($_POST['name'] ?? '');
 
+    // Per-game email rule (option mode 2 only): the checkbox is on the form and
+    // can also be toggled while editing. In other modes keep the stored value
+    // untouched (the form doesn't show the box, so a save must not wipe it).
+    $reqEmail = email_require_mode() === 2
+        ? (isset($_POST['require_email']) ? 1 : 0)
+        : (int)($game['require_email'] ?? 0);
+
     if ($name === '') {
         $error = t('error_name_required');
-    } elseif (opt_bool('require_email') && trim($_POST['brings_email'] ?? '') === '') {
+    } elseif ((email_require_mode() === 1 || $reqEmail === 1) && trim($_POST['brings_email'] ?? '') === '') {
+        // Globally required, or the proposer demands emails for this game — in
+        // which case their own email is mandatory too.
         $error = t('error_email_required');
     } elseif (trim($_POST['brings_email'] ?? '') !== '' && !email_valid(trim($_POST['brings_email'] ?? ''))) {
         $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
@@ -78,7 +94,7 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         $thumbnail = (int)$game['bgg_id'] ? $game['thumbnail'] : trim($_POST['thumbnail'] ?? '');
         db_run(
             'UPDATE games SET name=?, length_minutes=?, weight=?, max_players=?, start_time=?,
-                    thumbnail=?, language=?, link=?, brings_name=?, brings_email=?, explain_rules=?, comment=? WHERE id=?',
+                    thumbnail=?, language=?, link=?, brings_name=?, brings_email=?, explain_rules=?, require_email=?, comment=? WHERE id=?',
             [
                 $name,
                 max(0, (int)($_POST['length_minutes'] ?? 0)),
@@ -91,6 +107,7 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
                 trim($_POST['brings_name'] ?? '') ?: null,
                 trim($_POST['brings_email'] ?? '') ?: null,
                 min(2, max(0, (int)($_POST['explain_rules'] ?? 0))),
+                $reqEmail,
                 trim($_POST['comment'] ?? '') ?: null,
                 $gameId,
             ]

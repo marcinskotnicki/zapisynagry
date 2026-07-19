@@ -70,6 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// GET = the remove-player button was clicked: leave a trace right away, so
+// even an attempt that's abandoned (or fails the challenge later) shows in
+// the logs. The success path still adds its own player_delete row.
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    log_action('player_delete_attempt', $player['name'] . ' <- ' . $game['name']);
+}
 // GET (or failed POST): for email_code, (re)issue a code now so it's waiting
 // in the user's inbox when the confirm screen renders.
 if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
