@@ -74,6 +74,15 @@
             </label>
         </div>
 
+        <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="require_email" value="1" <?= (int)($draft['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('f_require_email')) ?>
+                </label>
+            </div>
+        <?php endif; ?>
+
         <h3><?= e(t('poll_candidates')) ?></h3>
         <?php if (empty($draft['games'])): ?>
             <p class="muted"><?= e(t('poll_no_candidates')) ?></p>

@@ -130,8 +130,18 @@ $toggle = function($key) {
 
         <?php
         $toggle('send_emails');       // master switch for notifications
-        $toggle('require_email');
         ?>
+
+        <div class="field">
+            <label for="require_email"><?= e(t('opt_require_email')) ?></label>
+            <select id="require_email" name="require_email">
+                <?php foreach ([0, 1, 2] as $m): // 0=never, 1=always, 2=proposer decides per game ?>
+                    <option value="<?= $m ?>"<?= opt_int('require_email') === $m ? ' selected' : '' ?>>
+                        <?= e(t('opt_require_email_' . $m)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
         <div class="field">
             <label for="verification_method"><?= e(t('opt_verification_method')) ?></label>

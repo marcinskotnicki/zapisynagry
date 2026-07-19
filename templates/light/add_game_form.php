@@ -130,13 +130,24 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                 <input type="text" id="brings_name" name="brings_name" value="<?= e($game['brings_name']) ?>">
             </div>
             <div class="field">
-                <label for="brings_email"><?= e(t('f_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+                <?php // '*' only in global mode 1; in mode 2 the requirement is the
+                      // proposer's own choice (the checkbox right below). ?>
+                <label for="brings_email"><?= e(t('f_email')) ?><?= email_require_mode() === 1 ? ' *' : '' ?></label>
                 <input type="email" id="brings_email" name="brings_email" value="<?= e($game['brings_email']) ?>">
                 <?php if (opt('msg_email_field') !== ''): ?>
                     <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php if (email_require_mode() === 2): // per-game rule: proposer decides (their own email then required too) ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="require_email" value="1" <?= (int)($game['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('f_require_email')) ?>
+                </label>
+            </div>
+        <?php endif; ?>
 
         <div class="field">
             <label for="explain_rules"><?= e(t('f_explain')) ?></label>

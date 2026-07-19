@@ -105,6 +105,47 @@ function email_valid($email) {
         && preg_match('/@[^@]+\.[^@]+$/', $email) === 1;
 }
 
+/* ---- Email requirement modes --------------------------------------------- *
+ * The 'require_email' option is a three-way integer code:
+ *   0 = emails never required (fields stay optional everywhere)
+ *   1 = emails always required (adding games and signing up)
+ *   2 = per-game: the proposer decides via a checkbox when creating a game or
+ *       poll; when they tick it, signups for THAT game/poll need an email —
+ *       and so does the proposer themself (they're demanding it of others).
+ * The per-row flag lives in games.require_email / polls.require_email and is
+ * only honoured in mode 2 (so flipping the option off also disables old flags).
+ * --------------------------------------------------------------------------- */
+
+/**
+ * The configured email requirement mode as an int code (see map above).
+ * @return int  0, 1 or 2.
+ */
+function email_require_mode() {
+    return opt_int('require_email');
+}
+
+/**
+ * Does signing up for THIS game need an email? True in global mode 1, or in
+ * per-game mode 2 when the game's own flag is set.
+ * @param array $game  A games row (needs the require_email column).
+ * @return bool
+ */
+function email_required_for_game($game) {
+    $mode = email_require_mode();
+    return $mode === 1 || ($mode === 2 && (int)($game['require_email'] ?? 0) === 1);
+}
+
+/**
+ * Does voting in THIS poll need an email? Same rule as games, read from the
+ * polls row (the flag also carries into the game the poll resolves to).
+ * @param array $poll  A polls row (needs the require_email column).
+ * @return bool
+ */
+function email_required_for_poll($poll) {
+    $mode = email_require_mode();
+    return $mode === 1 || ($mode === 2 && (int)($poll['require_email'] ?? 0) === 1);
+}
+
 /**
  * The current (non-archived) event row, or null if none exists yet.
  *

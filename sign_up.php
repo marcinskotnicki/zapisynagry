@@ -1,57 +1,82 @@
 <?php
 /* =============================================================================
- *  templates/light/sign_up.php — sign-up form. Presentation only.
+ *  sign_up.php — sign up for a game (or its reserve list).
  * -----------------------------------------------------------------------------
- *  Narrow card: name, optional email (starred when the admin requires it), and
- *  a "do you know the rules" select. The heading + note flip to the reserve
- *  wording when the game is already full. The optional admin "assigning a
- *  player" message shows at the top.
- *
- *  RENDER VARS:
- *    $game  — the game row being joined.
- *    $form  — prefilled values ['name','email','knows'].
- *    $full  — true if the game is full (this signup becomes a reserve).
- *    $error — message above the form, or null.
- *    $csrf  — hidden CSRF field.
+ *  GET renders the signup form; POST records the signup. Whether it's CONFIRMED
+ *  or RESERVE is decided at submit time from the current free seats, so two
+ *  people racing for the last seat resolve sanely (the one whose write lands
+ *  while a seat is free is confirmed; the other becomes reserve).
+ *  On a confirmed signup the game's bringer gets a notification email.
  * ============================================================================= */
-?>
-<div class="card card-narrow">
-    <h1><?= e($full ? t('signup_reserve') : t('signup_title')) ?></h1>
-    <p class="muted"><?= e($game['name']) ?></p>
+require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/events.php';
+require __DIR__ . '/inc/notify.php';
 
-    <?php if (opt('msg_assigning_player') !== ''): // optional admin-configured note ?>
-        <p class="event-msg"><?= e(opt('msg_assigning_player')) ?></p>
-    <?php endif; ?>
+// The game can arrive via query (link) or body (form post).
+$gameId = (int)($_GET['game'] ?? $_POST['game'] ?? 0);
+$game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null;
+if (!$game) { http_response_code(404); exit('Unknown game.'); }
 
-    <?php if ($full): // tell them they'll join the reserve list ?>
-        <p class="msg muted"><?= e(t('signup_full_note')) ?></p>
-    <?php endif; ?>
+$event = db_one('SELECT * FROM events WHERE id = ?', [$game['event_id']]);
+$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$activeDay = (int)($day['day_index'] ?? 1);   // for redirecting back to the right day tab
 
-    <?php if (!empty($error)): ?>
-        <p class="msg msg-error"><?= e($error) ?></p>
-    <?php endif; ?>
+// Signups only on the live event, and only if permitted by the access rules.
+if (!$event || (int)$event['is_archived'] === 1 || !can_signup()) {
+    redirect('index.php');
+}
 
-    <form method="post" action="sign_up.php?game=<?= (int)$game['id'] ?>">
-        <?= $csrf ?>
-        <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
+// Prefill name/email for a logged-in user; default "knows rules" to 0 ("yes").
+$u = current_user();
+$form = [
+    'name'  => $_POST['name']  ?? ($u['display_name'] ?? ''),
+    'email' => $_POST['email'] ?? ($u['email'] ?? ''),
+    'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
+];
+$error = null;
 
-        <label for="name"><?= e(t('signup_name')) ?></label>
-        <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $form['name']  = trim((string)$form['name']);
+    $form['email'] = trim((string)$form['email']);
+    $form['knows'] = min(2, max(0, (int)$form['knows']));   // clamp to the 0..2 codes
 
-        <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
-        <?php if (opt('msg_email_field') !== ''): ?>
-            <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
-        <?php endif; ?>
+    if ($form['name'] === '') {
+        $error = t('error_signup_name');
+    } elseif (email_required_for_game($game) && $form['email'] === '') {
+        // Required globally (mode 1) or because THIS game's proposer demands it.
+        $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
+    } else {
+        // Confirmed unless the game is already full RIGHT NOW (re-checked here,
+        // not from a value computed earlier, so the race resolves correctly).
+        $isReserve = game_is_full($gameId, $game['max_players']) ? 1 : 0;
+        db_run(
+            'INSERT INTO players (game_id, name, email, knows_rules, is_reserve, user_id)
+             VALUES (?,?,?,?,?,?)',
+            [
+                $gameId, $form['name'],
+                $form['email'] !== '' ? $form['email'] : null,   // store NULL, not ''
+                $form['knows'], $isReserve,
+                $u['id'] ?? null,                                // link to account if logged in
+            ]
+        );
+        log_action('signup', $form['name'] . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : ''));
+        notify_signup($game, $form['name']);                     // no-op unless notifications on
+        redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to the card
+    }
+}
 
-        <label for="knows"><?= e(t('signup_knows')) ?></label>
-        <select id="knows" name="knows">
-            <?php foreach ([0 => 'knows_yes', 1 => 'knows_somewhat', 2 => 'knows_no'] as $code => $k): ?>
-                <option value="<?= $code ?>"<?= (int)$form['knows'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
-            <?php endforeach; ?>
-        </select>
+// For the form: is the game full (so we can label the button "join reserve")?
+$full = game_is_full($gameId, $game['max_players']);
 
-        <button type="submit" class="btn btn-primary"><?= e(t('signup_submit')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
-    </form>
-</div>
+tpl_render('header', ['page_title' => t('signup_title')]);
+tpl_render('sign_up', [
+    'game'  => $game,
+    'form'  => $form,
+    'full'  => $full,
+    'error' => $error,
+    'csrf'  => csrf_field(),
+]);
+tpl_render('footer');

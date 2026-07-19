@@ -24,11 +24,11 @@ $OPTION_VALUES = [
     'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
-    'verification_method', 'table_names_mode',
+    'verification_method', 'table_names_mode', 'require_email',
 ];
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
-    'send_emails', 'require_email', 'allow_polls', 'allow_discussions',
+    'send_emails', 'allow_polls', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
 ];
@@ -62,6 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'table_names_mode':
                 // Whitelist of the table-name permission modes.
                 if (!in_array($val, ['off', 'admin', 'add_any', 'any'], true)) continue 2;
+                break;
+            case 'require_email':
+                // Integer codes: 0 = never, 1 = always, 2 = proposer decides per game.
+                if (!in_array($val, ['0', '1', '2'], true)) continue 2;
                 break;
         }
         opt_set($key, $val);

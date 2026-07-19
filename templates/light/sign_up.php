@@ -38,7 +38,7 @@
         <label for="name"><?= e(t('signup_name')) ?></label>
         <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
 
-        <label for="email"><?= e(t('signup_email')) ?><?= opt_bool('require_email') ? ' *' : '' ?></label>
+        <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
         <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
         <?php if (opt('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt('msg_email_field')) ?></p>

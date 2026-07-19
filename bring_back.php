@@ -1,39 +1,67 @@
 <?php
 /* =============================================================================
- *  templates/light/bring_back.php — restore an archived game. Presentation.
+ *  bring_back.php — restore a soft-deleted ("keep archived") game.
  * -----------------------------------------------------------------------------
- *  Name (+ optional email) of whoever is restoring the game; on submit they
- *  become its new owner/bringer. No verification challenge — anyone may restore.
- *
- *  RENDER VARS:
- *    $game  — the archived game being restored.
- *    $form  — prefilled ['name','email'] (from the logged-in user, if any).
- *    $error — message above the form, or null.
- *    $csrf  — hidden CSRF field.
+ *  Anyone may do this (no verification challenge): they supply a name (+ email),
+ *  the game is reactivated (is_archived=0), and they become its new owner /
+ *  bringer. Players still attached to the game are notified it's back.
  * ============================================================================= */
-?>
-<div class="card card-narrow">
-    <h1><?= e(t('bringback_title')) ?></h1>
-    <p><?= e(t('bringback_intro', $game['name'])) ?></p>
+require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/events.php';
+require __DIR__ . '/inc/notify.php';
 
-    <?php if (!empty($error)): ?>
-        <p class="msg msg-error"><?= e($error) ?></p>
-    <?php endif; ?>
+$gameId = (int)($_GET['game'] ?? $_POST['game'] ?? 0);
+$game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null;
+if (!$game) { redirect('index.php'); }
 
-    <form method="post" action="bring_back.php?game=<?= (int)$game['id'] ?>">
-        <?= $csrf ?>
-        <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
+$event = db_one('SELECT * FROM events WHERE id = ?', [$game['event_id']]);
+$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$activeDay = (int)($day['day_index'] ?? 1);
 
-        <label for="name"><?= e(t('bringback_name')) ?></label>
-        <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+// Only meaningful for an archived game on the live event.
+if (!$event || (int)$event['is_archived'] === 1 || (int)$game['is_archived'] !== 1) {
+    redirect('index.php?day=' . $activeDay);
+}
 
-        <label for="email"><?= e(t('bringback_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
-        <?php if (opt('msg_email_field') !== ''): ?>
-            <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
-        <?php endif; ?>
+// Prefill from the logged-in user, if any (a guest types their own details).
+$u = current_user();
+$form = [
+    'name'  => $_POST['name']  ?? ($u['display_name'] ?? ''),
+    'email' => $_POST['email'] ?? ($u['email'] ?? ''),
+];
+$error = null;
 
-        <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
-    </form>
-</div>
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $form['name']  = trim((string)$form['name']);
+    $form['email'] = trim((string)$form['email']);
+
+    if ($form['name'] === '') {
+        $error = t('error_name_required');
+    } elseif (email_required_for_game($game) && $form['email'] === '') {
+        // Restoring re-owns the game, so the bringer rule applies: required
+        // globally (mode 1) or when this game's flag demands emails (mode 2).
+        $error = t('error_email_required');
+    } elseif ($form['email'] !== '' && !email_valid($form['email'])) {
+        $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
+    } else {
+        // Reactivate AND re-own: the restorer becomes bringer + added_by owner.
+        db_run(
+            'UPDATE games SET is_archived = 0, brings_name = ?, brings_email = ?, brings_user_id = ?, added_by_user_id = ? WHERE id = ?',
+            [$form['name'], $form['email'] !== '' ? $form['email'] : null,
+             $u['id'] ?? null, $u['id'] ?? null, $gameId]
+        );
+        log_action('game_bringback', $game['name'] . ' -> ' . $form['name']);
+        notify_game_undeleted($game);   // tell players still attached it's back
+        redirect('index.php?day=' . $activeDay . '#game-' . $gameId);
+    }
+}
+
+tpl_render('header', ['page_title' => t('bringback_title')]);
+tpl_render('bring_back', [
+    'game'  => $game,
+    'form'  => $form,
+    'error' => $error,
+    'csrf'  => csrf_field(),
+]);
+tpl_render('footer');
