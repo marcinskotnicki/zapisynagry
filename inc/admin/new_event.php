@@ -71,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $s = trim($inStarts[$i] ?? '');
             $e = trim($inEnds[$i]   ?? '');
             $days[] = ['date' => $d, 'start' => $s, 'end' => $e];   // keep for re-render on error
+            // NB: end EARLIER than start is deliberately allowed — it means the
+            // day runs past midnight (18:00 -> 03:00); day_rel_min() gives all
+            // ordering/plotting that interpretation. So: no end>start check.
             if (!is_valid_date($d) || !is_valid_time($s) || !is_valid_time($e)) {
                 $ok = false;
             }

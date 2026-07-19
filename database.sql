@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '3');
+INSERT INTO meta (key, value) VALUES ('schema_version', '4');
 
 
 -- =============================================================================
@@ -98,6 +98,10 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- 2 = per-game: the proposer decides via a checkbox when adding a game or
     --     poll (and must then give their OWN email too).
     ('require_email',                '0'),
+    -- overnight_grace_hours: times up to N hours BEFORE a day's opening hour
+    -- still count as that same day (early setup); anything earlier flips to
+    -- "after midnight / next morning" on overnight days. See day_rel_min().
+    ('overnight_grace_hours',        '1'),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
     --   'registered'  = must be logged in (no code/email)

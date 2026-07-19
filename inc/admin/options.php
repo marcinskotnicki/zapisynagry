@@ -19,6 +19,7 @@
 $OPTION_VALUES = [
     'venue_name', 'email_address', 'email_login', 'email_password',
     'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
+    'overnight_grace_hours',
     'captcha_site_key', 'captcha_secret_key', 'timeline_extension',
     'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',
     'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
@@ -44,6 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'poll_default_deadline_hours':
             case 'login_days':
                 $val = (string)max(0, (int)$val);          // non-negative integers only
+                break;
+            case 'overnight_grace_hours':
+                // 0 = pivot exactly at opening; 12 is far more than any sane
+                // setup window and keeps the pivot from wrapping a full day.
+                $val = (string)min(12, max(0, (int)$val));
                 break;
             case 'default_language':
                 if (!lang_exists($val)) continue 2;        // ignore an unknown code (skip this field)

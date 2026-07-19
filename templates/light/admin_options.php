@@ -60,6 +60,7 @@ $toggle = function($key) {
         $text('captcha_site_key');
         $text('captcha_secret_key');
         $text('timeline_extension', 'number');   // hours added past the day's end
+        $text('overnight_grace_hours', 'number'); // early-setup window before opening (see day_rel_min)
         $textarea('game_languages');             // one dropdown choice per line
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
         $text('login_days', 'number');                    // persistent-login lifetime; 0 = session only

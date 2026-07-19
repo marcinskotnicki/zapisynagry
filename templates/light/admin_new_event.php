@@ -97,6 +97,9 @@ $dayLabel = function($i) {
             </fieldset>
         <?php endforeach; ?>
 
+        <?php // End earlier than start = the day runs past midnight (day_rel_min). ?>
+        <p class="field-note"><?= e(t('newevent_overnight_hint')) ?></p>
+
         <button type="submit" class="btn btn-primary"><?= e(t('newevent_create')) ?></button>
     </form>
 <?php endif; ?>

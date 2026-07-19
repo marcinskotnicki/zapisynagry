@@ -64,6 +64,10 @@ function event_day($eventId, $dayIndex) {
  */
 function event_tables_full($dayId) {
     require_once __DIR__ . '/polls.php';   // poll_full() (require_once: safe if already loaded)
+    // The day's opening hour: needed so items sort on the DAY'S clock (a game
+    // at 00:30 on an 18:00->03:00 day comes after the evening, not before it).
+    $dayRow      = db_one('SELECT start_time FROM event_days WHERE id = ?', [$dayId]);
+    $dayStartMin = hhmm_to_min($dayRow['start_time'] ?? '00:00');
     $tables = db_all('SELECT * FROM game_tables WHERE day_id = ? ORDER BY table_number', [$dayId]);
     foreach ($tables as &$tbl) {           // &$tbl: we mutate the row in place to add ['items']
         $items = [];
@@ -92,9 +96,11 @@ function event_tables_full($dayId) {
             $items[] = ['type' => 'poll', 'start' => $p['start_time'], 'data' => poll_full($p)];
         }
 
-        // Interleave games + polls by start time (string 'HH:MM' sorts correctly).
-        usort($items, function ($a, $b) {
-            return strcmp($a['start'], $b['start']);
+        // Interleave games + polls by start time ON THE DAY'S CLOCK: times
+        // before the opening hour count as next-morning (see day_rel_min), so
+        // after-midnight games land at the end of the evening, where they belong.
+        usort($items, function ($a, $b) use ($dayStartMin) {
+            return day_rel_min($a['start'], $dayStartMin) <=> day_rel_min($b['start'], $dayStartMin);
         });
 
         $tbl['items'] = $items;
@@ -122,18 +128,32 @@ function event_table_count($dayId) {
 
 /**
  * Default start time for a new game on a table: the day's start if the table is
- * empty, otherwise the latest game's start + its length. Returns 'HH:MM'.
- * Lets the add-game form pre-fill a sensible "next slot" so games line up.
+ * empty, otherwise the latest game END on the day's clock (day_rel_min, so
+ * after-midnight games count as latest, and a long earlier game that ends last
+ * wins over a later short one). Returns 'HH:MM', wrapped past midnight so the
+ * form's time input can display it. Lets the add-game form pre-fill a sensible
+ * "next slot" so games line up.
  *
  * @param int    $tableId
  * @param string $dayStart  'HH:MM' fallback for an empty table.
  * @return string
  */
 function event_next_start_time($tableId, $dayStart) {
-    $last = db_one('SELECT start_time, length_minutes FROM games
-                    WHERE table_id = ? ORDER BY start_time DESC, id DESC LIMIT 1', [$tableId]);
-    if (!$last) return $dayStart;
-    return min_to_hhmm(hhmm_to_min($last['start_time']) + (int)$last['length_minutes']);
+    // Latest game ON THE DAY'S CLOCK: a plain ORDER BY start_time would put a
+    // '00:30' after-midnight game first, not last, so pick the max via
+    // day_rel_min in PHP instead (tables hold a handful of games at most).
+    $dayStartMin = hhmm_to_min($dayStart);
+    $rows = db_all('SELECT start_time, length_minutes FROM games WHERE table_id = ?', [$tableId]);
+    if (!$rows) return $dayStart;
+    $lastEnd = 0;
+    foreach ($rows as $r) {
+        $end = day_rel_min($r['start_time'], $dayStartMin) + (int)$r['length_minutes'];
+        if ($end > $lastEnd) $lastEnd = $end;
+    }
+    // Wrap past midnight for display ('25:30' -> '01:30'): the form's
+    // type="time" input only accepts 00:00-23:59, and with day_rel_min doing
+    // the ordering everywhere, the wrapped form is unambiguous on this day.
+    return min_to_hhmm($lastEnd % 1440);
 }
 
 /* ---- Permissions --------------------------------------------------------- *
@@ -212,6 +232,31 @@ function table_names_can_edit() {
 function hhmm_to_min($s) {
     if (!preg_match('/^(\d{1,2}):(\d{2})$/', (string)$s, $m)) return 0;
     return (int)$m[1] * 60 + (int)$m[2];
+}
+
+/**
+ * 'HH:MM' -> minutes on the DAY'S OWN clock. The pivot sits GRACE hours before
+ * the day's opening hour (option 'overnight_grace_hours', default 1): times at
+ * or after the pivot belong to this day — including a bit BEFORE opening, so
+ * someone can schedule a 17:30 setup slot for an 18:00 day — while anything
+ * earlier than the pivot is taken to mean the next morning (+24h).
+ *
+ * This is what lets a single event day run past midnight (18:00 -> 03:00):
+ * a game entered at '00:30' on such a day is half past midnight AFTER the
+ * evening games, not half past midnight before them. On a normal day
+ * (10:00 -> 22:00) every sensible time is >= the pivot, so this is a no-op.
+ * All ordering/plotting goes through this; raw 'HH:MM' strings are what's
+ * stored and displayed. With a missing option (pre-update DB) grace is 0,
+ * which is exactly the old pivot-at-opening behaviour.
+ *
+ * @param string $hhmm         A stored 'HH:MM' time.
+ * @param int    $dayStartMin  The day's opening hour, in minutes (hhmm_to_min).
+ * @return int                 Minutes; >= the pivot for in-day times.
+ */
+function day_rel_min($hhmm, $dayStartMin) {
+    $pivot = $dayStartMin - opt_int('overnight_grace_hours') * 60;
+    $m = hhmm_to_min($hhmm);
+    return $m < $pivot ? $m + 1440 : $m;
 }
 
 /**
@@ -337,12 +382,18 @@ function knows_rules_label($code) {
  *  where a block = ['type'('game'|'poll'),'id','name','start_time','cur','max','full','left','width'].
  * --------------------------------------------------------------------------- */
 function timeline_build($dayRow, $tables, $extHours) {
-    // The visible window: day start .. day end + extension hours.
-    $startMin = hhmm_to_min($dayRow['start_time']);
-    $endMin   = hhmm_to_min($dayRow['end_time']) + max(0, (int)$extHours) * 60;
+    // The visible window: day start .. day end + extension hours, on the DAY'S
+    // OWN clock (day_rel_min): an end of '03:00' on an 18:00 day means 3 a.m.
+    // the next morning (27:00), so a single day can run past midnight.
+    $dayStartMin = hhmm_to_min($dayRow['start_time']);
+    $startMin = $dayStartMin;
+    $endMin   = day_rel_min($dayRow['end_time'], $dayStartMin) + max(0, (int)$extHours) * 60;
 
     // First pass: collect drawable items per table, and grow $endMin to fit any
     // item that runs past the nominal window (the spec's "just extend it").
+    // $startMin symmetrically shrinks to fit pre-opening items (the grace
+    // window lets e.g. a 17:30 setup slot exist on an 18:00 day — it must plot
+    // on-canvas, so the window's left edge follows the earliest item).
     $hasGames  = false;
     $tableData = [];
     foreach ($tables as $tbl) {
@@ -353,9 +404,10 @@ function timeline_build($dayRow, $tables, $extHours) {
                 // winning game will run, so they get a flat DEFAULT of 2 hours —
                 // roughly the average game — purely for display.
                 $p  = $it['data'];
-                $ps = hhmm_to_min($p['start_time']);
+                $ps = day_rel_min($p['start_time'], $dayStartMin);
                 $pe = $ps + 120;                           // the 2h display default
-                if ($pe > $endMin) $endMin = $pe;          // stretch to fit, like games
+                if ($pe > $endMin)   $endMin   = $pe;      // stretch to fit, like games
+                if ($ps < $startMin) $startMin = $ps;      // pre-opening (grace) item
                 $games[] = [
                     'type' => 'poll',
                     'id' => (int)$p['id'], 'name' => t('poll_label'), 'start_time' => $p['start_time'],
@@ -367,9 +419,10 @@ function timeline_build($dayRow, $tables, $extHours) {
             if ($it['type'] !== 'game') continue;
             $g  = $it['data'];
             if ((int)$g['is_archived'] === 1) continue;    // soft-deleted games are hidden here
-            $gs = hhmm_to_min($g['start_time']);
+            $gs = day_rel_min($g['start_time'], $dayStartMin);
             $ge = $gs + max(1, (int)$g['length_minutes']); // ensure non-zero width
-            if ($ge > $endMin) $endMin = $ge;              // stretch to fit overruns
+            if ($ge > $endMin)   $endMin   = $ge;          // stretch to fit overruns
+            if ($gs < $startMin) $startMin = $gs;          // pre-opening (grace) item
             // "current players" = confirmed only (reserves don't occupy a seat).
             $cur = 0;
             foreach ($g['players'] as $p) { if ((int)$p['is_reserve'] === 0) $cur++; }
