@@ -237,7 +237,7 @@ input, select, textarea {
 /* ---- Add-game gate & form ------------------------------------------------- */
 .gate-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
 .btn-big { padding: 0.85rem 1.2rem; font-size: 1.05rem; }
-.field-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
 @media (max-width: 620px) { .field-row { grid-template-columns: 1fr 1fr; } }
 .game-form textarea { width: 100%; }
 

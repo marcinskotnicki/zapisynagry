@@ -260,6 +260,45 @@ function day_rel_min($hhmm, $dayStartMin) {
 }
 
 /**
+ * Is a proposed start time inside the day's own opening..closing window?
+ *
+ * Both ends are read on the day's clock (day_rel_min), so this is correct for
+ * overnight days too: on 18:00 -> 03:00, a 01:00 start is inside (it maps past
+ * midnight to 25:00, which is <= the 03:00 = 27:00 close) while 05:00 is not.
+ * The window edges are the ACTUAL opening/closing hours — the overnight grace
+ * (early-setup) window does NOT widen them, so with this rule ON a pre-opening
+ * setup slot is rejected, which is the point of the rule.
+ *
+ * Only meaningful when option 'allow_start_outside_hours' is 0; callers guard
+ * on that. Returns true when the option is on (nothing to enforce).
+ *
+ * @param string $hhmm     Proposed 'HH:MM' start.
+ * @param array  $dayRow   The event_days row (needs start_time / end_time).
+ * @return bool
+ */
+function start_within_event_hours($hhmm, $dayRow) {
+    if (opt_bool('allow_start_outside_hours')) return true;   // rule off -> always fine
+    $startMin = hhmm_to_min($dayRow['start_time']);
+    $endMin   = day_rel_min($dayRow['end_time'], $startMin);
+    $t        = day_rel_min($hhmm, $startMin);
+    return $t >= $startMin && $t <= $endMin;
+}
+
+/**
+ * The min/max attribute pair for a start-time <input>, or null when the option
+ * lets starts fall anywhere (no clamp). On an overnight day max < min, which
+ * HTML time inputs read as a wrap-around range (valid = >= min OR <= max) —
+ * exactly the overnight window we want.
+ *
+ * @param array $dayRow  The event_days row (start_time / end_time), or null.
+ * @return array|null    ['min' => 'HH:MM', 'max' => 'HH:MM'] or null.
+ */
+function start_time_bounds($dayRow) {
+    if (!$dayRow || opt_bool('allow_start_outside_hours')) return null;
+    return ['min' => $dayRow['start_time'], 'max' => $dayRow['end_time']];
+}
+
+/**
  * Minutes since midnight -> 'HH:MM'. Negative input is floored to 0.
  * NOTE: does NOT wrap past 24h (90 min past midnight -> '25:00'); the timeline
  * handles its own modulo-24 display where it needs wrapped hour labels.

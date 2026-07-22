@@ -49,7 +49,13 @@
             </div>
             <div class="field">
                 <label for="p_start"><?= e(t('poll_start')) ?></label>
-                <input type="time" id="p_start" name="start_time" value="<?= e($draft['start_time']) ?>">
+                <?php // Same event-hours clamp as games (the poll resolves into a game at this time). ?>
+                <?php $pBounds = start_time_bounds(db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']])); ?>
+                <input type="time" id="p_start" name="start_time" value="<?= e($draft['start_time']) ?>"
+                    <?= $pBounds ? 'min="' . e($pBounds['min']) . '" max="' . e($pBounds['max']) . '"' : '' ?>>
+                <?php if ($pBounds): ?>
+                    <p class="field-note"><?= e(t('f_start_range', $pBounds['min'], $pBounds['max'])) ?></p>
+                <?php endif; ?>
             </div>
         </div>
 

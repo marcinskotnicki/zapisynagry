@@ -150,3 +150,9 @@
 }
 
 .tpl-classic .p-signedby { color: #666; }
+
+.content>.card{
+    max-width:99%;
+    width:1200px;
+    margin:0px auto;
+}

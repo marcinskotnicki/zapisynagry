@@ -105,6 +105,10 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = null;
     if ($form['name'] === '') {
         $error = t('error_name_required');
+    } elseif (!start_within_event_hours($form['start_time'], $day)) {
+        // Rule on + start outside the day's window: reject (matches the input's
+        // own min/max, so this only bites a bypassed/forged client).
+        $error = t('error_start_outside_hours');
     } elseif ((email_require_mode() === 1 || $form['require_email'] === 1) && $form['brings_email'] === '') {
         $error = t('error_email_required');
     } elseif ($form['brings_email'] !== '' && !email_valid($form['brings_email'])) {

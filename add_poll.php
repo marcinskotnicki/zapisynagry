@@ -98,6 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($do === 'finish') {
         if (empty($draft['games'])) {
             $error = t('poll_need_game');                  // a poll needs at least one candidate
+        } elseif (!start_within_event_hours($draft['start_time'], $day)) {
+            $error = t('error_start_outside_hours');       // rule on + start outside the day's window
         } elseif ((int)$draft['require_email'] === 1 && $draft['email'] === '') {
             // The proposer demands emails from voters -> their own is mandatory.
             $error = t('error_email_required');

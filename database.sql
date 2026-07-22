@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '4');
+INSERT INTO meta (key, value) VALUES ('schema_version', '5');
 
 
 -- =============================================================================
@@ -102,6 +102,10 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- still count as that same day (early setup); anything earlier flips to
     -- "after midnight / next morning" on overnight days. See day_rel_min().
     ('overnight_grace_hours',        '1'),
+    -- allow_start_outside_hours: 1 = a game/poll may start at any time (current
+    -- behaviour); 0 = the start-time input is clamped to the day's own hours
+    -- (min = opening, max = closing) and the same is enforced server-side.
+    ('allow_start_outside_hours',    '1'),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
     --   'registered'  = must be logged in (no code/email)

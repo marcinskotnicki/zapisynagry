@@ -81,6 +81,8 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
 
     if ($name === '') {
         $error = t('error_name_required');
+    } elseif (!start_within_event_hours($start, $day)) {
+        $error = t('error_start_outside_hours');   // rule on + start outside the day's window
     } elseif ((email_require_mode() === 1 || $reqEmail === 1) && trim($_POST['brings_email'] ?? '') === '') {
         // Globally required, or the proposer demands emails for this game — in
         // which case their own email is mandatory too.

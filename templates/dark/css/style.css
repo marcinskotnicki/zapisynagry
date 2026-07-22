@@ -37,3 +37,7 @@
 .tpl-dark .btn-danger { background: #c40000; border-color: #c40000; }
 
 .tpl-dark .players .signup-btn { display: block; width: fit-content; margin-left: auto; }
+
+input, select, textarea{
+    background:rgba(0,0,0,0.4);
+}

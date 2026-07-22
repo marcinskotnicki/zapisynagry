@@ -68,7 +68,14 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
             <div class="field">
                 <label for="start_time"><?= e(t('f_start')) ?></label>
-                <input type="time" id="start_time" name="start_time" value="<?= e($game['start_time']) ?>">
+                <?php // When the admin forbids starts outside event hours, clamp the
+                      // input to the day's own window (bounds are null otherwise). ?>
+                <?php $bounds = start_time_bounds(db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']])); ?>
+                <input type="time" id="start_time" name="start_time" value="<?= e($game['start_time']) ?>"
+                    <?= $bounds ? 'min="' . e($bounds['min']) . '" max="' . e($bounds['max']) . '"' : '' ?>>
+                <?php if ($bounds): ?>
+                    <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
+                <?php endif; ?>
             </div>
         </div>
 
