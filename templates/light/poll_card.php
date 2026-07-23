@@ -22,12 +22,12 @@ $canVote = !$readonly && can_signup();
         <?php if (!empty($poll['proposer_name'])): ?>
             <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong>
                 <?php if (!$readonly && messaging_allowed() && !empty($poll['proposer_email'])): // mail the proposer ?>
-                    <a class="msg-icon" href="message.php?poll_owner=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                    <a class="msg-icon" href="message.php?poll_owner=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_owner')) ?>" aria-label="<?= e(t('msgbtn_poll_owner')) ?>">&#9993;</a>
                 <?php endif; ?>
             </span>
         <?php endif; ?>
         <?php if (!$readonly && messaging_allowed()): // mail everyone who voted ?>
-            <a class="msg-icon" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+            <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
         <?php endif; ?>
         <?php
         // "End voting now": the proposer's own account, or an admin. Accounts
@@ -38,6 +38,11 @@ $canVote = !$readonly && can_signup();
         ?>
         <?php if ($canEnd): ?>
             <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
+        <?php endif; ?>
+        <?php // Editing follows the usual button rule (owner / admin / verified
+              // guest), unlike ending which is account-only. ?>
+        <?php if (!$readonly && verify_can_show_buttons($poll['proposer_user_id'])): ?>
+            <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
         <?php endif; ?>
     </div>
     <?php if (!empty($poll['deadline'])): // when voting closes (auto-resolves after) ?>

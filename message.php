@@ -86,8 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bodyText = trim($_POST['body'] ?? '');
     if ($bodyText === '') {
         $error = t('msg_empty');
+    } elseif (!text_has_content($bodyText)) {
+        $error = t('error_name_meaningless');
+    } elseif (text_too_long($bodyText, TEXT_BODY_MAX)) {
+        $error = t('error_too_long', TEXT_BODY_MAX);
     } elseif (!$me && $senderName === '') {
         $error = t('error_signup_name');
+    } elseif (!$me && (!text_has_content($senderName) || text_too_long($senderName, TEXT_NAME_MAX))) {
+        $error = t('error_name_meaningless');
     } elseif (!$me && $senderEmail === '') {
         $error = t('error_email_required');           // guests always need a reply path
     } elseif (!$me && !email_valid($senderEmail)) {

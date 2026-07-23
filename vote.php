@@ -32,9 +32,12 @@ if (!$poll || !$event || (int)$event['is_archived'] === 1 || !can_signup()) {
 
 $u = current_user();
 $uid = $u['id'] ?? null;
+// Guests get their last-used name/email prefilled so voting for several games
+// isn't several retypes (logged-in users use their account details).
+$guest = guest_identity();
 $form = [
-    'name'  => $_POST['name']  ?? ($u['display_name'] ?? ''),
-    'email' => $_POST['email'] ?? ($u['email'] ?? ''),
+    'name'  => $_POST['name']  ?? ($u['display_name'] ?? $guest['name']),
+    'email' => $_POST['email'] ?? ($u['email'] ?? $guest['email']),
     'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
 ];
 $error = null;
@@ -83,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              $form['email'] !== '' ? $form['email'] : null, $form['knows'], $uid]
         );
         log_action('poll_vote', $form['name'] . ' -> ' . $cand['name']);
+        guest_identity_remember($form['name'], $form['email']);   // prefill next time
 
         // Did this vote push the candidate over its threshold? If so it's now a game.
         $newGameId = poll_check_resolve($cand['poll_id']);

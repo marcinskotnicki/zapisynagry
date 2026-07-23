@@ -34,6 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($form['name'] === '') {
         $error = t('error_signup_name');
+    } elseif (!text_has_content($form['name']) || text_too_long($form['name'], TEXT_NAME_MAX)) {
+        $error = t('error_name_meaningless');
     } elseif ($form['email'] === '') {
         $error = t('error_email_required');
     } elseif (!email_valid($form['email'])) {

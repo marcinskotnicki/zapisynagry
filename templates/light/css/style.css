@@ -337,6 +337,10 @@ html { scroll-behavior: smooth; }
 .msg-icon { text-decoration: none; color: var(--primary); font-size: 1rem; line-height: 1; padding: 0 0.25rem; }
 .msg-icon:hover { color: var(--primary-hover, var(--primary)); filter: brightness(0.9); }
 .game-name-row .msg-icon { margin-left: 0.25rem; }
+/* .msg-icon-all marks the envelope that mails EVERYONE (a whole game or poll),
+   as opposed to a single player/proposer. Same look as .msg-icon for now —
+   style it here to tell the two apart at a glance. */
+.msg-icon-all { /* intentionally empty: styling hook */ }
 
 /* ---- Gate button hierarchy -------------------------------------------------- */
 .btn-secondary { background: #7d92ac; color: #fff; }   /* toned-down cousin of --primary */

@@ -17,6 +17,9 @@
  *  never lost regardless of which button was clicked.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+// Starting/continuing a NEW poll draft supersedes any parked live-edit target,
+// so add_poll_game.php can't mistake one flow for the other.
+unset($_SESSION['poll_live_edit']);
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
 require __DIR__ . '/inc/notify.php';

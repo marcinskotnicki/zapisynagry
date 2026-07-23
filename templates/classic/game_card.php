@@ -62,12 +62,12 @@
                     <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
                     <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
                     <?php if ($canMsg): ?>
-                        <a class="msg-icon" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                        <a class="msg-icon msg-icon-all" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msgbtn_game_all')) ?>" aria-label="<?= e(t('msgbtn_game_all')) ?>">&#9993;</a>
                     <?php endif; ?>
                 </div>
             <?php elseif ($canMsg): ?>
                 <div class="gc-tabs">
-                    <a class="msg-icon" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                    <a class="msg-icon msg-icon-all" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msgbtn_game_all')) ?>" aria-label="<?= e(t('msgbtn_game_all')) ?>">&#9993;</a>
                 </div>
             <?php endif; ?>
 
@@ -138,7 +138,7 @@
                             <?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
                         </span>
                         <?php if ($canMsg && !empty($p['email'])): ?>
-                            <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                            <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                         <?php endif; ?>
                         <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
                             <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('resign')) ?></a>
@@ -158,7 +158,7 @@
                 <div class="gc-slot gc-reserve">
                     <span><strong><?= e($p['name']) ?></strong> <?= e(t('reserve_tag')) ?></span>
                     <?php if ($canMsg && !empty($p['email'])): ?>
-                        <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msg_envelope')) ?>">&#9993;</a>
+                        <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>
                     <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
                         <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('resign')) ?></a>

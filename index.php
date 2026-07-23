@@ -53,6 +53,9 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
             // Optional table name: only honoured when the option-gated
             // permission allows the CURRENT visitor to set one ('' -> NULL).
             $tname = table_names_can_set() ? trim($_POST['table_name'] ?? '') : '';
+            // Junk ("'", "---") or oversize labels are dropped: the table is
+            // still created, just without a name.
+            if ($tname !== '' && (!text_has_content($tname) || text_too_long($tname, TEXT_NAME_MAX))) $tname = '';
             db_run('INSERT INTO game_tables (event_id, day_id, table_number, table_name) VALUES (?,?,?,?)',
                    [$event['id'], $dayRow['id'], $num, $tname !== '' ? $tname : null]);
             log_action('table_add', 'Table #' . $num . ' (day ' . $activeDay . ')');
@@ -75,6 +78,8 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
             : null;
         if ($tblRow) {
             $tname = trim($_POST['table_name'] ?? '');
+            // Same rule as adding: junk/oversize is treated as "no name".
+            if ($tname !== '' && (!text_has_content($tname) || text_too_long($tname, TEXT_NAME_MAX))) $tname = '';
             db_run('UPDATE game_tables SET table_name = ? WHERE id = ?',
                    [$tname !== '' ? $tname : null, $tblId]);
             log_action('table_rename', 'Table #' . $tblRow['table_number'] . ' -> ' . ($tname !== '' ? $tname : '(none)'));

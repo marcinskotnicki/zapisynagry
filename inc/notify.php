@@ -128,3 +128,38 @@ function notify_poll_concluded($emails, $gameName) {
         send_mail($to, t('ntf_poll_subject', $gameName), t('ntf_poll_body', $gameName));
     }
 }
+
+/**
+ * Everyone who has voted in a poll, by email. Blanks and duplicates removed —
+ * guests who voted without an email simply can't be reached.
+ *
+ * @param int $pollId
+ * @return string[]
+ */
+function notify_poll_voter_emails($pollId) {
+    $rows = db_all('SELECT DISTINCT email FROM poll_votes WHERE poll_id = ? AND email IS NOT NULL AND email <> ""',
+                   [$pollId]);
+    return array_column($rows, 'email');
+}
+
+/**
+ * Tell current voters that the poll they're in has changed — a candidate was
+ * added or removed, or the start time moved. $what is an already-translated
+ * one-line description of the change.
+ *
+ * Called AFTER the change is written, but note the caller must gather the
+ * emails BEFORE a removal if the removed candidate's voters should hear about
+ * it (deleting a candidate cascades its votes away).
+ *
+ * @param array    $poll   The polls row.
+ * @param string   $what   Human-readable description of what changed.
+ * @param string[] $emails Recipients (defaults to the poll's current voters).
+ * @return void
+ */
+function notify_poll_changed($poll, $what, $emails = null) {
+    if (!notify_enabled()) return;
+    if ($emails === null) $emails = notify_poll_voter_emails((int)$poll['id']);
+    foreach (array_unique(array_filter($emails)) as $to) {
+        send_mail($to, t('ntf_pollchg_subject'), t('ntf_pollchg_body', $what));
+    }
+}

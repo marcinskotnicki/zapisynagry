@@ -105,6 +105,14 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = null;
     if ($form['name'] === '') {
         $error = t('error_name_required');
+    } elseif (!text_has_content($form['name'])) {
+        $error = t('error_name_meaningless');       // e.g. just "'" or "---"
+    } elseif (text_too_long($form['name'], TEXT_NAME_MAX)) {
+        $error = t('error_too_long', TEXT_NAME_MAX);
+    } elseif ($form['brings_name'] !== '' && !text_has_content($form['brings_name'])) {
+        $error = t('error_name_meaningless');
+    } elseif (text_too_long($form['comment'], TEXT_BODY_MAX)) {
+        $error = t('error_too_long', TEXT_BODY_MAX);
     } elseif (!start_within_event_hours($form['start_time'], $day)) {
         // Rule on + start outside the day's window: reject (matches the input's
         // own min/max, so this only bites a bypassed/forged client).

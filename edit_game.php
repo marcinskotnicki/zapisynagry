@@ -81,6 +81,12 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
 
     if ($name === '') {
         $error = t('error_name_required');
+    } elseif (!text_has_content($name)) {
+        $error = t('error_name_meaningless');
+    } elseif (text_too_long($name, TEXT_NAME_MAX)) {
+        $error = t('error_too_long', TEXT_NAME_MAX);
+    } elseif (text_too_long(trim($_POST['comment'] ?? ''), TEXT_BODY_MAX)) {
+        $error = t('error_too_long', TEXT_BODY_MAX);
     } elseif (!start_within_event_hours($start, $day)) {
         $error = t('error_start_outside_hours');   // rule on + start outside the day's window
     } elseif ((email_require_mode() === 1 || $reqEmail === 1) && trim($_POST['brings_email'] ?? '') === '') {

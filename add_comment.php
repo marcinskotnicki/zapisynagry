@@ -30,7 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comment = trim($_POST['comment'] ?? '');
 
     // Silently ignore empty submissions (no error page for a blank comment).
-    if ($name !== '' && $comment !== '') {
+    // Junk (nothing but punctuation) and oversized text are dropped the same
+    // way: this endpoint redirects rather than rendering, so there's nowhere to
+    // show an error, and a silently-skipped junk comment is the right outcome.
+    if ($name !== '' && $comment !== ''
+        && text_has_content($name) && text_has_content($comment)
+        && !text_too_long($name, TEXT_NAME_MAX)
+        && !text_too_long($comment, TEXT_BODY_MAX)) {
         db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
                [$gameId, $name, $u['id'] ?? null, $comment]);
         log_action('comment_add', $game['name']);

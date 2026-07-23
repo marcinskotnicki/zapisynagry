@@ -29,8 +29,8 @@ if (!$event || (int)$event['is_archived'] === 1 || !can_signup()) {
 // Prefill name/email for a logged-in user; default "knows rules" to 0 ("yes").
 $u = current_user();
 $form = [
-    'name'  => $_POST['name']  ?? ($u['display_name'] ?? ''),
-    'email' => $_POST['email'] ?? ($u['email'] ?? ''),
+    'name'  => $_POST['name']  ?? ($u['display_name'] ?? guest_identity()['name']),
+    'email' => $_POST['email'] ?? ($u['email'] ?? guest_identity()['email']),
     'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
 ];
 $error = null;
@@ -43,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($form['name'] === '') {
         $error = t('error_signup_name');
+    } elseif (!text_has_content($form['name'])) {
+        $error = t('error_name_meaningless');
+    } elseif (text_too_long($form['name'], TEXT_NAME_MAX)) {
+        $error = t('error_too_long', TEXT_NAME_MAX);
     } elseif (email_required_for_game($game) && $form['email'] === '') {
         // Required globally (mode 1) or because THIS game's proposer demands it.
         $error = t('error_email_required');
@@ -63,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         );
         log_action('signup', $form['name'] . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : ''));
+        guest_identity_remember($form['name'], $form['email']);   // prefill next time
         notify_signup($game, $form['name']);                     // no-op unless notifications on
         redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to the card
     }

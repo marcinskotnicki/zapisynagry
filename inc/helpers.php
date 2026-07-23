@@ -105,6 +105,109 @@ function email_valid($email) {
         && preg_match('/@[^@]+\.[^@]+$/', $email) === 1;
 }
 
+/* ---- Free-text input sanity ---------------------------------------------- *
+ * Two cheap guards applied to user-supplied names and comments. Neither is a
+ * security measure — injection is already impossible because every query binds
+ * its parameters (inc/db.php) — they're CONTENT-QUALITY checks that keep junk
+ * out of the listings.
+ * --------------------------------------------------------------------------- */
+
+/** Longest accepted single-line name (game, player, table, display name). */
+const TEXT_NAME_MAX = 200;
+/** Longest accepted free-text block (comments, messages). */
+const TEXT_BODY_MAX = 2000;
+
+/**
+ * Does this text contain any actual content — at least one letter or digit?
+ *
+ * Rejects entries that are nothing but punctuation or symbols ("'", ".", "---",
+ * "???") while accepting everything genuine. Deliberately Unicode-aware (\p{L}
+ * with the /u flag) so Polish diacritics and any other alphabet count as
+ * letters, and digits pass so numeric titles like "1830" or "7 Wonders" work.
+ *
+ * NOTE this only asks whether SOME content exists — an apostrophe INSIDE a word
+ * is perfectly fine, which matters for real titles and names like "Tzolk'in",
+ * "King's Dilemma" or "O'Brien".
+ *
+ * @param string $s  Already-trimmed text.
+ * @return bool
+ */
+function text_has_content($s) {
+    return preg_match('/[\p{L}\p{N}]/u', (string)$s) === 1;
+}
+
+/**
+ * Is this text longer than $max characters? Counts CHARACTERS, not bytes, so a
+ * name with Polish diacritics isn't penalised for its encoding.
+ *
+ * @param string $s
+ * @param int    $max  Usually TEXT_NAME_MAX or TEXT_BODY_MAX.
+ * @return bool
+ */
+function text_too_long($s, $max) {
+    return mb_strlen((string)$s, 'UTF-8') > $max;
+}
+
+/* ---- Guest identity prefill ---------------------------------------------- *
+ * Guests have no account, so every signup / vote form asks for their name and
+ * email again. We remember the last values they typed in a plain cookie and
+ * prefill the fields, which is the difference between voting for four games
+ * being four retypes and four clicks.
+ *
+ * Deliberately NOT a login: it's a convenience prefill only, never used to
+ * authorise anything, so a forged cookie gains nothing an attacker couldn't
+ * type by hand anyway. Not HttpOnly for the same reason (no secret in it), and
+ * the values are length-capped before use.
+ * --------------------------------------------------------------------------- */
+
+/** Cookie name holding the guest's last-used name/email pair (JSON). */
+const GUEST_ID_COOKIE = 'guest_id';
+
+/**
+ * Remember a guest's name/email for next time. No-op for logged-in users (they
+ * already have an identity) and when there's nothing worth storing.
+ *
+ * @param string $name
+ * @param string $email
+ * @return void
+ */
+function guest_identity_remember($name, $email) {
+    if (is_logged_in()) return;
+    $name  = trim((string)$name);
+    $email = trim((string)$email);
+    if ($name === '' && $email === '') return;
+    $payload = json_encode([
+        'n' => mb_substr($name,  0, TEXT_NAME_MAX, 'UTF-8'),
+        'e' => mb_substr($email, 0, TEXT_NAME_MAX, 'UTF-8'),
+    ], JSON_UNESCAPED_UNICODE);
+    // 90 days: long enough to span a season of events, short enough to expire.
+    @setcookie(GUEST_ID_COOKIE, $payload, [
+        'expires'  => time() + 90 * 86400,
+        'path'     => '/',
+        'samesite' => 'Lax',
+        'secure'   => !empty($_SERVER['HTTPS']),
+    ]);
+}
+
+/**
+ * The remembered guest name/email, as ['name' => ..., 'email' => ...]. Both are
+ * '' when nothing is stored, the cookie is corrupt, or a user is logged in.
+ *
+ * @return array{name:string,email:string}
+ */
+function guest_identity() {
+    $blank = ['name' => '', 'email' => ''];
+    if (is_logged_in()) return $blank;
+    $raw = $_COOKIE[GUEST_ID_COOKIE] ?? '';
+    if ($raw === '' || strlen($raw) > 1000) return $blank;   // absurd -> ignore
+    $data = json_decode($raw, true);
+    if (!is_array($data)) return $blank;                     // corrupt/forged -> ignore
+    return [
+        'name'  => mb_substr(trim((string)($data['n'] ?? '')), 0, TEXT_NAME_MAX, 'UTF-8'),
+        'email' => mb_substr(trim((string)($data['e'] ?? '')), 0, TEXT_NAME_MAX, 'UTF-8'),
+    ];
+}
+
 /* ---- Email requirement modes --------------------------------------------- *
  * The 'require_email' option is a three-way integer code:
  *   0 = emails never required (fields stay optional everywhere)

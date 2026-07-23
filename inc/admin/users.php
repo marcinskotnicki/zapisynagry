@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = t('users_email_invalid');
         } elseif (db_one('SELECT id FROM users WHERE email = ?', [$email])) {
             $flash = t('users_email_taken');     // email is the login: must be unique
-        } elseif ($name === '') {
+        } elseif ($name === '' || !text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) {
             $flash = t('users_name_required');
         } elseif (strlen($pass) < 6) {
             $flash = t('users_password_short');
