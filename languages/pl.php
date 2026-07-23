@@ -75,6 +75,12 @@ return [
     'opt_header_button_style_icon' => 'Tylko ikony',
     'opt_header_button_style_both' => 'Ikony i tekst',
     'opt_show_venue_name'          => 'Pokaż nazwę lokalu w nagłówku',
+    'opt_captcha_version'          => 'Wersja reCAPTCHA',
+    'opt_captcha_version_v2'       => 'v2 — pole „Nie jestem robotem”',
+    'opt_captcha_version_v3'       => 'v3 — niewidoczna, oparta na punktacji',
+    'opt_captcha_version_note'     => 'Musi odpowiadać typowi klucza utworzonego w konsoli reCAPTCHA. Typy kluczy nie są zamienne.',
+    'opt_captcha_v3_threshold'     => 'Próg punktacji v3',
+    'opt_captcha_v3_threshold_note'=> 'Zgłoszenia z niższym wynikiem są odrzucane (0.1-1.0, domyślnie 0.5). Używane tylko przy v3.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',

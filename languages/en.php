@@ -83,6 +83,12 @@ return [
     'opt_header_button_style_icon' => 'Icons only',
     'opt_header_button_style_both' => 'Icons and text',
     'opt_show_venue_name'          => 'Show the venue name in the header',
+    'opt_captcha_version'          => 'reCAPTCHA version',
+    'opt_captcha_version_v2'       => 'v2 — "I\'m not a robot" checkbox',
+    'opt_captcha_version_v3'       => 'v3 — invisible, score-based',
+    'opt_captcha_version_note'     => 'Must match the key type you created in the reCAPTCHA console. Key types are not interchangeable.',
+    'opt_captcha_v3_threshold'     => 'v3 score threshold',
+    'opt_captcha_v3_threshold_note'=> 'Submissions scoring below this are rejected (0.1-1.0, default 0.5). Only used with v3.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

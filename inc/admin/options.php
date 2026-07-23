@@ -14,13 +14,19 @@
  *  the same way as text fields).
  * ============================================================================= */
 
+// The tab renders captcha settings (version select), so it needs the captcha
+// helpers. Pages load inc/captcha.php themselves; admin.php doesn't, hence the
+// require_once here — it's this tab's own dependency.
+require_once __DIR__ . '/../captcha.php';
+
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
 $OPTION_VALUES = [
     'venue_name', 'email_address', 'email_login', 'email_password',
     'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
     'overnight_grace_hours',
-    'captcha_site_key', 'captcha_secret_key', 'timeline_extension',
+    'captcha_site_key', 'captcha_secret_key', 'captcha_version', 'captcha_v3_threshold',
+    'timeline_extension',
     'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',
     'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
@@ -77,6 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'header_button_style':
                 // How the top-bar nav renders: text only / icon only / both.
                 if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
+                break;
+            case 'captcha_version':
+                // Which reCAPTCHA the keys belong to (types aren't interchangeable).
+                if (!in_array($val, ['v2', 'v3'], true)) continue 2;
+                break;
+            case 'captcha_v3_threshold':
+                // Score cutoff 0.1-1.0; anything outside that falls back to 0.5.
+                $f = (float)str_replace(',', '.', $val);      // tolerate a comma decimal
+                if ($f <= 0 || $f > 1) $f = 0.5;
+                $val = rtrim(rtrim(number_format($f, 2, '.', ''), '0'), '.');
                 break;
         }
         opt_set($key, $val);

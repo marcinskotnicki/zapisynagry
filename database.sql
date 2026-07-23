@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '7');
+INSERT INTO meta (key, value) VALUES ('schema_version', '8');
 
 
 -- =============================================================================
@@ -64,6 +64,15 @@ INSERT INTO options (key, value) VALUES
     ('bgg_api_code',          ''),     -- kept for forward-compat; xmlapi2 is public
     ('captcha_site_key',      ''),     -- reCAPTCHA site key (optional)
     ('captcha_secret_key',    ''),     -- reCAPTCHA secret key (optional)
+    -- captcha_version: which reCAPTCHA the keys above belong to —
+    --   'v2' = "I'm not a robot" checkbox (a visible challenge)
+    --   'v3' = invisible, score-based (needs JS; rejects below the threshold)
+    -- Key types are NOT interchangeable: a v3 key in v2 mode gives Google's
+    -- "Invalid key type" error, and vice versa.
+    ('captcha_version',       'v2'),
+    -- captcha_v3_threshold: minimum v3 score (0.0-1.0) treated as human.
+    -- Google's usual starting point is 0.5; raise it to be stricter.
+    ('captcha_v3_threshold',  '0.5'),
     ('timeline_extension',    '3'),    -- hours added past the day's end on timeline
     ('msg_below_event',       ''),     -- optional custom text under the event name
     ('msg_adding_game',       ''),     -- optional custom text on the add-game screen

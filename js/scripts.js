@@ -9,6 +9,8 @@
  *    1. New-event date cascade — pick the first day's date and the rest fill in
  *       as consecutive days.
  *    2. Copy-to-clipboard buttons (archive links).
+ *    3. Hash highlight for in-page anchors.
+ *    4. reCAPTCHA v3 token minting on form submit (invisible captcha mode).
  *  This file grows in the front-end phase (modals, add-game flow, etc.).
  * ========================================================================== */
 (function () {
@@ -18,6 +20,7 @@
         initDateCascade();
         initCopyButtons();
         initHashHighlight();
+        initRecaptchaV3();
     });
 
     /* ---- 1. Date cascade --------------------------------------------------- */
@@ -83,5 +86,46 @@
         }
         window.addEventListener('hashchange', apply);   // timeline / in-page clicks
         apply();                                        // arriving via a redirect anchor
+    }
+
+    /* ---- 4. reCAPTCHA v3 token -------------------------------------------- *
+     * v3 is invisible and score-based: there's no widget to tick, so the page
+     * has to ask Google for a token itself. Tokens expire after about two
+     * minutes, so we mint one at SUBMIT time rather than on page load — a user
+     * who spends a while filling the form would otherwise send a stale token.
+     *
+     * The hidden input is rendered by captcha_html() (PHP) and carries the site
+     * key + action as data attributes, so no key is hardcoded here.
+     *
+     * If Google's script didn't load (blocked, offline), we let the submit go
+     * through with an empty token: the server rejects it and shows the normal
+     * captcha error, which is clearer than silently freezing the form.
+     * --------------------------------------------------------------------- */
+    function initRecaptchaV3() {
+        var field = document.querySelector('input.recaptcha-v3-token');
+        if (!field) return;                       // not in v3 mode on this page
+        var form = field.form;
+        if (!form) return;
+
+        var siteKey = field.getAttribute('data-sitekey') || '';
+        var action  = field.getAttribute('data-action') || 'submit';
+        var minting = false;                      // guards the re-submit below
+
+        form.addEventListener('submit', function (ev) {
+            if (minting) return;                  // our own re-submit: let it pass
+            if (typeof grecaptcha === 'undefined' || !siteKey) return;  // fail open to the server
+
+            ev.preventDefault();
+            minting = true;
+            grecaptcha.ready(function () {
+                grecaptcha.execute(siteKey, { action: action }).then(function (token) {
+                    field.value = token;
+                    form.submit();                // native submit; listener short-circuits
+                })['catch'](function () {
+                    field.value = '';             // let the server reject it
+                    form.submit();
+                });
+            });
+        });
     }
 })();

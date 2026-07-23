@@ -59,6 +59,25 @@ $toggle = function($key) {
         $text('bgg_api_code');
         $text('captcha_site_key');
         $text('captcha_secret_key');
+        ?>
+        <div class="field">
+            <label for="captcha_version"><?= e(t('opt_captcha_version')) ?></label>
+            <select id="captcha_version" name="captcha_version">
+                <?php foreach (['v2', 'v3'] as $v): // must match the key type you created ?>
+                    <option value="<?= e($v) ?>"<?= captcha_version() === $v ? ' selected' : '' ?>>
+                        <?= e(t('opt_captcha_version_' . $v)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_captcha_version_note')) ?></p>
+        </div>
+        <div class="field">
+            <label for="captcha_v3_threshold"><?= e(t('opt_captcha_v3_threshold')) ?></label>
+            <input type="number" id="captcha_v3_threshold" name="captcha_v3_threshold"
+                   min="0.1" max="1" step="0.1" value="<?= e(opt('captcha_v3_threshold')) ?>">
+            <p class="field-note"><?= e(t('opt_captcha_v3_threshold_note')) ?></p>
+        </div>
+        <?php
         $text('timeline_extension', 'number');   // hours added past the day's end
         $text('overnight_grace_hours', 'number'); // early-setup window before opening (see day_rel_min)
         $toggle('allow_start_outside_hours');     // off -> clamp game/poll start to the day's hours
