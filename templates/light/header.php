@@ -7,8 +7,13 @@
  *
  *  Reads request state through read-only helpers only — t() (copy), e()
  *  (escaping), is_logged_in()/is_admin() (which nav links to show),
- *  tpl_css_url() (the active theme's stylesheet), opt() (venue name) — and
- *  contains no business logic or writes.
+ *  current_page() (to hide the link for the page you're on), nav_link() (the
+ *  icon/text style option), tpl_css_url() (the active theme's stylesheet),
+ *  opt() (venue name) — and contains no business logic or writes.
+ *
+ *  NAV: a Home link shows on every page except index; the link for the current
+ *  page is omitted. Guest theme/language pickers live in the FOOTER now, not
+ *  here (logged-in users set those in the user panel).
  *
  *  RENDER VARS:
  *    $page_title (optional) — the <title> prefix; defaults to the app name.
@@ -52,47 +57,28 @@ $page_title = $page_title ?? t('app_name');
     <div class="topbar-inner">
         <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
         <nav class="topnav">
-            <?php if (is_admin()): // admins get the panel link ?>
-                <a href="admin.php"><?= e(t('admin')) ?></a>
+            <?php
+            // Hide the link for the page you're already on, and show a Home link
+            // on the panel pages (but not on index itself). $here is the current
+            // script; nav_link() applies the icon/text style option.
+            $here = current_page();
+            if ($here !== 'index.php') {
+                echo nav_link('index.php', 'home', t('nav_home'));
+            }
+            ?>
+            <?php if (is_admin() && $here !== 'admin.php'): // admins get the panel link (not on the panel) ?>
+                <?= nav_link('admin.php', 'admin', t('admin')) ?>
             <?php endif; ?>
-            <?php if (is_logged_in()): // logged in: panel + logout ?>
-                <a href="user.php"><?= e(t('user_panel')) ?></a>
-                <a href="logout.php"><?= e(t('logout')) ?></a>
+            <?php if (is_logged_in()): // logged in: panel (unless on it) + logout ?>
+                <?php if ($here !== 'user.php'): ?>
+                    <?= nav_link('user.php', 'user', t('user_panel')) ?>
+                <?php endif; ?>
+                <?= nav_link('logout.php', 'logout', t('logout')) ?>
             <?php elseif (opt('registration_mode') !== 'guest_only'): // guest-only mode hides login ?>
-                <a href="login.php"><?= e(t('login')) ?></a>
-                <a href="register.php"><?= e(t('register')) ?></a>
+                <?= nav_link('login.php', 'login', t('login')) ?>
+                <?= nav_link('register.php', 'register', t('register')) ?>
             <?php endif; ?>
         </nav>
-        <?php
-        // Guest pickers: logged-in users change these in the user panel instead,
-        // so the dropdowns render only for guests — and only for the pref(s) the
-        // admin enabled (allow_guest_template / allow_guest_language). Selects
-        // auto-submit; the <noscript> button covers JS-free browsers. 'back'
-        // returns the visitor to the page they were on.
-        $showTplPick  = !is_logged_in() && tpl_switch_allowed()  && count(tpl_available())  > 1;
-        $showLangPick = !is_logged_in() && lang_switch_allowed() && count(lang_available()) > 1;
-        ?>
-        <?php if ($showTplPick || $showLangPick): ?>
-            <form class="topbar-prefs" method="post" action="prefs.php">
-                <?= csrf_field() ?>
-                <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>">
-                <?php if ($showTplPick): ?>
-                    <select name="template" title="<?= e(t('pref_template')) ?>" onchange="this.form.submit()">
-                        <?php foreach (tpl_available() as $tn): ?>
-                            <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php endif; ?>
-                <?php if ($showLangPick): ?>
-                    <select name="lang" title="<?= e(t('pref_language')) ?>" onchange="this.form.submit()">
-                        <?php foreach (lang_available() as $lc): ?>
-                            <option value="<?= e($lc) ?>"<?= $lc === ($GLOBALS['LANG_CODE'] ?? '') ? ' selected' : '' ?>><?= e(strtoupper($lc)) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php endif; ?>
-                <noscript><button type="submit" class="btn btn-small">OK</button></noscript>
-            </form>
-        <?php endif; ?>
     </div>
 </header>
 <?php // <main> is full-width; .content is the centred, width-capped column.

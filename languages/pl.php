@@ -27,6 +27,7 @@ return [
     'login_failed'        => 'Błędny e-mail lub hasło.',
     'forgot_password'     => 'Nie pamiętasz hasła?',
     'user_panel'          => 'Panel użytkownika',
+    'nav_home'            => 'Strona główna',
 
     // ---- Admin: shell + tabs ------------------------------------------------
     'admin'               => 'Administracja',
@@ -69,6 +70,10 @@ return [
     'opt_default_end_time'    => 'Domyślna godzina zakończenia',
     'opt_default_language'    => 'Domyślny język',
     'opt_default_template'    => 'Domyślny szablon',
+    'opt_header_button_style'      => 'Przyciski w nagłówku',
+    'opt_header_button_style_text' => 'Tylko tekst',
+    'opt_header_button_style_icon' => 'Tylko ikony',
+    'opt_header_button_style_both' => 'Ikony i tekst',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',

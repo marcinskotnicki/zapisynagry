@@ -171,3 +171,48 @@ function tpl_set_cookie($name) {
         setcookie('template', $name, time() + 31536000, '/');   // 365 days
     }
 }
+
+/**
+ * The current top-level page's script name, e.g. 'index.php' or 'admin.php'.
+ * Used by the header to hide the nav link for the page you're already on.
+ * @return string
+ */
+function current_page() {
+    return basename($_SERVER['SCRIPT_NAME'] ?? '');
+}
+
+/**
+ * Render one top-bar nav link, honouring the 'header_button_style' option
+ * ('text' | 'icon' | 'both'). The icon is a small HTML entity (glyph) kept in
+ * a central map here so all themes share it; unknown keys fall back to text so
+ * a link never renders empty.
+ *
+ * @param string $href   Target, e.g. 'admin.php'.
+ * @param string $key    Nav key: home|admin|user|logout|login|register.
+ * @param string $label  Already-translated visible text.
+ * @return string        HTML <a> element.
+ */
+function nav_link($href, $key, $label) {
+    // Glyphs chosen to render without an icon font (broad OS/browser coverage).
+    static $icons = [
+        'home'     => "\u{1F3E0}",  // house
+        'admin'    => "\u{2699}",   // gear
+        'user'     => "\u{1F464}",  // bust in silhouette
+        'logout'   => "\u{21AA}",   // rightwards arrow with hook
+        'login'    => "\u{1F511}",  // key
+        'register' => "\u{270D}",   // writing hand
+    ];
+    $style = opt('header_button_style');
+    $icon  = $icons[$key] ?? '';
+    if ($icon === '' || $style === 'text') {
+        $inner = e($label);
+    } elseif ($style === 'icon') {
+        // Icon-only: keep the text as an accessible label / tooltip.
+        $inner = '<span class="nav-ic" aria-hidden="true">' . $icon . '</span>';
+        return '<a href="' . e($href) . '" class="nav-icononly" title="' . e($label)
+             . '" aria-label="' . e($label) . '">' . $inner . '</a>';
+    } else { // 'both'
+        $inner = '<span class="nav-ic" aria-hidden="true">' . $icon . '</span> ' . e($label);
+    }
+    return '<a href="' . e($href) . '">' . $inner . '</a>';
+}

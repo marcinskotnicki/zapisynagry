@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '5');
+INSERT INTO meta (key, value) VALUES ('schema_version', '6');
 
 
 -- =============================================================================
@@ -106,6 +106,9 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- behaviour); 0 = the start-time input is clamped to the day's own hours
     -- (min = opening, max = closing) and the same is enforced server-side.
     ('allow_start_outside_hours',    '1'),
+    -- header_button_style: how the top-bar nav links render —
+    --   'text' = text only (current), 'icon' = icon only, 'both' = icon + text.
+    ('header_button_style',          'text'),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
     --   'registered'  = must be logged in (no code/email)

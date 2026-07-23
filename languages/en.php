@@ -35,6 +35,7 @@ return [
     'login_failed'        => 'Wrong email or password.',
     'forgot_password'     => 'Forgot your password?',
     'user_panel'          => 'User panel',
+    'nav_home'            => 'Home',
 
     // ---- Admin: shell + tabs ------------------------------------------------
     'admin'               => 'Admin',
@@ -77,6 +78,10 @@ return [
     'opt_default_end_time'    => 'Default end time',
     'opt_default_language'    => 'Default language',
     'opt_default_template'    => 'Default template',
+    'opt_header_button_style'      => 'Header buttons',
+    'opt_header_button_style_text' => 'Text only',
+    'opt_header_button_style_icon' => 'Icons only',
+    'opt_header_button_style_both' => 'Icons and text',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

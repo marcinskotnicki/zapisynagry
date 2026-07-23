@@ -109,6 +109,17 @@ $toggle = function($key) {
                 <?php endforeach; ?>
             </select>
         </div>
+
+        <div class="field">
+            <label for="header_button_style"><?= e(t('opt_header_button_style')) ?></label>
+            <select id="header_button_style" name="header_button_style">
+                <?php foreach (['text', 'icon', 'both'] as $m): // top-bar nav rendering ?>
+                    <option value="<?= e($m) ?>"<?= opt('header_button_style') === $m ? ' selected' : '' ?>>
+                        <?= e(t('opt_header_button_style_' . $m)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
     </fieldset>
 
     <fieldset>

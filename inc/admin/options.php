@@ -25,7 +25,7 @@ $OPTION_VALUES = [
     'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
-    'verification_method', 'table_names_mode', 'require_email',
+    'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
 ];
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
@@ -73,6 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'require_email':
                 // Integer codes: 0 = never, 1 = always, 2 = proposer decides per game.
                 if (!in_array($val, ['0', '1', '2'], true)) continue 2;
+                break;
+            case 'header_button_style':
+                // How the top-bar nav renders: text only / icon only / both.
+                if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
                 break;
         }
         opt_set($key, $val);
