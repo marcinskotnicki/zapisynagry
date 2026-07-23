@@ -82,6 +82,7 @@ return [
     'opt_header_button_style_text' => 'Text only',
     'opt_header_button_style_icon' => 'Icons only',
     'opt_header_button_style_both' => 'Icons and text',
+    'opt_show_venue_name'          => 'Show the venue name in the header',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

@@ -55,7 +55,14 @@ $page_title = $page_title ?? t('app_name');
 <body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?>">
 <header class="topbar">
     <div class="topbar-inner">
-        <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
+        <?php // Brand (venue name) top-left, unless the admin hid it (when the
+              // venue and event names are the same, showing both is redundant).
+              // An empty spacer keeps the nav right-aligned via space-between. ?>
+        <?php if (opt_bool('show_venue_name')): ?>
+            <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
+        <?php else: ?>
+            <span class="brand-spacer"></span>
+        <?php endif; ?>
         <nav class="topnav">
             <?php
             // Hide the link for the page you're already on, and show a Home link

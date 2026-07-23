@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '6');
+INSERT INTO meta (key, value) VALUES ('schema_version', '7');
 
 
 -- =============================================================================
@@ -109,6 +109,9 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- header_button_style: how the top-bar nav links render —
     --   'text' = text only (current), 'icon' = icon only, 'both' = icon + text.
     ('header_button_style',          'text'),
+    -- show_venue_name: 1 = show the venue name top-left (current); 0 = hide it,
+    -- useful when the venue and event names are the same (avoids showing both).
+    ('show_venue_name',              '1'),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
     --   'registered'  = must be logged in (no code/email)

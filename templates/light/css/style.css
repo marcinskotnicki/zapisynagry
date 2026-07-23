@@ -381,15 +381,19 @@ html { scroll-behavior: smooth; }
 .p-signedby { display: block; font-size: 0.62rem; line-height: 1.2; color: var(--text-muted); }
 
 /* Topbar theme/language pickers (guests) */
-/* Guest theme/language pickers now live in the footer (were in the top bar). */
+/* Guest theme/language pickers now live in the footer (were in the top bar),
+   pushed to the bottom-right corner. */
 .sitefooter { margin-top: 2rem; padding: 1rem 0; border-top: 1px solid var(--border); }
-.footer-prefs { display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+.footer-prefs { display: flex; gap: 1rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 .footer-prefs-item { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.8rem; color: var(--text-muted); }
 .footer-prefs select { font-size: 0.8rem; padding: 0.15rem 0.25rem; }
 
-/* Header nav icon glyph (icon-only / icon+text button styles). */
-.nav-ic { font-style: normal; line-height: 1; }
-.topnav .nav-icononly { font-size: 1rem; }   /* a touch larger when there's no text beside it */
+/* Header nav icons: inline SVG, monochrome (currentColor), vertically centred
+   next to any text. One size for the whole set. */
+.nav-ic { display: inline-flex; align-items: center; }
+.nav-svg { width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
+.topnav a { display: inline-flex; align-items: center; gap: 0.3rem; }
+.topnav .nav-icononly .nav-svg { width: 1.2em; height: 1.2em; }   /* a touch larger with no text beside it */
 
 /* 1px breathing gap between back-to-back timeline blocks: */
 .tl-game { border-right: 1px solid var(--surface); }

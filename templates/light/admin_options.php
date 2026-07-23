@@ -120,6 +120,14 @@ $toggle = function($key) {
                 <?php endforeach; ?>
             </select>
         </div>
+
+        <?php // Header presentation toggle: hide the top-left venue name. ?>
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="show_venue_name" value="1"<?= opt_bool('show_venue_name') ? ' checked' : '' ?>>
+                <?= e(t('opt_show_venue_name')) ?>
+            </label>
+        </div>
     </fieldset>
 
     <fieldset>

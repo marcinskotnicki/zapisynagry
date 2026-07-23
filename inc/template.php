@@ -183,9 +183,9 @@ function current_page() {
 
 /**
  * Render one top-bar nav link, honouring the 'header_button_style' option
- * ('text' | 'icon' | 'both'). The icon is a small HTML entity (glyph) kept in
- * a central map here so all themes share it; unknown keys fall back to text so
- * a link never renders empty.
+ * ('text' | 'icon' | 'both'). The icon is an inline SVG (see nav_icon_svg)
+ * kept central so all themes share it; unknown keys fall back to text so a
+ * link never renders empty.
  *
  * @param string $href   Target, e.g. 'admin.php'.
  * @param string $key    Nav key: home|admin|user|logout|login|register.
@@ -193,17 +193,8 @@ function current_page() {
  * @return string        HTML <a> element.
  */
 function nav_link($href, $key, $label) {
-    // Glyphs chosen to render without an icon font (broad OS/browser coverage).
-    static $icons = [
-        'home'     => "\u{1F3E0}",  // house
-        'admin'    => "\u{2699}",   // gear
-        'user'     => "\u{1F464}",  // bust in silhouette
-        'logout'   => "\u{21AA}",   // rightwards arrow with hook
-        'login'    => "\u{1F511}",  // key
-        'register' => "\u{270D}",   // writing hand
-    ];
     $style = opt('header_button_style');
-    $icon  = $icons[$key] ?? '';
+    $icon  = nav_icon_svg($key);   // '' for an unknown key
     if ($icon === '' || $style === 'text') {
         $inner = e($label);
     } elseif ($style === 'icon') {
@@ -215,4 +206,31 @@ function nav_link($href, $key, $label) {
         $inner = '<span class="nav-ic" aria-hidden="true">' . $icon . '</span> ' . e($label);
     }
     return '<a href="' . e($href) . '">' . $inner . '</a>';
+}
+
+/**
+ * Inline SVG for a nav key, or '' if unknown. All icons share one 24×24
+ * viewBox, use `currentColor` (so they're monochrome and inherit the link's
+ * text colour), and a single 2px round stroke — uniform weight and size across
+ * the set, unlike the old mix of emoji/line glyphs. Simple line paths keep the
+ * markup tiny and crisp at nav size.
+ *
+ * @param string $key  home|admin|user|logout|login|register.
+ * @return string      SVG markup, or ''.
+ */
+function nav_icon_svg($key) {
+    // Path/shape body for each icon (drawn inside a 24×24 box, stroked).
+    static $paths = [
+        'home'     => '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+        'admin'    => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+        'user'     => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+        'logout'   => '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>',
+        'login'    => '<path d="M9 4H5v16h4"/><path d="M14 8l4 4-4 4"/><path d="M18 12H9"/>',
+        'register' => '<path d="M4 20h16"/><path d="M14 4l4 4-9 9H5v-4z"/>',
+    ];
+    if (!isset($paths[$key])) return '';
+    return '<svg class="nav-svg" viewBox="0 0 24 24" width="18" height="18" '
+         . 'fill="none" stroke="currentColor" stroke-width="2" '
+         . 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+         . $paths[$key] . '</svg>';
 }

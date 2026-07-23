@@ -74,6 +74,7 @@ return [
     'opt_header_button_style_text' => 'Tylko tekst',
     'opt_header_button_style_icon' => 'Tylko ikony',
     'opt_header_button_style_both' => 'Ikony i tekst',
+    'opt_show_venue_name'          => 'Pokaż nazwę lokalu w nagłówku',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',
