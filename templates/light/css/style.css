@@ -446,3 +446,9 @@ html { scroll-behavior: smooth; }
 .icon-upload { margin-top: 0.75rem; }
 
 .event-rename { margin-bottom: 1.5rem; max-width: 420px; }
+
+@media (min-width: 621px) {
+    .game-list>article{
+        min-width:500px;
+    }
+}
