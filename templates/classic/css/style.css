@@ -34,6 +34,8 @@
 .poll-option{background:var(--gc-dark-1);border:none}
 a.poll-opt-name{color:white;}
 .poll-opt-votes{color:white;}
+.poll-card .rules-good{color:var(--gc-green);}
+.poll-card .game-rules{font-weight:bold;}
 
 .tpl-classic .gc-info {
     width: 235px; flex: 0 0 235px;
