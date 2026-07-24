@@ -38,6 +38,14 @@
                 <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
             <?php endif; ?>
         </div>
+        <?php if (poll_optin_relevant($poll)): // hidden when nothing is restricted anyway ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="allow_others" value="1" <?= (int)$poll['allow_others_add'] === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_allow_others')) ?>
+                </label>
+            </div>
+        <?php endif; ?>
         <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>
     </form>
 

@@ -80,6 +80,18 @@
             </label>
         </div>
 
+        <?php // Opt-in (off by default): anyone may add candidate games. The
+              // proposer can still remove any of them from the edit screen.
+              // Hidden when it wouldn't restrict anyone anyway (see the helper). ?>
+        <?php if (poll_optin_relevant()): ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="allow_others" value="1" <?= (int)($draft['allow_others'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_allow_others')) ?>
+                </label>
+            </div>
+        <?php endif; ?>
+
         <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
             <div class="field field-check">
                 <label>

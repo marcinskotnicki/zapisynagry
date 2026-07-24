@@ -44,6 +44,11 @@ $canVote = !$readonly && can_signup();
         <?php if (!$readonly && verify_can_show_buttons($poll['proposer_user_id'])): ?>
             <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
         <?php endif; ?>
+        <?php // Shown to anyone allowed to add — the proposer, an admin, or
+              // everyone when the proposer opted in. ?>
+        <?php if (!$readonly && poll_can_add_candidate($poll)): ?>
+            <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+        <?php endif; ?>
     </div>
     <?php if (!empty($poll['deadline'])): // when voting closes (auto-resolves after) ?>
         <p class="poll-deadline"><?= e(t('poll_deadline')) ?>: <strong><?= e(substr($poll['deadline'], 0, 16)) ?></strong></p>

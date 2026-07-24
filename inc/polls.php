@@ -140,6 +140,56 @@ function poll_resolve_candidate($poll, $cand) {
  * @param array $pollRow  A polls row.
  * @return array  Same row plus ['games'] = candidates each with votes/voted.
  */
+/**
+ * May the current visitor add a candidate game to this poll?
+ *
+ * Three ways in:
+ *   - they're the proposer's account or an admin (verify_decision 'allow'),
+ *   - they've already passed the poll's verification gate this session
+ *     (edit_poll.php sets that), or
+ *   - the proposer ticked "let others add games" AND the visitor is allowed to
+ *     add games at all.
+ *
+ * The opt-in is deliberately one-way: others may ADD, only the proposer (or an
+ * admin) may REMOVE, so the poll's owner keeps the final say over its contents.
+ *
+ * @param array $poll  A polls row.
+ * @return bool
+ */
+/**
+ * Is the "let others add games" opt-in worth showing?
+ *
+ * It only means something when somebody would otherwise be BLOCKED from adding.
+ * Two cases where nobody is:
+ *   - the admin set verification to 'none', so verify_decision() says 'allow'
+ *     to everyone for all guest-created content, and
+ *   - this particular poll has no owner AND no email to verify against, so
+ *     there's nothing to check the visitor against — anyone may already edit or
+ *     delete it, exactly like an ownerless game.
+ * In both cases the checkbox would promise a restriction the site isn't
+ * enforcing, so it's hidden rather than lying to the proposer.
+ *
+ * @param array|null $poll  A polls row, or null on the creation form (no row yet).
+ * @return bool
+ */
+function poll_optin_relevant($poll = null) {
+    if (opt('verification_method') === 'none') return false;
+    if ($poll !== null
+        && ($poll['proposer_user_id'] === null || $poll['proposer_user_id'] === '')
+        && empty($poll['proposer_email'])) {
+        return false;   // ownerless: nothing to verify against
+    }
+    return true;
+}
+
+function poll_can_add_candidate($poll) {
+    require_once __DIR__ . '/verify.php';   // verify_decision()
+    require_once __DIR__ . '/events.php';   // can_add_games()
+    if (verify_decision($poll['proposer_user_id'], $poll['proposer_email']) === 'allow') return true;
+    if (!empty($_SESSION['poll_edit_ok'][(int)$poll['id']])) return true;
+    return (int)($poll['allow_others_add'] ?? 0) === 1 && can_add_games();
+}
+
 function poll_full($pollRow) {
     $uid = current_user()['id'] ?? null;
     $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollRow['id']]);

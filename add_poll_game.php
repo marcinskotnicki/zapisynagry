@@ -22,14 +22,20 @@ require __DIR__ . '/inc/notify.php';
  * session so the multi-step BGG/manual flow below keeps its target without
  * every template having to thread a ?poll= through its forms. It also means
  * this whole file is reused rather than duplicated for editing.            */
+// ?poll=N enters live mode directly — that's the route for someone who ISN'T
+// the proposer, on a poll whose owner ticked "let others add games". The
+// proposer's own route (edit_poll.php) parks the same key.
+if (isset($_GET['poll'])) { $_SESSION['poll_live_edit'] = (int)$_GET['poll']; }
+
 $livePollId = (int)($_SESSION['poll_live_edit'] ?? 0);
 $livePoll   = $livePollId ? db_one('SELECT * FROM polls WHERE id = ?', [$livePollId]) : null;
 
 if ($livePoll) {
-    // Must already have passed edit_poll.php's verification gate (or need none).
-    if (empty($_SESSION['poll_edit_ok'][$livePollId])
-        && verify_decision($livePoll['proposer_user_id'], $livePoll['proposer_email']) !== 'allow') {
-        redirect('edit_poll.php?poll=' . $livePollId);
+    // One shared rule: proposer/admin, already-verified this session, or the
+    // poll opted in to letting anyone add.
+    if (!poll_can_add_candidate($livePoll)) {
+        unset($_SESSION['poll_live_edit']);
+        redirect('index.php');
     }
     $tableId = (int)$livePoll['table_id'];
 } else {
@@ -100,7 +106,14 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
              $cand['required_players']]
         );
         log_action('poll_cand_added', $cand['name'] . ' (poll #' . $livePollId . ')');
-        notify_poll_changed($livePoll, t('ntf_pollchg_added', $cand['name']));
+        // Voters always hear about it; the proposer is added to the list when
+        // it wasn't them doing the adding (the "let others add" path), since
+        // that's exactly the change they'd want to know about.
+        $tell = notify_poll_voter_emails($livePollId);
+        $byOwner = (verify_decision($livePoll['proposer_user_id'], $livePoll['proposer_email']) === 'allow')
+                   || !empty($_SESSION['poll_edit_ok'][$livePollId]);
+        if (!$byOwner && !empty($livePoll['proposer_email'])) { $tell[] = $livePoll['proposer_email']; }
+        notify_poll_changed($livePoll, t('ntf_pollchg_added', $cand['name']), $tell);
         unset($_SESSION['poll_live_edit']);           // one candidate per trip
         redirect('edit_poll.php?poll=' . $livePollId);
     }

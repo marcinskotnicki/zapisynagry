@@ -113,6 +113,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!start_within_event_hours($start, $day)) {
             $error = t('error_start_outside_hours');
         } else {
+            // "Let others add games" rides along on the same form; only a real
+            // change is logged/emailed, so re-saving the form is quiet.
+            // Only honour the checkbox when it was actually on the form — an
+            // unchecked box and a hidden one look identical in $_POST, and a
+            // hidden one must NOT wipe a value the proposer set earlier.
+            $allowOthers = poll_optin_relevant($poll)
+                ? (isset($_POST['allow_others']) ? 1 : 0)
+                : (int)$poll['allow_others_add'];
+            if ($allowOthers !== (int)$poll['allow_others_add']) {
+                db_run('UPDATE polls SET allow_others_add = ? WHERE id = ?', [$allowOthers, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' allow_others_add -> ' . $allowOthers);
+            }
             if ($start !== $poll['start_time']) {
                 db_run('UPDATE polls SET start_time = ? WHERE id = ?', [$start, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' start -> ' . $start);

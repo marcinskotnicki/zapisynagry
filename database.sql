@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '8');
+INSERT INTO meta (key, value) VALUES ('schema_version', '9');
 
 
 -- =============================================================================
@@ -337,6 +337,7 @@ CREATE TABLE polls (
     start_time       TEXT NOT NULL,              -- 'HH:MM'
     explain_rules    INTEGER NOT NULL DEFAULT 0,
     require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; votes need an email (only honoured when option require_email = 2); carried into the resolved game
+    allow_others_add INTEGER NOT NULL DEFAULT 0,  -- 0/1; proposer opted in to letting anyone add candidate games (they can still remove them)
     add_self         INTEGER NOT NULL DEFAULT 1,
     deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
