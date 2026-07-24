@@ -30,7 +30,7 @@
     color:white;
 }
 .poll-deadline{color:#cbcbcb;}
-.poll-card .btn-small{background:#333;color:white;text-transform:uppercase;border:none;font-size: 0.62rem;padding: 0.2rem 0.5rem;}
+.poll-card .btn-small{background:#333;color:white;text-transform:uppercase;border:none;font-size: 0.62rem;padding: 0.2rem 0.5rem;font-family:system-ui, "Segoe UI", Roboto, Arial, sans-serif;}
 .poll-option{background:var(--gc-dark-1);border:none}
 a.poll-opt-name{color:white;}
 .poll-opt-votes{color:white;}
