@@ -36,6 +36,25 @@ if (is_file($phpmailerDir . 'PHPMailer.php')) {
  *                              replies go to the sender, not the From address).
  * @return bool  True on success; false on invalid address or send failure.
  */
+/**
+ * Append the standard footer to a message body: two blank lines, then a link
+ * back to the site, so a recipient can always reach the event page from any
+ * notification.
+ *
+ * Centralised for the same reason as the subject prefix — every sender gets it
+ * without having to remember. Returns the body unchanged when no URL can be
+ * worked out (cron with no site_url configured), rather than emitting a
+ * broken link.
+ *
+ * @param string $body
+ * @return string
+ */
+function mail_body_with_footer($body) {
+    $home = site_base_url();
+    if ($home === '') return $body;
+    return rtrim($body, "\n") . "\n\n\n" . $home;
+}
+
 function send_mail($to, $subject, $body, $replyTo = null) {
     // Reject obviously bad addresses up front — also guards the loops in notify.
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
@@ -53,6 +72,8 @@ function send_mail($to, $subject, $body, $replyTo = null) {
     if ($prefix !== '' && strpos($subject, $prefix . ':') !== 0) {
         $subject = $prefix . ': ' . $subject;
     }
+
+    $body = mail_body_with_footer($body);
 
     $smtpHost = opt('email_smtp_server');
 

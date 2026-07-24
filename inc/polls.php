@@ -114,6 +114,12 @@ function poll_resolve_candidate($poll, $cand) {
         if (!empty($poll['proposer_email'])) $notifyEmails[] = $poll['proposer_email'];
 
         // 3) Removing the poll cascades its candidates and votes away.
+        // Move the poll's discussion onto the game it became, so the thread
+        // isn't lost when the poll row (and its cascade) goes away.
+        foreach (db_all('SELECT * FROM poll_comments WHERE poll_id = ? ORDER BY id', [$poll['id']]) as $pc) {
+            db_run('INSERT INTO comments (game_id, name, user_id, comment, created_at) VALUES (?,?,?,?,?)',
+                   [$gameId, $pc['name'], $pc['user_id'], $pc['comment'], $pc['created_at']]);
+        }
         db_run('DELETE FROM polls WHERE id = ?', [$poll['id']]);
         db()->commit();
     } catch (Throwable $ex) {
@@ -199,6 +205,9 @@ function poll_full($pollRow) {
     }
     unset($c);                                    // break the reference from the loop
     $pollRow['games'] = $cands;
+    // Discussion thread, oldest first — mirrors how a game card shows comments.
+    $pollRow['comments'] = db_all('SELECT * FROM poll_comments WHERE poll_id = ? ORDER BY id',
+                                  [$pollRow['id']]);
     return $pollRow;
 }
 

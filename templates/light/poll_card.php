@@ -85,4 +85,30 @@ $canVote = !$readonly && can_signup();
             </li>
         <?php endforeach; ?>
     </ul>
+
+    <?php // Discussion: same markup as a game card, posting to add_comment.php
+          // with a poll id instead of a game id. ?>
+    <?php if (opt_bool('allow_discussions')): ?>
+        <div class="discussion">
+            <?php if (!empty($poll['comments'])): ?>
+                <ul class="comment-list">
+                    <?php foreach ($poll['comments'] as $c): ?>
+                        <li><span class="c-name"><?= e($c['name']) ?>:</span> <?= nl2br(e($c['comment'])) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <?php if (!$readonly): ?>
+                <details class="comment-add">
+                    <summary><?= e(t('comment_add')) ?></summary>
+                    <form method="post" action="add_comment.php">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
+                        <input type="text" name="name" placeholder="<?= e(t('comment_name')) ?>" value="<?= e(current_user()['display_name'] ?? guest_identity()['name']) ?>">
+                        <textarea name="comment" rows="2" placeholder="<?= e(t('comment_text')) ?>" required></textarea>
+                        <button type="submit" class="btn btn-small btn-primary"><?= e(t('comment_submit')) ?></button>
+                    </form>
+                </details>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 </article>

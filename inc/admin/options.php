@@ -25,6 +25,7 @@ $OPTION_VALUES = [
     'venue_name', 'email_address', 'email_login', 'email_password',
     'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
     'overnight_grace_hours',
+    'site_url',
     'captcha_site_key', 'captcha_secret_key', 'captcha_version', 'captcha_v3_threshold',
     'timeline_extension',
     'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',

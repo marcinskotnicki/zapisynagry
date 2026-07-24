@@ -57,6 +57,7 @@ $toggle = function($key) {
         $text('email_smtp_port', 'number');
         $text('max_tables', 'number');           // 0 = unlimited
         $text('bgg_api_code');
+        $text('site_url');                       // used for the link at the foot of emails
         $text('captcha_site_key');
         $text('captcha_secret_key');
         ?>

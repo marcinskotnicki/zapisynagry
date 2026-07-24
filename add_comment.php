@@ -9,12 +9,22 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 
+// One endpoint serves both discussions: a comment belongs either to a game or
+// to a poll. $target is whichever row we found; $kind says which.
 $gameId = (int)($_POST['game'] ?? 0);
-$game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null;
-if (!$game) { redirect('index.php'); }
+$pollId = (int)($_POST['poll'] ?? 0);
+if ($pollId) {
+    $kind   = 'poll';
+    $target = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
+} else {
+    $kind   = 'game';
+    $target = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null;
+}
+if (!$target) { redirect('index.php'); }
+$game = $target;   // legacy name used further down for the log line
 
-$event = db_one('SELECT is_archived FROM events WHERE id = ?', [$game['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$event = db_one('SELECT is_archived FROM events WHERE id = ?', [$target['event_id']]);
+$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$target['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Only when discussions are on and the event is live.
@@ -37,9 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         && text_has_content($name) && text_has_content($comment)
         && !text_too_long($name, TEXT_NAME_MAX)
         && !text_too_long($comment, TEXT_BODY_MAX)) {
-        db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
-               [$gameId, $name, $u['id'] ?? null, $comment]);
-        log_action('comment_add', $game['name']);
+        if ($kind === 'poll') {
+            db_run('INSERT INTO poll_comments (poll_id, name, user_id, comment) VALUES (?,?,?,?)',
+                   [$pollId, $name, $u['id'] ?? null, $comment]);
+            log_action('comment_add', 'poll #' . $pollId);
+        } else {
+            db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
+                   [$gameId, $name, $u['id'] ?? null, $comment]);
+            log_action('comment_add', $game['name']);
+        }
     }
 }
-redirect('index.php?day=' . $activeDay . '#game-' . $gameId);
+redirect('index.php?day=' . $activeDay
+         . ($kind === 'poll' ? '#poll-' . $pollId : '#game-' . $gameId));

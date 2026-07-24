@@ -39,7 +39,7 @@ CREATE TABLE meta (
 
 -- Bump this string whenever the schema changes; the update script compares it
 -- against the version shipped in a new release.
-INSERT INTO meta (key, value) VALUES ('schema_version', '9');
+INSERT INTO meta (key, value) VALUES ('schema_version', '10');
 
 
 -- =============================================================================
@@ -121,6 +121,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- show_venue_name: 1 = show the venue name top-left (current); 0 = hide it,
     -- useful when the venue and event names are the same (avoids showing both).
     ('show_venue_name',              '1'),
+    -- site_url: absolute address of the app, used for the link at the foot of
+    -- every email. Blank = work it out from the current request, which is fine
+    -- for web-triggered mail but NOT for cron (no HTTP_HOST there), so set it
+    -- if you use the deadline sweep.
+    ('site_url',                     ''),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
     --   'registered'  = must be logged in (no code/email)
@@ -312,6 +317,26 @@ CREATE TABLE comments (
     comment    TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+
+-- =============================================================================
+--  poll_comments — discussion under a poll, mirroring `comments` for games.
+--  Deliberately a separate table rather than a nullable game_id/poll_id pair on
+--  `comments`, because the self-updater is additive only (it can create tables
+--  and add columns, but cannot relax an existing NOT NULL).
+--  When a poll resolves into a real game these rows are copied across into
+--  `comments` so the discussion survives, then cascade away with the poll.
+-- =============================================================================
+CREATE TABLE poll_comments (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    poll_id    INTEGER NOT NULL,
+    name       TEXT NOT NULL,
+    user_id    INTEGER,
+    comment    TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 

@@ -46,7 +46,10 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'name'          => $u['display_name'] ?? '',
         'email'         => $u['email'] ?? '',
         'comment'       => '',
-        'start_time'    => $day['start_time'],
+        // Same "next free slot" suggestion the add-game form uses: the end of
+        // the last game on this table, falling back to the day's opening hour
+        // for an empty table.
+        'start_time'    => event_next_start_time($tableId, $day['start_time']),
         'explain_rules' => 0,
         'add_self'      => 1,
         'require_email' => 0,           // per-poll email rule (shown only in option mode 2)

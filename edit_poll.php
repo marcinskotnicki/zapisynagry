@@ -125,7 +125,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run('UPDATE polls SET allow_others_add = ? WHERE id = ?', [$allowOthers, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' allow_others_add -> ' . $allowOthers);
             }
-            if ($start !== $poll['start_time']) {
+            // The poll's own description. Junk/oversize is refused rather than
+            // silently dropped, since this form can show an error.
+            $comment = trim($_POST['comment'] ?? '');
+            if ($comment !== '' && (!text_has_content($comment) || text_too_long($comment, TEXT_BODY_MAX))) {
+                $error = t('error_too_long', TEXT_BODY_MAX);
+            } elseif ($comment !== (string)$poll['comment']) {
+                db_run('UPDATE polls SET comment = ? WHERE id = ?', [$comment !== '' ? $comment : null, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' comment changed');
+                notify_poll_changed($poll, t('ntf_pollchg_comment'));
+            }
+            if ($error === null && $start !== $poll['start_time']) {
                 db_run('UPDATE polls SET start_time = ? WHERE id = ?', [$start, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' start -> ' . $start);
                 notify_poll_changed($poll, t('ntf_pollchg_time', $start));

@@ -38,6 +38,11 @@
                 <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
             <?php endif; ?>
         </div>
+        <div class="field">
+            <label for="p_comment"><?= e(t('poll_comment')) ?></label>
+            <textarea id="p_comment" name="comment" rows="3"><?= e((string)$poll['comment']) ?></textarea>
+        </div>
+
         <?php if (poll_optin_relevant($poll)): // hidden when nothing is restricted anyway ?>
             <div class="field field-check">
                 <label>

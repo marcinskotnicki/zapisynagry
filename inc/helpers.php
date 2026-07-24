@@ -148,6 +148,28 @@ function text_too_long($s, $max) {
     return mb_strlen((string)$s, 'UTF-8') > $max;
 }
 
+/**
+ * Absolute base URL of this installation, with a trailing slash, or '' if it
+ * can't be determined.
+ *
+ * Prefers the admin-configured 'site_url' because that's the only thing that
+ * works from CRON — a deadline sweep run by the scheduler has no HTTP_HOST to
+ * infer from. Falls back to reconstructing it from the current request, which
+ * covers every web-triggered email without any configuration.
+ *
+ * @return string  e.g. 'https://example.org/zapisy/' or ''.
+ */
+function site_base_url() {
+    $configured = trim((string)opt('site_url'));
+    if ($configured !== '') return rtrim($configured, '/') . '/';
+
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host === '') return '';                    // CLI/cron and nothing configured
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $dir    = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    return $scheme . '://' . $host . $dir . '/';
+}
+
 /* ---- Guest identity prefill ---------------------------------------------- *
  * Guests have no account, so every signup / vote form asks for their name and
  * email again. We remember the last values they typed in a plain cookie and
