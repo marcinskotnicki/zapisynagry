@@ -117,19 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Persist poll + candidates (+ optional proposer self-votes) atomically.
             db()->beginTransaction();
             try {
-                // Deadline: N hours before the poll's planned start (day date +
-                // start time). 0 hours = no automatic deadline (NULL). If the
-                // computed moment is already in the past (poll created late),
-                // clamp to +1 hour from now so a fresh poll always gets SOME
-                // voting window instead of resolving on the very next pageview.
-                $deadline = null;
-                if ((int)$draft['deadline_hours'] > 0) {
-                    $dayDate  = db_val('SELECT day_date FROM event_days WHERE id = ?', [$day['id']]);
-                    $startTs  = strtotime(($dayDate ?: date('Y-m-d')) . ' ' . $draft['start_time']);
-                    $deadTs   = $startTs - (int)$draft['deadline_hours'] * 3600;
-                    if ($deadTs <= time()) $deadTs = time() + 3600;   // the clamp
-                    $deadline = date('Y-m-d H:i:s', $deadTs);
-                }
+                // Deadline: N hours before the poll's planned start. The helper
+                // owns the overnight rollover and the "already past -> +1h"
+                // clamp; 0 hours means no automatic deadline (null).
+                $deadline = poll_deadline_from_hours($day, $draft['start_time'], $draft['deadline_hours']);
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,

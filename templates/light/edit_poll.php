@@ -3,17 +3,23 @@
  *  templates/light/edit_poll.php — edit a live poll. Presentation only.
  * -----------------------------------------------------------------------------
  *  Two independent parts on one page:
- *    - the start-time form (posts action=save),
+ *    - the settings form (posts action=save): start time, voting deadline,
+ *      description and the "let others add games" opt-in,
  *    - the candidate list, each row with its own tiny remove form
  *      (action=remove), plus a link into add_poll_game.php's live mode.
  *  They're separate forms so removing a game never depends on the time field
  *  validating, and vice versa.
+ *
+ *  The settings form also carries the day's date/opening-hour/grace as data-*
+ *  attributes, which js/scripts.js reads to preview when voting will close.
  *
  *  RENDER VARS:
  *    $poll   — the polls row being edited.
  *    $cands  — poll_games rows (candidates), in display order.
  *    $day    — the event_days row (for the time hint).
  *    $bounds — ['min','max'] to clamp the time input, or null.
+ *    $deadline_hours — the stored deadline expressed as hours before the start
+ *      (0 = none), since that's how the form edits it.
  *    $error  — message above the forms, or null.
  *    $csrf   — hidden CSRF field.
  * ============================================================================= */
@@ -26,7 +32,10 @@
     <?php endif; ?>
 
     <?php // ---- Start time ---------------------------------------------- ?>
-    <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>">
+    <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>"
+        data-day-date="<?= e($day['day_date'] ?? '') ?>"
+        data-day-start="<?= e($day['start_time'] ?? '') ?>"
+        data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
         <?= $csrf ?>
         <input type="hidden" name="action" value="save">
         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
@@ -37,6 +46,14 @@
             <?php if ($bounds): ?>
                 <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
             <?php endif; ?>
+        </div>
+        <div class="field">
+            <?php // Hours BEFORE the start when voting closes; 0 removes the deadline.
+                  // Moving the start time above shifts this along with it. ?>
+            <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
+            <input type="number" id="p_deadline" name="deadline_hours" min="0" value="<?= (int)($deadline_hours ?? 0) ?>">
+            <?php // Filled in by initPollDeadlinePreview() in js/scripts.js. ?>
+            <p class="field-note poll-deadline-preview"></p>
         </div>
         <div class="field">
             <label for="p_comment"><?= e(t('poll_comment')) ?></label>

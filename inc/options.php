@@ -30,6 +30,29 @@ function options_load() {
 }
 
 /**
+ * Apply the admin-chosen timezone. Called by bootstrap immediately AFTER
+ * options_load() (it needs opt()) and BEFORE anything that reads the clock.
+ *
+ * WHY IT MATTERS: event start times and poll deadlines are wall-clock times with
+ * no offset stored, and the deadline sweep compares them against date(). If PHP
+ * runs on a different clock than the venue, polls resolve at the wrong moment —
+ * an hour or two off, depending on the season.
+ *
+ * An unset or unrecognised value falls back to UTC rather than throwing, so a
+ * typo in the Options screen can never take the whole site down.
+ * @return void
+ */
+function app_timezone_init() {
+    $tz = opt('timezone', 'UTC');
+    try {
+        new DateTimeZone($tz);          // throws on an unknown identifier
+    } catch (Throwable $e) {
+        $tz = 'UTC';
+    }
+    date_default_timezone_set($tz);
+}
+
+/**
  * Raw string value of an option, or $default if it doesn't exist.
  * @param string $key
  * @param string $default  Returned when the key was never seeded.

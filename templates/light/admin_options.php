@@ -79,6 +79,36 @@ $toggle = function($key) {
             <p class="field-note"><?= e(t('opt_captcha_v3_threshold_note')) ?></p>
         </div>
         <?php
+        ?>
+        <?php // The site's clock. Event times and poll deadlines are wall-clock
+              // values, so this has to be the venue's real timezone or polls
+              // resolve at the wrong moment. Grouped by region to stay usable. ?>
+        <div class="field">
+            <label for="timezone"><?= e(t('opt_timezone')) ?></label>
+            <select id="timezone" name="timezone">
+                <?php
+                $tzNow = opt('timezone', 'UTC');
+                $groups = [];
+                foreach (DateTimeZone::listIdentifiers() as $tzId) {
+                    $region = strpos($tzId, '/') !== false ? strstr($tzId, '/', true) : 'Other';
+                    $groups[$region][] = $tzId;
+                }
+                // A stored value PHP no longer knows about would otherwise vanish
+                // from the list and silently reset on the next save.
+                if ($tzNow !== '' && !in_array($tzNow, DateTimeZone::listIdentifiers(), true)) {
+                    $groups['Other'][] = $tzNow;
+                }
+                foreach ($groups as $region => $ids): ?>
+                    <optgroup label="<?= e($region) ?>">
+                        <?php foreach ($ids as $tzId): ?>
+                            <option value="<?= e($tzId) ?>"<?= $tzId === $tzNow ? ' selected' : '' ?>><?= e($tzId) ?></option>
+                        <?php endforeach; ?>
+                    </optgroup>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_timezone_note', date('H:i'))) ?></p>
+        </div>
+        <?php
         $text('timeline_extension', 'number');   // hours added past the day's end
         $text('overnight_grace_hours', 'number'); // early-setup window before opening (see day_rel_min)
         $toggle('allow_start_outside_hours');     // off -> clamp game/poll start to the day's hours

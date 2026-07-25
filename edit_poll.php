@@ -140,6 +140,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 log_action('poll_edit', 'Poll #' . $pollId . ' start -> ' . $start);
                 notify_poll_changed($poll, t('ntf_pollchg_time', $start));
             }
+            // The deadline is expressed as "N hours before the start", so it has
+            // to be recomputed when EITHER the hours or the start time moved —
+            // that's the whole point of moving a poll: its voting window should
+            // travel with it.
+            //
+            // Only when the field was actually submitted, for the same reason
+            // the checkbox above is guarded: a form without it must not be read
+            // as "0 hours" and silently wipe a deadline someone else set. And
+            // only when the stored value really changes, so re-saving a comment
+            // edit can't re-clamp (and thereby quietly extend) a deadline.
+            if ($error === null && array_key_exists('deadline_hours', $_POST)) {
+                $dlHours  = max(0, (int)$_POST['deadline_hours']);
+                $curHours = poll_deadline_hours($poll, $day);
+                if ($dlHours !== $curHours || $start !== $poll['start_time']) {
+                    $newDeadline = poll_deadline_from_hours($day, $start, $dlHours);
+                    if ($newDeadline !== $poll['deadline']) {
+                        db_run('UPDATE polls SET deadline = ? WHERE id = ?', [$newDeadline, $pollId]);
+                        log_action('poll_edit', 'Poll #' . $pollId . ' deadline -> ' . ($newDeadline ?? 'none'));
+                        notify_poll_changed($poll, $newDeadline === null
+                            ? t('ntf_pollchg_deadline_off')
+                            : t('ntf_pollchg_deadline', substr($newDeadline, 0, 16)));
+                    }
+                }
+            }
             redirect('index.php?day=' . $activeDay . '#poll-' . $pollId);
         }
     }
@@ -151,13 +175,16 @@ $_SESSION['poll_live_edit'] = $pollId;
 
 // Fresh read: a removal above may have changed the candidate list.
 $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollId]);
+$pollNow = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
 
 tpl_render('header', ['page_title' => t('poll_edit_title')]);
 tpl_render('edit_poll', [
-    'poll'   => db_one('SELECT * FROM polls WHERE id = ?', [$pollId]),
+    'poll'   => $pollNow,
     'cands'  => $cands,
     'day'    => $day,
     'bounds' => start_time_bounds($day),   // clamp the time input when the option says so
+    // The stored deadline is absolute; the form edits it as hours-before-start.
+    'deadline_hours' => poll_deadline_hours($pollNow, $day),
     'error'  => $error,
     'csrf'   => csrf_field(),
 ]);

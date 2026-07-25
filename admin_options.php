@@ -59,6 +59,7 @@ $toggle = function($key) {
         $text('bgg_api_code');
         $text('captcha_site_key');
         $text('captcha_secret_key');
+        $text('timezone');                       // the venue's clock (see app_timezone_init)
         $text('timeline_extension', 'number');   // hours added past the day's end
         $textarea('game_languages');             // one dropdown choice per line
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start

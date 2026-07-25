@@ -411,6 +411,8 @@ Link wygasa za godzinę.',
     'ntf_pollchg_removed'             => 'Usunięto opcję: %s',
     'ntf_pollchg_time'                => 'Godzina rozpoczęcia zmieniona na %s',
     'ntf_pollchg_comment'             => 'Zaktualizowano opis ankiety.',
+    'ntf_pollchg_deadline'            => 'Koniec głosowania zmieniony na %s',
+    'ntf_pollchg_deadline_off'        => 'Głosowanie nie będzie już kończone automatycznie.',
     'poll_end_confirm'                => 'Zakończyć to głosowanie teraz? Zwycięży aktualnie prowadząca opcja (przy remisie — dodana wcześniej).',
     'poll_end_yes'                    => 'Tak, zakończ głosowanie',
     'msg_to_poll_owner'               => 'Wiadomość do %s (założyciel głosowania)',
@@ -483,4 +485,24 @@ Link wygasa za godzinę.',
     'opt_table_names_any'    => 'Każdy może nadawać i zmieniać nazwy stołów',
     'table_name_label'       => 'Nazwa stołu (opcjonalnie)',
     'table_rename'           => 'Zmień nazwę stołu',
+
+    // ---- Poll deadline live preview (JS, add_poll.php) --------------------------
+    'poll_deadline_preview'   => 'Ankieta zostanie automatycznie rozstrzygnięta {date} ({weekday}) o godzinie {time}.',
+    'poll_no_auto_deadline'   => 'Bez automatycznego zakończenia głosowania.',
+    'weekday_0'               => 'niedziela',
+    'weekday_1'               => 'poniedziałek',
+    'weekday_2'               => 'wtorek',
+    'weekday_3'               => 'środa',
+    'weekday_4'               => 'czwartek',
+    'weekday_5'               => 'piątek',
+    'weekday_6'               => 'sobota',
+
+    'opt_timezone'            => 'Strefa czasowa serwisu',
+    'opt_timezone_note'       => 'Godziny gier i terminy ankiet działają wg tego zegara. Aktualny czas: %s.',
+
+    // ---- Expired/invalid CSRF form token page -----------------------------------
+    'csrf_error_title'        => 'Wygasł formularz',
+    'csrf_error_body'         => 'Ten formularz wygasł lub jest nieprawidłowy — mogło to się zdarzyć, jeśli strona była otwarta zbyt długo. Wróć i spróbuj ponownie.',
+    'csrf_error_home'         => 'Wróć na stronę główną',
 ];
+

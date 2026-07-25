@@ -49,6 +49,13 @@ $page_title = $page_title ?? t('app_name');
             // Add client-facing strings here as the front end needs them.
             'confirm' => t('yes'),
             'cancel'  => t('cancel'),
+            // Poll deadline live preview (add_poll.php) — {date}/{weekday}/{time} tokens.
+            'pollDeadlinePreview' => t('poll_deadline_preview'),
+            'pollNoAutoDeadline'  => t('poll_no_auto_deadline'),
+            'weekdays' => [
+                t('weekday_0'), t('weekday_1'), t('weekday_2'), t('weekday_3'),
+                t('weekday_4'), t('weekday_5'), t('weekday_6'),
+            ],
         ], JSON_UNESCAPED_UNICODE) ?>;
     </script>
 </head>

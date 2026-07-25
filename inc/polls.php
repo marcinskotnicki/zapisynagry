@@ -276,3 +276,68 @@ function poll_resolve_expired() {
     }
     return $n;
 }
+
+/* ---- Deadlines ------------------------------------------------------------
+ *  A poll's deadline is stored as an absolute moment, but everywhere a human
+ *  touches it it's expressed as "N hours before the poll starts" — so these
+ *  three helpers are the single place that converts between the two. add_poll.php
+ *  (creation) and edit_poll.php (later changes) both go through them, which is
+ *  what keeps a poll's deadline following its start time when that start moves.
+ *
+ *  All of them need day_rel_min()/hhmm_to_min() from inc/events.php; every
+ *  caller already requires it.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * The absolute moment a poll starts, as a unix timestamp.
+ *
+ * NOT simply "day_date + start_time": on an overnight day (18:00 -> 03:00) a
+ * 01:00 start belongs to the NEXT calendar date, and day_rel_min() is the same
+ * helper the timeline and the event-hours check use, so all three agree.
+ *
+ * @param array  $dayRow     The event_days row (day_date / start_time).
+ * @param string $startTime  The poll's 'HH:MM' start.
+ * @return int               Unix timestamp.
+ */
+function poll_start_ts($dayRow, $startTime) {
+    $base = strtotime((($dayRow['day_date'] ?? '') ?: date('Y-m-d')) . ' 00:00');
+    return $base + day_rel_min($startTime, hhmm_to_min($dayRow['start_time'])) * 60;
+}
+
+/**
+ * Turn "N hours before the start" into the datetime string stored in
+ * polls.deadline. 0 (or less) means no automatic deadline at all -> null.
+ *
+ * THE CLAMP: if the computed moment has already passed (a poll created — or
+ * re-timed — late), it becomes an hour from now, so a poll always gets SOME
+ * voting window instead of resolving on the very next page view.
+ *
+ * @param array  $dayRow
+ * @param string $startTime
+ * @param int    $hours
+ * @return string|null  'Y-m-d H:i:s', or null for "no deadline".
+ */
+function poll_deadline_from_hours($dayRow, $startTime, $hours) {
+    $hours = (int)$hours;
+    if ($hours <= 0) return null;
+    $ts = poll_start_ts($dayRow, $startTime) - $hours * 3600;
+    if ($ts <= time()) $ts = time() + 3600;        // the clamp
+    return date('Y-m-d H:i:s', $ts);
+}
+
+/**
+ * The inverse: how many hours before its start is this poll's deadline? Used to
+ * fill the edit form's number field from a stored absolute deadline.
+ *
+ * Rounded to whole hours (the field only takes whole hours) and never negative.
+ * A poll with no deadline reports 0, which is exactly what the field means.
+ *
+ * @param array $poll
+ * @param array $dayRow
+ * @return int
+ */
+function poll_deadline_hours($poll, $dayRow) {
+    if (empty($poll['deadline'])) return 0;
+    $diff = poll_start_ts($dayRow, $poll['start_time']) - strtotime($poll['deadline']);
+    return max(0, (int)round($diff / 3600));
+}

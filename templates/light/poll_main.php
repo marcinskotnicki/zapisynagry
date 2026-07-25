@@ -26,7 +26,17 @@
         <p class="msg msg-error"><?= e($error) ?></p>
     <?php endif; ?>
 
-    <form method="post" action="add_poll.php?table=<?= (int)$table['id'] ?>" class="poll-form">
+    <?php
+    // Day info for the client-side "resolves on ..." preview below the deadline
+    // field. Same row start_time_bounds() already needs, so fetch it once here.
+    $pDay    = db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']]);
+    $pBounds = start_time_bounds($pDay);
+    ?>
+
+    <form method="post" action="add_poll.php?table=<?= (int)$table['id'] ?>" class="poll-form"
+        data-day-date="<?= e($pDay['day_date'] ?? '') ?>"
+        data-day-start="<?= e($pDay['start_time'] ?? '') ?>"
+        data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
         <?= $csrf ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
@@ -46,11 +56,13 @@
                 <?php // Hours BEFORE the start when voting closes; 0 disables the deadline. ?>
                 <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
                 <input type="number" id="p_deadline" name="deadline_hours" min="0" value="<?= (int)$draft['deadline_hours'] ?>">
+                <?php // Filled in by initPollDeadlinePreview() in js/scripts.js, from the
+                      // start time + deadline hours; empty until the script runs. ?>
+                <p class="field-note poll-deadline-preview"></p>
             </div>
             <div class="field">
                 <label for="p_start"><?= e(t('poll_start')) ?></label>
                 <?php // Same event-hours clamp as games (the poll resolves into a game at this time). ?>
-                <?php $pBounds = start_time_bounds(db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']])); ?>
                 <input type="time" id="p_start" name="start_time" value="<?= e($draft['start_time']) ?>"
                     <?= $pBounds ? 'min="' . e($pBounds['min']) . '" max="' . e($pBounds['max']) . '"' : '' ?>>
                 <?php if ($pBounds): ?>

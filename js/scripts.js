@@ -11,6 +11,7 @@
  *    2. Copy-to-clipboard buttons (archive links).
  *    3. Hash highlight for in-page anchors.
  *    4. reCAPTCHA v3 token minting on form submit (invisible captcha mode).
+ *    5. Poll deadline live preview (add_poll.php): "resolves on ..." text.
  *  This file grows in the front-end phase (modals, add-game flow, etc.).
  * ========================================================================== */
 (function () {
@@ -21,6 +22,7 @@
         initCopyButtons();
         initHashHighlight();
         initRecaptchaV3();
+        initPollDeadlinePreview();
     });
 
     /* ---- 1. Date cascade --------------------------------------------------- */
@@ -128,4 +130,80 @@
             });
         });
     }
+
+    /* ---- 5. Poll deadline preview ------------------------------------------ *
+     * Both poll forms (create in add_poll.php, edit in edit_poll.php) carry the
+     * day's date / opening hour / grace window as data-* attributes, because
+     * only the server knows the event's calendar. From those plus the two live
+     * inputs we reproduce day_rel_min()'s overnight rollover client-side and
+     * show the exact moment the poll will auto-resolve, updating on every edit.
+     *
+     * Mirrors poll_deadline_from_hours() in inc/polls.php — including its clamp
+     * — so the preview never promises a moment the server would overrule.
+     * ------------------------------------------------------------------------- */
+    function initPollDeadlinePreview() {
+        document.querySelectorAll('form[data-day-date]').forEach(function (form) {
+            var startInput    = form.querySelector('input[name="start_time"]');
+            var deadlineInput = form.querySelector('input[name="deadline_hours"]');
+            var out           = form.querySelector('.poll-deadline-preview');
+            if (!startInput || !deadlineInput || !out) return;
+
+            var dayDate  = form.getAttribute('data-day-date') || '';
+            var dayStart = form.getAttribute('data-day-start') || '';
+            var graceMin = (parseFloat(form.getAttribute('data-grace-hours')) || 0) * 60;
+            if (!dayDate || !dayStart) return;   // no calendar date -> nothing to preview
+
+            function update() {
+                var deadlineHours = parseFloat(deadlineInput.value);
+                if (!deadlineHours || deadlineHours <= 0) {
+                    out.textContent = (window.APP_LANG && window.APP_LANG.pollNoAutoDeadline) || '';
+                    return;
+                }
+                var startMin    = hhmmToMin(startInput.value);
+                var dayStartMin = hhmmToMin(dayStart);
+                if (startMin === null || dayStartMin === null) { out.textContent = ''; return; }
+
+                // Same pivot as day_rel_min() in inc/events.php: a start earlier
+                // than (opening hour - grace) belongs to the next calendar day.
+                var pivot  = dayStartMin - graceMin;
+                var relMin = startMin < pivot ? startMin + 1440 : startMin;
+
+                var base = new Date(dayDate + 'T00:00:00');
+                if (isNaN(base.getTime())) { out.textContent = ''; return; }
+                var startMoment = new Date(base.getTime());
+                startMoment.setMinutes(startMoment.getMinutes() + relMin);
+
+                var deadlineMoment = new Date(startMoment.getTime() - deadlineHours * 3600000);
+                // The server's clamp: a deadline that already passed becomes
+                // "an hour from now", so the poll keeps some voting window.
+                var now = new Date();
+                if (deadlineMoment <= now) {
+                    deadlineMoment = new Date(now.getTime() + 3600000);
+                }
+
+                var weekdays = (window.APP_LANG && window.APP_LANG.weekdays) || [];
+                var template = (window.APP_LANG && window.APP_LANG.pollDeadlinePreview) || '';
+                if (!template) { out.textContent = ''; return; }
+
+                out.textContent = template
+                    .replace('{date}', pad2(deadlineMoment.getDate()) + '.' + pad2(deadlineMoment.getMonth() + 1) + '.' + deadlineMoment.getFullYear())
+                    .replace('{weekday}', weekdays[deadlineMoment.getDay()] || '')
+                    .replace('{time}', pad2(deadlineMoment.getHours()) + ':' + pad2(deadlineMoment.getMinutes()));
+            }
+
+            startInput.addEventListener('input', update);
+            deadlineInput.addEventListener('input', update);
+            update();
+        });
+    }
+
+    // 'HH:MM' -> minutes since midnight, or null when it isn't a time yet
+    // (a half-typed <input type="time"> reports an empty value).
+    function hhmmToMin(s) {
+        var m = /^(\d{1,2}):(\d{2})$/.exec(s || '');
+        return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) : null;
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
 })();

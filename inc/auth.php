@@ -55,8 +55,11 @@ function auth_login($email, $password) {
         if ((int)($user['is_blocked'] ?? 0) === 1) {
             return 'blocked';                      // right password, blocked account
         }
-        // Regenerate the id on privilege change to thwart session fixation.
+        // Regenerate the id on privilege change to thwart session fixation, and
+        // mint a fresh CSRF token to match (it outlives the session otherwise —
+        // see the mirror cookie in csrf_token()).
         session_regenerate_id(true);
+        csrf_rotate();
         $_SESSION['user_id'] = (int)$user['id'];
         auth_remember_issue((int)$user['id']);     // persistent login (option-gated)
         return true;
@@ -73,6 +76,7 @@ function auth_login($email, $password) {
  */
 function auth_logout() {
     auth_remember_forget();
+    csrf_rotate();          // the token is cookie-backed now, so clear it explicitly
     $_SESSION = [];
     session_regenerate_id(true);
 }
@@ -257,16 +261,86 @@ function require_admin() {
  *  rejects it. Simple synchroniser-token pattern — sufficient here.
  * --------------------------------------------------------------------------- */
 
+// Name and lifetime of the mirror cookie that keeps the token alive across
+// session garbage collection (see csrf_token()).
+const CSRF_COOKIE_NAME = 'csrf';
+const CSRF_COOKIE_DAYS = 30;
+
 /**
  * The session CSRF token, generated on first use.
- * 16 random bytes -> 32 hex chars. Stable for the life of the session.
+ * 16 random bytes -> 32 hex chars.
+ *
+ * WHY THE MIRROR COOKIE: shared hosting garbage-collects session files
+ * aggressively (often after ~24 idle minutes). That used to wipe the token
+ * while the visitor still had a form open in a tab, so submitting it hit the
+ * "invalid or expired form token" wall — even though the remember-me cookie had
+ * quietly logged them back in. The token is therefore ALSO written to a
+ * long-lived cookie and restored from it when the session no longer has one, so
+ * an open form keeps working for as long as the cookie lives.
+ *
+ * SECURITY: this is the standard "double submit cookie" property — the cookie is
+ * HttpOnly and SameSite=Lax, so a malicious site can neither read the token nor
+ * script it into a forged form. What an attacker must know to forge a POST is
+ * unchanged: the token value itself.
+ *
  * @return string
  */
 function csrf_token() {
     if (empty($_SESSION['csrf'])) {
-        $_SESSION['csrf'] = bin2hex(random_bytes(16));
+        $fromCookie = (string)($_COOKIE[CSRF_COOKIE_NAME] ?? '');
+        // Only adopt a cookie that LOOKS like one of ours; anything else (a
+        // truncated or hand-edited value) gets replaced with a fresh token.
+        $_SESSION['csrf'] = preg_match('/^[a-f0-9]{32}$/', $fromCookie)
+            ? $fromCookie
+            : bin2hex(random_bytes(16));
     }
+    csrf_cookie_refresh($_SESSION['csrf']);
     return $_SESSION['csrf'];
+}
+
+/**
+ * (Re)write the mirror cookie, sliding its expiry forward on every request so an
+ * account in regular use never lapses.
+ *
+ * Guarded twice: once per request (a static flag — csrf_field() can be called
+ * several times per page) and only while headers can still be sent, since the
+ * footer renders a form long after output has begun.
+ *
+ * @param string $token
+ * @return void
+ */
+function csrf_cookie_refresh($token) {
+    static $done = false;
+    if ($done || headers_sent()) return;
+    $done = true;
+    setcookie(CSRF_COOKIE_NAME, $token, [
+        'expires'  => time() + CSRF_COOKIE_DAYS * 86400,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    ]);
+    $_COOKIE[CSRF_COOKIE_NAME] = $token;   // keep this request self-consistent
+}
+
+/**
+ * Throw the current token away (session copy AND cookie) so the next call to
+ * csrf_token() mints a fresh one. Called on login and logout: the token should
+ * not outlive a change of who is logged in.
+ * @return void
+ */
+function csrf_rotate() {
+    unset($_SESSION['csrf']);
+    if (!headers_sent()) {
+        setcookie(CSRF_COOKIE_NAME, '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        ]);
+    }
+    unset($_COOKIE[CSRF_COOKIE_NAME]);
 }
 
 /**
@@ -286,8 +360,26 @@ function csrf_field() {
  */
 function csrf_check() {
     $sent = $_POST['csrf'] ?? '';
-    if (!hash_equals(csrf_token(), $sent)) {
-        http_response_code(400);
-        exit('Invalid or expired form token. Go back and try again.');
+    if (hash_equals(csrf_token(), $sent)) return;
+
+    // A mismatch is now rare (the mirror cookie survives session GC), but a
+    // genuinely stale tab can still land here — so show a real page with a way
+    // out instead of a blank screen the visitor has to back-button off.
+    http_response_code(400);
+
+    // Offer "back to the form" only when the referrer is our OWN page: an
+    // attacker-controlled Referer must never become a link we render.
+    $back = '';
+    $ref  = $_SERVER['HTTP_REFERER'] ?? '';
+    if ($ref !== '' && isset($_SERVER['HTTP_HOST'])) {
+        $parts = parse_url($ref);
+        if (!empty($parts['host']) && strcasecmp($parts['host'], preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'])) === 0) {
+            $back = $ref;
+        }
     }
+
+    tpl_render('header', ['page_title' => t('csrf_error_title')]);
+    tpl_render('csrf_error', ['back' => $back]);
+    tpl_render('footer');
+    exit;
 }

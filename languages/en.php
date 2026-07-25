@@ -419,6 +419,8 @@ The link expires in one hour.',
     'ntf_pollchg_removed'             => 'An option was removed: %s',
     'ntf_pollchg_time'                => 'The start time changed to %s',
     'ntf_pollchg_comment'             => 'The description was updated.',
+    'ntf_pollchg_deadline'            => 'Voting now closes at %s',
+    'ntf_pollchg_deadline_off'        => 'Voting will no longer close automatically.',
     'poll_end_confirm'                => 'End this poll now? The current leader becomes the game (a tie goes to the earlier option).',
     'poll_end_yes'                    => 'Yes, end voting',
     'msg_to_poll_owner'               => 'Message to %s (poll owner)',
@@ -491,4 +493,24 @@ The link expires in one hour.',
     'opt_table_names_any'    => 'Anyone can set and edit table names',
     'table_name_label'       => 'Table name (optional)',
     'table_rename'           => 'Edit table name',
+
+    // ---- Poll deadline live preview (JS, add_poll.php) --------------------------
+    'poll_deadline_preview'   => 'This poll will be automatically resolved on {date} ({weekday}) at {time}.',
+    'poll_no_auto_deadline'   => 'No automatic deadline will be set.',
+    'weekday_0'               => 'Sunday',
+    'weekday_1'               => 'Monday',
+    'weekday_2'               => 'Tuesday',
+    'weekday_3'               => 'Wednesday',
+    'weekday_4'               => 'Thursday',
+    'weekday_5'               => 'Friday',
+    'weekday_6'               => 'Saturday',
+
+    'opt_timezone'            => 'Site timezone',
+    'opt_timezone_note'       => 'Game times and poll deadlines run on this clock. Current time: %s.',
+
+    // ---- Expired/invalid CSRF form token page -----------------------------------
+    'csrf_error_title'        => 'Form expired',
+    'csrf_error_body'         => "This form has expired or is invalid — this can happen if the page was left open for a long time. Please go back and try again.",
+    'csrf_error_home'         => 'Back to the home page',
 ];
+

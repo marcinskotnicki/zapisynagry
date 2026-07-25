@@ -110,6 +110,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- overnight_grace_hours: times up to N hours BEFORE a day's opening hour
     -- still count as that same day (early setup); anything earlier flips to
     -- "after midnight / next morning" on overnight days. See day_rel_min().
+    -- timezone: the clock the SITE runs on. Event start times, poll deadlines
+    -- and the "has this deadline passed?" sweep are all wall-clock times, so
+    -- this must match the venue's actual timezone or polls resolve at the wrong
+    -- moment. Any PHP timezone identifier; an unknown value falls back to UTC.
+    ('timezone',                     'Europe/Warsaw'),
     ('overnight_grace_hours',        '1'),
     -- allow_start_outside_hours: 1 = a game/poll may start at any time (current
     -- behaviour); 0 = the start-time input is clamped to the day's own hours
