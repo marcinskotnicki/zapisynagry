@@ -7,7 +7,8 @@
  *                          thumbnail, name, red "waga" band, centred info rows
  *                          (players / start / brings / language), the green
  *                          rules label, comment + discussion as black bands,
- *                          and the "+ add comment" pill.
+ *                          and the "add comment" pill (.comment-add, shared
+ *                          with the poll card so the two match).
  *    RIGHT (.gc-players) — light grey panel of NUMBERED SLOTS (1..max_players):
  *                          a filled slot shows "Gracz N: name (rules note)" with
  *                          a red resign button; an empty slot is a dark
@@ -107,8 +108,10 @@
                         </ul>
                     <?php endif; ?>
                     <?php if (!$readonly): ?>
-                        <details class="gc-addcomment">
-                            <summary>+ <?= e(t('comment_add')) ?></summary>
+                        <?php // Same class (and so the same pill) as the poll card's
+                              // comment box — the theme's "+" comes from CSS. ?>
+                        <details class="comment-add">
+                            <summary><?= e(t('comment_add')) ?></summary>
                             <form method="post" action="add_comment.php">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">

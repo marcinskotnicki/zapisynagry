@@ -24,18 +24,80 @@
     background: transparent; border: none; padding: 0; box-shadow: none;
 }
 
+/* ---- Poll cards -----------------------------------------------------------
+ *  poll_card.php is NOT overridden for this theme (one template, three looks),
+ *  so the whole classic look is done here by restyling the light markup to echo
+ *  the game card sitting next to it: the same dark gradient shell with rounded
+ *  corners, the same full-bleed "band" rows for its facts, and the same light
+ *  grey action rows the player slots use. Everything is scoped to .tpl-classic
+ *  so the light and dark themes keep their own poll card.
+ * ------------------------------------------------------------------------- */
 .tpl-classic .poll-card {
-    background:#595959;
-    box-shadow:0 2px 8px rgba(0, 0, 0, .35);
-    color:white;
+    background: linear-gradient(var(--gc-dark-1), var(--gc-dark-2));
+    color: #eee;
+    border: none;                        /* light's 1px box + 4px left accent */
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    padding: 0;                          /* the bands below run edge to edge */
 }
-.poll-deadline{color:#cbcbcb;}
-.poll-card .btn-small{background:#333;color:white;text-transform:uppercase;border:none;font-size: 0.62rem;padding: 0.2rem 0.5rem;font-family:system-ui, "Segoe UI", Roboto, Arial, sans-serif;}
-.poll-option{background:var(--gc-dark-1);border:none}
-a.poll-opt-name{color:white;}
-.poll-opt-votes{color:white;}
-.poll-card .rules-good{color:var(--gc-green);}
-.poll-card .game-rules{font-weight:bold;}
+
+/* Header strip: reads like .gc-tabs, with the POLL tag standing in for the
+   delete tab's red. */
+.tpl-classic .poll-head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
+    padding: 0.35rem 0.4rem; margin: 0;
+}
+.tpl-classic .poll-tag {
+    background: var(--gc-red); color: #fff;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 6px;
+}
+.tpl-classic .poll-card .game-time { color: #fff; font-size: 0.95rem; }
+.tpl-classic .poll-by { font-size: 0.8rem; color: #ddd; }
+.tpl-classic .poll-by strong { color: #fff; }
+.tpl-classic .poll-card .msg-icon { color: #ffb3ab; }
+
+/* The head's buttons are the poll's equivalent of the game card's tabs, so
+   they borrow .gc-tab's shape exactly. */
+.tpl-classic .poll-card .btn-small {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 6px; border: none;
+    background: #555; color: #fff; text-decoration: none;
+}
+.tpl-classic .poll-card .btn-small:hover { filter: brightness(1.15); text-decoration: none; }
+
+/* Fact rows -> .gc-band, including the hairline between neighbours. */
+.tpl-classic .poll-deadline,
+.tpl-classic .poll-card .game-rules,
+.tpl-classic .poll-card .game-comment {
+    background: var(--gc-band); color: #ddd;
+    margin: 0; padding: 0.3rem 0.5rem; font-size: 0.85rem;
+}
+.tpl-classic .poll-deadline strong { color: #fff; font-weight: 600; }
+.tpl-classic .poll-card .game-rules { font-weight: 600; }
+.tpl-classic .poll-card .game-comment { background: #0d0d0d; font-size: 0.8rem; line-height: 1.35; }
+.tpl-classic .poll-deadline + .game-rules,
+.tpl-classic .poll-card .game-rules + .game-comment { border-top: 1px solid rgba(255, 255, 255, .06); }
+.tpl-classic .poll-card .rules-good { color: var(--gc-green); }
+.tpl-classic .poll-card .rules-mid  { color: #e0c341; }
+.tpl-classic .poll-card .rules-bad  { color: #ff6b5e; }
+
+/* Candidates are the poll's actionable rows, so they mirror .gc-slot: light
+   grey on the dark card, exactly like the player slots. */
+.tpl-classic .poll-options { margin: 0; padding: 0.5rem; gap: 0.35rem; }
+.tpl-classic .poll-option {
+    background: var(--gc-row); border: none; border-radius: 4px;
+    padding: 0.3rem 0.5rem; font-size: 0.85rem; color: #333;
+}
+.tpl-classic .poll-opt-name, .tpl-classic a.poll-opt-name { color: #111; font-weight: 600; }
+.tpl-classic a.poll-opt-name { text-decoration: none; border-bottom: 1px dotted rgba(0, 0, 0, .45); }
+.tpl-classic a.poll-opt-name:hover { border-bottom-style: solid; }
+.tpl-classic .poll-opt-votes { color: #555; }
+/* The vote CTA is the poll's "Zapisz się", so it takes .gc-signup's dark fill;
+   the cancel-vote button stays quiet grey beside it. */
+.tpl-classic .poll-option .btn-primary { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+.tpl-classic .poll-option .btn-primary:hover { background: #000; }
+.tpl-classic .poll-option .btn-small { background: #777; }
 
 .tpl-classic .gc-info {
     width: 235px; flex: 0 0 235px;
@@ -76,18 +138,27 @@ a.poll-opt-name{color:white;}
 .tpl-classic .gc-comment { background: #0d0d0d; font-size: 0.8rem; line-height: 1.35; }
 .tpl-classic .gc-comment .c-name { color: #bbb; }
 
-.tpl-classic .gc-info .discussion { border-top: none; margin: 0; padding: 0; }
-.tpl-classic .gc-info .comment-list { gap: 0; margin: 0; }
-.tpl-classic .gc-info .comment-list li { background: #0d0d0d; border: none; border-radius: 0; color: #ccc; border-top: 1px solid rgba(255,255,255,.06); }
-.tpl-classic .gc-addcomment { margin-top: 0.5rem; }
-.tpl-classic .gc-addcomment summary {
+/* Discussion + "add comment": ONE set of rules for both card types. Both
+   templates use .comment-add, so the pill is identical on a game and on a
+   poll — which is the whole point of the shared class. */
+.tpl-classic .gc-info .discussion,
+.tpl-classic .poll-card .discussion { border-top: none; margin: 0; padding: 0; }
+.tpl-classic .gc-info .comment-list,
+.tpl-classic .poll-card .comment-list { gap: 0; margin: 0; }
+.tpl-classic .gc-info .comment-list li,
+.tpl-classic .poll-card .comment-list li { background: #0d0d0d; border: none; border-radius: 0; color: #ccc; border-top: 1px solid rgba(255,255,255,.06); }
+.tpl-classic .comment-add { margin-top: 0.5rem; padding-bottom: 0.2rem; }
+.tpl-classic .comment-add summary {
     display: inline-block; cursor: pointer; list-style: none;
     background: #4a4a4a; color: #fff; border-radius: 999px;
     padding: 0.25rem 0.9rem; font-size: 0.8rem;
 }
-.tpl-classic .gc-addcomment summary::-webkit-details-marker { display: none; }
-.tpl-classic .gc-addcomment form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.tpl-classic .gc-addcomment input, .tpl-classic .gc-addcomment textarea { width: 100%; box-sizing: border-box; }
+/* The "+" is a flourish of THIS theme only, so it lives here rather than in the
+   markup — that way the shared template stays clean for light and dark. */
+.tpl-classic .comment-add summary::before { content: "+ "; }
+.tpl-classic .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-classic .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.tpl-classic .comment-add input, .tpl-classic .comment-add textarea { width: 100%; box-sizing: border-box; }
 
 .tpl-classic .gc-players {
     background: var(--gc-panel);
@@ -148,7 +219,8 @@ a.poll-opt-name{color:white;}
 
 .tpl-classic .gc-more-slots { font-size: 0.78rem; color: #555; font-style: italic; margin: 0.1rem 0 0.4rem 0.2rem; }
 
-.tpl-classic .gc-info .comment-list li:nth-child(even) { background: #181818; }
+.tpl-classic .gc-info .comment-list li:nth-child(even),
+.tpl-classic .poll-card .comment-list li:nth-child(even) { background: #181818; }
 
 @media (max-width: 700px) {
     .tpl-classic .game-card { flex-direction: column; width:100%}
