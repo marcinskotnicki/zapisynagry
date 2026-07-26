@@ -104,6 +104,20 @@
             </div>
         <?php endif; ?>
 
+        <?php // Normally the first candidate to reach its player count ends the
+              // poll for everyone. Ticking this lets every option keep gathering
+              // votes until the deadline instead. Needs a deadline to mean
+              // anything — poll_check_resolve() ignores it without one, so the
+              // note spells that out rather than letting someone create a poll
+              // that quietly can't finish. ?>
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="wait_deadline" value="1" <?= (int)($draft['wait_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
+                <?= e(t('poll_wait_deadline')) ?>
+            </label>
+            <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
+        </div>
+
         <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
             <div class="field field-check">
                 <label>

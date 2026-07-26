@@ -508,6 +508,12 @@ The link expires in one hour.',
     'opt_timezone'            => 'Site timezone',
     'opt_timezone_note'       => 'Game times and poll deadlines run on this clock. Current time: %s.',
 
+    // ---- Poll: run to the deadline instead of ending on the first full option ----
+    'poll_wait_deadline'      => 'Keep voting open until the deadline',
+    'poll_wait_deadline_note' => 'By default the poll ends as soon as one game gets enough players. Tick this to let every option keep collecting votes until the deadline. Only works if a deadline is set.',
+    'ntf_pollchg_wait_on'     => 'Voting will now run to the deadline, even if a game fills up first.',
+    'ntf_pollchg_wait_off'    => 'Voting will now end as soon as a game gets enough players.',
+
     // ---- Deleting a poll --------------------------------------------------------
     'poll_delete'             => 'Delete',
     'delpoll_title'           => 'Delete this poll?',

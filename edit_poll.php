@@ -125,6 +125,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run('UPDATE polls SET allow_others_add = ? WHERE id = ?', [$allowOthers, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' allow_others_add -> ' . $allowOthers);
             }
+            // "Run to the deadline" — same treatment: this checkbox is always on
+            // the form, so an absent key genuinely means unticked. Changing it
+            // can END the poll on the spot: switching it OFF while a candidate is
+            // already full means the threshold now applies, which the resolve
+            // check below acts on.
+            $waitDeadline = isset($_POST['wait_deadline']) ? 1 : 0;
+            if ($waitDeadline !== (int)($poll['wait_for_deadline'] ?? 0)) {
+                db_run('UPDATE polls SET wait_for_deadline = ? WHERE id = ?', [$waitDeadline, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' wait_for_deadline -> ' . $waitDeadline);
+                notify_poll_changed($poll, $waitDeadline
+                    ? t('ntf_pollchg_wait_on')
+                    : t('ntf_pollchg_wait_off'));
+            }
             // The poll's own description. Junk/oversize is refused rather than
             // silently dropped, since this form can show an error.
             $comment = trim($_POST['comment'] ?? '');
@@ -163,6 +176,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             : t('ntf_pollchg_deadline', substr($newDeadline, 0, 16)));
                     }
                 }
+            }
+            // Both edits above can un-freeze a poll that was being held open:
+            // clearing "run to the deadline", or removing the deadline that made
+            // the flag effective at all. Either way the threshold applies again
+            // and a candidate may already be over it, so re-check before
+            // leaving — otherwise the poll would sit full until the next vote.
+            if ($error === null) {
+                $newGameId = poll_check_resolve($pollId);
+                if ($newGameId) { redirect('index.php?day=' . $activeDay . '#game-' . $newGameId); }
             }
             redirect('index.php?day=' . $activeDay . '#poll-' . $pollId);
         }

@@ -500,6 +500,12 @@ Link wygasa za godzinę.',
     'opt_timezone'            => 'Strefa czasowa serwisu',
     'opt_timezone_note'       => 'Godziny gier i terminy ankiet działają wg tego zegara. Aktualny czas: %s.',
 
+    // ---- Poll: run to the deadline instead of ending on the first full option ----
+    'poll_wait_deadline'      => 'Czekaj na koniec głosowania',
+    'poll_wait_deadline_note' => 'Domyślnie ankieta kończy się, gdy pierwsza gra zbierze komplet graczy. Zaznacz, aby wszystkie propozycje zbierały głosy aż do terminu zakończenia. Działa tylko, gdy ustawiono termin.',
+    'ntf_pollchg_wait_on'     => 'Głosowanie potrwa teraz do wyznaczonego terminu, nawet jeśli któraś gra zbierze komplet graczy.',
+    'ntf_pollchg_wait_off'    => 'Głosowanie zakończy się teraz, gdy któraś gra zbierze komplet graczy.',
+
     // ---- Deleting a poll --------------------------------------------------------
     'poll_delete'             => 'Usuń',
     'delpoll_title'           => 'Usunąć głosowanie?',

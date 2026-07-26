@@ -68,6 +68,14 @@
                 </label>
             </div>
         <?php endif; ?>
+        <?php // Run to the deadline instead of ending on the first full candidate. ?>
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="wait_deadline" value="1" <?= (int)($poll['wait_for_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
+                <?= e(t('poll_wait_deadline')) ?>
+            </label>
+            <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
+        </div>
         <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>
     </form>
 

@@ -3,7 +3,8 @@
  *  inc/polls.php — poll vote tallying and resolution.
  * -----------------------------------------------------------------------------
  *  A poll holds candidate games (poll_games); people vote (poll_votes) for one
- *  or more candidates. The moment a candidate's votes reach its required_players
+ *  or more candidates. Unless the poll opted to wait for its deadline (the
+ *  wait_for_deadline column), the moment a candidate's votes reach its required_players
  *  threshold, the poll RESOLVES: that candidate becomes a real game on the table,
  *  everyone who voted for it is assigned as a player (overflow past max_players
  *  goes to the reserve list), and the whole poll is deleted.
@@ -51,6 +52,19 @@ function poll_user_voted($pollGameId, $userId) {
 function poll_check_resolve($pollId) {
     $poll = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
     if (!$poll) return null;
+
+    // The proposer can ask for the poll to run its full course, so that every
+    // candidate keeps collecting votes instead of the first one to fill ending
+    // it for everybody. Then only the deadline sweep (or a manual "end voting
+    // now") resolves it.
+    //
+    // DELIBERATELY conditional on there BEING a deadline: honouring the flag
+    // without one would leave a poll with no way to ever finish by itself. With
+    // no deadline set we fall through to the normal threshold trigger, which is
+    // the behaviour the poll would have had anyway.
+    if ((int)($poll['wait_for_deadline'] ?? 0) === 1 && !empty($poll['deadline'])) {
+        return null;
+    }
 
     $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollId]);
     foreach ($cands as $c) {

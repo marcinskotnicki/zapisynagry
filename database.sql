@@ -369,6 +369,7 @@ CREATE TABLE polls (
     require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; votes need an email (only honoured when option require_email = 2); carried into the resolved game
     allow_others_add INTEGER NOT NULL DEFAULT 0,  -- 0/1; proposer opted in to letting anyone add candidate games (they can still remove them)
     add_self         INTEGER NOT NULL DEFAULT 1,
+    wait_for_deadline INTEGER NOT NULL DEFAULT 0, -- 0/1; 1 = ignore the "a candidate hit its player count" trigger and run to the deadline, so every option keeps collecting votes. Only honoured when a deadline is actually set (see poll_check_resolve), or the poll could never end.
     deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (table_id)         REFERENCES game_tables(id) ON DELETE CASCADE,
