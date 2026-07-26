@@ -3,8 +3,9 @@
  *  templates/light/edit_poll.php — edit a live poll. Presentation only.
  * -----------------------------------------------------------------------------
  *  Two independent parts on one page:
- *    - the settings form (posts action=save): start time, voting deadline,
- *      description and the "let others add games" opt-in,
+ *    - the settings form (posts action=save): proposer name/email, start time,
+ *      voting deadline, rules explanation, the per-poll email rule, description
+ *      and the two opt-ins — the same set the game edit form offers,
  *    - the candidate list, each row with its own tiny remove form
  *      (action=remove), plus a link into add_poll_game.php's live mode.
  *  They're separate forms so removing a game never depends on the time field
@@ -39,6 +40,24 @@
         <?= $csrf ?>
         <input type="hidden" name="action" value="save">
         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
+
+        <?php // Proposer details, same pair the game edit form offers. Changing
+              // the email moves the verification target for a guest-made poll,
+              // exactly as it does on a game. ?>
+        <div class="field-row">
+            <div class="field">
+                <label for="p_name"><?= e(t('poll_name')) ?></label>
+                <input type="text" id="p_name" name="name" value="<?= e($poll['proposer_name'] ?? '') ?>">
+            </div>
+            <div class="field">
+                <label for="p_email"><?= e(t('poll_email')) ?></label>
+                <input type="email" id="p_email" name="email" value="<?= e($poll['proposer_email'] ?? '') ?>">
+                <?php if (opt('msg_email_field') !== ''): // optional admin note above email inputs ?>
+                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="field">
             <label for="start_time"><?= e(t('poll_start')) ?></label>
             <input type="time" id="start_time" name="start_time" value="<?= e($poll['start_time']) ?>"
@@ -59,6 +78,27 @@
             <label for="p_comment"><?= e(t('poll_comment')) ?></label>
             <textarea id="p_comment" name="comment" rows="3"><?= e((string)$poll['comment']) ?></textarea>
         </div>
+
+        <div class="field">
+            <label for="p_explain"><?= e(t('poll_explain')) ?></label>
+            <select id="p_explain" name="explain_rules">
+                <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
+                    <option value="<?= $code ?>"<?= (int)$poll['explain_rules'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <?php // Per-poll email rule — only exists in option mode 2, where the
+              // proposer decides. In the other modes the box isn't rendered and
+              // the controller leaves the stored value alone. ?>
+        <?php if (email_require_mode() === 2): ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="require_email" value="1" <?= (int)($poll['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('f_require_email')) ?>
+                </label>
+            </div>
+        <?php endif; ?>
 
         <?php if (poll_optin_relevant($poll)): // hidden when nothing is restricted anyway ?>
             <div class="field field-check">

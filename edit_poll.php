@@ -106,13 +106,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'save') {
-        // Start time only (the candidate list is edited by its own buttons).
+        // Poll-level settings (the candidate list is edited by its own buttons).
         $start = trim($_POST['start_time'] ?? '');
+        // Read these ONLY when the form actually submitted them. An absent key is
+        // not an empty value: a POST from an older/partial form must not wipe the
+        // proposer's name or email. (Same principle as the checkboxes below —
+        // absence means "not offered", not "cleared".)
+        $pName  = array_key_exists('name', $_POST)
+            ? trim($_POST['name']) : (string)($poll['proposer_name'] ?? '');
+        $pEmail = array_key_exists('email', $_POST)
+            ? trim($_POST['email']) : (string)($poll['proposer_email'] ?? '');
+        // Per-poll email rule (option mode 2 only): the box is on the form and
+        // can be toggled here. In the other modes it isn't rendered, so a save
+        // must keep the stored value rather than read the absence as "off".
+        $reqEmail = email_require_mode() === 2
+            ? (isset($_POST['require_email']) ? 1 : 0)
+            : (int)($poll['require_email'] ?? 0);
+
         if (!is_valid_time($start)) {
             $error = t('error_time_invalid');
         } elseif (!start_within_event_hours($start, $day)) {
             $error = t('error_start_outside_hours');
+        } elseif ($pName !== '' && !text_has_content($pName)) {
+            $error = t('error_name_meaningless');    // punctuation-only, not a name
+        } elseif (text_too_long($pName, TEXT_NAME_MAX)) {
+            $error = t('error_too_long', TEXT_NAME_MAX);
+        } elseif ((email_require_mode() === 1 || $reqEmail === 1) && $pEmail === '') {
+            // Globally required, or the proposer demands emails from voters — in
+            // which case their own is mandatory too, same rule as add_poll.php.
+            $error = t('error_email_required');
+        } elseif ($pEmail !== '' && !email_valid($pEmail)) {
+            $error = t('error_email_invalid');       // non-empty but not X@Y.Z-shaped
         } else {
+            // Proposer details and the rules-explanation choice, mirroring the
+            // game edit form. Written together since they're one logical edit.
+            $explain = array_key_exists('explain_rules', $_POST)
+                ? min(2, max(0, (int)$_POST['explain_rules']))
+                : (int)$poll['explain_rules'];
+            if ($pName !== ($poll['proposer_name'] ?? '')
+                || $pEmail !== ($poll['proposer_email'] ?? '')
+                || $explain !== (int)$poll['explain_rules']
+                || $reqEmail !== (int)($poll['require_email'] ?? 0)) {
+                db_run('UPDATE polls SET proposer_name = ?, proposer_email = ?, explain_rules = ?, require_email = ? WHERE id = ?',
+                       [$pName !== '' ? $pName : null, $pEmail !== '' ? $pEmail : null,
+                        $explain, $reqEmail, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' details updated');
+            }
             // "Let others add games" rides along on the same form; only a real
             // change is logged/emailed, so re-saving the form is quiet.
             // Only honour the checkbox when it was actually on the form — an
