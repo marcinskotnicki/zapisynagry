@@ -7,6 +7,10 @@
  *  cancel-vote) control. Cancel-vote is a tiny inline POST form; voting links to
  *  the full vote form (where name/email are collected).
  *
+ *  LAYOUT: two rows — .poll-head (time, proposer, and the POLL tag pushed to the
+ *  right) then .poll-actions (every button, delete first). Splitting them is what
+ *  keeps the tag off the same line as the buttons, where it looked like one.
+ *
  *  HEAD CONTROLS and who sees them:
  *    end voting now  — the proposer's ACCOUNT or an admin (accounts only).
  *    edit / delete   — verify_can_show_buttons(): owner, admin, or a guest who
@@ -23,44 +27,59 @@
 $canVote = !$readonly && can_signup();
 ?>
 <article class="poll-card" id="poll-<?= (int)$poll['id'] ?>">
+    <?php // Line 1: what this is and when. The tag sits LAST in the markup so it
+          // lands at the right-hand end of the row (see .poll-tag's auto margin);
+          // as the leftmost red pill it used to read as a delete button. ?>
     <div class="poll-head">
-        <span class="poll-tag"><?= e(t('poll_label')) ?></span>
         <span class="game-time"><?= e($poll['start_time']) ?></span>
         <?php if (!empty($poll['proposer_name'])): ?>
             <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong>
-                <?php if (!$readonly && messaging_allowed() && !empty($poll['proposer_email'])): // mail the proposer ?>
+                <?php // Stays inline with the name — it messages that person,
+                      // so it belongs to the name rather than to the actions. ?>
+                <?php if (!$readonly && messaging_allowed() && !empty($poll['proposer_email'])): ?>
                     <a class="msg-icon" href="message.php?poll_owner=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_owner')) ?>" aria-label="<?= e(t('msgbtn_poll_owner')) ?>">&#9993;</a>
                 <?php endif; ?>
             </span>
         <?php endif; ?>
-        <?php if (!$readonly && messaging_allowed()): // mail everyone who voted ?>
-            <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
-        <?php endif; ?>
-        <?php
-        // "End voting now": the proposer's own account, or an admin. Accounts
-        // only — guest-created polls just wait for threshold/deadline.
-        $uid = current_user()['id'] ?? 0;
-        $canEnd = !$readonly && is_logged_in()
-                  && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
-        ?>
-        <?php if ($canEnd): ?>
-            <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
-        <?php endif; ?>
-        <?php // Editing follows the usual button rule (owner / admin / verified
-              // guest), unlike ending which is account-only. ?>
-        <?php if (!$readonly && verify_can_show_buttons($poll['proposer_user_id'])): ?>
-            <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
-            <?php // Same rule as editing, so a poll made from an account can only
-                  // be deleted by that account or an admin. delete_poll.php
-                  // re-checks it — this only hides the button. ?>
-            <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
-        <?php endif; ?>
-        <?php // Shown to anyone allowed to add — the proposer, an admin, or
-              // everyone when the proposer opted in. ?>
-        <?php if (!$readonly && poll_can_add_candidate($poll)): ?>
-            <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
-        <?php endif; ?>
+        <span class="poll-tag"><?= e(t('poll_label')) ?></span>
     </div>
+
+    <?php
+    // "End voting now": the proposer's own account, or an admin. Accounts only —
+    // guest-created polls just wait for their threshold or deadline.
+    $uid = current_user()['id'] ?? 0;
+    $canEnd = !$readonly && is_logged_in()
+              && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
+    // Editing and deleting follow the usual button rule (owner / admin /
+    // verified guest), unlike ending which is account-only.
+    $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
+    $canMsgAll   = !$readonly && messaging_allowed();
+    $canAddCand  = !$readonly && poll_can_add_candidate($poll);
+    ?>
+    <?php // Skip the row entirely when it would be empty — the read-only
+          // (archived) view shows no controls at all. ?>
+    <?php if ($canEditPoll || $canEnd || $canMsgAll || $canAddCand): ?>
+        <?php // Line 2: the actions, delete first, mirroring the game card's
+              // DELETE / EDIT tab order. Wraps on narrow screens. ?>
+        <div class="poll-actions">
+            <?php if ($canEditPoll): ?>
+                <?php // delete_poll.php re-checks this — the button only hides. ?>
+                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
+                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+            <?php endif; ?>
+            <?php if ($canEnd): ?>
+                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
+            <?php endif; ?>
+            <?php // Shown to anyone allowed to add — the proposer, an admin, or
+                  // everyone when the proposer opted in. ?>
+            <?php if ($canAddCand): ?>
+                <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+            <?php endif; ?>
+            <?php if ($canMsgAll): // mail everyone who voted ?>
+                <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <?php if (!empty($poll['deadline'])): // when voting closes (auto-resolves after) ?>
         <p class="poll-deadline"><?= e(t('poll_deadline')) ?>: <strong><?= e(substr($poll['deadline'], 0, 16)) ?></strong></p>
     <?php endif; ?>

@@ -44,15 +44,15 @@
 /* Header strip: reads like .gc-tabs, with the POLL tag standing in for the
    delete tab's red. */
 .tpl-classic .poll-head {
-    display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
-    padding: 0.35rem 0.4rem; margin: 0;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+    padding: 0.35rem 0.4rem 0.25rem; margin: 0;
 }
 /* NOT a solid red pill: that is exactly what .gc-tab-del (the game card's
-   DELETE tab) looks like, and it sits in the same top-left corner — people read
-   it as a button. An outlined label in the card's own grey reads as a caption,
-   which is what it is. It also now sits to the RIGHT of the real buttons. */
+   DELETE tab) looks like, and it used to sit in the same top-left corner —
+   people read it as a button. An outlined label in the card's own grey reads as
+   a caption, which is what it is. (Its position is handled by the shared rules:
+   last in .poll-head, pushed right by an auto margin.) */
 .tpl-classic .poll-tag {
-    order: 2; margin-left: auto;
     background: transparent; color: #cfcfcf;
     border: 1px solid rgba(255, 255, 255, .35);
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -62,10 +62,13 @@
 .tpl-classic .poll-by { font-size: 0.8rem; color: #ddd; }
 .tpl-classic .poll-by strong { color: #fff; }
 .tpl-classic .poll-card .msg-icon { color: #ffb3ab; }
-/* Light pushes "end voting" to the right edge with an auto margin; here the tag
-   claims that spot instead, so the buttons stay grouped together on the left
-   (two auto margins in one flex row would split the gap between them). */
-.tpl-classic .poll-end-btn { margin-left: 0; }
+
+/* The actions row is the poll's answer to .gc-tabs, so it gets the same padding
+   and left alignment. .poll-head above it holds only the time/proposer/tag. */
+.tpl-classic .poll-actions {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
+    padding: 0 0.4rem 0.35rem; margin: 0;
+}
 
 /* The head's buttons are the poll's equivalent of the game card's tabs, so
    they borrow .gc-tab's shape exactly. */
