@@ -33,7 +33,11 @@
     <?php endif; ?>
 
     <?php // ---- Start time ---------------------------------------------- ?>
-    <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>"
+    <?php // The save button lives at the BOTTOM of the page, below the candidate
+          // list, so it needs form="poll-settings" to reach back up to this form.
+          // Wrapping the candidate list inside this form instead would nest the
+          // per-candidate remove forms, which isn't valid HTML. ?>
+    <form id="poll-settings" method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>"
         data-day-date="<?= e($day['day_date'] ?? '') ?>"
         data-day-start="<?= e($day['start_time'] ?? '') ?>"
         data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
@@ -116,7 +120,6 @@
             </label>
             <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
         </div>
-        <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>
     </form>
 
     <?php // ---- Candidates ---------------------------------------------- ?>
@@ -144,8 +147,13 @@
         <?php endforeach; ?>
     </ul>
 
-    <p>
-        <a class="btn" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+    <?php // Adding a candidate leaves this page, so it reads as its own action
+          // above the save/cancel pair rather than sitting among them. ?>
+    <p class="poll-form-add">
+        <a class="btn btn-danger" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+    </p>
+    <p class="poll-form-actions">
+        <button type="submit" form="poll-settings" class="btn btn-primary"><?= e(t('save')) ?></button>
         <a class="btn" href="index.php#poll-<?= (int)$poll['id'] ?>"><?= e(t('cancel')) ?></a>
     </p>
 </div>

@@ -56,5 +56,5 @@ $title      = $title     ?? t('addgame_title');
         </button>
     </p>
 
-    <p class="muted"><a href="index.php"><?= e(t('back')) ?></a></p>
+    <p><a class="btn" href="index.php"><?= e(t('back')) ?></a></p>
 </div>

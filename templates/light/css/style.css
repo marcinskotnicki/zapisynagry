@@ -145,6 +145,10 @@ input, select, textarea {
 .btn-small { margin-top: 0; padding: 0.35rem 0.7rem; font-size: 0.85rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 .btn-small:hover { background: var(--border); text-decoration: none; }
 .btn-danger { background: var(--error); color: #fff; border-color: var(--error); }
+/* Without this, .btn-small:hover (same specificity, defined just above) won
+   the cascade and repainted a red button light grey — white text on grey.
+   Restating the background is what keeps that from applying. */
+.btn-danger:hover { background: var(--error); border-color: var(--error); color: #fff; filter: brightness(0.9); text-decoration: none; }
 
 /* ---- Admin: data tables --------------------------------------------------- */
 .grid { width: 100%; border-collapse: collapse; }
@@ -322,6 +326,10 @@ html { scroll-behavior: smooth; }
 .game-archived .game-name { text-decoration: line-through; }
 
 .delgame-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+/* Poll forms: the "add a game" call to action sits on its own line, with
+   save + cancel on the line below it. */
+.poll-form-add { margin: 1rem 0 0.6rem; }
+.poll-form-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
 
 .discussion { margin-top: 0.6rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
 .comment-list { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }

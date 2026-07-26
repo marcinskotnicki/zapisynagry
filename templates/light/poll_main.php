@@ -142,10 +142,16 @@
             </ul>
         <?php endif; ?>
 
-        <div class="poll-buttons">
-            <button type="submit" name="do" value="addgame" class="btn"><?= e(t('poll_addgame')) ?></button>
+        <?php // "Add a game" is the call to action while building the poll, so it
+              // gets its own line and the same red as the edit screen's copy of it.
+              // Save + cancel sit together underneath, the way every other form
+              // on the site ends. ?>
+        <p class="poll-form-add">
+            <button type="submit" name="do" value="addgame" class="btn btn-danger"><?= e(t('poll_addgame')) ?></button>
+        </p>
+        <p class="poll-form-actions">
             <button type="submit" name="do" value="finish" class="btn btn-primary"><?= e(t('poll_finish')) ?></button>
             <button type="submit" name="do" value="cancel" class="btn"><?= e(t('cancel')) ?></button>
-        </div>
+        </p>
     </form>
 </div>

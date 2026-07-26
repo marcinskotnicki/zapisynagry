@@ -39,6 +39,7 @@ $link_base = $link_base ?? 'add_game.php';   // where a chosen result leads
     <?php endif; ?>
 
     <p class="muted">
-        <a href="<?= e($link_base) ?>?table=<?= (int)$table['id'] ?>"><?= e(t('back')) ?></a>
+        <?php // Same grey .btn as every other cancel/back control on the site. ?>
+        <a class="btn" href="<?= e($link_base) ?>?table=<?= (int)$table['id'] ?>"><?= e(t('back')) ?></a>
     </p>
 </div>
