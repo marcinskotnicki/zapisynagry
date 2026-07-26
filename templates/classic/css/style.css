@@ -39,6 +39,7 @@
     border-radius: 12px; overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
     padding: 0;                          /* the bands below run edge to edge */
+    padding-bottom: 0.6rem;
 }
 
 /* Header strip: reads like .gc-tabs, with the POLL tag standing in for the
@@ -147,7 +148,7 @@
 .tpl-classic .poll-card .comment-list { gap: 0; margin: 0; }
 .tpl-classic .gc-info .comment-list li,
 .tpl-classic .poll-card .comment-list li { background: #0d0d0d; border: none; border-radius: 0; color: #ccc; border-top: 1px solid rgba(255,255,255,.06); }
-.tpl-classic .comment-add { margin-top: 0.5rem; padding-bottom: 0.2rem; }
+.tpl-classic .comment-add { margin-top: 0.5rem; padding-bottom: 0.2rem; text-align:center;}
 .tpl-classic .comment-add summary {
     display: inline-block; cursor: pointer; list-style: none;
     background: #4a4a4a; color: #fff; border-radius: 999px;
