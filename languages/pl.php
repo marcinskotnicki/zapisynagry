@@ -500,6 +500,16 @@ Link wygasa za godzinę.',
     'opt_timezone'            => 'Strefa czasowa serwisu',
     'opt_timezone_note'       => 'Godziny gier i terminy ankiet działają wg tego zegara. Aktualny czas: %s.',
 
+    // ---- Deleting a poll --------------------------------------------------------
+    'poll_delete'             => 'Usuń',
+    'delpoll_title'           => 'Usunąć głosowanie?',
+    'delpoll_confirm'         => 'Czy na pewno chcesz usunąć to głosowanie?',
+    'delpoll_note'            => 'Wszystkie propozycje gier i oddane głosy zostaną usunięte. Tej operacji nie można cofnąć.',
+    'delpoll_back'            => 'Nie, wróć',
+    'delpoll_everything'      => 'Tak, usuń głosowanie',
+    'ntf_polldel_subject'     => 'Głosowanie, w którym brałeś/aś udział, zostało usunięte',
+    'ntf_polldel_body'        => "Głosowanie, w którym oddano Twój głos, zostało usunięte przez osobę, która je utworzyła.\n\nOtwórz stronę wydarzenia, aby zobaczyć aktualne propozycje.",
+
     // ---- Expired/invalid CSRF form token page -----------------------------------
     'csrf_error_title'        => 'Wygasł formularz',
     'csrf_error_body'         => 'Ten formularz wygasł lub jest nieprawidłowy — mogło to się zdarzyć, jeśli strona była otwarta zbyt długo. Wróć i spróbuj ponownie.',

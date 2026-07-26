@@ -7,6 +7,13 @@
  *  cancel-vote) control. Cancel-vote is a tiny inline POST form; voting links to
  *  the full vote form (where name/email are collected).
  *
+ *  HEAD CONTROLS and who sees them:
+ *    end voting now  — the proposer's ACCOUNT or an admin (accounts only).
+ *    edit / delete   — verify_can_show_buttons(): owner, admin, or a guest who
+ *                      passes the verification challenge on the target page.
+ *    add a game      — poll_can_add_candidate() (owner, admin, or anyone when
+ *                      the proposer opted in).
+ *
  *  RENDER VARS:
  *    $poll     — a poll row plus ['games'] = candidates, each carrying 'votes'
  *                and 'voted' (whether the current user has voted for it).
@@ -43,6 +50,10 @@ $canVote = !$readonly && can_signup();
               // guest), unlike ending which is account-only. ?>
         <?php if (!$readonly && verify_can_show_buttons($poll['proposer_user_id'])): ?>
             <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+            <?php // Same rule as editing, so a poll made from an account can only
+                  // be deleted by that account or an admin. delete_poll.php
+                  // re-checks it — this only hides the button. ?>
+            <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
         <?php endif; ?>
         <?php // Shown to anyone allowed to add — the proposer, an admin, or
               // everyone when the proposer opted in. ?>

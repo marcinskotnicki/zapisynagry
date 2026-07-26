@@ -508,6 +508,16 @@ The link expires in one hour.',
     'opt_timezone'            => 'Site timezone',
     'opt_timezone_note'       => 'Game times and poll deadlines run on this clock. Current time: %s.',
 
+    // ---- Deleting a poll --------------------------------------------------------
+    'poll_delete'             => 'Delete',
+    'delpoll_title'           => 'Delete this poll?',
+    'delpoll_confirm'         => 'Are you sure you want to delete this poll?',
+    'delpoll_note'            => 'All of its game options and every vote cast will be removed. This cannot be undone.',
+    'delpoll_back'            => 'No, go back',
+    'delpoll_everything'      => 'Yes, delete the poll',
+    'ntf_polldel_subject'     => 'A poll you voted in was deleted',
+    'ntf_polldel_body'        => "A poll you voted in has been deleted by the person who created it.\n\nOpen the event page to see what else is on offer.",
+
     // ---- Expired/invalid CSRF form token page -----------------------------------
     'csrf_error_title'        => 'Form expired',
     'csrf_error_body'         => "This form has expired or is invalid — this can happen if the page was left open for a long time. Please go back and try again.",

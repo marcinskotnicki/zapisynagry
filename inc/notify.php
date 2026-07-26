@@ -156,6 +156,21 @@ function notify_poll_voter_emails($pollId) {
  * @param string[] $emails Recipients (defaults to the poll's current voters).
  * @return void
  */
+/**
+ * A poll you voted in was deleted. -> everyone who voted in it.
+ *
+ * MUST be called BEFORE the delete: the votes cascade away with the poll, so
+ * afterwards there is no way left to find who to tell.
+ * @param array $poll
+ * @return void
+ */
+function notify_poll_deleted($poll) {
+    if (!notify_enabled()) return;
+    foreach (notify_poll_voter_emails((int)$poll['id']) as $to) {
+        send_mail($to, t('ntf_polldel_subject'), t('ntf_polldel_body'));
+    }
+}
+
 function notify_poll_changed($poll, $what, $emails = null) {
     if (!notify_enabled()) return;
     if ($emails === null) $emails = notify_poll_voter_emails((int)$poll['id']);
