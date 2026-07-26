@@ -109,9 +109,12 @@
 .tpl-classic a.poll-opt-name { text-decoration: none; border-bottom: 1px dotted rgba(0, 0, 0, .45); }
 .tpl-classic a.poll-opt-name:hover { border-bottom-style: solid; }
 .tpl-classic .poll-opt-votes { color: #555; }
-/* The rows are light grey here, so the track darkens rather than lightens. */
+/* The rows are light grey here, so the track darkens rather than lightens.
+   The fill takes the theme's accent red: near-black read as part of the row
+   rather than as a bar. Green still marks a candidate that has hit its
+   required count, so "filling" and "full" stay tellable apart at a glance. */
 .tpl-classic .poll-opt-bar { height: 4px; background: rgba(0, 0, 0, .14); }
-.tpl-classic .poll-opt-bar > span { background: #1a1a1a; }
+.tpl-classic .poll-opt-bar > span { background: var(--gc-red); }
 .tpl-classic .poll-opt-bar.is-full > span { background: var(--gc-green); }
 /* The vote CTA is the poll's "Zapisz się", so it takes .gc-signup's dark fill;
    the cancel-vote button stays quiet grey beside it. */
