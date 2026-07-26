@@ -45,7 +45,7 @@
    delete tab's red. */
 .tpl-classic .poll-head {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
-    padding: 0.35rem 0.4rem 0.25rem; margin: 0;
+    padding: 0 0.4rem 0.35rem; margin: 0;
 }
 /* NOT a solid red pill: that is exactly what .gc-tab-del (the game card's
    DELETE tab) looks like, and it used to sit in the same top-left corner —
@@ -55,8 +55,8 @@
 .tpl-classic .poll-tag {
     background: transparent; color: #cfcfcf;
     border: 1px solid rgba(255, 255, 255, .35);
-    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 0.15rem 0.5rem; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem; border-radius: 6px;
 }
 .tpl-classic .poll-card .game-time { color: #fff; font-size: 0.95rem; }
 .tpl-classic .poll-by { font-size: 0.8rem; color: #ddd; }
@@ -67,7 +67,7 @@
    and left alignment. .poll-head above it holds only the time/proposer/tag. */
 .tpl-classic .poll-actions {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
-    padding: 0 0.4rem 0.35rem; margin: 0;
+    padding: 0.35rem 0.4rem 0.25rem; margin: 0;
 }
 
 /* The head's buttons are the poll's equivalent of the game card's tabs, so
@@ -109,6 +109,10 @@
 .tpl-classic a.poll-opt-name { text-decoration: none; border-bottom: 1px dotted rgba(0, 0, 0, .45); }
 .tpl-classic a.poll-opt-name:hover { border-bottom-style: solid; }
 .tpl-classic .poll-opt-votes { color: #555; }
+/* The rows are light grey here, so the track darkens rather than lightens. */
+.tpl-classic .poll-opt-bar { height: 4px; background: rgba(0, 0, 0, .14); }
+.tpl-classic .poll-opt-bar > span { background: #1a1a1a; }
+.tpl-classic .poll-opt-bar.is-full > span { background: var(--gc-green); }
 /* The vote CTA is the poll's "Zapisz się", so it takes .gc-signup's dark fill;
    the cancel-vote button stays quiet grey beside it. */
 .tpl-classic .poll-option .btn-primary { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }

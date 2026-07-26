@@ -266,13 +266,19 @@ input, select, textarea {
 .poll-card { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 0.75rem; background: #eef3fc; }
 .tpl-dark .poll-card { background: #1b2436; }
 .poll-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
-.poll-tag { margin-left: auto; background: var(--primary); color: var(--primary-text); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; } /* auto margin -> right-hand end of .poll-head */
+.poll-tag { margin-left: auto; background: var(--primary); color: var(--primary-text); font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; } /* auto margin -> right-hand end of .poll-head */
 /* Second row: every button the poll offers, delete first. Separate from
    .poll-head so the tag never shares a line with the buttons. */
-.poll-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+.poll-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0 0 0.5rem; }
 .poll-by { font-size: 0.92rem; }
 .poll-options { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-.poll-option { display: flex; align-items: center; gap: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.6rem; }
+.poll-option { position: relative; overflow: hidden; display: flex; align-items: center; gap: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.6rem 0.45rem; }
+/* Vote progress towards the candidate's required player count. Sits flush
+   across the bottom of the whole row; the parent's overflow:hidden is what
+   trims its ends to the rounded corners. */
+.poll-opt-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--border); }
+.poll-opt-bar > span { display: block; height: 100%; background: var(--primary); transition: width 0.2s ease; }
+.poll-opt-bar.is-full > span { background: var(--ok); }   /* threshold met */
 .poll-opt-thumb { height: 50px; width: 50px; object-fit: contain; }
 .poll-opt-name { flex: 1; min-width: 0; font-weight: 600; }
 .poll-opt-votes { color: var(--text-muted); font-size: 0.88rem; white-space: nowrap; }

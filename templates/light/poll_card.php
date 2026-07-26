@@ -7,9 +7,11 @@
  *  cancel-vote) control. Cancel-vote is a tiny inline POST form; voting links to
  *  the full vote form (where name/email are collected).
  *
- *  LAYOUT: two rows — .poll-head (time, proposer, and the POLL tag pushed to the
- *  right) then .poll-actions (every button, delete first). Splitting them is what
+ *  LAYOUT: two rows — .poll-actions (every button, delete first) then .poll-head
+ *  (time, proposer, and the POLL tag pushed to the right). Splitting them is what
  *  keeps the tag off the same line as the buttons, where it looked like one.
+ *  Each candidate also carries a .poll-opt-bar showing votes against the
+ *  required count.
  *
  *  HEAD CONTROLS and who sees them:
  *    end voting now  — the proposer's ACCOUNT or an admin (accounts only).
@@ -27,7 +29,31 @@
 $canVote = !$readonly && can_signup();
 ?>
 <article class="poll-card" id="poll-<?= (int)$poll['id'] ?>">
-    <?php // Line 1: what this is and when. The tag sits LAST in the markup so it
+    <?php
+    // "End voting now": the proposer's own account, or an admin. Accounts only —
+    // guest-created polls just wait for their threshold or deadline.
+    $uid = current_user()['id'] ?? 0;
+    $canEnd = !$readonly && is_logged_in()
+              && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
+    // Editing and deleting follow the usual button rule (owner / admin /
+    // verified guest), unlike ending which is account-only.
+    $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
+    $canMsgAll   = !$readonly && messaging_allowed();
+    $canAddCand  = !$readonly && poll_can_add_candidate($poll);
+    ?>
+    <?php // Skip the row entirely when it would be empty — the read-only
+          // (archived) view shows no controls at all. ?>
+    <?php if ($canEditPoll || $canEnd || $canMsgAll || $canAddCand): ?>
+        <?php // First row: the actions, delete first, mirroring the game card's
+              // DELETE / EDIT tab order. Wraps on narrow screens. ?>
+        <div class="poll-actions">
+            <?php if ($canEditPoll): ?>
+                <?php // delete_poll.php re-checks this — the button only hides. ?>
+                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
+                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+            <?php endif; ?>
+
+    <?php // Second row: what this is and when. The tag sits LAST in the markup so it
           // lands at the right-hand end of the row (see .poll-tag's auto margin);
           // as the leftmost red pill it used to read as a delete button. ?>
     <div class="poll-head">
@@ -44,29 +70,6 @@ $canVote = !$readonly && can_signup();
         <span class="poll-tag"><?= e(t('poll_label')) ?></span>
     </div>
 
-    <?php
-    // "End voting now": the proposer's own account, or an admin. Accounts only —
-    // guest-created polls just wait for their threshold or deadline.
-    $uid = current_user()['id'] ?? 0;
-    $canEnd = !$readonly && is_logged_in()
-              && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
-    // Editing and deleting follow the usual button rule (owner / admin /
-    // verified guest), unlike ending which is account-only.
-    $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
-    $canMsgAll   = !$readonly && messaging_allowed();
-    $canAddCand  = !$readonly && poll_can_add_candidate($poll);
-    ?>
-    <?php // Skip the row entirely when it would be empty — the read-only
-          // (archived) view shows no controls at all. ?>
-    <?php if ($canEditPoll || $canEnd || $canMsgAll || $canAddCand): ?>
-        <?php // Line 2: the actions, delete first, mirroring the game card's
-              // DELETE / EDIT tab order. Wraps on narrow screens. ?>
-        <div class="poll-actions">
-            <?php if ($canEditPoll): ?>
-                <?php // delete_poll.php re-checks this — the button only hides. ?>
-                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
-                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
-            <?php endif; ?>
             <?php if ($canEnd): ?>
                 <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
             <?php endif; ?>
@@ -100,6 +103,20 @@ $canVote = !$readonly && can_signup();
                     <span class="poll-opt-name"><?= e($c['name']) ?></span>
                 <?php endif; ?>
                 <span class="poll-opt-votes"><?= e(t('poll_votes', (int)$c['votes'], (int)$c['required_players'])) ?></span>
+                <?php
+                // Progress towards the candidate's REQUIRED player count — the
+                // number that decides the poll — not max_players. Capped at 100%
+                // so an over-subscribed option doesn't overflow its track, and
+                // skipped entirely when there's no threshold to fill.
+                $need = (int)$c['required_players'];
+                if ($need > 0):
+                    $pct  = min(100, (int)round((int)$c['votes'] / $need * 100));
+                    $full = (int)$c['votes'] >= $need;
+                ?>
+                    <?php // aria-hidden: the "votes: X / Y" text right above already
+                          // states this, so announcing it twice just adds noise. ?>
+                    <span class="poll-opt-bar<?= $full ? ' is-full' : '' ?>" aria-hidden="true"><span style="width: <?= $pct ?>%"></span></span>
+                <?php endif; ?>
                 <?php if ($canVote): ?>
                     <?php if (!empty($c['voted'])): // already voted -> offer to cancel (inline POST) ?>
                         <form method="post" action="vote.php?poll_game=<?= (int)$c['id'] ?>" class="inline">
