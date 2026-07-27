@@ -46,6 +46,7 @@
 .tpl-classic .poll-head {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
     padding: 0 0.4rem 0.35rem; margin: 0;
+    width:100%;
 }
 /* NOT a solid red pill: that is exactly what .gc-tab-del (the game card's
    DELETE tab) looks like, and it used to sit in the same top-left corner —
