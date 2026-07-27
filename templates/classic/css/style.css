@@ -257,6 +257,9 @@
 .tpl-classic .poll-card .comment-list li:nth-child(even) { background: #181818; }
 
 @media (max-width: 700px) {
+    .game-list>article{
+        width:100%;
+    }
     .tpl-classic .game-card { flex-direction: column; width:100%}
     .tpl-classic .gc-players {
         margin-left: 0; margin-top: 0.5rem;
@@ -274,9 +277,9 @@
     margin:0px auto;
 }
 
-@media (min-width: 621px) {
+@media (min-width: 701px) {
     .game-list>article{
-        width:500px;
+        width:600px;
     }
 }
 
