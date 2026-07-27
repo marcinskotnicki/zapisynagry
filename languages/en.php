@@ -508,6 +508,9 @@ The link expires in one hour.',
     'opt_timezone'            => 'Site timezone',
     'opt_timezone_note'       => 'Game times and poll deadlines run on this clock. Current time: %s.',
 
+    'addgame_search_empty'    => 'Please enter a game name first.',
+    'addgame_search_nokey'    => 'BGG search is unavailable: the administrator has not configured a BoardGameGeek API code. You can still add the game manually.',
+
     // ---- Poll: run to the deadline instead of ending on the first full option ----
     'poll_wait_deadline'      => 'Keep voting open until the deadline',
     'poll_wait_deadline_note' => 'By default the poll ends as soon as one game gets enough players. Tick this to let every option keep collecting votes until the deadline. Only works if a deadline is set.',

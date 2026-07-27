@@ -12,6 +12,7 @@
  *    3. Hash highlight for in-page anchors.
  *    4. reCAPTCHA v3 token minting on form submit (invisible captcha mode).
  *    5. Poll deadline live preview (add_poll.php): "resolves on ..." text.
+ *    6. BGG search guard: no searching with an empty game name.
  *  This file grows in the front-end phase (modals, add-game flow, etc.).
  * ========================================================================== */
 (function () {
@@ -23,6 +24,7 @@
         initHashHighlight();
         initRecaptchaV3();
         initPollDeadlinePreview();
+        initBggSearchGuard();
     });
 
     /* ---- 1. Date cascade --------------------------------------------------- */
@@ -205,5 +207,34 @@
     }
 
     function pad2(n) { return String(n).padStart(2, '0'); }
+
+    /* ---- 6. BGG search guard ----------------------------------------------- *
+     * Searching BoardGameGeek for an empty string returns nothing, which the
+     * results page can only report as "no matches" — misleading, since the user
+     * simply didn't type anything. Grey the button out until there's something
+     * to search for.
+     *
+     * Applied HERE rather than as a `disabled` attribute in the markup on
+     * purpose: with JS off the button must stay usable, and the server-side
+     * check in add_game.php / add_poll_game.php produces the message instead.
+     * This is the convenience; that is the guarantee.
+     * ------------------------------------------------------------------------ */
+    function initBggSearchGuard() {
+        document.querySelectorAll('button[name="go"][value="bgg"]').forEach(function (btn) {
+            // .form resolves both a nested button and one tied by form="...".
+            var form = btn.form;
+            if (!form) return;
+            var nameInput = form.querySelector('input[name="name"]');
+            if (!nameInput) return;
+
+            function sync() {
+                var empty = nameInput.value.trim() === '';
+                btn.disabled = empty;
+                btn.setAttribute('aria-disabled', empty ? 'true' : 'false');
+            }
+            nameInput.addEventListener('input', sync);
+            sync();
+        });
+    }
 
 })();

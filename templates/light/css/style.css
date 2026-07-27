@@ -79,17 +79,33 @@ input, select, textarea {
 .field-check label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
 .field-check input { width: auto; }
 
+/* IMPORTANT: this must give a background, a colour AND a font, or <a class="btn">
+   and <button class="btn"> do not look alike. Left unset, the anchor falls back
+   to link styling (bare red text in the classic theme) while the button picks up
+   the browser's own grey chrome — and since browsers don't inherit font-family
+   into form controls, the two also came out at different sizes. Stating all of
+   it here is what makes a link and a submit button interchangeable. */
 .btn {
     display: inline-block;
     margin-top: 1.2rem;
     padding: 0.6rem 1.2rem;
-    border: 0;
+    border: 1px solid var(--border);
     border-radius: 6px;
+    font-family: inherit;
     font-size: 1rem;
+    line-height: 1.25;
+    background: var(--surface-2);
+    color: var(--text);
+    text-align: center;
+    text-decoration: none;
     cursor: pointer;
 }
-.btn-primary { background: var(--primary); color: var(--primary-text); }
-.btn-primary:hover { filter: brightness(0.95); text-decoration: none; }
+.btn:hover { background: var(--border); color: var(--text); text-decoration: none; }
+/* Set by the BGG search guard in scripts.js while the name box is empty. */
+.btn[disabled], .btn[disabled]:hover { opacity: 0.5; cursor: not-allowed; filter: none; }
+/* The variants restate border-color too, or the neutral border above frames them. */
+.btn-primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary); color: var(--primary-text); border-color: var(--primary); filter: brightness(0.95); text-decoration: none; }
 
 /* ---- Admin panel ---------------------------------------------------------- */
 .admin h1 { font-size: 1.4rem; }
@@ -360,8 +376,8 @@ html { scroll-behavior: smooth; }
 .msg-icon-all { /* intentionally empty: styling hook */ }
 
 /* ---- Gate button hierarchy -------------------------------------------------- */
-.btn-secondary { background: #7d92ac; color: #fff; }   /* toned-down cousin of --primary */
-.btn-secondary:hover { filter: brightness(0.95); text-decoration: none; }
+.btn-secondary { background: #7d92ac; color: #fff; border-color: #7d92ac; }   /* toned-down cousin of --primary */
+.btn-secondary:hover { background: #7d92ac; color: #fff; border-color: #7d92ac; filter: brightness(0.95); text-decoration: none; }
 .gate-poll { margin-top: 0.6rem; }
 .gate-poll .btn { display: block; text-align: center; margin-top: 0; padding: 0.7rem 1.1rem; font-size: 0.98rem; }
 .gate-manual { margin-top: 0.6rem; text-align: center; }

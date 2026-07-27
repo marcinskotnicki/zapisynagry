@@ -228,11 +228,23 @@ if ($go === 'manual') {
 
 if ($go === 'bgg') {
     // BGG path: run the search for the typed name and show the results list.
-    $query   = trim($_POST['name'] ?? '');
-    $results = $query !== '' ? bgg_search($query) : [];
+    $query = trim($_POST['name'] ?? '');
+    // Three different reasons the list can come back empty, and they need three
+    // different messages. Searching with no name at all used to render as "no
+    // results", as did an unconfigured API code — both look like the game simply
+    // isn't on BGG. The JS in scripts.js blocks the empty case in the browser;
+    // this is the failsafe for when it doesn't run.
+    $bggProblem = null;
+    if ($query === '') {
+        $bggProblem = 'empty';
+    } elseif (!bgg_configured()) {
+        $bggProblem = 'unconfigured';
+    }
+    $results = $bggProblem === null ? bgg_search($query) : [];
     tpl_render('header', ['page_title' => t('addgame_title')]);
     tpl_render('add_game_bgg_list', [
         'table'   => $table, 'query' => $query, 'results' => $results,
+        'problem' => $bggProblem,
     ]);
     tpl_render('footer');
     exit;

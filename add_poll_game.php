@@ -160,11 +160,21 @@ if ($go === 'manual') {
 
 if ($go === 'bgg') {
     $query = trim($_POST['name'] ?? '');
-    $results = $query !== '' ? bgg_search($query) : [];
+    // Same three-way split as add_game.php: an empty search box and a missing
+    // API code both used to render as plain "no results", which reads as "that
+    // game isn't on BGG". See the comment there.
+    $bggProblem = null;
+    if ($query === '') {
+        $bggProblem = 'empty';
+    } elseif (!bgg_configured()) {
+        $bggProblem = 'unconfigured';
+    }
+    $results = $bggProblem === null ? bgg_search($query) : [];
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     // Reuse the shared BGG list, but point its links back here (not add_game.php).
     tpl_render('add_game_bgg_list', [
         'table' => $table, 'query' => $query, 'results' => $results,
+        'problem' => $bggProblem,
         'link_base' => 'add_poll_game.php',
     ]);
     tpl_render('footer');

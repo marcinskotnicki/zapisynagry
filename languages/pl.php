@@ -500,6 +500,9 @@ Link wygasa za godzinę.',
     'opt_timezone'            => 'Strefa czasowa serwisu',
     'opt_timezone_note'       => 'Godziny gier i terminy ankiet działają wg tego zegara. Aktualny czas: %s.',
 
+    'addgame_search_empty'    => 'Najpierw wpisz nazwę gry.',
+    'addgame_search_nokey'    => 'Wyszukiwanie w BGG jest niedostępne: administrator nie skonfigurował kodu API BoardGameGeek. Możesz dodać grę ręcznie.',
+
     // ---- Poll: run to the deadline instead of ending on the first full option ----
     'poll_wait_deadline'      => 'Czekaj na koniec głosowania',
     'poll_wait_deadline_note' => 'Domyślnie ankieta kończy się, gdy pierwsza gra zbierze komplet graczy. Zaznacz, aby wszystkie propozycje zbierały głosy aż do terminu zakończenia. Działa tylko, gdy ustawiono termin.',
