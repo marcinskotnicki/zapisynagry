@@ -57,7 +57,9 @@ $canVote = !$readonly && can_signup();
           // lands at the right-hand end of the row (see .poll-tag's auto margin);
           // as the leftmost red pill it used to read as a delete button. ?>
     <div class="poll-head">
-        <span class="game-time"><?= e($poll['start_time']) ?></span>
+        <?php // data-label lets the classic theme swap the clock glyph for the word
+              // (see its CSS); the other themes keep the icon and ignore it. ?>
+        <span class="game-time" data-label="<?= e(t('cl_start')) ?>"><?= e($poll['start_time']) ?></span>
         <?php if (!empty($poll['proposer_name'])): ?>
             <span class="poll-by"><?= e(t('poll_proposer')) ?>: <strong><?= e($poll['proposer_name']) ?></strong>
                 <?php // Stays inline with the name — it messages that person,
@@ -97,11 +99,27 @@ $canVote = !$readonly && can_signup();
                 <?php if (!empty($c['thumbnail'])): ?>
                     <img class="poll-opt-thumb" src="<?= e($c['thumbnail']) ?>" alt="">
                 <?php endif; ?>
-                <?php if (!empty($c['bgg_id'])): // candidates link to their BGG page ?>
-                    <a class="poll-opt-name" href="https://boardgamegeek.com/boardgame/<?= (int)$c['bgg_id'] ?>" target="_blank" rel="noopener"><?= e($c['name']) ?></a>
-                <?php else: ?>
-                    <span class="poll-opt-name"><?= e($c['name']) ?></span>
-                <?php endif; ?>
+                <?php // Name plus its details are one block so the votes count and
+                      // the vote button stay on the right of the row. ?>
+                <div class="poll-opt-main">
+                    <?php if (!empty($c['bgg_id'])): // candidates link to their BGG page ?>
+                        <a class="poll-opt-name" href="https://boardgamegeek.com/boardgame/<?= (int)$c['bgg_id'] ?>" target="_blank" rel="noopener"><?= e($c['name']) ?></a>
+                    <?php else: ?>
+                        <span class="poll-opt-name"><?= e($c['name']) ?></span>
+                    <?php endif; ?>
+                    <?php // The same three facts a game card shows, so a candidate can
+                          // be judged without opening its BGG page. Weight reuses the
+                          // game card's badge and its 1..5 colour buckets. ?>
+                    <p class="poll-opt-meta">
+                        <span class="weight-badge weight-<?= weight_bucket($c['weight']) ?>" title="<?= e(t('cl_weight')) ?>"><?= e(number_format((float)$c['weight'], 1)) ?></span>
+                        <?php if ((int)$c['length_minutes'] > 0): ?>
+                            <span class="poll-opt-len"><?= e(t('game_length_min', (int)$c['length_minutes'])) ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($c['language'])): ?>
+                            <span class="poll-opt-lang"><?= e($c['language']) ?></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
                 <span class="poll-opt-votes"><?= e(t('poll_votes', (int)$c['votes'], (int)$c['required_players'])) ?></span>
                 <?php
                 // Progress towards the candidate's REQUIRED player count — the

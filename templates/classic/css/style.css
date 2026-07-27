@@ -58,7 +58,15 @@
     font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 0.2rem 0.6rem; border-radius: 6px;
 }
-.tpl-classic .poll-card .game-time { color: #fff; font-size: 0.95rem; }
+/* The base theme prefixes the time with a clock glyph; the classic game card
+   spells its fields out as "Label: value" bands, so the poll card matches by
+   swapping the glyph for the word carried in data-label. */
+.tpl-classic .poll-card .game-time { color: #fff; font-size: 0.95rem; font-weight: 600; }
+.tpl-classic .poll-card .game-time::before { content: attr(data-label) ": "; font-weight: 400; color: #cfcfcf; }
+
+/* Candidate details sit on the light grey rows, so they need a dark muted grey
+   rather than the base theme's --text-muted. */
+.tpl-classic .poll-opt-meta { color: #5a5a5a; }
 .tpl-classic .poll-by { font-size: 0.8rem; color: #ddd; }
 .tpl-classic .poll-by strong { color: #fff; }
 .tpl-classic .poll-card .msg-icon { color: #ffb3ab; }

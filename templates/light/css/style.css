@@ -300,7 +300,12 @@ input, select, textarea {
 .poll-opt-bar > span { display: block; height: 100%; background: var(--primary); transition: width 0.2s ease; }
 .poll-opt-bar.is-full > span { background: var(--ok); }   /* threshold met */
 .poll-opt-thumb { height: 50px; width: 50px; object-fit: contain; }
-.poll-opt-name { flex: 1; min-width: 0; font-weight: 600; }
+/* Name + its details form one growing column; votes and the vote button sit
+   to the right of it. */
+.poll-opt-main { flex: 1; min-width: 0; }
+.poll-opt-name { font-weight: 600; }
+.poll-opt-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--text-muted); }
+.poll-opt-meta .weight-badge { min-width: 1.7rem; padding: 0 0.3rem; font-size: 0.72rem; }
 .poll-opt-votes { color: var(--text-muted); font-size: 0.88rem; white-space: nowrap; }
 
 /* Poll build screen */

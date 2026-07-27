@@ -85,6 +85,9 @@
             <div class="gc-band gc-waga weight-<?= $bucket ?>"><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_players')) ?>: <strong><?= count($confirmed) ?> / <?= $max ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_start')) ?>: <strong><?= e($g['start_time']) ?></strong></div>
+            <?php if ((int)$g['length_minutes'] > 0): // the other themes already show this ?>
+                <div class="gc-band gc-row"><?= e(t('cl_length')) ?>: <strong><?= e(t('game_length_min', (int)$g['length_minutes'])) ?></strong></div>
+            <?php endif; ?>
             <?php if (!empty($g['brings_name'])): ?>
                 <div class="gc-band gc-row"><?= e(t('game_brings')) ?>: <strong><?= e($g['brings_name']) ?></strong></div>
             <?php endif; ?>
