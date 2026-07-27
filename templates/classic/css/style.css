@@ -200,7 +200,7 @@
     border-radius: 10px;
     padding: 0.6rem 0.6rem 0.6rem 1.2rem;
     margin-left: -0.6rem; margin-top: 1.6rem;
-    min-width: 250px;
+    min-width: 300px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
 }
 .tpl-classic .gc-slot {
@@ -280,7 +280,7 @@
 
 @media (min-width: 701px) {
     .game-list>article{
-        width:600px;
+        width:550px;
     }
 }
 
