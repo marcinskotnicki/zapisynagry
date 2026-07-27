@@ -54,10 +54,10 @@
    a caption, which is what it is. (Its position is handled by the shared rules:
    last in .poll-head, pushed right by an auto margin.) */
 .tpl-classic .poll-tag {
-    background: transparent; color: #cfcfcf;
-    border: 1px solid rgba(255, 255, 255, .35);
+    background: black; color: #cfcfcf;
     font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 0.2rem 0.6rem; border-radius: 6px;
+    text-align:center;
 }
 /* The base theme prefixes the time with a clock glyph; the classic game card
    spells its fields out as "Label: value" bands, so the poll card matches by
