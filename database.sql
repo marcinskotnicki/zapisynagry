@@ -114,6 +114,14 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- and the "has this deadline passed?" sweep are all wall-clock times, so
     -- this must match the venue's actual timezone or polls resolve at the wrong
     -- moment. Any PHP timezone identifier; an unknown value falls back to UTC.
+    -- mailing_list: 0/1 master switch for the per-event mailing list (the
+    -- signup box under the timeline, the new-game notifications, and the
+    -- admin's Mailing tab).
+    ('mailing_list',                 '0'),
+    -- mailing_gdpr_text: consent wording shown beside a REQUIRED checkbox on
+    -- the signup box. Left empty, no checkbox is shown and none is demanded —
+    -- so this doubles as the on/off switch for asking consent at all.
+    ('mailing_gdpr_text',            ''),
     ('timezone',                     'Europe/Warsaw'),
     ('overnight_grace_hours',        '1'),
     -- allow_start_outside_hours: 1 = a game/poll may start at any time (current
@@ -295,6 +303,32 @@ CREATE TABLE games (
 --  broken by id), so the earliest reserve is promoted when a seat frees up.
 --  user_id links the signup to an account for "games played" stats.
 -- =============================================================================
+-- =============================================================================
+--  mail_subscribers — the per-event mailing list.
+--
+--  PER EVENT ON PURPOSE: someone interested in this month's meetup shouldn't
+--  start receiving mail about every future event, so a subscription is scoped to
+--  the event it was made on and dies with it (ON DELETE CASCADE).
+--
+--  consent_text stores a SNAPSHOT of the GDPR wording the person actually
+--  agreed to. Keeping only a boolean would be useless the moment an admin edits
+--  the text — you could no longer say what anyone consented to. NULL means the
+--  admin had configured no text, so no consent was asked for or given.
+-- =============================================================================
+CREATE TABLE mail_subscribers (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id     INTEGER NOT NULL,
+    email        TEXT NOT NULL,
+    token        TEXT NOT NULL,               -- unguessable; the unsubscribe link
+    consent_text TEXT,                        -- what they agreed to, verbatim
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+-- One subscription per address per event; re-subscribing must not duplicate.
+CREATE UNIQUE INDEX idx_mailsub_event_email ON mail_subscribers (event_id, email);
+CREATE INDEX idx_mailsub_token ON mail_subscribers (token);
+
+
 CREATE TABLE players (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id     INTEGER NOT NULL,

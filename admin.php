@@ -18,7 +18,7 @@ require_admin();                       // everything here is admin-only
 $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (uploads, updater)
 
 // Whitelist of tabs => controller file. The whitelist also blocks path tricks.
-$TABS = ['options', 'new_event', 'thumbnails', 'users', 'logs', 'archive', 'update'];
+$TABS = ['options', 'new_event', 'thumbnails', 'users', 'mailing', 'logs', 'archive', 'update'];
 
 $tab = $_GET['tab'] ?? 'options';
 if (!in_array($tab, $TABS, true)) $tab = 'options';   // unknown tab -> safe default

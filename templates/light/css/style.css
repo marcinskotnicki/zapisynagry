@@ -352,6 +352,21 @@ html { scroll-behavior: smooth; }
 .poll-form-add { margin: 1rem 0 0.6rem; }
 .poll-form-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
 
+/* ---- Mailing list signup box ----------------------------------------------
+   Rendered into the footer's $after_content slot, below the timeline, so it is
+   outside the width-capped .content column and needs its own centring. */
+.mailing-box { max-width: 640px; margin: 1.5rem auto 2rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.mailing-box h2 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+.mailing-box .muted { margin: 0 0 0.7rem; font-size: 0.9rem; }
+.mailing-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.mailing-row input[type="email"] { flex: 1; min-width: 12rem; }
+.mailing-row .btn { margin-top: 0; }
+.mailing-consent { margin-top: 0.6rem; font-size: 0.85rem; }
+.mailing-consent label { display: flex; gap: 0.45rem; align-items: flex-start; }
+.mailing-captcha { margin-top: 0.6rem; }
+/* Visually hidden but still read aloud — the placeholder is not a label. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
 .discussion { margin-top: 0.6rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
 .comment-list { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .comment-list li { font-size: 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.5rem; }

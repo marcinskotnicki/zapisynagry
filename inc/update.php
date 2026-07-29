@@ -144,6 +144,27 @@ function update_tables($pdo) {
 }
 
 /**
+ * List user-defined indexes (name => create-sql) in a PDO connection.
+ *
+ * Excludes the ones SQLite makes for itself: sqlite_autoindex_* (which back a
+ * UNIQUE or PRIMARY KEY declared inside CREATE TABLE) have no SQL to replay, and
+ * are created automatically with the table anyway.
+ *
+ * WHY THIS EXISTS: copying a table's CREATE TABLE statement does NOT bring its
+ * separate CREATE INDEX statements with it, so a table added by an update used
+ * to arrive without its indexes — including UNIQUE ones, whose absence quietly
+ * drops a constraint rather than just costing speed.
+ * @return array<string,string>
+ */
+function update_indexes($pdo) {
+    $out = [];
+    $rows = $pdo->query("SELECT name, sql FROM sqlite_master
+                         WHERE type='index' AND name NOT LIKE 'sqlite_%' AND sql IS NOT NULL")->fetchAll();
+    foreach ($rows as $r) $out[$r['name']] = $r['sql'];
+    return $out;
+}
+
+/**
  * Column list (name => PRAGMA row) for a table.
  * @return array<string,array>
  */
@@ -238,6 +259,24 @@ function update_run($root) {
                     }
                 }
             }
+        }
+
+        // Indexes the reference schema declares but this database lacks. Runs
+        // AFTER the table pass, so an index belonging to a table created a
+        // moment ago finds its table already there.
+        //
+        // Only ever ADDS. An index that exists here but not in the reference is
+        // left alone: it may be something an admin added deliberately, and
+        // dropping it is not a call an updater should make.
+        $refIdx  = update_indexes($ref);
+        $liveIdx = update_indexes($live);
+        foreach ($refIdx as $idxName => $idxSql) {
+            if (isset($liveIdx[$idxName])) continue;
+            // A UNIQUE index can fail on data that predates it (duplicate rows
+            // that were legal until now). Let that abort the transaction loudly
+            // rather than pretend the constraint is in force when it isn't.
+            $live->exec($idxSql);
+            $results[] = t('update_added_index', $idxName);
         }
 
         // Seed any newly introduced options keys (settings added in a release).

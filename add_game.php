@@ -21,6 +21,8 @@ require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/bgg.php';
 require __DIR__ . '/inc/captcha.php';
+require __DIR__ . '/inc/mail.php';       // send_mail(), used by the mailing list
+require __DIR__ . '/inc/mailing.php';
 
 // ---- Resolve the target table (and its day/event) --------------------------
 $tableId = (int)($_GET['table'] ?? $_POST['table'] ?? 0);
@@ -168,6 +170,11 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($error === null) {
             log_action('game_add', $form['name']);
+            // Tell the event's mailing list. AFTER the commit, so a failed
+            // insert can't send mail about a game that doesn't exist, and
+            // outside the transaction so slow SMTP doesn't hold a write lock.
+            mailing_notify_new_item((int)$event['id'], $form['name'], (int)$day['id'],
+                                    $form['start_time'], 'game-' . $gameId);
             redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to card
         }
     }

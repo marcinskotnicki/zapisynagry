@@ -20,6 +20,7 @@ $tabs = [
     'new_event'  => 'tab_new_event',
     'thumbnails' => 'tab_thumbnails',
     'users'      => 'tab_users',
+    'mailing'    => 'tab_mailing',
     'logs'       => 'tab_logs',
     'archive'    => 'tab_archive',
     'update'     => 'tab_update',

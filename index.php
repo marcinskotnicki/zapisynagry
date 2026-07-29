@@ -11,6 +11,7 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
+require __DIR__ . '/inc/mailing.php';   // the signup box under the timeline
 require __DIR__ . '/inc/polls.php';    // poll_resolve_expired() below (events.php only
                                        // loads it lazily, inside event_tables_full)
 require __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards
@@ -111,6 +112,18 @@ $renameTable  = $canEditNames ? (int)($_GET['rename_table'] ?? 0) : 0;
 // renders outside the width-capped .content column at full page width.
 $timeline     = $dayRow ? timeline_build($dayRow, $tables, opt_int('timeline_extension')) : null;
 $timelineHtml = $timeline ? tpl_capture('timeline', ['timeline' => $timeline]) : '';
+
+// Mailing-list signup box, appended AFTER the timeline into the same slot so it
+// sits below it at full page width. Hidden on an archived event: no point
+// collecting addresses for something that already happened.
+if (!$readonly && mailing_enabled()) {
+    $timelineHtml .= tpl_capture('mailing_form', [
+        'active_day' => $activeDay,
+        'gdpr'       => mailing_gdpr_text(),
+        'flash'      => flash_get(),
+        'csrf'       => csrf_field(),
+    ]);
+}
 
 tpl_render('header', ['page_title' => $event['name']]);
 tpl_render('front_event', [

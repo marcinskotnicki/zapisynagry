@@ -23,6 +23,7 @@ unset($_SESSION['poll_live_edit']);
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
 require __DIR__ . '/inc/notify.php';
+require __DIR__ . '/inc/mailing.php';
 
 $tableId = (int)($_GET['table'] ?? $_POST['table'] ?? 0);
 $table   = $tableId ? db_one('SELECT * FROM game_tables WHERE id = ?', [$tableId]) : null;
@@ -183,6 +184,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($error === null) {
                 log_action('poll_create', $draft['name'] . ' (' . count($draft['games']) . ' games)');
                 unset($_SESSION['poll_draft']);            // draft persisted -> clear it
+                // Mailing list, after the commit — see add_game.php. If the
+                // seeded votes resolve the poll below, subscribers still get a
+                // useful link: the poll anchor simply won't match, and the page
+                // opens on the right day either way.
+                mailing_notify_new_item((int)$event['id'], $draft['name'] !== '' ? $draft['name'] : t('ml_a_poll'),
+                                        (int)$day['id'], $draft['start_time'], 'poll-' . $pollId, true);
                 // Seeded votes might already settle a candidate (e.g. required 1),
                 // in which case this resolves the poll into a game immediately —
                 // then jump to the game card; otherwise jump to the new poll.

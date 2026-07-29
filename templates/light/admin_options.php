@@ -109,6 +109,21 @@ $toggle = function($key) {
             <p class="field-note"><?= e(t('opt_timezone_note', date('H:i'))) ?></p>
         </div>
         <?php
+        ?>
+        <?php // Mailing list: master switch, plus the consent wording. Leaving the
+              // text empty means no checkbox is shown and none is required. ?>
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="mailing_list" value="1" <?= opt_bool('mailing_list') ? 'checked' : '' ?>>
+                <?= e(t('opt_mailing_list')) ?>
+            </label>
+        </div>
+        <div class="field">
+            <label for="mailing_gdpr_text"><?= e(t('opt_mailing_gdpr')) ?></label>
+            <textarea id="mailing_gdpr_text" name="mailing_gdpr_text" rows="4"><?= e(opt('mailing_gdpr_text')) ?></textarea>
+            <p class="field-note"><?= e(t('opt_mailing_gdpr_note')) ?></p>
+        </div>
+        <?php
         $text('timeline_extension', 'number');   // hours added past the day's end
         $text('overnight_grace_hours', 'number'); // early-setup window before opening (see day_rel_min)
         $toggle('allow_start_outside_hours');     // off -> clamp game/poll start to the day's hours

@@ -33,13 +33,15 @@ $OPTION_VALUES = [
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
     'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
+    'timezone',            // the venue's clock; validated below
+    'mailing_gdpr_text',   // '' means "don't ask for consent at all"
 ];
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'send_emails', 'allow_polls', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
-    'allow_start_outside_hours', 'show_venue_name',
+    'allow_start_outside_hours', 'show_venue_name', 'mailing_list',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -84,6 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'header_button_style':
                 // How the top-bar nav renders: text only / icon only / both.
                 if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
+                break;
+            case 'timezone':
+                // Must be a real PHP timezone: app_timezone_init() falls back to
+                // UTC on anything else, so storing junk would silently move the
+                // whole site's clock. Reject instead and keep the old value.
+                try { new DateTimeZone($val); } catch (Throwable $e) { continue 2; }
                 break;
             case 'captcha_version':
                 // Which reCAPTCHA the keys belong to (types aren't interchangeable).
