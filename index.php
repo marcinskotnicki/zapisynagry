@@ -12,6 +12,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/mailing.php';   // the signup box under the timeline
+require __DIR__ . '/inc/captcha.php';   // ...which renders a captcha when one is required
 require __DIR__ . '/inc/polls.php';    // poll_resolve_expired() below (events.php only
                                        // loads it lazily, inside event_tables_full)
 require __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards

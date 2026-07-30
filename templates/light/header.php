@@ -60,41 +60,53 @@ $page_title = $page_title ?? t('app_name');
     </script>
 </head>
 <body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?>">
+<?php
+// Build the nav BEFORE deciding whether to draw the bar at all. With the venue
+// name hidden AND accounts set to guest-only, a visitor's top bar can come out
+// completely empty — no brand, no login (guest-only suppresses it), and no Home
+// link on the home page itself. An empty bar is just a stray grey stripe, so in
+// that case the whole <header> is skipped.
+//
+// Deliberately driven by "did anything render?" rather than by testing those two
+// options directly: that way an admin still keeps their panel/logout links, and
+// a guest on a sub-page still keeps Home, in exactly the same configuration.
+// Hard-coding the option check would strand people on sub-pages with no way back.
+$here = current_page();
+ob_start();
+    // Home, except on the home page. nav_link() applies the icon/text option.
+    if ($here !== 'index.php') {
+        echo nav_link('index.php', 'home', t('nav_home'));
+    }
+    if (is_admin() && $here !== 'admin.php') {          // admins: the panel link
+        echo nav_link('admin.php', 'admin', t('admin'));
+    }
+    if (is_logged_in()) {                               // panel (unless on it) + logout
+        if ($here !== 'user.php') {
+            echo nav_link('user.php', 'user', t('user_panel'));
+        }
+        echo nav_link('logout.php', 'logout', t('logout'));
+    } elseif (opt('registration_mode') !== 'guest_only') {   // guest-only hides login
+        echo nav_link('login.php', 'login', t('login'));
+        echo nav_link('register.php', 'register', t('register'));
+    }
+$topnav   = trim(ob_get_clean());
+$showName = opt_bool('show_venue_name');
+?>
+<?php if ($showName || $topnav !== ''): ?>
 <header class="topbar">
     <div class="topbar-inner">
         <?php // Brand (venue name) top-left, unless the admin hid it (when the
               // venue and event names are the same, showing both is redundant).
               // An empty spacer keeps the nav right-aligned via space-between. ?>
-        <?php if (opt_bool('show_venue_name')): ?>
+        <?php if ($showName): ?>
             <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
         <?php else: ?>
             <span class="brand-spacer"></span>
         <?php endif; ?>
-        <nav class="topnav">
-            <?php
-            // Hide the link for the page you're already on, and show a Home link
-            // on the panel pages (but not on index itself). $here is the current
-            // script; nav_link() applies the icon/text style option.
-            $here = current_page();
-            if ($here !== 'index.php') {
-                echo nav_link('index.php', 'home', t('nav_home'));
-            }
-            ?>
-            <?php if (is_admin() && $here !== 'admin.php'): // admins get the panel link (not on the panel) ?>
-                <?= nav_link('admin.php', 'admin', t('admin')) ?>
-            <?php endif; ?>
-            <?php if (is_logged_in()): // logged in: panel (unless on it) + logout ?>
-                <?php if ($here !== 'user.php'): ?>
-                    <?= nav_link('user.php', 'user', t('user_panel')) ?>
-                <?php endif; ?>
-                <?= nav_link('logout.php', 'logout', t('logout')) ?>
-            <?php elseif (opt('registration_mode') !== 'guest_only'): // guest-only mode hides login ?>
-                <?= nav_link('login.php', 'login', t('login')) ?>
-                <?= nav_link('register.php', 'register', t('register')) ?>
-            <?php endif; ?>
-        </nav>
+        <nav class="topnav"><?= $topnav ?></nav>
     </div>
 </header>
+<?php endif; ?>
 <?php // <main> is full-width; .content is the centred, width-capped column.
       // Full-bleed sections (e.g. the timeline) render OUTSIDE .content via the
       // footer's $after_content slot — no negative-margin tricks needed. ?>

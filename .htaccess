@@ -1,0 +1,45 @@
+# =============================================================================
+#  .htaccess — extensionless URLs, as ALIASES only.
+# -----------------------------------------------------------------------------
+#  Typing /admin gets you admin.php. Nothing in the app generates these; every
+#  link, form action and redirect still uses the .php form, so this can only ever
+#  add a way in — it can't break one.
+#
+#  WHY SINGLE SEGMENT ONLY (no /add_game/18):
+#  Every asset URL in this app is relative and root-less — "templates/light/css/
+#  style.css", "icons/favicon-32.png", "js/scripts.js", the thumbnails. At /admin
+#  the browser still resolves those against /, so they work untouched. At
+#  /add_game/18 the base becomes /add_game/, and the stylesheet, every icon and
+#  every thumbnail 404s: the page renders completely unstyled. Path-segment URLs
+#  need every one of those made root-absolute first, which is a separate job.
+#
+#  The whole thing is wrapped in <IfModule> so a host without mod_rewrite serves
+#  the site normally instead of returning 500.
+# =============================================================================
+
+<IfModule mod_dir.c>
+    DirectoryIndex index.php
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Map /name -> name.php.
+    #   !-f / !-d : never shadow something that already exists, so a real file or
+    #               directory keeps winning (e.g. /icons stays the icons folder).
+    #   .php -f   : only rewrite when the target script actually exists, so an
+    #               unknown path still gives an honest 404 rather than a PHP error.
+    #   [^/]+     : one segment, no slashes — see the note above about relative URLs.
+    # The original query string is carried over, so /admin?tab=options works.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([^/]+)$ $1.php [L,QSA]
+
+    # Belt and braces for the database. The installer already drops a
+    # "Require all denied" .htaccess into data/, but it writes it with @ — a
+    # failure there is silent, and that directory holds database.sqlite. This
+    # rule doesn't depend on that file having been written, and unlike
+    # "Require all denied" it behaves the same on Apache 2.2 and 2.4.
+    RewriteRule ^data(/|$) - [F,L]
+</IfModule>
