@@ -27,7 +27,8 @@ Everything below follows from that.
 ## 1. Requirements and deployment
 
 **PHP 7.4+** (`MIN_PHP_VERSION` in `install.php`), extensions `pdo_sqlite`,
-`curl`, `zip`, `gd`, `mbstring`. No Composer step — `vendor/` contains only
+`curl`, `zip`, `gd`, `mbstring`, `simplexml` (BGG search parses XML with it —
+without it, a search fatals rather than degrading). No Composer step — `vendor/` contains only
 PHPMailer, committed to the repo.
 
 **Installing.** Upload `install.php` alone and open it. It downloads the branch

@@ -154,7 +154,7 @@ wymagania, pobierze i rozpakuje aplikację, utworzy bazę danych i poprosi o dan
 konta administratora. Po zakończeniu usuwa sam siebie.
 
 **Wymagania.** PHP 7.4 lub nowsze (zalecane 8.x) z rozszerzeniami `pdo_sqlite`,
-`curl`, `zip`, `gd` i `mbstring` oraz katalog z prawem zapisu. Dane trzymane są w
+`curl`, `zip`, `gd`, `mbstring` i `simplexml` oraz katalog z prawem zapisu. Dane trzymane są w
 SQLite, więc nie trzeba osobnego serwera bazy danych. Wystarczy dowolny hosting
 współdzielony z PHP.
 

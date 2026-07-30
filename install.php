@@ -112,7 +112,12 @@ function check_requirements($root) {
         version_compare(PHP_VERSION, MIN_PHP_VERSION, '>='),
         'Found ' . PHP_VERSION,
     ];
-    foreach (['pdo_sqlite', 'curl', 'zip', 'gd', 'mbstring'] as $ext) {
+    // simplexml is what inc/bgg.php parses BoardGameGeek's XML responses with.
+    // Without it, BGG search doesn't just come back empty — it fatals the
+    // first time someone tries it, which is a far worse failure than the other
+    // optional-feature extensions here. Checked alongside the rest so it's
+    // caught at install time instead of the first live search.
+    foreach (['pdo_sqlite', 'curl', 'zip', 'gd', 'mbstring', 'simplexml'] as $ext) {
         $checks[] = ["Extension: $ext", extension_loaded($ext), extension_loaded($ext) ? 'loaded' : 'missing'];
     }
     $checks[] = ['Install directory writable', is_writable($root), $root];

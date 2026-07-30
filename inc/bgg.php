@@ -4,10 +4,16 @@
  * -----------------------------------------------------------------------------
  *  Mirrors the behaviour proven in the previous project, cleaned up:
  *    * One /search call returns id + name + year for every match. Expansions
- *      are excluded server-side (type=boardgame & excludesubtype).
+ *      are excluded server-side (type=boardgame & excludesubtype) — but BGG's
+ *      own index mistags plenty of items, so that filter is a first pass, not
+ *      a guarantee. A second, more reliable pass runs later (see bgg_search).
  *    * Thumbnails are NOT in the search response, so we only fetch them (via
  *      per-item /thing) when the result list is small enough — big lists skip
- *      thumbnails to avoid hammering the API. (RESULT_IMAGE_LIMIT.)
+ *      thumbnails to avoid hammering the API. (RESULT_IMAGE_LIMIT.) That same
+ *      /thing call also carries an authoritative type="..." attribute, so
+ *      short lists get a second expansion/promo filter for free; long lists
+ *      don't get this second pass, since there's no per-item call to piggyback
+ *      it on without hammering the API further.
  *    * The chosen game's full details (length, weight, players, image) come
  *      from a single /thing call after the user clicks.
  *
@@ -137,6 +143,7 @@ function bgg_parse_thing($xmlString) {
     return [
         'id'         => (int)$item['id'],
         'name'       => $name,
+        'type'       => (string)($item['type'] ?? ''),   // 'boardgame' | 'boardgameexpansion' | 'boardgameaccessory' | ...
         'thumbnail'  => (string)($item->thumbnail ?? ''),
         'image'      => (string)($item->image ?? ''),
         'length'     => (int)($item->playingtime['value'] ?? 0),
@@ -155,6 +162,11 @@ function bgg_parse_thing($xmlString) {
  * Thumbnails are only filled when the result count is small (RESULT_IMAGE_LIMIT);
  * otherwise 'thumbnail' is ''. Sorted alphabetically by name.
  *
+ * For short lists, results are also filtered a second time against /thing's
+ * authoritative type attribute, which catches expansions and accessories the
+ * search endpoint's own filter missed (see the file header). Long lists don't
+ * get this second pass and may still include a stray expansion or promo.
+ *
  * @param string $query  User's search text.
  * @return array  List of matches; empty on network/HTTP failure.
  */
@@ -169,6 +181,29 @@ function bgg_configured() {
     return trim((string)opt('bgg_api_code')) !== '';
 }
 
+/**
+ * Does /thing say this specific entry is something OTHER than a plain board
+ * game — an expansion, an accessory, etc? This is bgg_search()'s second,
+ * authoritative filter pass; see the file header for why the search
+ * endpoint's own filter isn't enough on its own.
+ *
+ * An EMPTY type (a missing attribute, or bgg_thing() having failed for this
+ * item) is NOT treated as "other" — with nothing to go on, keeping the item is
+ * safer than discarding an otherwise-real game over one incomplete lookup.
+ *
+ * Pulled out as its own function (rather than an inline condition inside
+ * bgg_search) so the rule has one place to live and can be tested directly
+ * against parsed /thing fixtures, without needing the network.
+ *
+ * @param array|null $detail  bgg_parse_thing()'s return, or null on failure.
+ * @return bool
+ */
+function bgg_is_non_game($detail) {
+    if ($detail === null) return false;
+    $type = $detail['type'] ?? '';
+    return $type !== '' && $type !== 'boardgame';
+}
+
 function bgg_search($query) {
     $url = BGG_BASE . 'search?type=boardgame&excludesubtype=boardgameexpansion&query='
          . urlencode($query);
@@ -179,12 +214,30 @@ function bgg_search($query) {
 
     // Conditionally enrich with thumbnails (one /thing per item) for short lists.
     // For long lists we'd make dozens of extra calls, so we skip thumbnails there.
+    //
+    // SECOND FILTER PASS, piggybacking on that same /thing call: the search
+    // endpoint's excludesubtype is well known to be unreliable — BGG's own
+    // index mistags plenty of expansions and promos, so some still slip
+    // through. /thing's type="..." attribute is the authoritative source (it's
+    // that specific entry's own declared type), so anything that isn't a plain
+    // 'boardgame' is dropped here — at NO extra API cost, since we were
+    // fetching this response for the thumbnail anyway.
+    //
+    // This only runs for short lists, for the same reason thumbnails do: a
+    // long list has no enrichment call to piggyback on, so it keeps whatever
+    // the search endpoint returned, mistags and all. And a promo that BGG
+    // staff filed as a standalone 'boardgame' entry (rather than as an
+    // expansion/accessory of something) looks identical to a real game from
+    // here — that's a data problem on BGG's end no client-side filter can fix.
     if (count($items) <= RESULT_IMAGE_LIMIT) {
-        foreach ($items as &$it) {
+        $filtered = [];
+        foreach ($items as $it) {
             $detail = bgg_thing($it['id']);
+            if (bgg_is_non_game($detail)) continue;   // expansion/accessory etc — drop
             $it['thumbnail'] = $detail ? $detail['thumbnail'] : '';
+            $filtered[] = $it;
         }
-        unset($it);
+        $items = $filtered;
     } else {
         foreach ($items as &$it) { $it['thumbnail'] = ''; }
         unset($it);

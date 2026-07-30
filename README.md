@@ -150,7 +150,7 @@ requirements, downloads and unpacks the app, creates the database, and asks for
 your admin account. It deletes itself when it finishes.
 
 **Requirements.** PHP 7.4 or newer (8.x recommended) with the `pdo_sqlite`,
-`curl`, `zip`, `gd` and `mbstring` extensions, and a writable install directory.
+`curl`, `zip`, `gd`, `mbstring` and `simplexml` extensions, and a writable install directory.
 Data is stored in SQLite, so there is no separate database server to set up. Any
 shared host running PHP will do.
 
