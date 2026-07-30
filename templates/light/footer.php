@@ -50,11 +50,11 @@ $showLangPick = !is_logged_in() && lang_switch_allowed() && count(lang_available
         <?php endif; ?>
         <noscript><button type="submit" class="btn btn-small">OK</button></noscript>
     </form>
-    <div class="bgg_logo">
-        <img src="/img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
-    </div>
 </footer>
 <?php endif; ?>
+<div class="bgg_logo">
+<img src="/img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
+</div>
 <?php
 // Load the shared script bundle if it exists. We check existence so a brand-new
 // install (or a build where js/ isn't present yet) doesn't emit a 404 for it.
