@@ -510,7 +510,6 @@ Link wygasa za godzinę.',
     'opt_email_prefix_event'  => 'Nazwy wydarzenia',
     'opt_email_prefix_note'   => 'Obecnie tytuły zaczynają się od: „%s”.',
 
-    'update_moved_message'    => 'Przeniesiono tekst do wersji językowej: %s',
 
     // ---- Mailing list -----------------------------------------------------------
     'opt_mailing_list'        => 'Włącz listę mailingową',

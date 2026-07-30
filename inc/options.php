@@ -85,20 +85,16 @@ function custom_msg_option($key, $lang) {
 /**
  * An admin-configured message, in the language the visitor is reading.
  *
- * FALLBACK CHAIN, in order:
- *   1. the current language's text;
- *   2. the site's default language's text — so an admin who only filled Polish
- *      still shows something to an English visitor, rather than a blank gap;
- *   3. the bare legacy key (`msg_voting` with no suffix), which is what every
- *      one of these was before they became per-language. Existing installs
- *      keep working untouched, and any language added to the site later still
- *      inherits that text until someone translates it.
+ * FALLBACK: the current language's text, then the site's default language's —
+ * so an admin who has only filled in Polish still shows something to an English
+ * visitor rather than a blank gap. Nothing configured in either yields '', and
+ * callers render nothing at all for an empty message.
  *
  * MUST NOT be called before lang_load() — it needs lang_current(). In practice
  * every caller is a template, which renders long after bootstrap.
  *
  * @param string $key  One of custom_msg_keys().
- * @return string  '' when nothing is configured anywhere.
+ * @return string  '' when nothing is configured.
  */
 function opt_msg($key) {
     $lang = function_exists('lang_current') ? lang_current() : '';
@@ -111,7 +107,7 @@ function opt_msg($key) {
         $v = trim((string)opt(custom_msg_option($key, $default), ''));
         if ($v !== '') return $v;
     }
-    return trim((string)opt($key, ''));   // pre-translation value
+    return '';
 }
 
 /**

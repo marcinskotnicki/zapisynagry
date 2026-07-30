@@ -318,47 +318,6 @@ function update_run($root) {
             }
         }
 
-        // One-time move of the six custom messages to per-language storage.
-        //
-        // They used to be a single row each (msg_voting); they are now one row
-        // per language (msg_voting_pl, msg_voting_en, …). Without this, an
-        // admin who upgrades opens the Options screen, sees six empty boxes,
-        // and reasonably concludes their text was lost — even though opt_msg()
-        // is still falling back to it and the site looks unchanged.
-        //
-        // Copies into the site's DEFAULT language only: that is the language
-        // the existing text was almost certainly written in. The original row
-        // is left in place on purpose — it costs nothing, it stays the last
-        // fallback for any language added later, and not deleting an admin's
-        // content during an automated upgrade is the safer default.
-        //
-        // Idempotent: it only writes where the target is absent or empty, so a
-        // second update run does nothing and can't clobber a translation the
-        // admin has since written.
-        if (isset($liveTables['options'])) {
-            $defLang = $live->query("SELECT value FROM options WHERE key='default_language'")->fetchColumn();
-            if (is_string($defLang) && $defLang !== '') {
-                foreach (custom_msg_keys() as $msgKey) {
-                    $legacy = $live->prepare('SELECT value FROM options WHERE key = ?');
-                    $legacy->execute([$msgKey]);
-                    $legacyVal = (string)$legacy->fetchColumn();
-                    if (trim($legacyVal) === '') continue;
-
-                    $target = custom_msg_option($msgKey, $defLang);
-                    $cur = $live->prepare('SELECT value FROM options WHERE key = ?');
-                    $cur->execute([$target]);
-                    $curVal = $cur->fetchColumn();
-                    if ($curVal !== false && trim((string)$curVal) !== '') continue;   // already translated
-
-                    $live->prepare(
-                        'INSERT INTO options (key, value) VALUES (?, ?)
-                         ON CONFLICT(key) DO UPDATE SET value = excluded.value'
-                    )->execute([$target, $legacyVal]);
-                    $results[] = t('update_moved_message', $target);
-                }
-            }
-        }
-
         // Bump the recorded schema version to the new one (informational marker).
         if (isset($refTables['meta'])) {
             $newVer = $ref->query("SELECT value FROM meta WHERE key='schema_version'")->fetchColumn();

@@ -74,14 +74,8 @@ INSERT INTO options (key, value) VALUES
     -- Google's usual starting point is 0.5; raise it to be stricter.
     ('captcha_v3_threshold',  '0.5'),
     ('timeline_extension',    '3'),    -- hours added past the day's end on timeline
-    ('msg_below_event',       ''),     -- optional custom text under the event name
-    ('msg_adding_game',       ''),     -- optional custom text on the add-game screen
-    ('msg_assigning_player',  ''),     -- optional custom text on the signup screen
     ('login_days',            '365'),  -- how long logins persist (days); 0 = browser session only
     ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
-    ('msg_adding_poll',       ''),     -- optional custom text above the add-poll form
-    ('msg_voting',            ''),     -- optional custom text on the vote form
-    ('msg_email_field',       ''),     -- optional note shown above every email input
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
     ('site_icon',             ''),     -- '' = no site icon; otherwise a version stamp (files live in /icons)
     ('game_languages',        'PL

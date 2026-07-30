@@ -360,8 +360,10 @@ key to `custom_msg_keys()` in `inc/options.php` and nothing else: the Options
 screen, the save whitelist and the upgrade migration all generate themselves
 from that list crossed with `lang_available()`. Read it in a template with
 `opt_msg('key')`, never `opt('key')` — these are stored one row per language
-(`msg_voting_en`), and `opt_msg()` is what walks the fallback chain of current
-language → site default language → the pre-translation bare key.
+(`msg_voting_en`), and `opt_msg()` is what falls back from the current language
+to the site default language, so a half-translated site shows text rather than a
+blank gap. Nothing configured in either yields `''`, and callers render nothing
+at all for an empty message.
 
 **Add a column.** Edit `database.sql` only. Use `NOT NULL DEFAULT`.
 

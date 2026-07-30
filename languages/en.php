@@ -518,7 +518,6 @@ The link expires in one hour.',
     'opt_email_prefix_event'  => 'The event name',
     'opt_email_prefix_note'   => 'Subjects currently start with: "%s".',
 
-    'update_moved_message'    => 'Moved custom text into a language field: %s',
 
     // ---- Mailing list -----------------------------------------------------------
     'opt_mailing_list'        => 'Enable the mailing list',
