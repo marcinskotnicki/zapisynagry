@@ -143,6 +143,7 @@ return [
     'newevent_end'        => 'End',
     'newevent_error_dates'=> 'Please give a valid date and times for every day.',
     'day_n'               => 'Day %d',
+    'day_hours'           => '%s – %s',
     'day_label_1'         => 'First day',
     'day_label_2'         => 'Second day',
     'day_label_3'         => 'Third day',

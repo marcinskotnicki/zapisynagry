@@ -33,6 +33,11 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
     <?php if ((int)$num_days === 1 && !empty($days[0]['day_date'])): // single-day: show the date inline ?>
         <p class="event-date"><?= e($days[0]['day_date']) ?></p>
     <?php endif; ?>
+    <?php // Opening hours, under the date. Deliberately NOT tied to the date being
+          // set: a one-day event with no date still has hours worth stating. ?>
+    <?php if ((int)$num_days === 1 && ($hrs = day_hours_label($days[0] ?? null)) !== ''): ?>
+        <p class="event-hours"><?= e($hrs) ?></p>
+    <?php endif; ?>
     <?php if (opt_msg('msg_below_event') !== ''): // optional admin banner ?>
         <p class="event-msg"><?= e(opt_msg('msg_below_event')) ?></p>
     <?php endif; ?>
@@ -46,6 +51,9 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
                href="index.php?day=<?= $i ?><?= $tokenQS ?>">
                 <?= e(t('day_n', $i)) ?>
                 <?php if (!empty($d['day_date'])): ?><span class="day-tab-date"><?= e($d['day_date']) ?></span><?php endif; ?>
+                <?php // Per tab rather than once for the event: days routinely run
+                      // different hours from one another. ?>
+                <?php if (($dHrs = day_hours_label($d)) !== ''): ?><span class="day-tab-hours"><?= e($dHrs) ?></span><?php endif; ?>
             </a>
         <?php endforeach; ?>
     </nav>

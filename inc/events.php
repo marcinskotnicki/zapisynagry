@@ -299,6 +299,28 @@ function start_time_bounds($dayRow) {
 }
 
 /**
+ * A day's opening hours as a single label, e.g. "10:00 – 22:00".
+ *
+ * Shown on the home page under the date, because events at the same venue
+ * often start at different times from one week to the next and that isn't
+ * otherwise visible without opening a game.
+ *
+ * An OVERNIGHT day reads back exactly as stored — "18:00 – 03:00" — which is
+ * precisely the fact worth surfacing, so it needs no special marking. The
+ * separator lives in the language files rather than being hardcoded, since not
+ * every language punctuates a range the same way.
+ *
+ * @param array|null $dayRow  The event_days row (start_time / end_time).
+ * @return string  '' when either end is missing, so callers can skip the element.
+ */
+function day_hours_label($dayRow) {
+    $from = trim((string)($dayRow['start_time'] ?? ''));
+    $to   = trim((string)($dayRow['end_time'] ?? ''));
+    if ($from === '' || $to === '') return '';
+    return t('day_hours', $from, $to);
+}
+
+/**
  * Minutes since midnight -> 'HH:MM'. Negative input is floored to 0.
  * NOTE: does NOT wrap past 24h (90 min past midnight -> '25:00'); the timeline
  * handles its own modulo-24 display where it needs wrapped hour labels.

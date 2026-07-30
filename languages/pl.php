@@ -135,6 +135,7 @@ return [
     'newevent_end'        => 'Koniec',
     'newevent_error_dates'=> 'Podaj poprawną datę oraz godziny dla każdego dnia.',
     'day_n'               => 'Dzień %d',
+    'day_hours'           => '%s – %s',
     'day_label_1'         => 'Pierwszy dzień',
     'day_label_2'         => 'Drugi dzień',
     'day_label_3'         => 'Trzeci dzień',

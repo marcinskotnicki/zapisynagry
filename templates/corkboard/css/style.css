@@ -101,6 +101,16 @@ body.tpl-corkboard {
     opacity: 0.88;
     text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .45);
 }
+/* Painted on the board like the date above it, one step quieter. */
+.tpl-corkboard .event-hours {
+    text-align: center;
+    font-family: var(--font-type);
+    letter-spacing: 0.10em;
+    font-size: 0.8rem;
+    color: var(--signage);
+    opacity: 0.75;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .45);
+}
 .tpl-corkboard .event-msg { text-align: center; }
 
 /* Days are not tabs here — they are separate slips of paper laid side by side
@@ -149,6 +159,8 @@ body.tpl-corkboard {
     z-index: 1;
 }
 .tpl-corkboard .day-tab-date { color: inherit; opacity: 0.75; }
+/* On the slip itself, so it takes the slip's ink rather than the sign colour. */
+.tpl-corkboard .day-tab-hours { color: inherit; opacity: 0.6; }
 
 /* ---- Paper ----------------------------------------------------------------
    One card treatment, reused everywhere, so the whole board reads as one stack
