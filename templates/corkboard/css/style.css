@@ -1,0 +1,269 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  corkboard — the club noticeboard this app replaced.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a future edit doesn't sand off the point:
+ *
+ *  The metaphor is the physical board a club used to pin things to: a cork
+ *  substrate, typed manila index cards, polaroids taped on at whatever angle the
+ *  hand left them, and a rubber stamp for the one thing that isn't decided yet.
+ *  Every material here is drawn from that, rather than from a generic "warm and
+ *  friendly" palette — the colours are cork, manila, fountain-pen ink and stamp
+ *  ink, and the type is a typewriter because index cards were typed.
+ *
+ *  THE SIGNATURE IS THE POLAROID, and it is the only place this theme is loud.
+ *  Everything else — cards, buttons, player chips — is deliberately quiet paper,
+ *  so the photographs are what you notice. Resist adding a second flourish;
+ *  pinned everything reads as clutter, not as a board.
+ *
+ *  NO IMAGE ASSETS AND NO WEB FONTS. Textures are CSS gradients and the faces
+ *  are system stacks, on purpose: the theme stays a single file like `dark`,
+ *  costs no extra requests, and — since this app asks visitors for GDPR consent
+ *  — quietly adding a Google Fonts request would be the wrong call to make on
+ *  the admin's behalf.
+ *
+ *  Everything is scoped to .tpl-corkboard (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-corkboard {
+    /* ---- Materials ------------------------------------------------------- */
+    --cork:        #a9773f;   /* the board itself */
+    --cork-dark:   #8a5f2f;   /* its vignette and speckle */
+    --card:        #ede4d0;   /* manila index card */
+    --card-edge:   #cfc0a2;   /* the cut edge of that card */
+    --ink:         #23374d;   /* fountain pen, blue-black */
+    --pencil:      #7a7264;   /* graphite, for secondary text */
+    --stamp:       #b03a2e;   /* rubber stamp red */
+    --stamp-green: #3d6b4f;   /* the "paid"/"ok" stamp */
+
+    --font-type:   'Courier New', Courier, monospace;
+
+    /* Remap the base theme's variables onto those materials, so every rule we
+       don't touch still lands somewhere sensible. */
+    --bg:           var(--cork);
+    --surface:      var(--card);
+    --surface-2:    #f3ebd9;
+    --border:       var(--card-edge);
+    --text:         var(--ink);
+    --text-muted:   var(--pencil);
+    --primary:      var(--ink);
+    --primary-text: #f6f1e4;
+    --ok:           var(--stamp-green);
+    --error:        var(--stamp);
+    --radius:       3px;      /* paper is cut, not rounded */
+}
+
+/* ---- The board ------------------------------------------------------------
+   Cork is granular, so the speckle is two offset radial gradients at different
+   scales — one regular grid would read as a pattern rather than a material. */
+body.tpl-corkboard {
+    background-color: var(--cork);
+    background-image:
+        radial-gradient(rgba(255, 255, 255, .10) 1px, transparent 1.6px),
+        radial-gradient(rgba(0, 0, 0, .16) 1px, transparent 1.6px),
+        radial-gradient(circle at 50% 0, rgba(255, 244, 222, .12), transparent 60%);
+    background-size: 13px 13px, 21px 19px, 100% 100%;
+    background-position: 0 0, 7px 9px, 0 0;
+    color: var(--ink);
+}
+
+/* ---- Paper ----------------------------------------------------------------
+   One card treatment, reused everywhere, so the whole board reads as one stack
+   of stationery. The double shadow is the sheet plus its lift off the cork. */
+.tpl-corkboard .card,
+.tpl-corkboard .table-block,
+.tpl-corkboard .game-card,
+.tpl-corkboard .poll-card,
+.tpl-corkboard .mailing-box {
+    background-color: var(--card);
+    background-image: linear-gradient(rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 60%);
+    border: 1px solid var(--card-edge);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .55) inset,
+                0 3px 7px rgba(60, 38, 12, .28);
+}
+
+/* Table headings are typed labels, not headlines. */
+.tpl-corkboard .table-title,
+.tpl-corkboard .players-label,
+.tpl-corkboard .game-time,
+.tpl-corkboard .game-length,
+.tpl-corkboard .poll-deadline,
+.tpl-corkboard .weight-badge,
+.tpl-corkboard .reserve-tag,
+.tpl-corkboard .poll-opt-votes {
+    font-family: var(--font-type);
+    letter-spacing: 0.02em;
+}
+.tpl-corkboard .table-title {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.95rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--card-edge);
+    padding-bottom: 0.3rem;
+}
+.tpl-corkboard .game-time { color: var(--ink); font-weight: 700; }
+.tpl-corkboard .game-time:before { content: none; }   /* the clock glyph fights the typewriter */
+
+/* ---- THE SIGNATURE: polaroids ---------------------------------------------
+   A polaroid is a white frame with a deep lip at the bottom, and it is never
+   quite straight. The angles are assigned by position rather than at random —
+   CSS can't randomise, and a repeating three-step cycle is irregular enough
+   that the eye reads it as hand-placed.
+
+   The rotation is on the IMAGE only. Rotating the card would tilt its text, and
+   tilted text is harder to read for the sake of a joke. */
+/* The frame eats into the picture (box-sizing is border-box globally), so the
+   column gets a little wider here than the base theme's 15%/100px — otherwise
+   the photograph inside a 100px polaroid is barely 86px. */
+.tpl-corkboard .game-thumb { position: relative; width: 18%; min-width: 120px; }
+.tpl-corkboard .game-thumb img {
+    display: block;
+    width: 92%;
+    background: #fffdf7;
+    padding: 7px 7px 22px;      /* the lip along the bottom is what says "polaroid" */
+    border: 1px solid #e4dcc8;
+    border-radius: 2px;
+    box-shadow: 0 4px 9px rgba(48, 30, 8, .38);
+    transform: rotate(-1.8deg);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.tpl-corkboard .game-list > *:nth-of-type(3n+2) .game-thumb img { transform: rotate(1.4deg); }
+.tpl-corkboard .game-list > *:nth-of-type(3n)   .game-thumb img { transform: rotate(-0.6deg); }
+
+/* Straighten a photo when you reach for it — the one bit of motion, and it
+   matches what a hand does. */
+.tpl-corkboard .game-card:hover .game-thumb img {
+    transform: rotate(0deg) scale(1.02);
+    box-shadow: 0 7px 15px rgba(48, 30, 8, .42);
+}
+
+/* A strip of tape across the top corner. :has() keeps it off the cards that
+   have buttons but no photograph; where :has() is unsupported it simply never
+   appears, which is a clean degradation. Its angle deliberately disagrees with
+   the photo's — tape goes on afterwards, by hand. */
+.tpl-corkboard .game-thumb:has(img)::before {
+    content: "";
+    position: absolute;
+    top: -7px; left: 50%;
+    width: 54px; height: 17px;
+    transform: translateX(-58%) rotate(-6deg);
+    background: linear-gradient(rgba(238, 232, 205, .78), rgba(222, 213, 178, .78));
+    border-left: 1px dashed rgba(0, 0, 0, .10);
+    border-right: 1px dashed rgba(0, 0, 0, .10);
+    box-shadow: 0 1px 2px rgba(48, 30, 8, .22);
+    z-index: 2;
+}
+
+/* ---- Cards on the board ---------------------------------------------------
+   Index cards are ruled. The lines are faint enough to be a texture rather than
+   a thing you read, and they stop at the card edge. */
+.tpl-corkboard .game-card {
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%),
+        repeating-linear-gradient(transparent 0 27px, rgba(35, 55, 77, .07) 27px 28px);
+    padding: 0.85rem;
+    gap: 1rem;
+}
+
+/* A poll has not been decided yet, so its card is dashed — provisional. That
+   distinction carries meaning, which is why it earns its own treatment when
+   nothing else here does. */
+.tpl-corkboard .poll-card {
+    border: 1px dashed var(--pencil);
+    border-left: 1px dashed var(--pencil);
+}
+
+/* ---- The stamp ------------------------------------------------------------
+   The only other loud element, and it is one word on one element: the tag that
+   says this slot is still open. Stamps are pressed unevenly and never square. */
+.tpl-corkboard .poll-tag {
+    display: inline-block;
+    background: none;
+    color: var(--stamp);
+    font-family: var(--font-type);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border: 2px solid var(--stamp);
+    border-radius: 2px;
+    transform: rotate(-3deg);
+    opacity: 0.82;              /* ink never presses evenly */
+}
+
+/* ---- Chips, buttons, small parts ------------------------------------------ */
+.tpl-corkboard .player {
+    background: #fbf6e9;
+    border: 1px solid var(--card-edge);
+    border-radius: 2px;
+    font-family: var(--font-type);
+    font-size: 0.82rem;
+    box-shadow: 0 1px 2px rgba(60, 38, 12, .16);
+}
+.tpl-corkboard .player-reserve { background: repeating-linear-gradient(45deg, #f4eedd 0 6px, #eee6d0 6px 12px); }
+
+.tpl-corkboard .btn {
+    background: #f7f1e0;
+    border: 1px solid var(--card-edge);
+    color: var(--ink);
+    font-family: var(--font-type);
+    box-shadow: 0 1px 2px rgba(60, 38, 12, .2);
+}
+.tpl-corkboard .btn:hover { background: #fffaea; }
+.tpl-corkboard .btn-primary {
+    background: var(--ink); border-color: var(--ink); color: #f6f1e4;
+}
+.tpl-corkboard .btn-primary:hover { background: #1a2a3b; border-color: #1a2a3b; color: #f6f1e4; }
+.tpl-corkboard .btn-danger,
+.tpl-corkboard .btn-danger:hover { background: var(--stamp); border-color: var(--stamp); color: #fdf6ee; }
+
+/* Weight keeps its colour scale — that encodes data and must stay readable —
+   but loses its pill shape so it sits on the paper like everything else. */
+.tpl-corkboard .weight-badge { border-radius: 2px; font-size: 0.78rem; }
+
+.tpl-corkboard .msg-icon { color: var(--ink); }
+.tpl-corkboard .game-comment,
+.tpl-corkboard .comment-list li {
+    background: #f6efdd;
+    border: 1px solid var(--card-edge);
+    border-radius: 2px;
+}
+
+/* ---- Chrome ---------------------------------------------------------------
+   The rail the board hangs on: dark, flat, out of the way. */
+.tpl-corkboard .topbar {
+    background: linear-gradient(#4b361f, #3a2917);
+    border-bottom: 2px solid #2c1f11;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+}
+.tpl-corkboard .topbar a,
+.tpl-corkboard .brand { color: #f0e4cc; }
+.tpl-corkboard .timeline { background: rgba(255, 250, 236, .9); border-radius: 3px; }
+
+/* ---- Quality floor -------------------------------------------------------- */
+/* Focus has to be visible against both paper and cork. */
+.tpl-corkboard a:focus-visible,
+.tpl-corkboard button:focus-visible,
+.tpl-corkboard input:focus-visible,
+.tpl-corkboard select:focus-visible,
+.tpl-corkboard textarea:focus-visible {
+    outline: 3px solid var(--stamp);
+    outline-offset: 2px;
+}
+
+/* The tilt is static and stays — it is the design, not an effect. What goes is
+   the movement: no straightening on hover for anyone who asked for less of it. */
+@media (prefers-reduced-motion: reduce) {
+    .tpl-corkboard .game-thumb img { transition: none; }
+    .tpl-corkboard .game-card:hover .game-thumb img { transform: none; }
+}
+
+/* Narrow screens: the photograph shrinks but keeps its frame and its angle. */
+@media (max-width: 700px) {
+    .tpl-corkboard .game-thumb img { padding: 5px 5px 16px; }
+    .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
+}
