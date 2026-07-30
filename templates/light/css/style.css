@@ -499,3 +499,6 @@ html { scroll-behavior: smooth; }
 
 .event-rename { margin-bottom: 1.5rem; max-width: 420px; }
 
+.bgg_logo{display:block;text-align:center;padding:20px 10px;}
+.bgg_logo img{width:60%;max-width:300px;height:auto;}
+
