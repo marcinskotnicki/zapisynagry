@@ -513,6 +513,11 @@ The link expires in one hour.',
     'addgame_search_empty'    => 'Please enter a game name first.',
     'addgame_search_nokey'    => 'BGG search is unavailable: the administrator has not configured a BoardGameGeek API code. You can still add the game manually.',
 
+    'opt_email_prefix'        => 'Email subjects start with',
+    'opt_email_prefix_venue'  => 'The venue name',
+    'opt_email_prefix_event'  => 'The event name',
+    'opt_email_prefix_note'   => 'Subjects currently start with: "%s".',
+
     // ---- Mailing list -----------------------------------------------------------
     'opt_mailing_list'        => 'Enable the mailing list',
     'opt_mailing_gdpr'        => 'Consent text (GDPR)',

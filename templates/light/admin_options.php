@@ -110,6 +110,21 @@ $toggle = function($key) {
         </div>
         <?php
         ?>
+        <?php // Which name every outgoing subject is prefixed with. Venues that
+              // run frequent events usually want the event name, so recipients
+              // can tell one event's mail from another's. ?>
+        <div class="field">
+            <label for="email_subject_prefix"><?= e(t('opt_email_prefix')) ?></label>
+            <select id="email_subject_prefix" name="email_subject_prefix">
+                <?php foreach (['venue', 'event'] as $mode): ?>
+                    <option value="<?= e($mode) ?>"<?= opt('email_subject_prefix') === $mode ? ' selected' : '' ?>>
+                        <?= e(t('opt_email_prefix_' . $mode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_email_prefix_note', mail_subject_prefix())) ?></p>
+        </div>
+
         <?php // Mailing list: master switch, plus the consent wording. Leaving the
               // text empty means no checkbox is shown and none is required. ?>
         <div class="field field-check">

@@ -55,20 +55,42 @@ function mail_body_with_footer($body) {
     return rtrim($body, "\n") . "\n\n\n" . $home;
 }
 
+/**
+ * The string every outgoing subject is prefixed with.
+ *
+ * 'venue' (default) -> the venue name, falling back to the current event's.
+ * 'event'           -> the current event's name, falling back to the venue's.
+ *
+ * The fallback matters: an admin who picks "event" but has no live event (all
+ * archived, or none created yet) would otherwise get bare, unrecognisable
+ * subjects, which is worse than the name they didn't pick.
+ * @return string  '' when neither is set.
+ */
+function mail_subject_prefix() {
+    $venue = trim((string)opt('venue_name'));
+    $event = trim((string)(current_event()['name'] ?? ''));
+    if (opt('email_subject_prefix') === 'event') {
+        return $event !== '' ? $event : $venue;
+    }
+    return $venue !== '' ? $venue : $event;
+}
+
 function send_mail($to, $subject, $body, $replyTo = null) {
     // Reject obviously bad addresses up front — also guards the loops in notify.
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
 
-    // Every outgoing subject is prefixed with "<venue>: " (or the current
-    // event's name when no venue is configured), so recipients recognise the
-    // mail without checking the sender. Centralised HERE so all senders —
-    // the seven notify_* triggers, recovery, verification, user messages —
-    // get it for free; the strpos guard keeps a caller-supplied prefix from
-    // doubling up.
-    $prefix = opt('venue_name');
-    if ($prefix === '') {
-        $prefix = current_event()['name'] ?? '';
-    }
+    // Every outgoing subject is prefixed so recipients recognise the mail
+    // without checking the sender. Centralised HERE so all senders — the
+    // notify_* triggers, recovery, verification, user messages, the mailing
+    // list — get it for free; the strpos guard keeps a caller-supplied prefix
+    // from doubling up.
+    //
+    // WHICH name is the admin's choice (option 'email_subject_prefix'): a venue
+    // running one event at a time wants its own name, but somewhere with
+    // frequent events the EVENT name is what lets people find the right thread.
+    // Either way the other one is used as a fallback when the preferred is
+    // blank, so the prefix is never empty just because a field was left unset.
+    $prefix = mail_subject_prefix();
     if ($prefix !== '' && strpos($subject, $prefix . ':') !== 0) {
         $subject = $prefix . ': ' . $subject;
     }

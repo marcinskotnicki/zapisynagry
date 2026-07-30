@@ -117,6 +117,10 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- mailing_list: 0/1 master switch for the per-event mailing list (the
     -- signup box under the timeline, the new-game notifications, and the
     -- admin's Mailing tab).
+    -- email_subject_prefix: 'venue' or 'event' — which name every outgoing
+    -- subject is prefixed with. A venue with frequent events usually wants
+    -- 'event', so recipients can tell one event's mail from another's.
+    ('email_subject_prefix',         'venue'),
     ('mailing_list',                 '0'),
     -- mailing_gdpr_text: consent wording shown beside a REQUIRED checkbox on
     -- the signup box. Left empty, no checkbox is shown and none is demanded —

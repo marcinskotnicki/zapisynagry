@@ -505,6 +505,11 @@ Link wygasa za godzinę.',
     'addgame_search_empty'    => 'Najpierw wpisz nazwę gry.',
     'addgame_search_nokey'    => 'Wyszukiwanie w BGG jest niedostępne: administrator nie skonfigurował kodu API BoardGameGeek. Możesz dodać grę ręcznie.',
 
+    'opt_email_prefix'        => 'Tytuły e-maili zaczynają się od',
+    'opt_email_prefix_venue'  => 'Nazwy lokalu',
+    'opt_email_prefix_event'  => 'Nazwy wydarzenia',
+    'opt_email_prefix_note'   => 'Obecnie tytuły zaczynają się od: „%s”.',
+
     // ---- Mailing list -----------------------------------------------------------
     'opt_mailing_list'        => 'Włącz listę mailingową',
     'opt_mailing_gdpr'        => 'Treść zgody (RODO)',

@@ -18,6 +18,7 @@
 // helpers. Pages load inc/captcha.php themselves; admin.php doesn't, hence the
 // require_once here — it's this tab's own dependency.
 require_once __DIR__ . '/../captcha.php';
+require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in the form's note
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -34,6 +35,7 @@ $OPTION_VALUES = [
     'default_language', 'default_template', 'registration_mode',
     'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
     'timezone',            // the venue's clock; validated below
+    'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
 ];
 $OPTION_TOGGLES = [
@@ -86,6 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'header_button_style':
                 // How the top-bar nav renders: text only / icon only / both.
                 if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
+                break;
+            case 'email_subject_prefix':
+                // Anything else would silently fall through to the venue branch
+                // in mail_subject_prefix(); reject it so the stored value always
+                // says what it means.
+                if (!in_array($val, ['venue', 'event'], true)) continue 2;
                 break;
             case 'timezone':
                 // Must be a real PHP timezone: app_timezone_init() falls back to
