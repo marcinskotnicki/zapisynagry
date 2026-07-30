@@ -28,8 +28,8 @@
 
 .tpl-corkboard {
     /* ---- Materials ------------------------------------------------------- */
-    --cork:        #a9773f;   /* the board itself */
-    --cork-dark:   #8a5f2f;   /* its vignette and speckle */
+    --cork:        #7a5326;   /* the board itself — deep, so paper and sign text pop */
+    --signage:     #f7ecd5;   /* painted lettering on the board */
     --card:        #ede4d0;   /* manila index card */
     --card-edge:   #cfc0a2;   /* the cut edge of that card */
     --ink:         #23374d;   /* fountain pen, blue-black */
@@ -62,11 +62,70 @@ body.tpl-corkboard {
     background-image:
         radial-gradient(rgba(255, 255, 255, .10) 1px, transparent 1.6px),
         radial-gradient(rgba(0, 0, 0, .16) 1px, transparent 1.6px),
-        radial-gradient(circle at 50% 0, rgba(255, 244, 222, .12), transparent 60%);
-    background-size: 13px 13px, 21px 19px, 100% 100%;
-    background-position: 0 0, 7px 9px, 0 0;
+        radial-gradient(circle at 50% 0, rgba(255, 236, 205, .10), transparent 55%),
+        linear-gradient(rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .18));
+    background-size: 13px 13px, 21px 19px, 100% 100%, 100% 100%;
+    background-position: 0 0, 7px 9px, 0 0, 0 0;
+    background-attachment: scroll, scroll, fixed, fixed;
     color: var(--ink);
 }
+
+/* ---- The sign -------------------------------------------------------------
+   The event name and date are the only text painted straight onto the cork, so
+   they are lettered rather than typed: a calligraphic old-style serif, centred,
+   in the pale paint colour, lifted off the board with a shadow. Everything else
+   on the page is typed or handwritten on paper — this is the one painted thing,
+   which is why it gets the only serif in the theme.
+
+   System faces only (no web font, see the note at the top). Palatino leads the
+   stack because it is humanist and slightly calligraphic; Georgia and Times are
+   the fallbacks and still read as lettering rather than UI. */
+.tpl-corkboard .event-header { text-align: center; }
+.tpl-corkboard .event-header h1 {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    font-size: 2.1rem;
+    color: var(--signage);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .5);
+}
+.tpl-corkboard .event-date {
+    text-align: center;
+    font-family: var(--font-type);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--signage);
+    opacity: 0.88;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .45);
+}
+.tpl-corkboard .event-msg { text-align: center; }
+
+/* Day tabs are card stock pinned to the board, so they centre under the sign
+   and the base theme's underline rule goes — there is no ruled edge to sit on. */
+.tpl-corkboard .day-tabs {
+    justify-content: center;
+    border-bottom: none;
+    gap: 0.35rem;
+}
+.tpl-corkboard .day-tab {
+    font-family: var(--font-type);
+    color: var(--signage);
+    background: rgba(0, 0, 0, .16);
+    border: 1px solid rgba(0, 0, 0, .22);
+    border-radius: 3px 3px 0 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+}
+.tpl-corkboard .day-tab:hover { background: rgba(0, 0, 0, .26); }
+.tpl-corkboard .day-tab-active {
+    background: var(--card);
+    border-color: var(--card-edge);
+    color: var(--ink);
+    text-shadow: none;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(40, 24, 6, .35);
+}
+.tpl-corkboard .day-tab-date { color: inherit; opacity: 0.8; }
 
 /* ---- Paper ----------------------------------------------------------------
    One card treatment, reused everywhere, so the whole board reads as one stack
