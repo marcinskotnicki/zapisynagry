@@ -172,12 +172,6 @@ $toggle = function($key) {
                                value="<?= e(opt($optKey)) ?>">
                     </div>
                 <?php endforeach; ?>
-                <?php // Text from before these became per-language. Shown only while
-                      // it is still doing something, i.e. while some language has no
-                      // translation of its own to use instead. ?>
-                <?php if (trim((string)opt($msgKey)) !== ''): ?>
-                    <p class="field-note"><?= e(t('opt_msg_legacy_note', opt($msgKey))) ?></p>
-                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </fieldset>
