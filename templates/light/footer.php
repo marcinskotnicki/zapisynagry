@@ -53,7 +53,7 @@ $showLangPick = !is_logged_in() && lang_switch_allowed() && count(lang_available
 </footer>
 <?php endif; ?>
 <div class="bgg_logo">
-<img src="/img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
+<img src="img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
 </div>
 <?php
 // Load the shared script bundle if it exists. We check existence so a brand-new
