@@ -238,18 +238,14 @@ body.tpl-corkboard {
     border: 1px solid #e4dcc8;
     border-radius: 2px;
     box-shadow: 0 4px 9px rgba(48, 30, 8, .38);
-    transform: rotate(-1.8deg);
-    transition: transform .18s ease, box-shadow .18s ease;
+    transform: rotate(-1.8deg);   /* static — see the note below on why it never moves */
 }
 .tpl-corkboard .game-list > *:nth-of-type(3n+2) .game-thumb img { transform: rotate(1.4deg); }
 .tpl-corkboard .game-list > *:nth-of-type(3n)   .game-thumb img { transform: rotate(-0.6deg); }
 
-/* Straighten a photo when you reach for it — the one bit of motion, and it
-   matches what a hand does. */
-.tpl-corkboard .game-card:hover .game-thumb img {
-    transform: rotate(0deg) scale(1.02);
-    box-shadow: 0 7px 15px rgba(48, 30, 8, .42);
-}
+/* NO hover motion on the photo, on purpose: this card isn't a link, and a
+   photograph that shifts when the pointer passes over it reads as "click me" —
+   exactly the wrong message for something that is just sitting on the board. */
 
 /* A strip of tape across the top corner. :has() keeps it off the cards that
    have buttons but no photograph; where :has() is unsupported it simply never
@@ -395,12 +391,11 @@ body.tpl-corkboard {
     outline-offset: 2px;
 }
 
-/* The tilt is static and stays — it is the design, not an effect. What goes is
-   the movement: no straightening on hover for anyone who asked for less of it. */
+/* The polaroid's tilt is static and has no hover motion to begin with, so there
+   is nothing left for this to cancel there. The day-tab lift is the one
+   remaining hover movement in the theme, and this is what turns it off. */
 @media (prefers-reduced-motion: reduce) {
-    .tpl-corkboard .game-thumb img,
     .tpl-corkboard .day-tab { transition: none; }
-    .tpl-corkboard .game-card:hover .game-thumb img { transform: none; }
     .tpl-corkboard .day-tab:hover { transform: none; }
 }
 

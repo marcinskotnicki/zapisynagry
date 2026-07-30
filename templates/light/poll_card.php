@@ -52,10 +52,30 @@ $canVote = !$readonly && can_signup();
                 <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
                 <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
             <?php endif; ?>
+            <?php if ($canEnd): ?>
+                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
+            <?php endif; ?>
+            <?php // Shown to anyone allowed to add — the proposer, an admin, or
+                  // everyone when the proposer opted in. ?>
+            <?php if ($canAddCand): ?>
+                <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+            <?php endif; ?>
+            <?php if ($canMsgAll): // mail everyone who voted ?>
+                <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
-    <?php // Second row: what this is and when. The tag sits LAST in the markup so it
-          // lands at the right-hand end of the row (see .poll-tag's auto margin);
-          // as the leftmost red pill it used to read as a delete button. ?>
+    <?php // Second row: what this is and when. UNCONDITIONAL — the start time,
+          // proposer name and the tag are information every viewer gets, not
+          // controls, so they must not disappear along with the buttons above
+          // just because this particular viewer has none. (They used to: this
+          // whole block was accidentally nested inside the actions guard, so a
+          // guest with no visible buttons lost the poll's start time and
+          // proposer along with them.) The tag sits LAST in the markup so it
+          // lands at the right-hand end of the row (see .poll-tag's auto
+          // margin); as the leftmost red pill it used to read as a delete
+          // button. ?>
     <div class="poll-head">
         <?php // data-label lets the classic theme swap the clock glyph for the word
               // (see its CSS); the other themes keep the icon and ignore it. ?>
@@ -72,19 +92,6 @@ $canVote = !$readonly && can_signup();
         <span class="poll-tag"><?= e(t('poll_label')) ?></span>
     </div>
 
-            <?php if ($canEnd): ?>
-                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
-            <?php endif; ?>
-            <?php // Shown to anyone allowed to add — the proposer, an admin, or
-                  // everyone when the proposer opted in. ?>
-            <?php if ($canAddCand): ?>
-                <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
-            <?php endif; ?>
-            <?php if ($canMsgAll): // mail everyone who voted ?>
-                <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
     <?php if (!empty($poll['deadline'])): // when voting closes (auto-resolves after) ?>
         <p class="poll-deadline"><?= e(t('poll_deadline')) ?>: <strong><?= e(substr($poll['deadline'], 0, 16)) ?></strong></p>
     <?php endif; ?>

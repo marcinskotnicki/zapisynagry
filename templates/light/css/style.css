@@ -204,14 +204,28 @@ input, select, textarea {
 /* Opening hours, under the date and quieter than it — useful at a glance,
    not something to read first. */
 .event-hours { color: var(--text-muted); font-size: 0.9rem; margin: 0.1rem 0 0; }
-.day-tab-hours { display: block; font-size: 0.72rem; color: var(--text-muted); }
+.day-tab-hours { display: block; font-size: 0.72rem; color: var(--text-muted); }   /* smaller than the date above it, on purpose */
 .event-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
 
-.day-tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; border-bottom: 2px solid var(--border); margin: 1rem 0 1.5rem; }
-.day-tab { padding: 0.5rem 0.9rem; color: var(--text-muted); border: 1px solid transparent; border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; }
+.day-tabs { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.25rem; border-bottom: 2px solid var(--border); margin: 1rem 0 1.5rem; }
+/* Flex column + centering: a day missing its date or hours (a shorter tab) still
+   lands centered in the row rather than sitting flush at the top of a taller
+   neighbour — align-items:stretch above equalises every tab's height first. */
+.day-tab {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 0.5rem 0.9rem;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-size: 1.05rem;   /* the day name itself, a little bigger than body text */
+}
 .day-tab:hover { background: var(--surface-2); text-decoration: none; }
 .day-tab-active { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -2px; font-weight: 600; }
-.day-tab-date { display: block; font-size: 0.75rem; color: var(--text-muted); }
+/* The date reads as the header of the two lines below the name, so it is
+   sized above the hours line rather than left to look incidental beside it. */
+.day-tab-date { display: block; font-size: 0.85rem; color: var(--text-muted); }
 
 /* ---- Tables --------------------------------------------------------------- */
 .table-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
@@ -290,7 +304,10 @@ input, select, textarea {
 .poll-card { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 0.75rem; background: #eef3fc; }
 .tpl-dark .poll-card { background: #1b2436; }
 .poll-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
-.poll-tag { margin-left: auto; background: var(--primary); color: var(--primary-text); font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; } /* auto margin -> right-hand end of .poll-head */
+/* NOT var(--primary): that is exactly what .btn-primary uses, and a tag sitting
+   right next to real buttons in the same colour reads as one of them. Same fix,
+   same colours, as the classic theme's tag — a caption colour no button uses. */
+.poll-tag { margin-left: auto; background: black; color: #cfcfcf; font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; } /* auto margin -> right-hand end of .poll-head */
 /* Second row: every button the poll offers, delete first. Separate from
    .poll-head so the tag never shares a line with the buttons. */
 .poll-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0 0 0.5rem; }
@@ -479,7 +496,12 @@ html { scroll-behavior: smooth; }
     padding: 0.5rem 1.1rem; font-size: 0.95rem;
     margin-top: 0.6rem;
 }
-.signup-btn:hover { filter: brightness(0.93); text-decoration: none; }
+/* Restating the background here is what stops .btn-small:hover (equal
+   specificity, defined earlier) from repainting this grey on hover — the exact
+   bug already fixed once for .btn-danger. Without it the button loses its green
+   entirely on hover, which on the dark theme left it almost the same colour as
+   the page background. */
+.signup-btn:hover { background: #2e9e5b; filter: brightness(0.93); text-decoration: none; }
 
 /* ---- Table names (optional labels + the tiny rename controls) ------------ */
 .table-block { position: relative; }
