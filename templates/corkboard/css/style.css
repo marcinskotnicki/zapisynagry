@@ -398,8 +398,24 @@ body.tpl-corkboard {
     .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
 }
 
-.game-card, .poll-card{position:relative;z-index:2;margin: 20px 0;}
-.game-card:after,.game-card:before, .poll-card:after,.poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
-.game-card:after,.poll-card:after{transform: rotate(0.8deg);z-index:-1}
+/* A card is the top sheet of a small stack: two pseudo-elements inherit its
+   paper and shadow, sit behind it on negative z-index, and are rotated a couple
+   of degrees each so only their corners show.
 
-.userpanel h1, .userpanel h2, .admin h1{color:white;}
+   THE STACKING CONTEXT LIVES ON .game-list, NOT ON THE CARD. A card needs
+   position:relative so its ::before/::after size and place themselves against
+   ITS box rather than the whole list — but position:relative with no z-index
+   does NOT start a new stacking context, so the negative-z pseudo-elements
+   pass straight through it and land in game-list's context instead, one layer
+   further back. That is what lets the extra sheets paint on top of the
+   table's paper instead of being trapped behind their own card where only a
+   rotated corner could ever peek out. Give the card its own non-auto z-index
+   again and you are back to that trap — the split has to stay exactly this
+   way for the effect to work. */
+.tpl-corkboard .game-list { position: relative; z-index: 2; }
+.tpl-corkboard .game-card, .tpl-corkboard .poll-card{position:relative;margin: 20px 0;}
+.tpl-corkboard .game-card:after,.tpl-corkboard .game-card:before, .tpl-corkboard .poll-card:after,.tpl-corkboard .poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
+.tpl-corkboard .game-card:after,.tpl-corkboard .poll-card:after{transform: rotate(0.8deg);z-index:-1}
+
+/* Panel headings sit on the cork, not on paper. */
+.tpl-corkboard .userpanel h1, .tpl-corkboard .userpanel h2, .tpl-corkboard .admin h1{color:white;}
