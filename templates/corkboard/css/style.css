@@ -401,3 +401,5 @@ body.tpl-corkboard {
 .game-card, .poll-card{position:relative;z-index:2;margin: 20px 0;}
 .game-card:after,.game-card:before, .poll-card:after,.poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
 .game-card:after,.poll-card:after{transform: rotate(0.8deg);z-index:-1}
+
+.userpanel h1, .userpanel h2, .admin h1{color:white;}
