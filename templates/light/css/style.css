@@ -352,6 +352,13 @@ html { scroll-behavior: smooth; }
 .poll-form-add { margin: 1rem 0 0.6rem; }
 .poll-form-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
 
+/* One row per language under each custom-message label: a short language code
+   in a fixed-width gutter, then the input, so the boxes line up whatever the
+   code lengths are. */
+.msg-lang-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; }
+.msg-lang-code { flex: 0 0 2.4rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; }
+.msg-lang-row input { flex: 1; min-width: 0; }
+
 /* ---- Mailing list signup box ----------------------------------------------
    Rendered into the footer's $after_content slot, below the timeline, so it is
    outside the width-capped .content column and needs its own centring. */

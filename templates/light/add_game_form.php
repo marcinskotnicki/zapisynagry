@@ -141,8 +141,8 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                       // proposer's own choice (the checkbox right below). ?>
                 <label for="brings_email"><?= e(t('f_email')) ?><?= email_require_mode() === 1 ? ' *' : '' ?></label>
                 <input type="email" id="brings_email" name="brings_email" value="<?= e($game['brings_email']) ?>">
-                <?php if (opt('msg_email_field') !== ''): ?>
-                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php if (opt_msg('msg_email_field') !== ''): ?>
+                    <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
         </div>

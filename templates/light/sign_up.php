@@ -19,8 +19,8 @@
     <h1><?= e($full ? t('signup_reserve') : t('signup_title')) ?></h1>
     <p class="muted"><?= e($game['name']) ?></p>
 
-    <?php if (opt('msg_assigning_player') !== ''): // optional admin-configured note ?>
-        <p class="event-msg"><?= e(opt('msg_assigning_player')) ?></p>
+    <?php if (opt_msg('msg_assigning_player') !== ''): // optional admin-configured note ?>
+        <p class="event-msg"><?= e(opt_msg('msg_assigning_player')) ?></p>
     <?php endif; ?>
 
     <?php if ($full): // tell them they'll join the reserve list ?>
@@ -40,8 +40,8 @@
 
         <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
         <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
-        <?php if (opt('msg_email_field') !== ''): ?>
-            <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+        <?php if (opt_msg('msg_email_field') !== ''): ?>
+            <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
 
         <label for="knows"><?= e(t('signup_knows')) ?></label>

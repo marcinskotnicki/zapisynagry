@@ -22,8 +22,8 @@ $title      = $title     ?? t('addgame_title');
 <div class="card card-narrow">
     <h1><?= e($title) ?></h1>
 
-    <?php if ($action === 'add_game.php' && opt('msg_adding_game') !== ''): // admin note, game gate only ?>
-        <p class="event-msg"><?= e(opt('msg_adding_game')) ?></p>
+    <?php if ($action === 'add_game.php' && opt_msg('msg_adding_game') !== ''): // admin note, game gate only ?>
+        <p class="event-msg"><?= e(opt_msg('msg_adding_game')) ?></p>
     <?php endif; ?>
 
     <?php // The visual hierarchy (top to bottom, most to least used): BGG add is

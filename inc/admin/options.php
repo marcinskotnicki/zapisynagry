@@ -29,8 +29,8 @@ $OPTION_VALUES = [
     'site_url',
     'captcha_site_key', 'captcha_secret_key', 'captcha_version', 'captcha_v3_threshold',
     'timeline_extension',
-    'msg_below_event', 'msg_adding_game', 'msg_assigning_player', 'game_languages',
-    'msg_adding_poll', 'msg_voting', 'msg_email_field', 'poll_default_deadline_hours', 'login_days',
+    'game_languages',
+    'poll_default_deadline_hours', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
     'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
@@ -38,6 +38,20 @@ $OPTION_VALUES = [
     'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
 ];
+/* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
+ * so their keys can't be a fixed list — they depend on which language files
+ * exist. Generated from the same two helpers the Options screen renders from,
+ * so a field that appears there is always one the save handler will accept.
+ * The bare legacy keys are deliberately NOT accepted any more: they are read
+ * as a fallback (see opt_msg) but no longer editable, so there is exactly one
+ * place to change any given message. */
+foreach (custom_msg_keys() as $__msgKey) {
+    foreach (lang_available() as $__lang) {
+        $OPTION_VALUES[] = custom_msg_option($__msgKey, $__lang);
+    }
+}
+unset($__msgKey, $__lang);
+
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'send_emails', 'allow_polls', 'allow_discussions',

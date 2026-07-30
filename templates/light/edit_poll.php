@@ -56,8 +56,8 @@
             <div class="field">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
                 <input type="email" id="p_email" name="email" value="<?= e($poll['proposer_email'] ?? '') ?>">
-                <?php if (opt('msg_email_field') !== ''): // optional admin note above email inputs ?>
-                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php if (opt_msg('msg_email_field') !== ''): // optional admin note above email inputs ?>
+                    <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
         </div>

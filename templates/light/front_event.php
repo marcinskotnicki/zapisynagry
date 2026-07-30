@@ -33,8 +33,8 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
     <?php if ((int)$num_days === 1 && !empty($days[0]['day_date'])): // single-day: show the date inline ?>
         <p class="event-date"><?= e($days[0]['day_date']) ?></p>
     <?php endif; ?>
-    <?php if (opt('msg_below_event') !== ''): // optional admin banner ?>
-        <p class="event-msg"><?= e(opt('msg_below_event')) ?></p>
+    <?php if (opt_msg('msg_below_event') !== ''): // optional admin banner ?>
+        <p class="event-msg"><?= e(opt_msg('msg_below_event')) ?></p>
     <?php endif; ?>
 </div>
 

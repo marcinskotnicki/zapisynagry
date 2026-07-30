@@ -116,7 +116,7 @@ plain-requires the same file later you get *cannot redeclare*. This is why
 | `bootstrap.php` | The single entry include. | — |
 | `db.php` | The only place the PDO connection is opened. | `db`, `db_run`, `db_one`, `db_all`, `db_val` |
 | `helpers.php` | Small shared utilities. | `e`, `redirect`, `flash_set/get`, `email_valid`, `text_has_content`, `site_base_url`, `current_event`, `log_action` |
-| `options.php` | The admin-editable settings, cached in memory. | `options_load`, `opt`, `opt_int`, `opt_bool`, `opt_set`, `app_timezone_init` |
+| `options.php` | The admin-editable settings, cached in memory. | `options_load`, `opt`, `opt_int`, `opt_bool`, `opt_set`, `opt_msg`, `custom_msg_keys`, `app_timezone_init` |
 | `auth.php` | Sessions, login, CSRF, access checks. | `auth_login`, `auth_logout`, `current_user`, `is_admin`, `require_admin`, `csrf_field`, `csrf_check`, `csrf_rotate` |
 | `lang.php` | Translation loading and lookup. | `lang_load`, `t`, `lang_current` |
 | `template.php` | Theme resolution and view rendering. | `tpl_init`, `tpl_file`, `tpl_render`, `tpl_capture`, `nav_link`, `current_page` |
@@ -354,6 +354,14 @@ don't.
 `inc/admin/options.php` (`$OPTION_VALUES` for text, `$OPTION_TOGGLES` for a
 checkbox — miss this and the field renders but never saves), a field in
 `templates/light/admin_options.php`, and `opt_*` labels in both language files.
+
+**Add a custom message** (admin-editable free text shown to visitors). Add the
+key to `custom_msg_keys()` in `inc/options.php` and nothing else: the Options
+screen, the save whitelist and the upgrade migration all generate themselves
+from that list crossed with `lang_available()`. Read it in a template with
+`opt_msg('key')`, never `opt('key')` — these are stored one row per language
+(`msg_voting_en`), and `opt_msg()` is what walks the fallback chain of current
+language → site default language → the pre-translation bare key.
 
 **Add a column.** Edit `database.sql` only. Use `NOT NULL DEFAULT`.
 

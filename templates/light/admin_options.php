@@ -154,13 +154,32 @@ $toggle = function($key) {
         // The six optional custom texts, in the order a visitor meets them:
         // homepage banner, add-game form, signup form, add-poll form, vote form,
         // and the note above every email field. Empty = not rendered.
-        $text('msg_below_event');
-        $text('msg_adding_game');
-        $text('msg_assigning_player');
-        $text('msg_adding_poll');
-        $text('msg_voting');
-        $text('msg_email_field');
-        ?>
+        //
+        // One input PER LANGUAGE, generated from lang_available() rather than a
+        // hardcoded pl/en pair — languages are auto-discovered from the
+        // languages/ folder, so dropping a de.php in there gets a German box
+        // here for free, with no change needed on this screen.
+        $langs = lang_available();
+        sort($langs);
+        foreach (custom_msg_keys() as $msgKey): ?>
+            <div class="field">
+                <label><?= e(t('opt_' . $msgKey)) ?></label>
+                <?php foreach ($langs as $lc):
+                    $optKey = custom_msg_option($msgKey, $lc); ?>
+                    <div class="msg-lang-row">
+                        <label class="msg-lang-code" for="<?= e($optKey) ?>"><?= e(strtoupper($lc)) ?></label>
+                        <input type="text" id="<?= e($optKey) ?>" name="<?= e($optKey) ?>"
+                               value="<?= e(opt($optKey)) ?>">
+                    </div>
+                <?php endforeach; ?>
+                <?php // Text from before these became per-language. Shown only while
+                      // it is still doing something, i.e. while some language has no
+                      // translation of its own to use instead. ?>
+                <?php if (trim((string)opt($msgKey)) !== ''): ?>
+                    <p class="field-note"><?= e(t('opt_msg_legacy_note', opt($msgKey))) ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
     </fieldset>
 
     <fieldset>

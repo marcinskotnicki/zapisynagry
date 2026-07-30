@@ -518,6 +518,9 @@ The link expires in one hour.',
     'opt_email_prefix_event'  => 'The event name',
     'opt_email_prefix_note'   => 'Subjects currently start with: "%s".',
 
+    'opt_msg_legacy_note'     => 'Earlier single-language text, used for any language without its own: "%s"',
+    'update_moved_message'    => 'Moved custom text into a language field: %s',
+
     // ---- Mailing list -----------------------------------------------------------
     'opt_mailing_list'        => 'Enable the mailing list',
     'opt_mailing_gdpr'        => 'Consent text (GDPR)',

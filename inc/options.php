@@ -53,6 +53,68 @@ function app_timezone_init() {
 }
 
 /**
+ * The admin-editable free-text messages shown around the site.
+ *
+ * ONE list, used by three places that must never disagree: the fields the
+ * Options screen renders, the keys its save handler accepts, and the one-time
+ * upgrade copy in inc/update.php. Adding a seventh message means adding it
+ * here and nowhere else.
+ * @return string[]
+ */
+function custom_msg_keys() {
+    return [
+        'msg_below_event',
+        'msg_adding_game',
+        'msg_assigning_player',
+        'msg_adding_poll',
+        'msg_voting',
+        'msg_email_field',
+    ];
+}
+
+/**
+ * The option key holding one message in one language, e.g. 'msg_voting_en'.
+ * @param string $key   One of custom_msg_keys().
+ * @param string $lang  Language code, as returned by lang_available().
+ * @return string
+ */
+function custom_msg_option($key, $lang) {
+    return $key . '_' . $lang;
+}
+
+/**
+ * An admin-configured message, in the language the visitor is reading.
+ *
+ * FALLBACK CHAIN, in order:
+ *   1. the current language's text;
+ *   2. the site's default language's text — so an admin who only filled Polish
+ *      still shows something to an English visitor, rather than a blank gap;
+ *   3. the bare legacy key (`msg_voting` with no suffix), which is what every
+ *      one of these was before they became per-language. Existing installs
+ *      keep working untouched, and any language added to the site later still
+ *      inherits that text until someone translates it.
+ *
+ * MUST NOT be called before lang_load() — it needs lang_current(). In practice
+ * every caller is a template, which renders long after bootstrap.
+ *
+ * @param string $key  One of custom_msg_keys().
+ * @return string  '' when nothing is configured anywhere.
+ */
+function opt_msg($key) {
+    $lang = function_exists('lang_current') ? lang_current() : '';
+    if ($lang !== '') {
+        $v = trim((string)opt(custom_msg_option($key, $lang), ''));
+        if ($v !== '') return $v;
+    }
+    $default = (string)opt('default_language', '');
+    if ($default !== '' && $default !== $lang) {
+        $v = trim((string)opt(custom_msg_option($key, $default), ''));
+        if ($v !== '') return $v;
+    }
+    return trim((string)opt($key, ''));   // pre-translation value
+}
+
+/**
  * Raw string value of an option, or $default if it doesn't exist.
  * @param string $key
  * @param string $default  Returned when the key was never seeded.

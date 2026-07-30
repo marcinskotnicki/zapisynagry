@@ -26,8 +26,8 @@
         <div class="field">
             <label for="email"><?= e(t('signup_email')) ?> *</label>
             <input type="email" id="email" name="email" value="<?= e($form['email']) ?>" required>
-            <?php if (opt('msg_email_field') !== ''): // the shared email-field note ?>
-                <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+            <?php if (opt_msg('msg_email_field') !== ''): // the shared email-field note ?>
+                <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
             <?php endif; ?>
         </div>
         <div class="field">

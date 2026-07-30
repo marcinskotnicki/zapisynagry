@@ -18,8 +18,8 @@
 <div class="card">
     <h1><?= e(t('addpoll_title')) ?></h1>
 
-    <?php if (opt('msg_adding_poll') !== ''): // optional admin-configured note ?>
-        <p class="event-msg"><?= e(opt('msg_adding_poll')) ?></p>
+    <?php if (opt_msg('msg_adding_poll') !== ''): // optional admin-configured note ?>
+        <p class="event-msg"><?= e(opt_msg('msg_adding_poll')) ?></p>
     <?php endif; ?>
 
     <?php if (!empty($error)): ?>
@@ -48,8 +48,8 @@
             <div class="field">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
                 <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
-                <?php if (opt('msg_email_field') !== ''): // optional admin note above email inputs ?>
-                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php if (opt_msg('msg_email_field') !== ''): // optional admin note above email inputs ?>
+                    <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
             <div class="field">

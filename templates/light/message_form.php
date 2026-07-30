@@ -52,8 +52,8 @@
             <div class="field">
                 <label for="sender_email"><?= e(t('msg_sender_email')) ?> *</label>
                 <input type="email" id="sender_email" name="sender_email" value="<?= e($sender_email) ?>" required>
-                <?php if (opt('msg_email_field') !== ''): // the shared email-field note ?>
-                    <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+                <?php if (opt_msg('msg_email_field') !== ''): // the shared email-field note ?>
+                    <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

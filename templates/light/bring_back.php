@@ -29,8 +29,8 @@
 
         <label for="email"><?= e(t('bringback_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
         <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
-        <?php if (opt('msg_email_field') !== ''): ?>
-            <p class="field-note"><?= e(opt('msg_email_field')) ?></p>
+        <?php if (opt_msg('msg_email_field') !== ''): ?>
+            <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
 
         <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
