@@ -32,6 +32,8 @@
     --signage:     #f7ecd5;   /* painted lettering on the board */
     --card:        #ede4d0;   /* manila index card */
     --card-edge:   #cfc0a2;   /* the cut edge of that card */
+    --kraft:       #d6c39c;   /* the darker sheet a table's cards are laid on */
+    --kraft-edge:  #b39f78;
     --ink:         #23374d;   /* fountain pen, blue-black */
     --pencil:      #7a7264;   /* graphite, for secondary text */
     --stamp:       #b03a2e;   /* rubber stamp red */
@@ -101,37 +103,57 @@ body.tpl-corkboard {
 }
 .tpl-corkboard .event-msg { text-align: center; }
 
-/* Day tabs are card stock pinned to the board, so they centre under the sign
-   and the base theme's underline rule goes — there is no ruled edge to sit on. */
+/* Days are not tabs here — they are separate slips of paper laid side by side
+   on the board. So: no joined edge, no shared underline, each one bordered and
+   shadowed in its own right, and a real gap between them.
+
+   The days you are NOT looking at are older paper, sun-darkened and pushed down
+   flat. The one you ARE looking at is a fresh slip dropped on top: lighter
+   stock, a deeper shadow, and knocked slightly askew — the same hand that
+   taped the photographs on put it there. */
 .tpl-corkboard .day-tabs {
     justify-content: center;
+    align-items: flex-start;
     border-bottom: none;
-    gap: 0.35rem;
+    gap: 0.75rem;
+    padding-bottom: 0.4rem;
 }
 .tpl-corkboard .day-tab {
     font-family: var(--font-type);
-    color: var(--signage);
-    background: rgba(0, 0, 0, .16);
-    border: 1px solid rgba(0, 0, 0, .22);
-    border-radius: 3px 3px 0 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+    text-align: center;
+    color: #5f4a2c;
+    background: var(--kraft);
+    background-image: linear-gradient(rgba(0, 0, 0, .10), rgba(0, 0, 0, .02));
+    border: 1px solid var(--kraft-edge);
+    border-radius: 2px;
+    padding: 0.45rem 1rem;
+    text-shadow: none;
+    box-shadow: 0 2px 4px rgba(40, 24, 6, .35);
+    transition: transform .15s ease, box-shadow .15s ease;
 }
-.tpl-corkboard .day-tab:hover { background: rgba(0, 0, 0, .26); }
-.tpl-corkboard .day-tab-active {
+.tpl-corkboard .day-tab:hover {
+    background: #e0cfa9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 24, 6, .38);
+}
+.tpl-corkboard .day-tab-active,
+.tpl-corkboard .day-tab-active:hover {
     background: var(--card);
+    background-image: linear-gradient(rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 60%);
     border-color: var(--card-edge);
     color: var(--ink);
-    text-shadow: none;
+    font-weight: 700;
     margin-bottom: 0;
-    box-shadow: 0 2px 5px rgba(40, 24, 6, .35);
+    transform: rotate(-1.6deg);            /* dropped on top, not filed */
+    box-shadow: 0 5px 11px rgba(40, 24, 6, .42);
+    z-index: 1;
 }
-.tpl-corkboard .day-tab-date { color: inherit; opacity: 0.8; }
+.tpl-corkboard .day-tab-date { color: inherit; opacity: 0.75; }
 
 /* ---- Paper ----------------------------------------------------------------
    One card treatment, reused everywhere, so the whole board reads as one stack
    of stationery. The double shadow is the sheet plus its lift off the cork. */
 .tpl-corkboard .card,
-.tpl-corkboard .table-block,
 .tpl-corkboard .game-card,
 .tpl-corkboard .poll-card,
 .tpl-corkboard .mailing-box {
@@ -140,8 +162,26 @@ body.tpl-corkboard {
     border: 1px solid var(--card-edge);
     border-radius: 3px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, .55) inset,
-                0 3px 7px rgba(60, 38, 12, .28);
+                0 1px 8px rgba(60, 38, 12, .38)
 }
+
+/* A table is the larger sheet its games are laid out on, so it is a heavier,
+   darker stock than the cards sitting on it — that contrast is what makes the
+   cards read as separate pieces rather than as panels of one page. The timeline
+   is the same sheet, so it takes the same paper. */
+.tpl-corkboard .table-block,
+.tpl-corkboard .tl-scroll {
+    background-color: var(--kraft);
+    background-image: linear-gradient(rgba(255, 255, 255, .30), rgba(255, 255, 255, 0) 55%);
+    border: 1px solid var(--kraft-edge);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset,
+                0 3px 8px rgba(40, 24, 6, .32);
+}
+.tpl-corkboard .tl-table-no { background: rgba(0, 0, 0, .07); color: var(--ink); }
+.tpl-corkboard .tl-hours { border-bottom-color: var(--kraft-edge); }
+.tpl-corkboard .tl-hour, .tpl-corkboard .tl-hour::before { color: var(--pencil); border-color: var(--kraft-edge); }
+.tpl-corkboard .timeline-title { color: var(--signage); text-shadow: 0 1px 3px rgba(0, 0, 0, .45); }
 
 /* Table headings are typed labels, not headlines. */
 .tpl-corkboard .table-title,
@@ -292,6 +332,35 @@ body.tpl-corkboard {
     border-radius: 2px;
 }
 
+/* ---- Admin tabs -----------------------------------------------------------
+   These sit on the cork, where the base theme's muted grey is close to
+   invisible. Inactive tabs become pale lettering on a recess in the board; the
+   active one is already paper and is left alone. */
+.tpl-corkboard .tabs { border-bottom: none; gap: 0.35rem; }
+.tpl-corkboard .tab {
+    font-family: var(--font-type);
+    color: var(--signage);
+    background: rgba(0, 0, 0, .16);
+    border: 1px solid rgba(0, 0, 0, .22);
+    border-radius: 3px 3px 0 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+}
+.tpl-corkboard .tab:hover { background: rgba(0, 0, 0, .26); color: var(--signage); }
+.tpl-corkboard .tab-active,
+.tpl-corkboard .tab-active:hover {
+    background: var(--card);
+    border-color: var(--card-edge);
+    color: var(--ink);
+    text-shadow: none;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(40, 24, 6, .35);
+}
+.tpl-corkboard .tab-body {
+    background: var(--card);
+    border: 1px solid var(--card-edge);
+    border-radius: 3px;
+}
+
 /* ---- Chrome ---------------------------------------------------------------
    The rail the board hangs on: dark, flat, out of the way. */
 .tpl-corkboard .topbar {
@@ -317,8 +386,10 @@ body.tpl-corkboard {
 /* The tilt is static and stays — it is the design, not an effect. What goes is
    the movement: no straightening on hover for anyone who asked for less of it. */
 @media (prefers-reduced-motion: reduce) {
-    .tpl-corkboard .game-thumb img { transition: none; }
+    .tpl-corkboard .game-thumb img,
+    .tpl-corkboard .day-tab { transition: none; }
     .tpl-corkboard .game-card:hover .game-thumb img { transform: none; }
+    .tpl-corkboard .day-tab:hover { transform: none; }
 }
 
 /* Narrow screens: the photograph shrinks but keeps its frame and its angle. */
@@ -326,3 +397,7 @@ body.tpl-corkboard {
     .tpl-corkboard .game-thumb img { padding: 5px 5px 16px; }
     .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
 }
+
+.game-card, .poll-card{position:relative;z-index:2}
+.game-card:after,.game-card:before, .poll-card:after,.poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
+.game-card:after,.poll-card:after{transform: rotate(0.8deg);z-index:-1}
