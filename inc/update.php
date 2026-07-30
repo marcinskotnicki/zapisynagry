@@ -28,13 +28,35 @@
 
 /**
  * Top-level names the updater must never overwrite/restore.
- * config.php = settings; data/ = the DB; thumbnails/ = uploads; icons/ = the
- * admin-uploaded site icon set; install.php = the self-deleted installer
- * (restoring it would re-expose setup).
+ *
+ * These belong to the SERVER, not to the release: config.php = settings;
+ * data/ = the DB; thumbnails/ = uploads; icons/ = the admin-uploaded site icon
+ * set; install.php = the self-deleted installer (restoring it would re-expose
+ * setup). Copying over any of them would destroy something the admin owns.
  * @return string[]
  */
 function update_protected_paths() {
     return ['config.php', 'data', 'thumbnails', 'icons', 'install.php'];
+}
+
+/**
+ * Top-level names that ship in the repository but must NOT be deployed.
+ *
+ * Distinct from update_protected_paths() and deliberately a separate list: those
+ * are things on the SERVER worth shielding, these are things in the RELEASE that
+ * simply have no business on a live site. Conflating the two would make both
+ * lists confusing to read a year from now.
+ *
+ * docs/  — developer documentation; useful in the repo, dead weight in a web
+ *          root, and publicly readable there for no reason.
+ * tests/ — the test suite. It creates and tears down its own database and is
+ *          meaningless (and undesirable) on a live install. Excluding it here
+ *          makes that guarantee automatic rather than depending on remembering
+ *          not to commit the folder.
+ * @return string[]
+ */
+function update_skipped_paths() {
+    return ['docs', 'tests'];
 }
 
 /**
@@ -210,11 +232,13 @@ function update_run($root) {
     $src = update_extracted_root($tmp);              // the "<repo>-<branch>/" wrapper
     if (!$src) { update_rrmdir($tmp); return [t('update_failed', 'empty archive')]; }
 
-    // Overlay every top-level item except the protected ones.
-    $protected = update_protected_paths();
+    // Overlay every top-level item, minus the two exclusion lists: things the
+    // server owns (settings, data, uploads) and things the release ships but
+    // shouldn't deploy (docs, tests).
+    $skip = array_merge(update_protected_paths(), update_skipped_paths());
     foreach (scandir($src) as $item) {
         if ($item === '.' || $item === '..') continue;
-        if (in_array($item, $protected, true)) continue;   // never clobber settings/data/installer
+        if (in_array($item, $skip, true)) continue;
         update_rcopy($src . '/' . $item, $root . '/' . $item);
     }
     update_rrmdir($tmp);                             // clean up the extraction dir
