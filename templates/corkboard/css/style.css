@@ -321,6 +321,7 @@ body.tpl-corkboard {
     border-radius: 2px;
     transform: rotate(-2.2deg);
     opacity: 0.82;              /* ink never presses evenly */
+    margin: 0.6rem 0 0.8rem;
 }
 
 .tpl-corkboard .game-name a{color: var(--stamp);}
