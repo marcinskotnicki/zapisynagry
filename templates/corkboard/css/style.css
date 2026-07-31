@@ -303,7 +303,7 @@ body.tpl-corkboard {
     padding: 0.2rem 0.55rem;
     border: 2px solid var(--stamp);
     border-radius: 2px;
-    transform: rotate(-3deg);
+    transform: rotate(-4deg);
     opacity: 0.82;              /* ink never presses evenly */
 }
 
@@ -315,7 +315,7 @@ body.tpl-corkboard {
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    font-size: 1rem;
     padding: 0.2rem 0.55rem;
     border: 2px solid var(--stamp);
     border-radius: 2px;
