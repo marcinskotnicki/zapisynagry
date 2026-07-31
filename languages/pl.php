@@ -389,7 +389,7 @@ Link wygasa za godzinę.',
     // ---- Classic theme labels -------------------------------------------------
     'cl_weight'             => 'waga',
     'cl_players'            => 'graczy',
-    'cl_start'              => 'Rozpoczęcie',
+    'cl_start'              => 'Start',
     'cl_length'             => 'Czas gry',
     'cl_version'            => 'Wersja',
     'cl_comment'            => 'Komentarz',
