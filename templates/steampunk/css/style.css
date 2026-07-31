@@ -51,6 +51,7 @@
     --vial:       #b8d43a;   /* the reagent in the sight-glass: yellow-green */
     --vial-core:  #e6f39a;   /* its lit core, where the light passes through */
     --glow:       #f0952f;   /* glowing orange: pending, and past the threshold */
+    --ember-lit:  #e2683c;   /* the firebox colour, lifted enough to read as text */
     --parchment:  #ece0c6;   /* label card / body text */
     --ember:      #b8431c;   /* firebox glow: danger and the red line */
 
@@ -231,7 +232,15 @@ body.tpl-steampunk {
 .tpl-steampunk .gc-waga strong { color: #241a10; }
 /* The weight scale keeps its colours — those encode complexity and are shared
    across every theme; only the shading changes. */
-.tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); color: var(--vial); font-weight: 700; }
+/* The rules line is TONE-CODED — good / mid / bad — and a flat colour here
+   would outrank the base .rules-* rules (0,2,0 beats 0,1,0) and paint every
+   state the same. That is exactly what happened: "rules not explained" showed
+   green. Set the background once, then let each tone carry its own colour, the
+   way the classic theme does. */
+.tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); font-weight: 700; }
+.tpl-steampunk .gc-rules.rules-good { color: var(--vial); }
+.tpl-steampunk .gc-rules.rules-mid  { color: var(--glow); }
+.tpl-steampunk .gc-rules.rules-bad  { color: var(--ember-lit); }
 .tpl-steampunk .gc-comment { background: rgba(0, 0, 0, .4); font-size: 0.8rem; line-height: 1.35; }
 .tpl-steampunk .gc-comment .c-name { color: var(--brass-lit); }
 
@@ -305,7 +314,10 @@ body.tpl-steampunk {
 .tpl-steampunk .sk-berth-free .sk-rivet {
     background: radial-gradient(circle at 34% 30%, #6f6250, #3d362c 60%, #241f19);
 }
-.tpl-steampunk .gc-knows { color: var(--vial); font-size: 0.74rem; }
+.tpl-steampunk .gc-knows { font-size: 0.74rem; }
+.tpl-steampunk .gc-knows.rules-good { color: var(--vial); }
+.tpl-steampunk .gc-knows.rules-mid  { color: var(--glow); }
+.tpl-steampunk .gc-knows.rules-bad  { color: var(--ember-lit); }
 .tpl-steampunk .gc-reserve { opacity: 0.8; font-style: italic; }
 .tpl-steampunk .reserve-tag { color: var(--ember); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
 .tpl-steampunk .gc-more-slots { font-size: 0.76rem; color: var(--text-muted); font-style: italic; margin: 0.1rem 0 0.4rem 0.2rem; }
@@ -423,6 +435,13 @@ body.tpl-steampunk {
        would otherwise sit on top of. */
     padding-bottom: 1.6rem;
 }
+/* The poll card's rules line uses .game-rules, not .gc-rules, so without these
+   it falls through to the BASE theme's greens and reds — close, but a
+   different green from the game card beside it. Same three tones, same
+   colours, so the two cards agree. */
+.tpl-steampunk .poll-card .rules-good { color: var(--vial); }
+.tpl-steampunk .poll-card .rules-mid  { color: var(--glow); }
+.tpl-steampunk .poll-card .rules-bad  { color: var(--ember-lit); }
 .tpl-steampunk .poll-opt-name, .tpl-steampunk a.poll-opt-name { color: var(--brass-lit); }
 .tpl-steampunk .poll-opt-votes { color: var(--text-muted); }
 
