@@ -421,7 +421,7 @@ body.tpl-corkboard {
    again and you are back to that trap — the split has to stay exactly this
    way for the effect to work. */
 .tpl-corkboard .game-list { position: relative; z-index: 2; gap:1.75rem;flex-wrap:wrap;flex-direction:row;justify-content:center;padding-top:10px}
-.tpl-corkboard .game-card, .tpl-corkboard .poll-card{position:relative;margin: 10px; min-width: 42%;  max-width: 600px;}
+.tpl-corkboard .game-card, .tpl-corkboard .poll-card{position:relative;margin: 10px; width: 42%;}
 .tpl-corkboard .game-card:only-child, .tpl-corkboard .poll-card:only-child{width:90%;max-width:90%}
 .tpl-corkboard .game-card:after,.tpl-corkboard .game-card:before, .tpl-corkboard .poll-card:after,.tpl-corkboard .poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
 .tpl-corkboard .game-card:after,.tpl-corkboard .poll-card:after{transform: rotate(0.8deg);z-index:-1}
@@ -429,6 +429,9 @@ body.tpl-corkboard {
 /* Panel headings sit on the cork, not on paper. */
 .tpl-corkboard .userpanel h1, .tpl-corkboard .userpanel h2, .tpl-corkboard .admin h1{color:white;}
 /* Narrow screens: the photograph shrinks but keeps its frame and its angle. */
+@media (max-width: 1120px) {
+    .tpl-corkboard .game-card, .tpl-corkboard .poll-card{min-width:90%;max-width:100%;margin-left:0;margin-right:0;}
+}
 @media (max-width: 700px) {
     .tpl-corkboard .game-thumb img { padding: 5px 5px 16px; }
     .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
