@@ -83,6 +83,10 @@ body.tpl-corkboard {
    System faces only (no web font, see the note at the top). Palatino leads the
    stack because it is humanist and slightly calligraphic; Georgia and Times are
    the fallbacks and still read as lettering rather than UI. */
+.content {
+    max-width: var(--maxw);
+}
+
 .tpl-corkboard .event-header { text-align: center; }
 .tpl-corkboard .event-header h1 {
     font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
