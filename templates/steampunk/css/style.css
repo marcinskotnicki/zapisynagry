@@ -439,6 +439,28 @@ body.tpl-steampunk {
    it falls through to the BASE theme's greens and reds — close, but a
    different green from the game card beside it. Same three tones, same
    colours, so the two cards agree. */
+/* The poll card's start time comes from the SHARED poll_card.php, which the
+   base theme prefixes with a clock emoji — a flat pictogram that sits badly
+   against brass and slab lettering. This theme's own game card spells the same
+   fact out as a band ("Start: 16:00"), so the poll card is made to match.
+
+   The word comes from the data-label attribute the shared template already
+   carries for exactly this purpose, so it stays translated and no markup
+   changes — the same mechanism the corkboard theme uses. */
+.tpl-steampunk .poll-card .game-time {
+    color: var(--brass-lit);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.tpl-steampunk .poll-card .game-time::before {
+    content: attr(data-label) ": ";
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.78em;
+}
+
 .tpl-steampunk .poll-card .rules-good { color: var(--vial); }
 .tpl-steampunk .poll-card .rules-mid  { color: var(--glow); }
 .tpl-steampunk .poll-card .rules-bad  { color: var(--ember-lit); }
