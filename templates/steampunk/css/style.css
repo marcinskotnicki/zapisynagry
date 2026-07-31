@@ -79,14 +79,21 @@
    pattern you're meant to look at. */
 body.tpl-steampunk {
     background-color: var(--soot);
+    /* Four fixed layers, painted FIRST-LISTED ON TOP: grain over the two cogs
+       over the wash. The cogs sit half off opposite corners so they read as
+       machinery the page is bolted between, rather than as two ornaments
+       floating in the margins. Every list below has to stay four long and in
+       the same order — a short list silently repeats from the start, which is
+       a confusing way to lose a layer. */
     background-image:
+        url("../img/grain.svg"),
         url("../img/cog.svg"),
         url("../img/cog.svg"),
         radial-gradient(ellipse at 50% 0%, rgba(176, 141, 87, .09), transparent 55%);
-    background-repeat: no-repeat, no-repeat, no-repeat;
-    background-size: 640px 640px, 420px 420px, 100% 100%;
-    background-position: -180px 8%, calc(100% + 130px) 62%, top center;
-    background-attachment: fixed, fixed, fixed;
+    background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+    background-size: 180px 180px, 640px 640px, 420px 420px, 100% 100%;
+    background-position: 0 0, -320px -320px, calc(100% + 210px) calc(100% + 210px), top center;
+    background-attachment: fixed, fixed, fixed, fixed;
     color: var(--parchment);
     font-family: var(--font-sk);
 }
@@ -405,12 +412,63 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .poll-deadline { color: var(--text-muted); }
 .tpl-steampunk .poll-deadline strong { color: var(--brass-lit); }
-.tpl-steampunk .poll-option { background: rgba(0, 0, 0, .3); border: 1px solid rgba(176, 141, 87, .2); border-radius: 2px; }
+.tpl-steampunk .poll-option {
+    background: rgba(0, 0, 0, .3);
+    border: 1px solid rgba(176, 141, 87, .2);
+    border-radius: 2px;
+    /* Room at the foot for the sight-glass below. The base rule pins the bar to
+       bottom:0 with only 0.45rem of padding, which a 10px tube would sit on
+       top of. */
+    padding-bottom: 1.15rem;
+}
 .tpl-steampunk .poll-opt-name, .tpl-steampunk a.poll-opt-name { color: var(--brass-lit); }
 .tpl-steampunk .poll-opt-votes { color: var(--text-muted); }
-.tpl-steampunk .poll-opt-bar { background: rgba(0, 0, 0, .5); }
-.tpl-steampunk .poll-opt-bar > span { background: linear-gradient(var(--brass-lit), var(--brass)); }
-.tpl-steampunk .poll-opt-bar.is-full > span { background: var(--verdigris); }
+
+/* ---- The sight-glass ------------------------------------------------------
+   A brass-collared tube of dark glass with the vote level standing in it.
+   Inset from the option's edges so it reads as a fitted instrument rather than
+   a progress bar bleeding to the border. The inner shadow is the glass; the
+   ::after streak is the specular highlight along its upper wall.
+
+   NOTE: .poll-option sets overflow:hidden, so the liquid's glow is clipped at
+   the option's bounds — the tube is inset partly to give that glow somewhere
+   to fall. */
+.tpl-steampunk .poll-opt-bar {
+    left: 0.55rem; right: 0.55rem; bottom: 0.3rem;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(#0a0705, #1c130c 60%, #0f0a06);
+    border: 1px solid var(--brass-dark);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, .85),
+                0 1px 0 rgba(234, 207, 154, .14);
+}
+.tpl-steampunk .poll-opt-bar::after {
+    content: "";
+    position: absolute;
+    left: 4px; right: 4px; top: 1px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(255, 250, 235, .3) 18%,
+                                rgba(255, 250, 235, .16) 62%, transparent);
+    pointer-events: none;
+}
+/* The liquid: lit from above, with a hot leading edge and a glow that spills
+   onto the glass. Rounded at both ends so it reads as a column of fluid rather
+   than a filled rectangle. */
+.tpl-steampunk .poll-opt-bar > span {
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffe6a8 0%, var(--brass-lit) 26%,
+                                #c8862a 68%, #7d5210 100%);
+    box-shadow: 0 0 7px rgba(234, 207, 154, .7),
+                inset 0 1px 0 rgba(255, 250, 235, .65);
+}
+/* At the threshold the fluid turns: verdigris, the theme's one cool tone, so a
+   full option is legible at a glance and not just "more brass". */
+.tpl-steampunk .poll-opt-bar.is-full > span {
+    background: linear-gradient(180deg, #9fe6d6 0%, var(--verdigris) 30%, #2b5c54 100%);
+    box-shadow: 0 0 8px rgba(63, 131, 120, .85),
+                inset 0 1px 0 rgba(220, 255, 248, .6);
+}
 
 /* ---- Timeline: the pressure log -------------------------------------------- */
 .tpl-steampunk .timeline { background: rgba(42, 32, 26, .85); border: 1px solid var(--brass-dark); border-radius: 3px; }
