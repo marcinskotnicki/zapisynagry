@@ -194,7 +194,7 @@ body.tpl-corkboard {
 .tpl-corkboard .tl-table-no { background: rgba(0, 0, 0, .07); color: var(--ink); }
 .tpl-corkboard .tl-hours { border-bottom-color: var(--kraft-edge); }
 .tpl-corkboard .tl-hour, .tpl-corkboard .tl-hour::before { color: var(--pencil); border-color: var(--kraft-edge); }
-.tpl-corkboard .timeline-title { color: var(--primary); text-shadow: none; }
+.tpl-corkboard .timeline-title { color: var(--signage); text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .5); font-weight:400; font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;}
 
 /* Table headings are typed labels, not headlines. */
 .tpl-corkboard .table-title,
@@ -379,7 +379,7 @@ body.tpl-corkboard {
 }
 .tpl-corkboard .topbar a,
 .tpl-corkboard .brand { color: #f0e4cc; }
-.tpl-corkboard .timeline { background: rgba(255, 250, 236, .9); border-radius: 3px; padding-bottom: 15px;  margin: 0px 10px;}
+.tpl-corkboard .timeline { background: none; border-radius: 3px; padding-bottom: 15px;}
 
 /* ---- Quality floor -------------------------------------------------------- */
 /* Focus has to be visible against both paper and cork. */
