@@ -33,6 +33,7 @@
 
     <form method="post" action="message.php">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <?php // Exactly one target id is non-zero; re-emit that one (see message.php). ?>
         <?php if ($player): ?>
             <input type="hidden" name="player" value="<?= (int)$player ?>">

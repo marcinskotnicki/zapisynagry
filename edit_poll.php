@@ -85,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'remove') {
+        antibot_check('click');
         // Drop one candidate. Gather the voters FIRST — the delete cascades
         // their votes away, and a poll needs at least one option to survive.
         $cgId = (int)($_POST['cand'] ?? 0);
@@ -106,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'save') {
+        antibot_check('form');
         // Poll-level settings (the candidate list is edited by its own buttons).
         $start = trim($_POST['start_time'] ?? '');
         // Read these ONLY when the form actually submitted them. An absent key is

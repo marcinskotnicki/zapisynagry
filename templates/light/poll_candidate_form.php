@@ -28,6 +28,7 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
 
     <form method="post" action="add_poll_game.php?table=<?= (int)$table['id'] ?>" class="game-form">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="mode" value="save">
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
         <input type="hidden" name="source" value="<?= e($source) ?>">

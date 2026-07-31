@@ -69,6 +69,7 @@ $go   = $_POST['go'] ?? '';
 /* ---- SAVE: append the candidate to the draft ----------------------------- */
 if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     $cand = [
         'name'             => trim($_POST['name'] ?? ''),
         'length_minutes'   => max(0, (int)($_POST['length_minutes'] ?? 0)),

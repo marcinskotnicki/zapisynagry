@@ -28,6 +28,7 @@
 
     <form method="post" action="delete_poll.php?poll=<?= (int)$poll['id'] ?>" class="delgame-form">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
 
         <?php if ($decision === 'email_match'): // retype the stored email ?>

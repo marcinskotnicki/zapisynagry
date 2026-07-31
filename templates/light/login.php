@@ -21,6 +21,7 @@
 
     <form method="post" action="login.php">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="next" value="<?= e($next ?? '') ?>">
 
         <label for="email"><?= e(t('email')) ?></label>

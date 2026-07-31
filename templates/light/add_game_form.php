@@ -37,6 +37,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
 
     <form method="post" action="<?= e($action) ?>" class="game-form">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="mode" value="save">
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
         <input type="hidden" name="source" value="<?= e($source) ?>">

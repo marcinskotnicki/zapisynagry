@@ -33,6 +33,7 @@
 
     <form method="post" action="sign_up.php?game=<?= (int)$game['id'] ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
 
         <label for="name"><?= e(t('signup_name')) ?></label>

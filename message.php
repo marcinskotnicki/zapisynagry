@@ -83,6 +83,7 @@ $senderEmail = $me ? $me['email']        : trim($_POST['sender_email'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     $bodyText = trim($_POST['body'] ?? '');
     if ($bodyText === '') {
         $error = t('msg_empty');

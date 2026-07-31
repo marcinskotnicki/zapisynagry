@@ -82,6 +82,10 @@ return [
     'opt_captcha_version_note'     => 'Musi odpowiadać typowi klucza utworzonego w konsoli reCAPTCHA. Typy kluczy nie są zamienne.',
     'opt_captcha_v3_threshold'     => 'Próg punktacji v3',
     'opt_captcha_v3_threshold_note'=> 'Zgłoszenia z niższym wynikiem są odrzucane (0.1-1.0, domyślnie 0.5). Używane tylko przy v3.',
+    'opt_antibot_delay_form'        => 'Minimalny czas wypełniania formularza (s)',
+    'opt_antibot_delay_form_note'   => 'Odrzuca zgłoszenie, jeśli formularz (dodawanie/edycja gry, zapis, ankieta, komentarz, wiadomość, rejestracja) wrócił szybciej niż podana liczba sekund od wyświetlenia. 0 wyłącza tę kontrolę. Nie dotyczy zalogowanych.',
+    'opt_antibot_delay_click'       => 'Minimalny czas dla prostych akcji (s)',
+    'opt_antibot_delay_click_note'  => 'To samo, ale dla akcji jednego kliknięcia: usuwanie, głosowanie, logowanie. 0 wyłącza tę kontrolę. Nie dotyczy zalogowanych.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',

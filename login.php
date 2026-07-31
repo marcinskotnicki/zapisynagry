@@ -30,6 +30,7 @@ $next  = safe_next($_REQUEST['next'] ?? 'index.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('click');
     // NB: strict === true — auth_login() may also return the (truthy!) string
     // 'blocked' when the password was right but the account is blocked.
     $result = auth_login($_POST['email'] ?? '', $_POST['password'] ?? '');

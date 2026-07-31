@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($choice === 'back') {
         redirect('index.php?day=' . $activeDay);          // bail out, no challenge needed
     }
+    antibot_check('click');
     if (!verify_passes($decision, 'game', $gameId, $game['brings_email'], $_POST)) {
         $error = t('verify_failed');                       // failed challenge -> re-show confirm
     } elseif ($choice === 'archive' && !$purge) {   // meaningless when already archived

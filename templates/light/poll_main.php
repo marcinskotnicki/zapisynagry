@@ -38,6 +38,7 @@
         data-day-start="<?= e($pDay['start_time'] ?? '') ?>"
         data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
         <div class="field-row">

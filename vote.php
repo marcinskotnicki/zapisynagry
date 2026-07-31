@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Recording a vote: a logged-in user can't vote twice for the same candidate.
+    antibot_check('click');
     if ($uid && poll_user_voted($pgId, $uid)) {
         redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);   // already voted; no duplicate
     }

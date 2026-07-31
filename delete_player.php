@@ -50,6 +50,7 @@ $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('click');
     if (!verify_passes($decision, 'player', $playerId, $player['email'], $_POST)) {
         $error = t('verify_failed');             // wrong/missing challenge -> re-show the form
     } else {

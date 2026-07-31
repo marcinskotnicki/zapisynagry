@@ -27,6 +27,7 @@ $purge = !empty($purge);
 
     <form method="post" action="delete_game.php?game=<?= (int)$game['id'] ?>" class="delgame-form">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
 
         <?php if ($decision === 'email_match'): // retype the stored email ?>

@@ -66,6 +66,7 @@ if (($_POST['action'] ?? '') === 'verify' && $_SERVER['REQUEST_METHOD'] === 'POS
 /* ---- Save ---------------------------------------------------------------- */
 if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     if (!$unlocked) { redirect('index.php?day=' . $activeDay); }   // never save while locked
 
     $start = trim($_POST['start_time'] ?? '');

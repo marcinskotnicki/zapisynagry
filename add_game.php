@@ -74,6 +74,7 @@ $go   = $_POST['go'] ?? '';     // 'manual' / 'bgg' from the gate buttons
  * ============================================================================= */
 if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
 
     // Gather + coerce every field to a safe type/range.
     $form = [

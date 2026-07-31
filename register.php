@@ -29,6 +29,7 @@ $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     $pass1 = (string)($_POST['password']  ?? '');
     $pass2 = (string)($_POST['password2'] ?? '');
 

@@ -107,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('index.php?day=' . $activeDay);
 
     } elseif ($do === 'finish') {
+        antibot_check('form');
         if (empty($draft['games'])) {
             $error = t('poll_need_game');                  // a poll needs at least one candidate
         } elseif (!start_within_event_hours($draft['start_time'], $day)) {

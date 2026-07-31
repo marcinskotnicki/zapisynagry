@@ -174,6 +174,7 @@ $canVote = !$readonly && can_signup();
                     <summary><?= e(t('comment_add')) ?></summary>
                     <form method="post" action="add_comment.php">
                         <?= csrf_field() ?>
+                        <?= antibot_field() ?>
                         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
                         <input type="text" name="name" placeholder="<?= e(t('comment_name')) ?>" value="<?= e(current_user()['display_name'] ?? guest_identity()['name']) ?>">
                         <textarea name="comment" rows="2" placeholder="<?= e(t('comment_text')) ?>" required></textarea>

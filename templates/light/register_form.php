@@ -19,6 +19,7 @@
 
     <form method="post" action="register.php">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <div class="field">
             <label for="name"><?= e(t('reg_name')) ?> *</label>
             <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required autofocus>

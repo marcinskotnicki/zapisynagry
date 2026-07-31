@@ -37,6 +37,7 @@ $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     $form['name']  = trim((string)$form['name']);
     $form['email'] = trim((string)$form['email']);
     $form['knows'] = min(2, max(0, (int)$form['knows']));   // clamp to the 0..2 codes

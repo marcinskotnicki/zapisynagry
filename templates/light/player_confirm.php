@@ -24,6 +24,7 @@
 
     <form method="post" action="delete_player.php?player=<?= (int)$player['id'] ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="player" value="<?= (int)$player['id'] ?>">
 
         <?php if ($decision === 'email_match'): // retype the stored email ?>

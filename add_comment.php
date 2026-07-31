@@ -34,6 +34,7 @@ if (!opt_bool('allow_discussions') || !$event || (int)$event['is_archived'] === 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
     $u       = current_user();
     // Use the typed name, or fall back to the logged-in display name.
     $name    = trim($_POST['name'] ?? '') ?: ($u['display_name'] ?? '');

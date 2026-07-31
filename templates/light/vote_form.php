@@ -28,6 +28,7 @@
 
     <form method="post" action="vote.php?poll_game=<?= (int)$cand['id'] ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="poll_game" value="<?= (int)$cand['id'] ?>">
 
         <label for="name"><?= e(t('signup_name')) ?></label>

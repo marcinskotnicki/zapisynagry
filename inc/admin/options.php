@@ -37,6 +37,7 @@ $OPTION_VALUES = [
     'timezone',            // the venue's clock; validated below
     'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
+    'antibot_delay_form', 'antibot_delay_click',   // seconds; 0 = off; validated below
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -70,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'email_smtp_port':
             case 'poll_default_deadline_hours':
             case 'login_days':
+            case 'antibot_delay_form':
+            case 'antibot_delay_click':
                 $val = (string)max(0, (int)$val);          // non-negative integers only
                 break;
             case 'overnight_grace_hours':

@@ -42,6 +42,7 @@
         data-day-start="<?= e($day['start_time'] ?? '') ?>"
         data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="action" value="save">
         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
 
@@ -137,6 +138,7 @@
                 <?php if (count($cands) > 1): // a poll must keep at least one option ?>
                     <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>" class="inline">
                         <?= $csrf ?>
+                        <?= antibot_field() ?>
                         <input type="hidden" name="action" value="remove">
                         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
                         <input type="hidden" name="cand" value="<?= (int)$c['id'] ?>">

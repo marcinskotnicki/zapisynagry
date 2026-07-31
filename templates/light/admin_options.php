@@ -79,6 +79,24 @@ $toggle = function($key) {
             <p class="field-note"><?= e(t('opt_captcha_v3_threshold_note')) ?></p>
         </div>
         <?php
+        // A lightweight companion to captcha: reject a form that comes back
+        // faster than a human plausibly could have filled it in. Each guarded
+        // form carries a hidden render timestamp; 0 disables that bucket's
+        // check entirely, and a logged-in visitor is always exempt.
+        ?>
+        <div class="field">
+            <label for="antibot_delay_form"><?= e(t('opt_antibot_delay_form')) ?></label>
+            <input type="number" id="antibot_delay_form" name="antibot_delay_form" min="0"
+                   value="<?= (int)opt('antibot_delay_form') ?>">
+            <p class="field-note"><?= e(t('opt_antibot_delay_form_note')) ?></p>
+        </div>
+        <div class="field">
+            <label for="antibot_delay_click"><?= e(t('opt_antibot_delay_click')) ?></label>
+            <input type="number" id="antibot_delay_click" name="antibot_delay_click" min="0"
+                   value="<?= (int)opt('antibot_delay_click') ?>">
+            <p class="field-note"><?= e(t('opt_antibot_delay_click_note')) ?></p>
+        </div>
+        <?php
         ?>
         <?php // The site's clock. Event times and poll deadlines are wall-clock
               // values, so this has to be the venue's real timezone or polls

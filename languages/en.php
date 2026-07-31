@@ -90,6 +90,10 @@ return [
     'opt_captcha_version_note'     => 'Must match the key type you created in the reCAPTCHA console. Key types are not interchangeable.',
     'opt_captcha_v3_threshold'     => 'v3 score threshold',
     'opt_captcha_v3_threshold_note'=> 'Submissions scoring below this are rejected (0.1-1.0, default 0.5). Only used with v3.',
+    'opt_antibot_delay_form'        => 'Minimum form-fill time (s)',
+    'opt_antibot_delay_form_note'   => 'Rejects a submission that comes back faster than this many seconds after the form (add/edit game, sign up, poll, comment, message, registration) was rendered. 0 disables the check. Logged-in visitors are exempt.',
+    'opt_antibot_delay_click'       => 'Minimum time for quick actions (s)',
+    'opt_antibot_delay_click_note'  => 'The same idea for single-click actions: deletions, voting, logging in. 0 disables the check. Logged-in visitors are exempt.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

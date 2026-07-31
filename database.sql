@@ -120,6 +120,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- the signup box. Left empty, no checkbox is shown and none is demanded —
     -- so this doubles as the on/off switch for asking consent at all.
     ('mailing_gdpr_text',            ''),
+    -- antibot_delay_form / antibot_delay_click: minimum seconds between a
+    -- guarded form's render and its submission (see inc/antibot.php). 0
+    -- disables the check for that bucket. Ignored for logged-in users.
+    ('antibot_delay_form',           '2'),
+    ('antibot_delay_click',          '1'),
     ('timezone',                     'Europe/Warsaw'),
     ('overnight_grace_hours',        '1'),
     -- allow_start_outside_hours: 1 = a game/poll may start at any time (current

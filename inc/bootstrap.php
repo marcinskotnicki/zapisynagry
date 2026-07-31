@@ -38,6 +38,7 @@ require __DIR__ . '/options.php';
 require __DIR__ . '/lang.php';
 require __DIR__ . '/template.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/antibot.php';   // small + universally needed; see its own header
 
 // ---- 3. Wire everything up for this request --------------------------------
 // ORDER MATTERS here:
