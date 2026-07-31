@@ -175,23 +175,32 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Three themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**
-and **classic**.
+Five themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard** and **elvish**. They're discovered by directory
+glob, so creating a folder registers one — there is no list to update.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a
-stylesheet alone, and `classic/` overrides one template plus its CSS.
+stylesheet alone; `classic/` and `elvish/` each override one template plus
+their CSS; `elvish/` also ships three hand-written SVG ornaments in its own
+`img/`.
 
 Non-base stylesheets `@import` light's, then override. Only the active theme's
-sheet is ever linked.
+sheet is ever linked. **Scope every rule** to the theme's `.tpl-<name>` class —
+each theme's test suite asserts this, so an unscoped rule fails the build.
 
 Templates are **presentation only**. They receive an explicit array of variables
 and never query the database — `tpl_render()` extracts that array into scope,
 using `$__tpl_*` locals internally to avoid collisions.
 
-**Prefer restyling shared markup over forking a template.** Once classic forked
-`game_card.php`, its comment button drifted out of sync with the poll card's for
-months. Everything the classic poll card does is CSS against light's markup.
+**Prefer restyling shared markup over forking a template**, and when you do
+fork, pin it. Classic forked `game_card.php` with nothing tying it to light's,
+and its comment button drifted out of sync for months before anyone noticed.
+Elvish forks the same file — deliberately, because its player list draws a bud
+for every *free* seat and light's card has no element for a seat nobody
+occupies — but `tests/test_elvish.php` asserts every control light's card
+offers is still present in the fork, so the same silent loss can't recur. If
+you fork a template, write that test in the same commit.
 
 **All page URLs are relative and root-less** (`templates/light/css/style.css`,
 `icons/…`, `js/scripts.js`). This is what makes path-style pretty URLs a large
@@ -371,8 +380,13 @@ at all for an empty message.
 `notify_enabled()`, called from the controller *after* the commit — outside the
 transaction, so slow SMTP holds no write lock and a rollback sends nothing.
 
-**Add a theme.** `templates/<name>/css/style.css` that `@import`s light's. Add
-files only for markup you actually need to change.
+**Add a theme.** `templates/<name>/css/style.css` that `@import`s light's; the
+directory glob picks it up with no registration step. Scope every rule to
+`.tpl-<name>`. Add template files only for markup you genuinely need to change,
+and if you do, write the parity test that pins the fork to light's version in
+the same commit (see §6, and `tests/test_elvish.php` for the pattern). Assets
+belong in `templates/<name>/img/` — prefer SVG, which diffs like code and stays
+crisp at any size.
 
 **Add a translation key.** Both files, same commit.
 

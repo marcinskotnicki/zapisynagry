@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <!-- Seamless-ish botanical tile for the page ground. Deliberately faint: at
+       4% opacity it reads as texture in the lacquer, not as wallpaper. -->
+  <g fill="none" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round" opacity="0.5">
+    <path d="M0 150 Q45 120 60 75 Q72 38 45 0"/>
+    <path d="M180 30 Q135 60 120 105 Q108 142 135 180"/>
+    <path d="M60 75 q18 -12 30 -4 q-12 16 -30 4 z"/>
+    <path d="M120 105 q-18 12 -30 4 q12 -16 30 -4 z"/>
+    <path d="M52 108 q14 -6 22 2 q-14 10 -22 -2 z"/>
+    <path d="M128 72 q-14 6 -22 -2 q14 -10 22 2 z"/>
+  </g>
+</svg>

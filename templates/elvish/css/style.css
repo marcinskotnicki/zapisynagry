@@ -1,0 +1,467 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  elvish — an illuminated ledger of the evening's games.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a later edit doesn't sand off the point:
+ *
+ *  The reference is Art Nouveau at its most botanical — Mucha's panels, Horta's
+ *  ironwork, Tiffany glass — read through a woodland-elvish lens. The materials
+ *  are lacquered malachite, gold leaf, and warm vellum, and every colour below
+ *  is named for one of them rather than for its role, so the palette stays
+ *  answerable to the subject instead of drifting into generic "dark theme".
+ *
+ *  TWO SIGNATURES, and they are the only places this theme is loud:
+ *    1. THE ILLUMINATED FRAME — a hand-drawn SVG border (img/frame.svg) applied
+ *       with border-image, so one 9-slice asset frames a card of any size with
+ *       true ornamental corners rather than a plain rounded rectangle.
+ *    2. THE VINE OF SEATS — the player list as a stem: a leaf for every taken
+ *       seat, an unopened bud for every free one. This is the whole reason the
+ *       theme forks game_card.php (see that file's header); it makes free seats
+ *       into objects you can see and count, which the base card never does.
+ *  Everything else is deliberately quiet. Resist adding a third flourish —
+ *  ornament everywhere reads as noise, and the frame stops being special.
+ *
+ *  LAYOUT sits between the two existing themes on purpose: classic's fixed
+ *  550px cards in a wrapping row, and corkboard's 44%-width centred grid.
+ *  Here: ~48% wrapping cards, centred, but stacked internally like corkboard
+ *  rather than split into two panels like classic.
+ *
+ *  ASSETS are three hand-written SVGs in ../img/ — vector so they stay crisp
+ *  at any card size, text so they diff and version like code, and small enough
+ *  that the whole theme is four files. NO WEB FONTS, matching the rest of the
+ *  app: this site asks visitors for GDPR consent, so quietly adding a
+ *  third-party font request isn't a call to make on the admin's behalf.
+ *
+ *  Everything is scoped to .tpl-elvish (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-elvish {
+    /* ---- Materials ------------------------------------------------------- */
+    --moss:       #0d2a1f;   /* lacquered malachite: the ground */
+    --moss-deep:  #061710;   /* recessed panels and the page vignette */
+    --moss-lift:  #143829;   /* a panel raised off the ground */
+    --gold:       #c9a227;   /* gold leaf: linework, frames, rules */
+    --gilt:       #eddba6;   /* bright gilt: lettering that must read */
+    --vellum:     #ece2cc;   /* warm off-white body text */
+    --sage:       #86a894;   /* muted secondary text */
+    --garnet:     #9d3b46;   /* Art Nouveau's muted rose, standing in for red */
+
+    /* ONE lettering family, varied by weight and spacing. Art Nouveau posters
+       lettered a whole design in a single hand rather than pairing a display
+       face with a body face, so this is the subject's own convention, not a
+       shortcut. Optima and Candara are the closest system faces to that
+       flared-stem humanist lettering; the rest is fallback. */
+    --font-el: Optima, 'Segoe UI Variable Display', Candara, 'Gill Sans MT',
+               'Trebuchet MS', 'Lucida Grande', sans-serif;
+
+    /* Remap the base theme's variables onto those materials, so every rule
+       this file never touches still lands somewhere sensible. */
+    --bg:           var(--moss);
+    --surface:      var(--moss-lift);
+    --surface-2:    var(--moss-deep);
+    --border:       rgba(201, 162, 39, .35);
+    --text:         var(--vellum);
+    --text-muted:   var(--sage);
+    --primary:      var(--gold);
+    --primary-text: #14261c;
+    --ok:           #7fbf9a;
+    --error:        var(--garnet);
+    --radius:       2px;
+    --maxw:         1400px;
+}
+
+/* ---- The ground -----------------------------------------------------------
+   Lacquer over a faint botanical: the vine tile at 4% is texture in the
+   surface, not wallpaper. The radial lift keeps the top of the page from
+   reading as flat black-green. */
+body.tpl-elvish {
+    background-color: var(--moss);
+    background-image:
+        url("../img/vine.svg"),
+        radial-gradient(ellipse at 50% -10%, rgba(201, 162, 39, .10), transparent 60%);
+    background-size: 180px 180px, 100% 100%;
+    background-repeat: repeat, no-repeat;
+    background-attachment: scroll, fixed;
+    color: var(--vellum);
+    font-family: var(--font-el);
+}
+.tpl-elvish .content { max-width: var(--maxw); }
+
+/* ---- Lettering ------------------------------------------------------------
+   Everything is the one family; the hierarchy comes from spacing and gilt.
+   Small-caps + wide tracking is the Art Nouveau label voice. */
+.tpl-elvish h1, .tpl-elvish h2, .tpl-elvish h3,
+.tpl-elvish .btn, .tpl-elvish input, .tpl-elvish select, .tpl-elvish textarea {
+    font-family: var(--font-el);
+}
+.tpl-elvish .event-header { text-align: center; }
+.tpl-elvish .event-header h1 {
+    color: var(--gilt);
+    font-weight: 400;
+    font-size: 2.3rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .5), 0 0 22px rgba(201, 162, 39, .22);
+}
+/* The flourish under the event name: the divider asset, centred, as a
+   background rather than an extra element — no markup change needed. */
+.tpl-elvish .event-header h1::after {
+    content: "";
+    display: block;
+    height: 18px;
+    margin: 0.45rem auto 0;
+    max-width: 320px;
+    background: url("../img/divider.svg") center / contain no-repeat;
+}
+.tpl-elvish .event-date,
+.tpl-elvish .event-hours {
+    text-align: center;
+    color: var(--sage);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.82rem;
+    margin: 0.1rem 0 0;
+}
+
+/* ---- Day tabs: leaves on a bough ------------------------------------------ */
+.tpl-elvish .day-tabs {
+    justify-content: center;
+    border-bottom: 1px solid rgba(201, 162, 39, .28);
+    gap: 0.4rem;
+}
+.tpl-elvish .day-tab {
+    color: var(--sage);
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    letter-spacing: 0.08em;
+}
+.tpl-elvish .day-tab:hover { background: rgba(201, 162, 39, .08); color: var(--gilt); }
+.tpl-elvish .day-tab-active,
+.tpl-elvish .day-tab-active:hover {
+    color: var(--gilt);
+    background: var(--moss-lift);
+    border-color: rgba(201, 162, 39, .45);
+    box-shadow: inset 0 1px 0 rgba(201, 162, 39, .18);
+}
+.tpl-elvish .day-tab-date { color: inherit; opacity: 0.85; }
+.tpl-elvish .day-tab-hours { color: inherit; opacity: 0.6; }
+
+/* ---- Tables: the ledger's sections ---------------------------------------- */
+.tpl-elvish .table-block {
+    background: linear-gradient(rgba(255, 255, 255, .025), transparent 40%), var(--moss-deep);
+    border: 1px solid rgba(201, 162, 39, .22);
+    border-radius: 3px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .35);
+}
+.tpl-elvish .table-title {
+    color: var(--gilt);
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    text-align: center;
+    border-bottom: none;
+    padding-bottom: 0.5rem;
+}
+.tpl-elvish .table-title::after {
+    content: "";
+    display: block;
+    height: 14px;
+    margin: 0.35rem auto 0;
+    max-width: 260px;
+    background: url("../img/divider.svg") center / contain no-repeat;
+    opacity: 0.85;
+}
+
+/* ---- Layout: between classic's fixed row and corkboard's centred grid ----- */
+.tpl-elvish .game-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.6rem;
+}
+.tpl-elvish .game-card,
+.tpl-elvish .poll-card {
+    flex: 0 1 48%;
+    min-width: 320px;
+    max-width: 620px;
+}
+
+/* ---- SIGNATURE 1: the illuminated frame ----------------------------------
+   border-image is the right tool for this and not a trick: one 9-slice asset
+   gives true ornamental corners at their natural size while the edges stretch
+   to whatever height the card ends up. A background-image could not do the
+   corners without four separate layers. The padding is what stops content
+   colliding with the ornament. */
+.tpl-elvish .game-card,
+.tpl-elvish .poll-card {
+    background: linear-gradient(rgba(201, 162, 39, .05), transparent 45%), var(--moss-lift);
+    border: 18px solid transparent;
+    border-image: url("../img/frame.svg") 40 / 18px stretch;
+    border-radius: 0;
+    padding: 0.5rem 0.9rem 0.9rem;
+    box-shadow: 0 3px 16px rgba(0, 0, 0, .4);
+}
+.tpl-elvish .game-card.active,
+.tpl-elvish .poll-card.active { box-shadow: 0 0 0 2px rgba(201, 162, 39, .5), 0 3px 16px rgba(0, 0, 0, .4); }
+
+/* ---- Cartouche ------------------------------------------------------------ */
+.tpl-elvish .el-cartouche { text-align: center; }
+.tpl-elvish .game-name-row { justify-content: center; }
+.tpl-elvish .game-name {
+    color: var(--gilt);
+    font-weight: 400;
+    font-size: 1.25rem;
+    letter-spacing: 0.06em;
+}
+.tpl-elvish .game-name a { color: var(--gilt); text-decoration: none; border-bottom: 1px dotted rgba(237, 219, 166, .45); }
+.tpl-elvish .game-name a:hover { border-bottom-style: solid; }
+.tpl-elvish .el-cartouche .game-actions { display: inline-flex; gap: 0.35rem; margin-top: 0.3rem; }
+.tpl-elvish .game-thumb { margin: 0.4rem auto 0.2rem; text-align: center; }
+.tpl-elvish .game-thumb img {
+    max-width: 160px;
+    border: 1px solid rgba(201, 162, 39, .45);
+    border-radius: 2px;
+}
+
+/* ---- The inscribed attribute line ----------------------------------------- */
+.tpl-elvish .game-meta {
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.35rem 0;
+    border-top: 1px solid rgba(201, 162, 39, .18);
+    border-bottom: 1px solid rgba(201, 162, 39, .18);
+    margin: 0.4rem 0 0.6rem;
+}
+.tpl-elvish .game-time {
+    color: var(--gilt);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+.tpl-elvish .game-time:before { content: none; }   /* the clock glyph fights the lettering */
+.tpl-elvish .game-length,
+.tpl-elvish .game-language { color: var(--sage); letter-spacing: 0.06em; font-size: 0.85rem; }
+/* The weight scale keeps its colours — that encodes data — but loses its pill
+   shape so it sits on the line like everything else. */
+.tpl-elvish .weight-badge { border-radius: 2px; font-size: 0.78rem; }
+.tpl-elvish .game-brings { color: var(--vellum); text-align: center; font-size: 0.9rem; margin: 0.2rem 0; }
+.tpl-elvish .game-brings strong { color: var(--gilt); }
+.tpl-elvish .game-rules { text-align: center; font-size: 0.88rem; letter-spacing: 0.04em; }
+.tpl-elvish .game-comment {
+    background: rgba(0, 0, 0, .22);
+    border-left: 2px solid rgba(201, 162, 39, .4);
+    color: var(--vellum);
+    font-size: 0.86rem;
+    padding: 0.4rem 0.6rem;
+    margin: 0.5rem 0;
+}
+
+/* ---- SIGNATURE 2: the vine of seats ---------------------------------------
+   A stem down the left, a leaf per taken seat, an unopened bud per free one.
+   The glyphs are Unicode rather than more SVG: at this size a 16px asset would
+   be indistinguishable, and this keeps the seat list as real, selectable text.
+   The stem is the ul's left border; each li reaches it with a short branch. */
+.tpl-elvish .players { margin-top: 0.6rem; }
+.tpl-elvish .players-label {
+    display: block;
+    text-align: center;
+    color: var(--sage);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    margin-bottom: 0.45rem;
+}
+.tpl-elvish .el-vine {
+    list-style: none;
+    margin: 0 0 0.6rem;
+    padding: 0 0 0 1.5rem;
+    border-left: 1px solid rgba(201, 162, 39, .38);
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+.tpl-elvish .el-vine .player {
+    position: relative;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0.1rem 0 0.1rem 0.2rem;
+    color: var(--vellum);
+    font-size: 0.9rem;
+}
+/* The branch: a short rule from the stem out to the leaf. */
+.tpl-elvish .el-vine .player::after {
+    content: "";
+    position: absolute;
+    left: -1.5rem;
+    top: 0.75em;
+    width: 1.05rem;
+    height: 1px;
+    background: rgba(201, 162, 39, .32);
+}
+/* Leaf = a seat that is taken. Bud = a seat still open. */
+.tpl-elvish .el-vine .el-leaf::before {
+    content: "\2767";                 /* rotated floral heart — reads as a leaf */
+    color: var(--gold);
+    margin-right: 0.4rem;
+    font-size: 0.95em;
+}
+.tpl-elvish .el-vine .el-bud::before {
+    content: "\2022";                 /* a closed bud on the stem */
+    color: rgba(201, 162, 39, .45);
+    margin-right: 0.4rem;
+}
+.tpl-elvish .el-vine .el-bud { font-style: italic; }
+.tpl-elvish .el-vine .el-bud .muted { color: var(--sage); opacity: 0.7; font-size: 0.85rem; }
+.tpl-elvish .el-vine .player-reserve { opacity: 0.8; }
+.tpl-elvish .el-vine .player-reserve::before { color: var(--sage); }
+.tpl-elvish .reserve-tag {
+    color: var(--sage);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+}
+.tpl-elvish .player-del { color: var(--garnet); }
+.tpl-elvish .p-signedby { color: var(--sage); font-size: 0.78rem; }
+.tpl-elvish .msg-icon { color: var(--gold); }
+
+/* ---- Controls -------------------------------------------------------------
+   Gold-outlined on the lacquer, filling with gilt on hover — the ironwork
+   reading rather than a solid button. */
+.tpl-elvish .btn {
+    background: transparent;
+    border: 1px solid rgba(201, 162, 39, .55);
+    color: var(--gilt);
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+}
+.tpl-elvish .btn:hover { background: rgba(201, 162, 39, .14); color: var(--gilt); }
+.tpl-elvish .btn-primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--primary-text);
+    font-weight: 600;
+}
+.tpl-elvish .btn-primary:hover { background: var(--gilt); border-color: var(--gilt); color: var(--primary-text); }
+.tpl-elvish .btn-danger,
+.tpl-elvish .btn-danger:hover { background: var(--garnet); border-color: var(--garnet); color: #f6e9e6; }
+.tpl-elvish .signup-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    background: rgba(201, 162, 39, .12);
+}
+.tpl-elvish .signup-btn:hover { background: rgba(201, 162, 39, .26); }
+
+/* ---- Forms ---------------------------------------------------------------- */
+.tpl-elvish input, .tpl-elvish select, .tpl-elvish textarea {
+    background: var(--moss-deep);
+    border: 1px solid rgba(201, 162, 39, .35);
+    color: var(--vellum);
+    border-radius: 2px;
+}
+.tpl-elvish input:focus, .tpl-elvish select:focus, .tpl-elvish textarea:focus {
+    border-color: var(--gold);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, .22);
+}
+.tpl-elvish label { color: var(--sage); letter-spacing: 0.04em; }
+.tpl-elvish .field-note { color: var(--sage); opacity: 0.85; }
+
+/* ---- Discussion ----------------------------------------------------------- */
+.tpl-elvish .discussion { text-align: center; border-top: 1px solid rgba(201, 162, 39, .18); margin-top: 0.6rem; }
+.tpl-elvish .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; text-align: left; }
+.tpl-elvish .comment-list li {
+    background: rgba(0, 0, 0, .2);
+    border: none;
+    border-left: 2px solid rgba(201, 162, 39, .3);
+    border-radius: 0;
+    color: var(--vellum);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+.tpl-elvish .comment-list .c-name { color: var(--gilt); }
+.tpl-elvish .comment-add summary {
+    display: inline-block;
+    cursor: pointer;
+    list-style: none;
+    color: var(--gilt);
+    border: 1px solid rgba(201, 162, 39, .45);
+    border-radius: 2px;
+    padding: 0.2rem 0.85rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+}
+.tpl-elvish .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-elvish .comment-add form { text-align: left; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* ---- Polls: the undecided entry -------------------------------------------
+   A poll is a page not yet written, so its frame is the same but its tag is a
+   gilt caption rather than anything button-like. */
+.tpl-elvish .poll-tag {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid rgba(201, 162, 39, .55);
+    color: var(--gilt);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    border-radius: 2px;
+}
+.tpl-elvish .poll-deadline { color: var(--sage); }
+.tpl-elvish .poll-deadline strong { color: var(--gilt); }
+.tpl-elvish .poll-option {
+    background: rgba(0, 0, 0, .2);
+    border: 1px solid rgba(201, 162, 39, .2);
+    border-radius: 2px;
+}
+.tpl-elvish .poll-opt-name, .tpl-elvish a.poll-opt-name { color: var(--gilt); }
+.tpl-elvish .poll-opt-votes { color: var(--sage); }
+.tpl-elvish .poll-opt-bar { background: rgba(0, 0, 0, .35); }
+.tpl-elvish .poll-opt-bar > span { background: var(--gold); }
+.tpl-elvish .poll-opt-bar.is-full > span { background: #7fbf9a; }
+
+/* ---- Chrome --------------------------------------------------------------- */
+.tpl-elvish .topbar {
+    background: linear-gradient(var(--moss-deep), #04120c);
+    border-bottom: 1px solid rgba(201, 162, 39, .4);
+}
+.tpl-elvish .topbar a, .tpl-elvish .brand { color: var(--gilt); }
+.tpl-elvish .brand { letter-spacing: 0.12em; }
+.tpl-elvish .timeline { background: rgba(0, 0, 0, .22); border: 1px solid rgba(201, 162, 39, .18); border-radius: 3px; }
+.tpl-elvish .tl-scroll { background: transparent; }
+.tpl-elvish .timeline-title { color: var(--gilt); letter-spacing: 0.12em; text-transform: uppercase; }
+.tpl-elvish .mailing-box {
+    background: var(--moss-lift);
+    border: 1px solid rgba(201, 162, 39, .28);
+    border-radius: 3px;
+}
+.tpl-elvish .game-archived .game-name { text-decoration: line-through; color: var(--sage); }
+.tpl-elvish .game-archived { opacity: 0.6; }
+
+/* ---- Quality floor --------------------------------------------------------
+   Focus has to be visible against both the lacquer and the gilt. */
+.tpl-elvish a:focus-visible,
+.tpl-elvish button:focus-visible,
+.tpl-elvish input:focus-visible,
+.tpl-elvish select:focus-visible,
+.tpl-elvish textarea:focus-visible,
+.tpl-elvish summary:focus-visible {
+    outline: 2px solid var(--gilt);
+    outline-offset: 2px;
+}
+
+/* One card per row once two would be cramped; the frame and vine are unchanged,
+   they simply have the full width to breathe. */
+@media (max-width: 900px) {
+    .tpl-elvish .game-card,
+    .tpl-elvish .poll-card { flex: 1 1 100%; min-width: 0; max-width: 100%; }
+    .tpl-elvish .event-header h1 { font-size: 1.7rem; letter-spacing: 0.1em; }
+    .tpl-elvish .game-card,
+    .tpl-elvish .poll-card { border-width: 14px; border-image-width: 14px; }
+}

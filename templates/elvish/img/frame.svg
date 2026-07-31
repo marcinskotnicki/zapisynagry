@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- 9-slice frame for CSS border-image (slice 40). The four 40x40 corners
+       hold the ornament; the middle strips are plain rules that stretch to any
+       card size. One corner is defined once and mirrored, so the four can
+       never drift out of symmetry. -->
+  <defs>
+    <g id="corner" fill="none" stroke="#c9a227" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M40 4 H16 Q4 4 4 16 V40"/>
+      <path d="M36 12 Q12 12 12 36"/>
+      <path d="M12 30 Q12 18 20 16 Q27 15 26 21 Q25 26 19 26 Q13 26 13 32"/>
+      <path d="M31 6 q6 4 4 10 q-6 1 -8 -4 q-1 -5 4 -6 z" fill="#c9a227" stroke="none"/>
+      <path d="M6 31 q4 6 10 4 q1 -6 -4 -8 q-5 -1 -6 4 z" fill="#c9a227" stroke="none"/>
+    </g>
+  </defs>
+  <use href="#corner"/>
+  <use href="#corner" transform="translate(120,0) scale(-1,1)"/>
+  <use href="#corner" transform="translate(0,120) scale(1,-1)"/>
+  <use href="#corner" transform="translate(120,120) scale(-1,-1)"/>
+  <g stroke="#c9a227" stroke-width="2" fill="none" stroke-linecap="round">
+    <path d="M40 4 H80"/>
+    <path d="M40 116 H80"/>
+    <path d="M4 40 V80"/>
+    <path d="M116 40 V80"/>
+  </g>
+</svg>
