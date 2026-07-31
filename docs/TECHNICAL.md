@@ -175,14 +175,15 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Five themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard** and **elvish**. They're discovered by directory
-glob, so creating a folder registers one — there is no list to update.
+Six themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard**, **elvish** and **space**. They're discovered by
+directory glob, so creating a folder registers one — there is no list to
+update.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a
-stylesheet alone; `classic/` and `elvish/` each override one template plus
-their CSS; `elvish/` also ships three hand-written SVG ornaments in its own
+stylesheet alone; `classic/`, `elvish/` and `space/` each override one template
+plus their CSS; `elvish/` and `space/` also ship hand-written SVGs in their own
 `img/`.
 
 Non-base stylesheets `@import` light's, then override. Only the active theme's
@@ -196,11 +197,19 @@ using `$__tpl_*` locals internally to avoid collisions.
 **Prefer restyling shared markup over forking a template**, and when you do
 fork, pin it. Classic forked `game_card.php` with nothing tying it to light's,
 and its comment button drifted out of sync for months before anyone noticed.
-Elvish forks the same file — deliberately, because its player list draws a bud
-for every *free* seat and light's card has no element for a seat nobody
-occupies — but `tests/test_elvish.php` asserts every control light's card
-offers is still present in the fork, so the same silent loss can't recur. If
-you fork a template, write that test in the same commit.
+Elvish and space fork the same file — deliberately, because both render a
+*free* seat as an object (a bud on a vine; a numbered open slot) and light's
+card has no element for a seat nobody occupies. Both are pinned:
+`tests/test_elvish.php` and `tests/test_space.php` assert every control light's
+card offers is still present in their fork, so the same silent loss can't
+recur. If you fork a template, write that test in the same commit — and verify
+it actually fails when a control is removed, or it is not really pinning
+anything.
+
+**CSS parsers do not catch a bad colour.** `css-tree` reads `#e8destroy` as a
+bare identifier, not an error, so a typo'd hex is invisible to validation. Each
+theme suite greps its own stylesheet for `#` literals containing letters past
+`f`; that check caught a real one while the space theme was being written.
 
 **All page URLs are relative and root-less** (`templates/light/css/style.css`,
 `icons/…`, `js/scripts.js`). This is what makes path-style pretty URLs a large

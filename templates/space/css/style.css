@@ -1,0 +1,497 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  space — the evening's games as a launch manifest.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a later edit doesn't sand off the point:
+ *
+ *  The subject isn't "sci-fi", it's MISSION CONTROL — and that's a real fit
+ *  rather than a costume: this app is already a schedule of timed events with
+ *  people assigned to them, which is what a launch manifest is. Games are
+ *  missions with a scheduled time, players are crew, empty seats are open
+ *  crew slots, the timeline is a window schedule. Every naming and layout
+ *  decision below follows from that reading.
+ *
+ *  PALETTE is deliberately NOT the near-black-plus-one-acid-accent that space
+ *  themes default to. The ground is the blue-violet of the night side of a
+ *  planet, not black; and there are two accents, both drawn from the subject —
+ *  NASA's own signal red (#fc3d21, the "worm") for anything live or primary,
+ *  and instrument azure for secondary readouts. No terminal-green anywhere.
+ *
+ *  TYPE is two roles, and the split is the subject's own: a condensed
+ *  technical face for labels and headings (aerospace signage is DIN-derived),
+ *  and a MONOSPACE for every number. Mission control displays really do split
+ *  that way, because fixed-width digits let a value be read at a glance
+ *  without its column shifting. So the monospace here is on times, counts,
+ *  slot numbers and telemetry only — never on prose.
+ *
+ *  SIGNATURE: the world on the horizon. A single large SVG limb fixed to the
+ *  foot of the viewport with the whole page floating above it, over a seamless
+ *  starfield. That ambient hero is where this theme spends its boldness; the
+ *  cards themselves stay restrained instrument modules so the view stays the
+ *  thing you notice.
+ *
+ *  LAYOUT is loosely corkboard's: a centred wrapping row of ~46% cards with
+ *  the same breakpoint shape, rather than classic's fixed 550px columns.
+ *
+ *  NO WEB FONTS, matching the rest of the app: this site asks visitors for
+ *  GDPR consent, so quietly adding a third-party font request isn't a call to
+ *  make on the admin's behalf. Both stacks are system faces.
+ *
+ *  Everything is scoped to .tpl-space (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-space {
+    /* ---- Materials ------------------------------------------------------- */
+    --void:       #080d1a;   /* the night side: blue-violet, never pure black */
+    --hull:       #131b2e;   /* instrument housing */
+    --hull-lift:  #1d2740;   /* a raised panel */
+    --ceramic:    #e6ecf7;   /* thermal-tile white: body text */
+    --slate:      #7d8aa5;   /* muted readouts and secondary text */
+    --worm:       #fc3d21;   /* NASA signal red: live, primary, contrasting */
+    --azure:      #58a6e8;   /* instrument blue: links and secondary accents */
+    --caution:    #f0b429;   /* amber, for anything at capacity */
+
+    /* Condensed technical for lettering; fixed-width for numbers. Bahnschrift
+       (Windows) and DIN Alternate (macOS) are the closest system faces to
+       aerospace signage; the monospace stack is whatever the platform ships. */
+    --font-sp:   'Bahnschrift', 'DIN Alternate', 'Roboto Condensed',
+                 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-tele: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas,
+                 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+
+    /* Remap the base theme's variables so rules this file never touches still
+       land somewhere sensible. */
+    --bg:           var(--void);
+    --surface:      var(--hull);
+    --surface-2:    var(--hull-lift);
+    --border:       rgba(88, 166, 232, .22);
+    --text:         var(--ceramic);
+    --text-muted:   var(--slate);
+    --primary:      var(--worm);
+    --primary-text: #ffffff;
+    --ok:           #46c98b;
+    --error:        var(--worm);
+    --radius:       3px;
+    --maxw:         1500px;
+}
+
+/* ---- SIGNATURE: the view ---------------------------------------------------
+   Three fixed layers, painted back to front: a wash that lifts the top of the
+   frame, the starfield tile, and the planet limb anchored to the bottom. All
+   three are background-attachment:fixed so the content scrolls THROUGH the
+   view rather than dragging it along — which is what makes it read as a
+   window rather than as wallpaper. */
+body.tpl-space {
+    background-color: var(--void);
+    background-image:
+        url("../img/planet.svg"),
+        url("../img/starfield.svg"),
+        radial-gradient(ellipse at 50% 0%, rgba(88, 166, 232, .10), transparent 55%);
+    background-repeat: no-repeat, repeat, no-repeat;
+    background-size: 100% auto, 220px 220px, 100% 100%;
+    background-position: bottom center, top left, top center;
+    background-attachment: fixed, fixed, fixed;
+    color: var(--ceramic);
+    font-family: var(--font-sp);
+}
+.tpl-space .content { max-width: var(--maxw); }
+
+/* ---- Lettering ------------------------------------------------------------ */
+.tpl-space h1, .tpl-space h2, .tpl-space h3,
+.tpl-space .btn, .tpl-space input, .tpl-space select, .tpl-space textarea {
+    font-family: var(--font-sp);
+}
+/* Numbers only — see the note at the top on why this split is the subject's. */
+.tpl-space .game-time, .tpl-space .game-length, .tpl-space .weight-badge,
+.tpl-space .sp-num, .tpl-space .sp-clock, .tpl-space .players-label,
+.tpl-space .tl-hour, .tpl-space .poll-opt-votes, .tpl-space .event-hours {
+    font-family: var(--font-tele);
+    font-variant-numeric: tabular-nums;
+}
+
+.tpl-space .event-header { text-align: center; }
+.tpl-space .event-header h1 {
+    color: var(--ceramic);
+    font-weight: 600;
+    font-size: 2.2rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+/* The rule under the designation: a signal-red bar, offset left, the way a
+   mission patch or a panel label is underscored rather than centred. */
+.tpl-space .event-header h1::after {
+    content: "";
+    display: block;
+    width: 96px;
+    height: 2px;
+    margin: 0.5rem auto 0;
+    background: linear-gradient(90deg, var(--worm), rgba(252, 61, 33, 0));
+}
+.tpl-space .event-date,
+.tpl-space .event-hours {
+    text-align: center;
+    color: var(--slate);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin: 0.1rem 0 0;
+}
+
+/* ---- Day tabs: channel selectors ------------------------------------------ */
+.tpl-space .day-tabs { justify-content: center; border-bottom: 1px solid var(--border); gap: 0.3rem; }
+.tpl-space .day-tab {
+    color: var(--slate);
+    background: rgba(19, 27, 46, .6);
+    border: 1px solid transparent;
+    border-bottom: none;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+.tpl-space .day-tab:hover { background: rgba(88, 166, 232, .1); color: var(--ceramic); }
+.tpl-space .day-tab-active,
+.tpl-space .day-tab-active:hover {
+    color: var(--ceramic);
+    background: var(--hull-lift);
+    border-color: var(--border);
+    box-shadow: inset 0 2px 0 var(--worm);   /* the lit channel */
+}
+.tpl-space .day-tab-date, .tpl-space .day-tab-hours { color: inherit; opacity: 0.75; }
+
+/* ---- Tables: console groups ----------------------------------------------- */
+.tpl-space .table-block {
+    background: linear-gradient(rgba(88, 166, 232, .05), transparent 40%), rgba(19, 27, 46, .82);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
+    backdrop-filter: blur(2px);   /* the view stays visible behind the glass */
+}
+.tpl-space .table-title {
+    color: var(--ceramic);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+}
+
+/* ---- Layout: loosely corkboard's --------------------------------------- */
+.tpl-space .game-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+.tpl-space .game-card,
+.tpl-space .poll-card {
+    flex: 0 1 46%;
+    min-width: 320px;
+    max-width: 640px;
+    background: linear-gradient(rgba(88, 166, 232, .06), transparent 38%), rgba(29, 39, 64, .88);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem 0.9rem 0.9rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .05);
+    position: relative;
+}
+/* Mechanical detail, kept to one thing: a hairline seam across the top of the
+   module, the way a panel meets its housing. Not four rivets in the corners —
+   that's the costume version. */
+.tpl-space .game-card::before,
+.tpl-space .poll-card::before {
+    content: "";
+    position: absolute;
+    top: 5px; left: 10px; right: 10px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(88, 166, 232, .35), transparent);
+}
+.tpl-space .game-card.active,
+.tpl-space .poll-card.active { box-shadow: 0 0 0 1px var(--worm), 0 2px 16px rgba(0, 0, 0, .45); }
+
+/* ---- Module header --------------------------------------------------------- */
+.tpl-space .sp-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+}
+/* Status lamp: green while seats remain, amber once the module is at capacity.
+   It encodes the same fact the signup button's label does, which is the point —
+   a status light that means nothing is decoration. */
+.tpl-space .sp-lamp {
+    flex: 0 0 auto;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 7px rgba(70, 201, 139, .8);
+}
+.tpl-space .sp-lamp-full { background: var(--caution); box-shadow: 0 0 7px rgba(240, 180, 41, .8); }
+.tpl-space .game-name-row { flex: 1 1 auto; min-width: 0; justify-content: flex-start; }
+.tpl-space .game-name {
+    color: var(--ceramic);
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.tpl-space .game-name a { color: var(--ceramic); text-decoration: none; }
+.tpl-space .game-name a:hover { color: var(--azure); }
+.tpl-space .sp-clock { color: var(--azure); font-size: 1rem; letter-spacing: 0.06em; white-space: nowrap; }
+.tpl-space .sp-clock:before { content: none; }   /* the clock glyph fights the readout */
+.tpl-space .sp-actions { display: inline-flex; gap: 0.35rem; margin-bottom: 0.5rem; }
+.tpl-space .game-thumb { text-align: center; margin: 0.2rem 0 0.4rem; }
+.tpl-space .game-thumb img { max-width: 150px; border: 1px solid var(--border); border-radius: 3px; }
+
+/* ---- Telemetry strip ------------------------------------------------------- */
+.tpl-space .sp-telemetry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    padding: 0.4rem 0.5rem;
+    background: rgba(8, 13, 26, .55);
+    border: 1px solid rgba(88, 166, 232, .14);
+    border-radius: 3px;
+    margin: 0 0 0.5rem;
+}
+.tpl-space .sp-cell { display: inline-flex; align-items: baseline; gap: 0.35rem; }
+/* The key is the label; it stays quiet so the value reads first. */
+.tpl-space .sp-key {
+    color: var(--slate);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+.tpl-space .game-length, .tpl-space .game-language { color: var(--ceramic); font-size: 0.85rem; }
+/* The weight scale keeps its colours — those encode complexity and are shared
+   with every theme — but drops to a square chip to match the panel. */
+.tpl-space .weight-badge { border-radius: 2px; font-size: 0.76rem; min-width: 1.9rem; }
+.tpl-space .game-brings { color: var(--ceramic); font-size: 0.88rem; margin: 0.25rem 0; }
+.tpl-space .game-rules { font-size: 0.85rem; letter-spacing: 0.04em; }
+.tpl-space .game-comment {
+    background: rgba(8, 13, 26, .5);
+    border-left: 2px solid var(--azure);
+    color: var(--ceramic);
+    font-size: 0.86rem;
+    padding: 0.4rem 0.6rem;
+    margin: 0.5rem 0;
+}
+
+/* ---- CREW MANIFEST --------------------------------------------------------
+   A numbered roster: every seat has a slot number and a filled/open state, and
+   standby crew sit in their own block below rather than mixed in. Fixed-width
+   numbering is what lets the column be scanned. */
+.tpl-space .players { margin-top: 0.5rem; }
+.tpl-space .players-label {
+    display: block;
+    color: var(--slate);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    margin-bottom: 0.35rem;
+}
+.tpl-space .sp-slots { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.tpl-space .sp-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: rgba(8, 13, 26, .45);
+    border: none;
+    border-left: 2px solid transparent;
+    border-radius: 0;
+    padding: 0.22rem 0.5rem;
+    font-size: 0.88rem;
+    color: var(--ceramic);
+}
+.tpl-space .sp-num {
+    flex: 0 0 auto;
+    color: var(--slate);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    min-width: 1.6rem;
+}
+.tpl-space .sp-who { flex: 1 1 auto; min-width: 0; }
+.tpl-space .sp-slot-filled { border-left-color: var(--azure); }
+/* An open slot is stated, not implied by absence — that's the whole reason
+   this theme forks the card. */
+.tpl-space .sp-slot-open {
+    border-left-color: rgba(125, 138, 165, .35);
+    background: rgba(8, 13, 26, .22);
+}
+.tpl-space .sp-slot-open .sp-who { color: var(--slate); font-style: italic; opacity: 0.75; }
+.tpl-space .sp-standby-label { margin-top: 0.5rem; color: var(--caution); opacity: 0.85; }
+.tpl-space .sp-standby .sp-slot-filled { border-left-color: var(--caution); }
+.tpl-space .player-del { color: var(--worm); }
+.tpl-space .p-signedby { color: var(--slate); font-size: 0.76rem; }
+.tpl-space .msg-icon { color: var(--azure); }
+.tpl-space .reserve-tag { color: var(--caution); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.68rem; }
+
+/* ---- Controls --------------------------------------------------------------
+   Flat panel switches: a quiet outline that lights on hover, with the primary
+   action carrying the signal red. */
+.tpl-space .btn {
+    background: rgba(88, 166, 232, .08);
+    border: 1px solid var(--border);
+    color: var(--ceramic);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    border-radius: 3px;
+}
+.tpl-space .btn:hover { background: rgba(88, 166, 232, .2); color: #fff; }
+.tpl-space .btn-primary {
+    background: linear-gradient(#ff5a3c, var(--worm));
+    border-color: #d62d15;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.tpl-space .btn-primary:hover { background: linear-gradient(#ff7256, #e8331a); }
+.tpl-space .btn-danger,
+.tpl-space .btn-danger:hover { background: var(--worm); border-color: var(--worm); color: #fff; }
+.tpl-space .signup-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    border-color: rgba(88, 166, 232, .45);
+}
+.tpl-space .signup-btn:hover { background: rgba(88, 166, 232, .26); }
+
+/* ---- Forms ----------------------------------------------------------------- */
+.tpl-space input, .tpl-space select, .tpl-space textarea {
+    background: rgba(8, 13, 26, .7);
+    border: 1px solid var(--border);
+    color: var(--ceramic);
+    border-radius: 3px;
+}
+.tpl-space input:focus, .tpl-space select:focus, .tpl-space textarea:focus {
+    border-color: var(--azure);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(88, 166, 232, .25);
+}
+.tpl-space label { color: var(--slate); letter-spacing: 0.06em; }
+.tpl-space .field-note { color: var(--slate); opacity: 0.85; }
+
+/* ---- Discussion ------------------------------------------------------------ */
+.tpl-space .discussion { border-top: 1px solid var(--border); margin-top: 0.6rem; }
+.tpl-space .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
+.tpl-space .comment-list li {
+    background: rgba(8, 13, 26, .5);
+    border: none;
+    border-left: 2px solid rgba(88, 166, 232, .3);
+    border-radius: 0;
+    color: var(--ceramic);
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+.tpl-space .comment-list .c-name { color: var(--azure); }
+.tpl-space .comment-add summary {
+    display: inline-block;
+    cursor: pointer;
+    list-style: none;
+    color: var(--ceramic);
+    background: rgba(88, 166, 232, .1);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.2rem 0.85rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.tpl-space .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-space .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* ---- Polls: awaiting go / no-go -------------------------------------------- */
+.tpl-space .poll-tag {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--caution);
+    color: var(--caution);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    border-radius: 3px;
+}
+.tpl-space .poll-deadline { color: var(--slate); }
+.tpl-space .poll-deadline strong { color: var(--ceramic); }
+.tpl-space .poll-option {
+    background: rgba(8, 13, 26, .5);
+    border: 1px solid rgba(88, 166, 232, .16);
+    border-radius: 3px;
+}
+.tpl-space .poll-opt-name, .tpl-space a.poll-opt-name { color: var(--ceramic); }
+.tpl-space .poll-opt-votes { color: var(--slate); }
+.tpl-space .poll-opt-bar { background: rgba(8, 13, 26, .8); }
+.tpl-space .poll-opt-bar > span { background: var(--azure); }
+.tpl-space .poll-opt-bar.is-full > span { background: var(--ok); }
+
+/* ---- Timeline: the window schedule ----------------------------------------- */
+.tpl-space .timeline { background: rgba(19, 27, 46, .75); border: 1px solid var(--border); border-radius: 4px; }
+.tpl-space .tl-scroll { background: transparent; border-color: var(--border); }
+.tpl-space .timeline-title { color: var(--ceramic); letter-spacing: 0.18em; text-transform: uppercase; }
+.tpl-space .tl-hours { border-bottom-color: var(--border); }
+.tpl-space .tl-hour { color: var(--slate); }
+.tpl-space .tl-hour::before { border-left-color: rgba(88, 166, 232, .3); }
+.tpl-space .tl-table-no { background: rgba(8, 13, 26, .6); color: var(--slate); }
+.tpl-space .tl-game {
+    background: linear-gradient(rgba(255, 255, 255, .16), transparent), var(--azure);
+    color: #06121f;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-right: 1px solid rgba(255, 255, 255, .18);
+    font-weight: 600;
+}
+.tpl-space .tl-game:hover { filter: brightness(1.1); }
+.tpl-space .tl-count-full { color: #5c1200; }
+/* A poll is a slot with no go/no-go yet: the base sheet paints this near-white
+   (#eef3fc), which on this ground is the one bright patch on the page, so the
+   value has to be replaced rather than tinted. */
+.tpl-space .tl-game.tl-poll {
+    background: rgba(8, 13, 26, .85);
+    color: var(--caution);
+    border: 1px dashed var(--caution);
+}
+.tpl-space .tl-game.tl-poll .tl-sub { color: rgba(240, 180, 41, .8); }
+
+/* ---- Chrome ---------------------------------------------------------------- */
+.tpl-space .topbar {
+    background: linear-gradient(rgba(19, 27, 46, .95), rgba(8, 13, 26, .95));
+    border-bottom: 1px solid var(--border);
+}
+.tpl-space .topbar a, .tpl-space .brand { color: var(--ceramic); }
+.tpl-space .brand { letter-spacing: 0.16em; text-transform: uppercase; }
+.tpl-space .mailing-box {
+    background: rgba(29, 39, 64, .85);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.tpl-space .game-archived { opacity: 0.5; }
+.tpl-space .game-archived .game-name { text-decoration: line-through; color: var(--slate); }
+
+/* ---- Quality floor ---------------------------------------------------------
+   Focus has to read against both the hull panels and the view behind them. */
+.tpl-space a:focus-visible,
+.tpl-space button:focus-visible,
+.tpl-space input:focus-visible,
+.tpl-space select:focus-visible,
+.tpl-space textarea:focus-visible,
+.tpl-space summary:focus-visible {
+    outline: 2px solid var(--azure);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1120px) {
+    .tpl-space .game-card,
+    .tpl-space .poll-card { flex: 1 1 100%; min-width: 0; max-width: 100%; }
+}
+@media (max-width: 700px) {
+    .tpl-space .event-header h1 { font-size: 1.6rem; letter-spacing: 0.14em; }
+    /* The limb is a horizon, not a backdrop: on a tall narrow screen a
+       full-width planet swallows the page, so it drops back to a band. */
+    body.tpl-space { background-size: 200% auto, 220px 220px, 100% 100%; }
+}
