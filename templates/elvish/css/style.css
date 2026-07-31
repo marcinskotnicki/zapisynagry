@@ -341,13 +341,25 @@ body.tpl-elvish {
     border-radius: 2px;
 }
 .tpl-elvish .btn:hover { background: rgba(201, 162, 39, .14); color: var(--gilt); }
+/* Gilt metal rather than flat paint: a three-stop gradient with the bright
+   band sitting just ABOVE centre is what the eye reads as a specular highlight
+   on a curved surface — an even top-to-bottom fade just looks like a gradient.
+   The inset rim lifts the top edge and drops the bottom, the same trick as a
+   struck coin. */
 .tpl-elvish .btn-primary {
-    background: var(--gold);
-    border-color: var(--gold);
+    background: linear-gradient(#f0dda6 0%, var(--gilt) 38%, var(--gold) 52%, #9d7d18 100%);
+    border-color: #8a6d14;
     color: var(--primary-text);
     font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 248, 220, .75),
+                inset 0 -1px 0 rgba(0, 0, 0, .28);
+    text-shadow: 0 1px 0 rgba(255, 248, 220, .35);
 }
-.tpl-elvish .btn-primary:hover { background: var(--gilt); border-color: var(--gilt); color: var(--primary-text); }
+.tpl-elvish .btn-primary:hover {
+    background: linear-gradient(#fbeec4 0%, #f3e2b0 38%, var(--gilt) 52%, #b08d1c 100%);
+    border-color: #8a6d14;
+    color: var(--primary-text);
+}
 .tpl-elvish .btn-danger,
 .tpl-elvish .btn-danger:hover { background: var(--garnet); border-color: var(--garnet); color: #f6e9e6; }
 .tpl-elvish .signup-btn {
@@ -434,8 +446,40 @@ body.tpl-elvish {
 .tpl-elvish .topbar a, .tpl-elvish .brand { color: var(--gilt); }
 .tpl-elvish .brand { letter-spacing: 0.12em; }
 .tpl-elvish .timeline { background: rgba(0, 0, 0, .22); border: 1px solid rgba(201, 162, 39, .18); border-radius: 3px; }
-.tpl-elvish .tl-scroll { background: transparent; }
+.tpl-elvish .tl-scroll { background: transparent; border-color: rgba(201, 162, 39, .18); }
 .tpl-elvish .timeline-title { color: var(--gilt); letter-spacing: 0.12em; text-transform: uppercase; }
+.tpl-elvish .tl-hours { border-bottom-color: rgba(201, 162, 39, .22); }
+.tpl-elvish .tl-hour { color: var(--sage); }
+.tpl-elvish .tl-hour::before { border-left-color: rgba(201, 162, 39, .3); }
+.tpl-elvish .tl-table-no { background: rgba(0, 0, 0, .3); color: var(--sage); }
+
+/* Scheduled games take the same struck-metal treatment as the primary button,
+   so a booked slot reads as a gold inlay set into the timeline. */
+.tpl-elvish .tl-game {
+    background: linear-gradient(#f0dda6 0%, var(--gilt) 38%, var(--gold) 52%, #9d7d18 100%);
+    color: var(--primary-text);
+    border: 1px solid #8a6d14;
+    border-right: 1px solid #8a6d14;
+    box-shadow: inset 0 1px 0 rgba(255, 248, 220, .7),
+                inset 0 -1px 0 rgba(0, 0, 0, .3);
+    text-shadow: 0 1px 0 rgba(255, 248, 220, .3);
+}
+.tpl-elvish .tl-game:hover { filter: brightness(1.06); }
+.tpl-elvish .tl-count-full { color: #5c1f14; }
+
+/* A poll is a slot not yet decided, so it is the UNFILLED version of that
+   inlay: the same metal, darkened and matte, with the dashed edge light's
+   timeline already uses to mean "provisional". Light's own rule paints this
+   near-white (#eef3fc), which on the lacquer was the one bright patch on the
+   page — the base value has to be overridden, not just tinted. */
+.tpl-elvish .tl-game.tl-poll {
+    background: linear-gradient(#6d5713 0%, #55430e 55%, #3a2d08 100%);
+    color: var(--gilt);
+    border: 1px dashed rgba(201, 162, 39, .65);
+    box-shadow: inset 0 1px 0 rgba(201, 162, 39, .22);
+    text-shadow: none;
+}
+.tpl-elvish .tl-game.tl-poll .tl-sub { color: rgba(237, 219, 166, .8); }
 .tpl-elvish .mailing-box {
     background: var(--moss-lift);
     border: 1px solid rgba(201, 162, 39, .28);

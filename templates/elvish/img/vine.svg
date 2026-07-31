@@ -1,12 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
-  <!-- Seamless-ish botanical tile for the page ground. Deliberately faint: at
-       4% opacity it reads as texture in the lacquer, not as wallpaper. -->
-  <g fill="none" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round" opacity="0.5">
-    <path d="M0 150 Q45 120 60 75 Q72 38 45 0"/>
-    <path d="M180 30 Q135 60 120 105 Q108 142 135 180"/>
-    <path d="M60 75 q18 -12 30 -4 q-12 16 -30 4 z"/>
-    <path d="M120 105 q-18 12 -30 4 q12 -16 30 -4 z"/>
-    <path d="M52 108 q14 -6 22 2 q-14 10 -22 -2 z"/>
-    <path d="M128 72 q-14 6 -22 -2 q14 -10 22 2 z"/>
+  <!-- SEAMLESS botanical lattice for the page ground.
+       Every stroke that leaves an edge re-enters the opposite edge at the SAME
+       coordinate (the horizontal vine sits on y=90 at both x=0 and x=180; the
+       vertical one on x=90 at both y=0 and y=180), so tiled copies join into a
+       continuous trellis instead of a field of disconnected marks.
+       Kept very faint on purpose: this is grain in the lacquer, not wallpaper. -->
+  <g fill="none" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round" opacity="0.25">
+    <path d="M0 90 C 30 90, 40 60, 60 60 S 90 120, 120 120 S 150 90, 180 90"/>
+    <path d="M90 0 C 90 30, 120 40, 120 60 S 60 90, 60 120 S 90 150, 90 180"/>
+    <path d="M60 60 q14 -12 26 -5 q-11 15 -26 5 z"/>
+    <path d="M120 120 q-14 12 -26 5 q11 -15 26 -5 z"/>
+    <path d="M120 60 q10 -13 22 -8 q-8 16 -22 8 z"/>
+    <path d="M60 120 q-10 13 -22 8 q8 -16 22 -8 z"/>
+    <circle cx="90" cy="90" r="2.4" fill="#c9a227" stroke="none"/>
   </g>
 </svg>
