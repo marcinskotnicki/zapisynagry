@@ -200,10 +200,10 @@ input, select, textarea {
 
 /* ---- Event header & day tabs ---------------------------------------------- */
 .event-header h1 { margin-bottom: 0.2rem; }
-.event-date { color: var(--text-muted); margin-top: 0; }
+.event-date { color: var(--text-muted); margin-top: 0; margin-bottom:0; font-size:1.1rem}
 /* Opening hours, under the date and quieter than it — useful at a glance,
    not something to read first. */
-.event-hours { color: var(--text-muted); font-size: 0.9rem; margin: 0.1rem 0 0; }
+.event-hours { color: var(--text-muted); font-size: 0.9rem; margin: 0.1rem 0 10px; }
 .day-tab-hours { display: block; font-size: 0.72rem; color: var(--text-muted); }   /* smaller than the date above it, on purpose */
 .event-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
 
