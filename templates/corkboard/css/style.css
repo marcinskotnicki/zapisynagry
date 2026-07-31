@@ -307,6 +307,24 @@ body.tpl-corkboard {
     opacity: 0.82;              /* ink never presses evenly */
 }
 
+.tpl-corkboard .game-name {
+    display: inline-block;
+    background: none;
+    color: var(--stamp);
+    font-family: var(--font-type);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 0.2rem 0.55rem;
+    border: 2px solid var(--stamp);
+    border-radius: 2px;
+    transform: rotate(-3deg);
+    opacity: 0.82;              /* ink never presses evenly */
+}
+
+.tpl-corkboard .game-name a{color: var(--stamp);}
+
 /* ---- Chips, buttons, small parts ------------------------------------------ */
 .tpl-corkboard .player {
     background: #fbf6e9;
