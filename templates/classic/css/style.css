@@ -259,7 +259,7 @@
 .tpl-classic .poll-card .comment-list li:nth-child(even) { background: #181818; }
 
 @media (max-width: 700px) {
-    .game-list>article{
+    .tpl-classic .game-list>article{
         width:100%;
     }
     .tpl-classic .game-card { flex-direction: column; width:100%}
@@ -273,30 +273,32 @@
 
 .tpl-classic .p-signedby { color: #666; }
 
-.content>.card{
+.tpl-classic .content>.card{
     max-width:99%;
     width:1200px;
     margin:0px auto;
 }
 
 @media (min-width: 701px) {
-    .game-list>article{
+    .tpl-classic .game-list>article{
         width:550px;
     }
 }
 
-.msg-icon-all {
+.tpl-classic .msg-icon-all {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     color:#ffb3ab;
 }
 
-.event-header{
+.tpl-classic .event-header{
     text-align:center;
 }
 
-.day-tabs{justify-content:center;}
-.day-tabs, .day-tab-active {border-color:#b8b9bd;}
-.day-tab-active{
+.tpl-classic .day-tabs{justify-content:center;}
+.tpl-classic .day-tabs, .day-tab-active {border-color:#b8b9bd;}
+.tpl-classic .day-tab-active{
     background: linear-gradient(var(--surface), var(--bg));
 }
+
+.tpl-classic .table-title{padding-bottom:10px;text-align:center;}
