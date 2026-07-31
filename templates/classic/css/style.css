@@ -294,3 +294,9 @@
 .event-header{
     text-align:center;
 }
+
+.day-tabs{justify-content:center;}
+.day-tabs, .day-tab-active {border-color:#b8b9bd;}
+.day-tab-active{
+    background: linear-gradient(var(--surface), var(--bg));
+}
