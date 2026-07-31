@@ -198,7 +198,7 @@ body.tpl-corkboard {
 .tpl-corkboard .tl-table-no { background: rgba(0, 0, 0, .07); color: var(--ink); }
 .tpl-corkboard .tl-hours { border-bottom-color: var(--kraft-edge); }
 .tpl-corkboard .tl-hour, .tpl-corkboard .tl-hour::before { color: var(--pencil); border-color: var(--kraft-edge); }
-.tpl-corkboard .timeline-title { color: var(--signage); text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .5); font-weight:400; font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;}
+.tpl-corkboard .timeline-title { text-align:center; color: var(--signage); text-shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .5); font-weight:400; font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;}
 
 /* Table headings are typed labels, not headlines. */
 .tpl-corkboard .table-title,
