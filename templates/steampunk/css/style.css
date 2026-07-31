@@ -48,7 +48,9 @@
     --brass:      #b08d57;   /* patinated brass: the working metal */
     --brass-lit:  #eacf9a;   /* polished highlight and lettering */
     --brass-dark: #6b5228;   /* the shadowed side of every fitting */
-    --verdigris:  #3f8378;   /* oxidised copper: the one cool contrast */
+    --vial:       #b8d43a;   /* the reagent in the sight-glass: yellow-green */
+    --vial-core:  #e6f39a;   /* its lit core, where the light passes through */
+    --glow:       #f0952f;   /* glowing orange: pending, and past the threshold */
     --parchment:  #ece0c6;   /* label card / body text */
     --ember:      #b8431c;   /* firebox glow: danger and the red line */
 
@@ -67,7 +69,7 @@
     --text-muted:   #a9977a;
     --primary:      var(--brass);
     --primary-text: #241a10;
-    --ok:           var(--verdigris);
+    --ok:           var(--vial);
     --error:        var(--ember);
     --radius:       2px;
     --maxw:         1400px;
@@ -229,7 +231,7 @@ body.tpl-steampunk {
 .tpl-steampunk .gc-waga strong { color: #241a10; }
 /* The weight scale keeps its colours — those encode complexity and are shared
    across every theme; only the shading changes. */
-.tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); color: var(--verdigris); font-weight: 700; }
+.tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); color: var(--vial); font-weight: 700; }
 .tpl-steampunk .gc-comment { background: rgba(0, 0, 0, .4); font-size: 0.8rem; line-height: 1.35; }
 .tpl-steampunk .gc-comment .c-name { color: var(--brass-lit); }
 
@@ -303,7 +305,7 @@ body.tpl-steampunk {
 .tpl-steampunk .sk-berth-free .sk-rivet {
     background: radial-gradient(circle at 34% 30%, #6f6250, #3d362c 60%, #241f19);
 }
-.tpl-steampunk .gc-knows { color: var(--verdigris); font-size: 0.74rem; }
+.tpl-steampunk .gc-knows { color: var(--vial); font-size: 0.74rem; }
 .tpl-steampunk .gc-reserve { opacity: 0.8; font-style: italic; }
 .tpl-steampunk .reserve-tag { color: var(--ember); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
 .tpl-steampunk .gc-more-slots { font-size: 0.76rem; color: var(--text-muted); font-style: italic; margin: 0.1rem 0 0.4rem 0.2rem; }
@@ -398,15 +400,15 @@ body.tpl-steampunk {
 .tpl-steampunk .poll-card {
     background: linear-gradient(var(--walnut-up), var(--walnut));
     border: 1px solid var(--brass-dark);
-    border-left: 4px solid var(--verdigris);
+    border-left: 4px solid var(--glow);
     border-radius: 3px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, .5);
 }
 .tpl-steampunk .poll-tag {
     margin-left: auto;
     background: transparent;
-    border: 1px solid var(--verdigris);
-    color: var(--verdigris);
+    border: 1px solid var(--glow);
+    color: var(--glow);
     letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.7rem;
     border-radius: 2px;
 }
@@ -417,57 +419,78 @@ body.tpl-steampunk {
     border: 1px solid rgba(176, 141, 87, .2);
     border-radius: 2px;
     /* Room at the foot for the sight-glass below. The base rule pins the bar to
-       bottom:0 with only 0.45rem of padding, which a 10px tube would sit on
-       top of. */
-    padding-bottom: 1.15rem;
+       bottom:0 with only 0.45rem of padding, which the tube and its collars
+       would otherwise sit on top of. */
+    padding-bottom: 1.6rem;
 }
 .tpl-steampunk .poll-opt-name, .tpl-steampunk a.poll-opt-name { color: var(--brass-lit); }
 .tpl-steampunk .poll-opt-votes { color: var(--text-muted); }
 
 /* ---- The sight-glass ------------------------------------------------------
-   A brass-collared tube of dark glass with the vote level standing in it.
-   Inset from the option's edges so it reads as a fitted instrument rather than
-   a progress bar bleeding to the border. The inner shadow is the glass; the
-   ::after streak is the specular highlight along its upper wall.
+   A dark glass tube in brass collars, with the vote level standing in it as a
+   lit reagent. Inset from the option's edges so it reads as a fitted
+   instrument rather than a progress bar bleeding to the border.
 
-   NOTE: .poll-option sets overflow:hidden, so the liquid's glow is clipped at
+   Only lightly rounded (3px), NOT a pill: a fully rounded bar reads as a
+   lozenge, and the collars at each end need a squared body to clamp onto.
+
+   NOTE: .poll-option sets overflow:hidden, so the reagent's glow is clipped at
    the option's bounds — the tube is inset partly to give that glow somewhere
    to fall. */
 .tpl-steampunk .poll-opt-bar {
-    left: 0.55rem; right: 0.55rem; bottom: 0.3rem;
-    height: 10px;
-    border-radius: 999px;
-    background: linear-gradient(#0a0705, #1c130c 60%, #0f0a06);
+    left: 0.85rem; right: 0.85rem; bottom: 0.32rem;
+    height: 14px;
+    border-radius: 3px;
+    background: linear-gradient(#0a0705, #1c130c 55%, #0d0906);
     border: 1px solid var(--brass-dark);
-    box-shadow: inset 0 2px 3px rgba(0, 0, 0, .85),
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .9),
+                inset 0 -1px 2px rgba(0, 0, 0, .7),
                 0 1px 0 rgba(234, 207, 154, .14);
 }
+/* THE COLLARS. Both live in ::after rather than one per pseudo-element,
+   because ::before paints BENEATH the reagent span and the left collar would
+   disappear under the fluid as soon as the tube started filling. Two
+   background layers, pinned left and right, with the block extending past the
+   tube on all sides so the brass wraps its ends. */
 .tpl-steampunk .poll-opt-bar::after {
     content: "";
     position: absolute;
-    left: 4px; right: 4px; top: 1px;
-    height: 3px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(255, 250, 235, .3) 18%,
-                                rgba(255, 250, 235, .16) 62%, transparent);
+    top: -3px; bottom: -3px; left: -6px; right: -6px;
     pointer-events: none;
+    border-radius: 2px;
+    background:
+        linear-gradient(180deg, #f2e0bb, var(--brass) 38%, var(--brass-dark) 72%, #4a3717) left center / 9px 100% no-repeat,
+        linear-gradient(180deg, #f2e0bb, var(--brass) 38%, var(--brass-dark) 72%, #4a3717) right center / 9px 100% no-repeat;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6));
 }
-/* The liquid: lit from above, with a hot leading edge and a glow that spills
-   onto the glass. Rounded at both ends so it reads as a column of fluid rather
-   than a filled rectangle. */
+/* THE REAGENT. The vertical gradient is doing the real work: dark at both
+   rims, brightest just above the middle. That is how a cylinder of lit fluid
+   actually reads — an even fill looks like a painted bar, which is what this
+   was before. The outer glow spills onto the glass; the inner one keeps the
+   fluid looking lit from within rather than merely coloured. */
 .tpl-steampunk .poll-opt-bar > span {
-    border-radius: 999px;
-    background: linear-gradient(180deg, #ffe6a8 0%, var(--brass-lit) 26%,
-                                #c8862a 68%, #7d5210 100%);
-    box-shadow: 0 0 7px rgba(234, 207, 154, .7),
-                inset 0 1px 0 rgba(255, 250, 235, .65);
+    border-radius: 2px;
+    background: linear-gradient(180deg,
+                #6d8a17 0%,
+                var(--vial) 16%,
+                var(--vial-core) 40%,
+                var(--vial) 66%,
+                #5f7a12 100%);
+    box-shadow: 0 0 9px rgba(184, 212, 58, .8),
+                inset 0 0 6px rgba(230, 243, 154, .55);
 }
-/* At the threshold the fluid turns: verdigris, the theme's one cool tone, so a
-   full option is legible at a glance and not just "more brass". */
+/* Past the threshold the reagent runs hot — the same orange that marks a poll
+   as pending elsewhere, so "at pressure" is legible at a glance and not just
+   "more green". */
 .tpl-steampunk .poll-opt-bar.is-full > span {
-    background: linear-gradient(180deg, #9fe6d6 0%, var(--verdigris) 30%, #2b5c54 100%);
-    box-shadow: 0 0 8px rgba(63, 131, 120, .85),
-                inset 0 1px 0 rgba(220, 255, 248, .6);
+    background: linear-gradient(180deg,
+                #a85a0e 0%,
+                var(--glow) 18%,
+                #ffd08a 42%,
+                var(--glow) 68%,
+                #97500b 100%);
+    box-shadow: 0 0 10px rgba(240, 149, 47, .85),
+                inset 0 0 6px rgba(255, 216, 160, .6);
 }
 
 /* ---- Timeline: the pressure log -------------------------------------------- */
@@ -493,11 +516,11 @@ body.tpl-steampunk {
    value has to be replaced rather than tinted. */
 .tpl-steampunk .tl-game.tl-poll {
     background: rgba(0, 0, 0, .55);
-    color: var(--verdigris);
-    border: 1px dashed var(--verdigris);
+    color: var(--glow);
+    border: 1px dashed var(--glow);
     box-shadow: none;
 }
-.tpl-steampunk .tl-game.tl-poll .tl-sub { color: rgba(63, 131, 120, .85); }
+.tpl-steampunk .tl-game.tl-poll .tl-sub { color: rgba(240, 149, 47, .85); }
 
 /* ---- Chrome ---------------------------------------------------------------- */
 .tpl-steampunk .topbar {
