@@ -94,6 +94,8 @@ return [
     'opt_antibot_delay_form_note'   => 'Rejects a submission that comes back faster than this many seconds after the form (add/edit game, sign up, poll, comment, message, registration) was rendered. 0 disables the check. Logged-in visitors are exempt.',
     'opt_antibot_delay_click'       => 'Minimum time for quick actions (s)',
     'opt_antibot_delay_click_note'  => 'The same idea for single-click actions: deletions, voting, logging in. 0 disables the check. Logged-in visitors are exempt.',
+    'opt_antibot_honeypot'          => 'Hidden trap field',
+    'opt_antibot_honeypot_note'     => 'Adds an invisible "Website" field to those same forms. A real visitor never fills it in — a bot often does. Independent of the delays above; logged-in visitors are exempt.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

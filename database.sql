@@ -125,6 +125,10 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- disables the check for that bucket. Ignored for logged-in users.
     ('antibot_delay_form',           '2'),
     ('antibot_delay_click',          '1'),
+    -- antibot_honeypot: 0/1, an invisible "Website" field on the same forms —
+    -- a real visitor never fills it in, a naive bot often does. Independent
+    -- of the two delays above; also ignored for logged-in users.
+    ('antibot_honeypot',             '1'),
     ('timezone',                     'Europe/Warsaw'),
     ('overnight_grace_hours',        '1'),
     -- allow_start_outside_hours: 1 = a game/poll may start at any time (current

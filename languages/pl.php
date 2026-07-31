@@ -86,6 +86,8 @@ return [
     'opt_antibot_delay_form_note'   => 'Odrzuca zgłoszenie, jeśli formularz (dodawanie/edycja gry, zapis, ankieta, komentarz, wiadomość, rejestracja) wrócił szybciej niż podana liczba sekund od wyświetlenia. 0 wyłącza tę kontrolę. Nie dotyczy zalogowanych.',
     'opt_antibot_delay_click'       => 'Minimalny czas dla prostych akcji (s)',
     'opt_antibot_delay_click_note'  => 'To samo, ale dla akcji jednego kliknięcia: usuwanie, głosowanie, logowanie. 0 wyłącza tę kontrolę. Nie dotyczy zalogowanych.',
+    'opt_antibot_honeypot'          => 'Ukryte pole-pułapka',
+    'opt_antibot_honeypot_note'     => 'Dodaje niewidoczne pole „Website” do tych samych formularzy. Prawdziwy odwiedzający nigdy go nie wypełni — bot często tak. Niezależne od powyższych opóźnień; nie dotyczy zalogowanych.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',

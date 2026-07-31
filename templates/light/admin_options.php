@@ -96,6 +96,13 @@ $toggle = function($key) {
                    value="<?= (int)opt('antibot_delay_click') ?>">
             <p class="field-note"><?= e(t('opt_antibot_delay_click_note')) ?></p>
         </div>
+        <div class="field field-check">
+            <label>
+                <input type="checkbox" name="antibot_honeypot" value="1" <?= opt_bool('antibot_honeypot') ? 'checked' : '' ?>>
+                <?= e(t('opt_antibot_honeypot')) ?>
+            </label>
+            <p class="field-note"><?= e(t('opt_antibot_honeypot_note')) ?></p>
+        </div>
         <?php
         ?>
         <?php // The site's clock. Event times and poll deadlines are wall-clock
