@@ -1,0 +1,483 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  steampunk — the evening's games as a boiler room of pressure vessels.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a later edit doesn't sand off the point:
+ *
+ *  LAYOUT IS CLASSIC'S, deliberately — this theme was asked for on that
+ *  footprint. The card is classic's two-panel split: a narrow instrument
+ *  column beside a wider crew plate that overlaps it, in a wrapping row of
+ *  550px cards. The structure and the class names are re-used rather than
+ *  reinvented; only the material changes. If you're comparing the two files,
+ *  the positioning rules should look familiar on purpose.
+ *
+ *  MATERIALS are oiled walnut, patinated brass and oxidised copper. The
+ *  ground is warm dark brown rather than the near-black a dark theme reaches
+ *  for by default, and the contrast comes from VERDIGRIS — the blue-green of
+ *  weathered copper — rather than from a second warm tone, which would just
+ *  make everything brass-on-brass.
+ *
+ *  SIGNATURE: the pressure gauge. Every crew plate carries a working brass
+ *  gauge whose needle points at how full the game is, swept across the dial in
+ *  img/gauge.svg. The angle is computed in PHP and set inline, because only
+ *  the card knows the counts — a gauge that always read the same would be a
+ *  picture of an instrument rather than an instrument. That, plus the rivets,
+ *  is where this theme spends its boldness; everything else is quiet metal.
+ *
+ *  INTRICACY, without the noise: the ornament here is repetition of a few
+ *  honest details — rivet heads, banded plate edging, a hairline of specular
+ *  brass on every raised edge — rather than a different flourish everywhere.
+ *  Resist adding a fourth kind of decoration; a boiler room is busy because it
+ *  has many of the same fittings, not many different ones.
+ *
+ *  ASSETS: three hand-written SVGs in ../img/. Vector so they stay crisp as
+ *  border-image stretches them, text so they diff like code. NO WEB FONTS,
+ *  matching the rest of the app — this site asks visitors for GDPR consent, so
+ *  quietly adding a third-party font request isn't a call to make on the
+ *  admin's behalf.
+ *
+ *  Everything is scoped to .tpl-steampunk (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-steampunk {
+    /* ---- Materials ------------------------------------------------------- */
+    --soot:       #1b1512;   /* the boiler room: warm dark, never neutral black */
+    --walnut:     #2a201a;   /* oiled casing */
+    --walnut-up:  #3a2c23;   /* a raised panel */
+    --brass:      #b08d57;   /* patinated brass: the working metal */
+    --brass-lit:  #eacf9a;   /* polished highlight and lettering */
+    --brass-dark: #6b5228;   /* the shadowed side of every fitting */
+    --verdigris:  #3f8378;   /* oxidised copper: the one cool contrast */
+    --parchment:  #ece0c6;   /* label card / body text */
+    --ember:      #b8431c;   /* firebox glow: danger and the red line */
+
+    /* Slab serif for lettering — Victorian industrial signage was slab, and it
+       sets this theme apart from the other five at a glance. Rockwell ships
+       with Office, DIN-era slabs are the fallbacks; nothing is fetched. */
+    --font-sk:   Rockwell, 'Rockwell Nova', 'Bookman Old Style', 'Roboto Slab',
+                 Georgia, 'Times New Roman', serif;
+
+    /* Remap the base variables so untouched rules still land somewhere sane. */
+    --bg:           var(--soot);
+    --surface:      var(--walnut-up);
+    --surface-2:    var(--walnut);
+    --border:       rgba(176, 141, 87, .34);
+    --text:         var(--parchment);
+    --text-muted:   #a9977a;
+    --primary:      var(--brass);
+    --primary-text: #241a10;
+    --ok:           var(--verdigris);
+    --error:        var(--ember);
+    --radius:       2px;
+    --maxw:         1400px;
+}
+
+/* ---- The boiler room ------------------------------------------------------
+   Two enormous cogs, very faint, fixed behind the page — the machinery the
+   whole thing is bolted to. Faint enough to read as depth rather than as a
+   pattern you're meant to look at. */
+body.tpl-steampunk {
+    background-color: var(--soot);
+    background-image:
+        url("../img/cog.svg"),
+        url("../img/cog.svg"),
+        radial-gradient(ellipse at 50% 0%, rgba(176, 141, 87, .09), transparent 55%);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 640px 640px, 420px 420px, 100% 100%;
+    background-position: -180px 8%, calc(100% + 130px) 62%, top center;
+    background-attachment: fixed, fixed, fixed;
+    color: var(--parchment);
+    font-family: var(--font-sk);
+}
+.tpl-steampunk .content { max-width: var(--maxw); }
+/* The cogs are decoration behind everything; without this they can sit over a
+   panel's own background on some stacking orders. */
+.tpl-steampunk .content, .tpl-steampunk .topbar { position: relative; z-index: 1; }
+
+/* ---- Lettering ------------------------------------------------------------ */
+.tpl-steampunk h1, .tpl-steampunk h2, .tpl-steampunk h3,
+.tpl-steampunk .btn, .tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
+    font-family: var(--font-sk);
+}
+.tpl-steampunk .event-header { text-align: center; }
+.tpl-steampunk .event-header h1 {
+    color: var(--brass-lit);
+    font-weight: 700;
+    font-size: 2.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    /* Struck-metal lettering: a dark edge below, a light one above. */
+    text-shadow: 0 1px 0 #100b08, 0 -1px 0 rgba(234, 207, 154, .3);
+}
+.tpl-steampunk .event-date,
+.tpl-steampunk .event-hours {
+    text-align: center;
+    color: var(--text-muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin: 0.1rem 0 0;
+}
+
+/* ---- Day tabs: lever positions -------------------------------------------- */
+.tpl-steampunk .day-tabs { justify-content: center; border-bottom: 2px solid var(--brass-dark); gap: 0.35rem; }
+.tpl-steampunk .day-tab {
+    color: var(--text-muted);
+    background: linear-gradient(var(--walnut-up), var(--walnut));
+    border: 1px solid var(--brass-dark);
+    border-bottom: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+.tpl-steampunk .day-tab:hover { color: var(--brass-lit); }
+.tpl-steampunk .day-tab-active,
+.tpl-steampunk .day-tab-active:hover {
+    color: #241a10;
+    background: linear-gradient(var(--brass-lit), var(--brass));
+    border-color: var(--brass-dark);
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .55);
+}
+.tpl-steampunk .day-tab-date, .tpl-steampunk .day-tab-hours { color: inherit; opacity: 0.8; }
+
+/* ---- Tables: banks of machinery ------------------------------------------- */
+.tpl-steampunk .table-block {
+    background: linear-gradient(rgba(176, 141, 87, .06), transparent 40%), rgba(42, 32, 26, .9);
+    border: 1px solid var(--brass-dark);
+    border-radius: 3px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(234, 207, 154, .12);
+}
+.tpl-steampunk .table-title {
+    color: var(--brass-lit);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--brass-dark);
+    padding-bottom: 0.4rem;
+}
+
+/* ---- Layout: classic's, unchanged ----------------------------------------- */
+.tpl-steampunk .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; }
+.tpl-steampunk .game-card {
+    display: flex; align-items: flex-start; gap: 0;
+    flex: 0 0 auto;
+    background: transparent; border: none; padding: 0; box-shadow: none;
+}
+
+/* ---- The instrument column ------------------------------------------------ */
+.tpl-steampunk .gc-info {
+    width: 235px; flex: 0 0 235px;
+    background: linear-gradient(var(--walnut-up), var(--walnut));
+    color: var(--parchment); text-align: center;
+    border-radius: 3px; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(234, 207, 154, .16);
+    padding-bottom: 0.6rem;
+    position: relative; z-index: 1;
+    border: 1px solid var(--brass-dark);
+}
+.tpl-steampunk .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-steampunk .gc-tab {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 2px; text-decoration: none;
+    color: #241a10;
+    background: linear-gradient(var(--brass-lit), var(--brass));
+    border: 1px solid var(--brass-dark);
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .5);
+}
+.tpl-steampunk .gc-tab:hover { filter: brightness(1.1); text-decoration: none; }
+.tpl-steampunk .gc-tab-del { background: linear-gradient(#d9633a, var(--ember)); color: #fff5ef; }
+
+.tpl-steampunk .gc-thumb { padding: 0.5rem 0 0.2rem; }
+.tpl-steampunk .gc-thumb img {
+    max-width: 150px; max-height: 190px;
+    border: 3px solid var(--brass-dark);
+    box-shadow: 0 0 0 1px #100b08;
+}
+/* The nameplate: an engraved brass strip screwed to the casing. */
+.tpl-steampunk .gc-name {
+    color: #241a10;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0.5rem 0.5rem;
+    padding: 0.3rem 0.5rem;
+    background: linear-gradient(var(--brass-lit), var(--brass) 60%, var(--brass-dark));
+    border: 1px solid var(--brass-dark);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .6), 0 1px 3px rgba(0, 0, 0, .5);
+    text-shadow: 0 1px 0 rgba(255, 245, 220, .35);
+}
+.tpl-steampunk .gc-name a { color: #241a10; text-decoration: none; border-bottom: 1px dotted rgba(36, 26, 16, .5); }
+.tpl-steampunk .gc-name a:hover { border-bottom-style: solid; }
+
+.tpl-steampunk .gc-band { padding: 0.3rem 0.5rem; font-size: 0.85rem; color: var(--parchment); }
+.tpl-steampunk .gc-band strong { color: var(--brass-lit); font-weight: 700; }
+.tpl-steampunk .gc-band + .gc-band { border-top: 1px solid rgba(176, 141, 87, .16); }
+.tpl-steampunk .gc-row { background: rgba(0, 0, 0, .22); }
+.tpl-steampunk .gc-waga { background: linear-gradient(var(--brass), var(--brass-dark)); color: #241a10; font-weight: 700; }
+.tpl-steampunk .gc-waga strong { color: #241a10; }
+/* The weight scale keeps its colours — those encode complexity and are shared
+   across every theme; only the shading changes. */
+.tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); color: var(--verdigris); font-weight: 700; }
+.tpl-steampunk .gc-comment { background: rgba(0, 0, 0, .4); font-size: 0.8rem; line-height: 1.35; }
+.tpl-steampunk .gc-comment .c-name { color: var(--brass-lit); }
+
+/* ---- The crew plate: riveted brass ----------------------------------------
+   border-image puts the plate's banded, rivet-headed edging on all four sides
+   from one 9-slice asset — corners at natural size, edges stretched. */
+.tpl-steampunk .gc-players {
+    background: linear-gradient(rgba(234, 207, 154, .1), transparent 30%), var(--walnut-up);
+    border: 14px solid transparent;
+    border-image: url("../img/plate.svg") 30 / 14px stretch;
+    padding: 0.6rem 0.6rem 0.6rem 1.2rem;
+    margin-left: -0.6rem; margin-top: 1.6rem;
+    min-width: 300px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .45);
+}
+
+/* ---- SIGNATURE: the pressure gauge ----------------------------------------
+   The dial is the SVG; the needle is this element, rotated by the angle the
+   card computed from the crew count. transform-origin sits at the needle's
+   pivot, not its centre, so it swings like a needle rather than spinning like
+   a propeller. */
+.tpl-steampunk .sk-gauge {
+    position: relative;
+    width: 88px; height: 88px;
+    margin: 0 auto 0.6rem;
+    background: url("../img/gauge.svg") center / contain no-repeat;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5));
+}
+.tpl-steampunk .sk-needle {
+    position: absolute;
+    left: 50%; bottom: 50%;
+    width: 3px; height: 32px;
+    margin-left: -1.5px;
+    background: linear-gradient(#3a2b12, var(--ember) 65%, #d9633a);
+    border-radius: 2px 2px 0 0;
+    transform-origin: 50% 100%;   /* pivot at the hub, not the middle */
+    box-shadow: 0 0 3px rgba(0, 0, 0, .6);
+}
+.tpl-steampunk .sk-gauge-read {
+    position: absolute;
+    left: 0; right: 0; bottom: 12%;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3a2b12;
+    letter-spacing: 0.04em;
+}
+
+/* ---- Berths ---------------------------------------------------------------
+   The intricacy is repetition: every berth carries the same rivet head, so the
+   plate reads as fabricated rather than as a list with an icon. */
+.tpl-steampunk .gc-slot {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(rgba(255, 255, 255, .05), transparent), var(--walnut);
+    border: 1px solid var(--brass-dark);
+    border-radius: 2px;
+    padding: 0.3rem 0.5rem; margin-bottom: 0.35rem;
+    font-size: 0.85rem; color: var(--parchment);
+    box-shadow: inset 0 1px 0 rgba(234, 207, 154, .12);
+}
+.tpl-steampunk .gc-slot strong { color: var(--brass-lit); }
+.tpl-steampunk .sk-rivet {
+    flex: 0 0 auto;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #f2e0bb, var(--brass) 55%, #5d4620);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .6);
+}
+/* An empty berth is stated rather than implied — its rivet is unpolished. */
+.tpl-steampunk .sk-berth-free { opacity: 0.62; }
+.tpl-steampunk .sk-berth-free .sk-rivet {
+    background: radial-gradient(circle at 34% 30%, #6f6250, #3d362c 60%, #241f19);
+}
+.tpl-steampunk .gc-knows { color: var(--verdigris); font-size: 0.74rem; }
+.tpl-steampunk .gc-reserve { opacity: 0.8; font-style: italic; }
+.tpl-steampunk .reserve-tag { color: var(--ember); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
+.tpl-steampunk .gc-more-slots { font-size: 0.76rem; color: var(--text-muted); font-style: italic; margin: 0.1rem 0 0.4rem 0.2rem; }
+.tpl-steampunk .p-signedby { color: var(--text-muted); font-size: 0.76rem; }
+.tpl-steampunk .msg-icon { color: var(--brass-lit); }
+
+/* The resign tag: a small stamped ticket. */
+.tpl-steampunk .gc-resign {
+    margin-left: auto;
+    background: linear-gradient(#d9633a, var(--ember));
+    color: #fff5ef;
+    font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 0.2rem 0.45rem; border-radius: 2px; text-decoration: none; white-space: nowrap;
+    border: 1px solid #7d2c11;
+}
+.tpl-steampunk .gc-resign:hover { filter: brightness(1.12); text-decoration: none; }
+
+/* The signup bar: a brass lever across the plate. */
+.tpl-steampunk .gc-signup {
+    display: block; text-align: center;
+    background: linear-gradient(var(--brass-lit), var(--brass) 55%, var(--brass-dark));
+    color: #241a10;
+    border: 1px solid var(--brass-dark);
+    border-radius: 2px; padding: 0.4rem 0.7rem; margin-bottom: 0.35rem;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .6), 0 1px 3px rgba(0, 0, 0, .5);
+}
+.tpl-steampunk .gc-signup:hover { filter: brightness(1.08); text-decoration: none; }
+
+/* ---- Controls -------------------------------------------------------------- */
+.tpl-steampunk .btn {
+    background: linear-gradient(var(--walnut-up), var(--walnut));
+    border: 1px solid var(--brass-dark);
+    color: var(--parchment);
+    letter-spacing: 0.06em;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(234, 207, 154, .14);
+}
+.tpl-steampunk .btn:hover { background: linear-gradient(#463629, var(--walnut-up)); color: var(--brass-lit); }
+.tpl-steampunk .btn-primary {
+    background: linear-gradient(var(--brass-lit), var(--brass) 55%, var(--brass-dark));
+    border-color: var(--brass-dark);
+    color: #241a10;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .6);
+}
+.tpl-steampunk .btn-primary:hover { filter: brightness(1.08); }
+.tpl-steampunk .btn-danger,
+.tpl-steampunk .btn-danger:hover { background: linear-gradient(#d9633a, var(--ember)); border-color: #7d2c11; color: #fff5ef; }
+
+/* ---- Forms ----------------------------------------------------------------- */
+.tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
+    background: rgba(0, 0, 0, .35);
+    border: 1px solid var(--brass-dark);
+    color: var(--parchment);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+}
+.tpl-steampunk input:focus, .tpl-steampunk select:focus, .tpl-steampunk textarea:focus {
+    border-color: var(--brass);
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), 0 0 0 2px rgba(176, 141, 87, .3);
+}
+.tpl-steampunk label { color: var(--text-muted); letter-spacing: 0.04em; }
+.tpl-steampunk .field-note { color: var(--text-muted); opacity: 0.9; }
+
+/* ---- Discussion ------------------------------------------------------------ */
+.tpl-steampunk .gc-info .discussion { border-top: none; margin: 0; padding: 0; text-align: center; }
+.tpl-steampunk .comment-list { list-style: none; gap: 0; margin: 0; padding: 0; text-align: left; }
+.tpl-steampunk .comment-list li {
+    background: rgba(0, 0, 0, .42);
+    border: none; border-radius: 0;
+    border-top: 1px solid rgba(176, 141, 87, .14);
+    color: var(--parchment);
+    font-size: 0.8rem;
+}
+.tpl-steampunk .comment-add { margin-top: 0.5rem; padding-bottom: 0.5rem; }
+.tpl-steampunk .comment-add summary {
+    display: inline-block; cursor: pointer; list-style: none;
+    background: linear-gradient(var(--brass-lit), var(--brass));
+    color: #241a10;
+    border: 1px solid var(--brass-dark);
+    border-radius: 2px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.tpl-steampunk .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-steampunk .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
+
+/* ---- Polls: pressure not yet raised ---------------------------------------- */
+.tpl-steampunk .poll-card {
+    background: linear-gradient(var(--walnut-up), var(--walnut));
+    border: 1px solid var(--brass-dark);
+    border-left: 4px solid var(--verdigris);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .5);
+}
+.tpl-steampunk .poll-tag {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--verdigris);
+    color: var(--verdigris);
+    letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.7rem;
+    border-radius: 2px;
+}
+.tpl-steampunk .poll-deadline { color: var(--text-muted); }
+.tpl-steampunk .poll-deadline strong { color: var(--brass-lit); }
+.tpl-steampunk .poll-option { background: rgba(0, 0, 0, .3); border: 1px solid rgba(176, 141, 87, .2); border-radius: 2px; }
+.tpl-steampunk .poll-opt-name, .tpl-steampunk a.poll-opt-name { color: var(--brass-lit); }
+.tpl-steampunk .poll-opt-votes { color: var(--text-muted); }
+.tpl-steampunk .poll-opt-bar { background: rgba(0, 0, 0, .5); }
+.tpl-steampunk .poll-opt-bar > span { background: linear-gradient(var(--brass-lit), var(--brass)); }
+.tpl-steampunk .poll-opt-bar.is-full > span { background: var(--verdigris); }
+
+/* ---- Timeline: the pressure log -------------------------------------------- */
+.tpl-steampunk .timeline { background: rgba(42, 32, 26, .85); border: 1px solid var(--brass-dark); border-radius: 3px; }
+.tpl-steampunk .tl-scroll { background: transparent; border-color: var(--brass-dark); }
+.tpl-steampunk .timeline-title { color: var(--brass-lit); letter-spacing: 0.16em; text-transform: uppercase; }
+.tpl-steampunk .tl-hours { border-bottom-color: var(--brass-dark); }
+.tpl-steampunk .tl-hour { color: var(--text-muted); }
+.tpl-steampunk .tl-hour::before { border-left-color: rgba(176, 141, 87, .35); }
+.tpl-steampunk .tl-table-no { background: rgba(0, 0, 0, .4); color: var(--text-muted); }
+.tpl-steampunk .tl-game {
+    background: linear-gradient(var(--brass-lit), var(--brass) 55%, var(--brass-dark));
+    color: #241a10;
+    border: 1px solid var(--brass-dark);
+    border-right: 1px solid var(--brass-dark);
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .5);
+}
+.tpl-steampunk .tl-game:hover { filter: brightness(1.08); }
+.tpl-steampunk .tl-count-full { color: #6b1f08; }
+/* A poll has no pressure raised yet: the base sheet paints this near-white
+   (#eef3fc), which on this ground is the one bright patch on the page, so the
+   value has to be replaced rather than tinted. */
+.tpl-steampunk .tl-game.tl-poll {
+    background: rgba(0, 0, 0, .55);
+    color: var(--verdigris);
+    border: 1px dashed var(--verdigris);
+    box-shadow: none;
+}
+.tpl-steampunk .tl-game.tl-poll .tl-sub { color: rgba(63, 131, 120, .85); }
+
+/* ---- Chrome ---------------------------------------------------------------- */
+.tpl-steampunk .topbar {
+    background: linear-gradient(var(--walnut-up), #170f0b);
+    border-bottom: 2px solid var(--brass-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+}
+.tpl-steampunk .topbar a, .tpl-steampunk .brand { color: var(--brass-lit); }
+.tpl-steampunk .brand { letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+.tpl-steampunk .mailing-box {
+    background: linear-gradient(var(--walnut-up), var(--walnut));
+    border: 1px solid var(--brass-dark);
+    border-radius: 3px;
+}
+.tpl-steampunk .game-archived .gc-info { opacity: 0.55; }
+.tpl-steampunk .game-archived .gc-name { text-decoration: line-through; }
+
+/* ---- Quality floor --------------------------------------------------------- */
+.tpl-steampunk a:focus-visible,
+.tpl-steampunk button:focus-visible,
+.tpl-steampunk input:focus-visible,
+.tpl-steampunk select:focus-visible,
+.tpl-steampunk textarea:focus-visible,
+.tpl-steampunk summary:focus-visible {
+    outline: 2px solid var(--brass-lit);
+    outline-offset: 2px;
+}
+
+/* Classic's own breakpoints, so the footprint really is the same one. */
+@media (max-width: 700px) {
+    .tpl-steampunk .game-card { flex-direction: column; width: 100%; }
+    .tpl-steampunk .gc-players {
+        margin-left: 0; margin-top: 0.5rem;
+        width: 100%; box-sizing: border-box; min-width: 0;
+    }
+    .tpl-steampunk .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
+    .tpl-steampunk .event-header h1 { font-size: 1.6rem; }
+}
+@media (min-width: 701px) {
+    .tpl-steampunk .game-list > article { width: 550px; }
+}

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- 9-slice riveted brass plate edging for CSS border-image (slice 30).
+       One corner is drawn and mirrored four ways so the rivets can never fall
+       out of alignment; the middle strips are plain banding that stretches. -->
+  <defs>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#d9bd8a"/>
+      <stop offset="40%"  stop-color="#b08d57"/>
+      <stop offset="100%" stop-color="#7a5f2c"/>
+    </linearGradient>
+    <radialGradient id="rivet" cx="35%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#f2e0bb"/>
+      <stop offset="55%"  stop-color="#b08d57"/>
+      <stop offset="100%" stop-color="#5d4620"/>
+    </radialGradient>
+    <g id="cnr">
+      <path d="M0 0 H30 V8 H8 V30 H0 Z" fill="url(#band)"/>
+      <path d="M0 0 H30 V8 H8 V30 H0 Z" fill="none" stroke="#4a3717" stroke-width="1"/>
+      <circle cx="15" cy="15" r="4.2" fill="url(#rivet)"/>
+      <circle cx="15" cy="15" r="4.2" fill="none" stroke="#4a3717" stroke-width=".8"/>
+    </g>
+  </defs>
+  <use href="#cnr"/>
+  <use href="#cnr" transform="translate(120,0) scale(-1,1)"/>
+  <use href="#cnr" transform="translate(0,120) scale(1,-1)"/>
+  <use href="#cnr" transform="translate(120,120) scale(-1,-1)"/>
+  <g fill="url(#band)" stroke="#4a3717" stroke-width="1">
+    <rect x="30" y="0"   width="60" height="8"/>
+    <rect x="30" y="112" width="60" height="8"/>
+    <rect x="0"  y="30"  width="8"  height="60"/>
+    <rect x="112" y="30" width="8"  height="60"/>
+  </g>
+</svg>

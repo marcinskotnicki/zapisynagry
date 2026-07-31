@@ -175,16 +175,16 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Six themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard**, **elvish** and **space**. They're discovered by
-directory glob, so creating a folder registers one — there is no list to
-update.
+Seven themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard**, **elvish**, **space** and **steampunk**. They're
+discovered by directory glob, so creating a folder registers one — there is no
+list to update.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a
-stylesheet alone; `classic/`, `elvish/` and `space/` each override one template
-plus their CSS; `elvish/` and `space/` also ship hand-written SVGs in their own
-`img/`.
+stylesheet alone; `classic/`, `elvish/`, `space/` and `steampunk/` each
+override `game_card.php` plus their CSS; the last three also ship hand-written
+SVGs in their own `img/`.
 
 Non-base stylesheets `@import` light's, then override. Only the active theme's
 sheet is ever linked. **Scope every rule** to the theme's `.tpl-<name>` class —
@@ -197,14 +197,23 @@ using `$__tpl_*` locals internally to avoid collisions.
 **Prefer restyling shared markup over forking a template**, and when you do
 fork, pin it. Classic forked `game_card.php` with nothing tying it to light's,
 and its comment button drifted out of sync for months before anyone noticed.
-Elvish and space fork the same file — deliberately, because both render a
-*free* seat as an object (a bud on a vine; a numbered open slot) and light's
-card has no element for a seat nobody occupies. Both are pinned:
-`tests/test_elvish.php` and `tests/test_space.php` assert every control light's
-card offers is still present in their fork, so the same silent loss can't
-recur. If you fork a template, write that test in the same commit — and verify
-it actually fails when a control is removed, or it is not really pinning
+Elvish, space and steampunk fork the same file deliberately: each renders a
+*free* seat as an object (a bud on a vine, a numbered open slot, an unpolished
+rivet) and light's card has no element for a seat nobody occupies; steampunk
+additionally needs classic's two-panel split and a needle element for its
+gauge. All three are pinned — `tests/test_elvish.php`, `test_space.php` and
+`test_steampunk.php` assert every control light's card offers is still present
+in their fork. If you fork a template, write that test in the same commit, and
+verify it actually fails when a control is removed, or it is not really pinning
 anything.
+
+**That drift is not hypothetical.** Classic's fork lost its `antibot_field()`
+when the anti-bot work only touched `templates/light/`, so commenting from the
+classic theme was rejected outright (the check fails closed on a missing
+timestamp) until it was spotted. Per-theme parity tests catch a fork drifting
+from light's *controls*; `tests/test_antibot.php` now also scans **every**
+template for a form posting to a guarded endpoint without the field, which
+catches the class rather than the instance.
 
 **CSS parsers do not catch a bad colour.** `css-tree` reads `#e8destroy` as a
 bare identifier, not an error, so a typo'd hex is invisible to validation. Each

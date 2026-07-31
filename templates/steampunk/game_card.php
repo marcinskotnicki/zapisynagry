@@ -1,28 +1,33 @@
 <?php
 /* =============================================================================
- *  templates/classic/game_card.php — the CLASSIC game card. Presentation only.
+ *  templates/steampunk/game_card.php — one game, as a pressure vessel.
  * -----------------------------------------------------------------------------
- *  Overrides light's game_card for the "classic" theme (the old app's look):
- *    LEFT  (.gc-info)    — dark rounded card: action tabs (delete/edit), the
- *                          thumbnail, name, red "waga" band, centred info rows
- *                          (players / start / brings / language), the green
- *                          rules label, comment + discussion as black bands,
- *                          and the "add comment" pill (.comment-add, shared
- *                          with the poll card so the two match).
- *    RIGHT (.gc-players) — light grey panel of NUMBERED SLOTS (1..max_players):
- *                          a filled slot shows "Gracz N: name (rules note)" with
- *                          a red resign button; an empty slot is a dark
- *                          "Zapisz się" button. Reserves are listed after.
+ *  LAYOUT is classic's on purpose (this theme was asked for on that footprint):
+ *  a narrow instrument column (.gc-info) beside a wider crew plate
+ *  (.gc-players) that overlaps it. Those class names are classic's, and the
+ *  base positioning rules they carry are re-used rather than reinvented — only
+ *  the material changes.
  *
- *  Same data contract and permission rules as light's card:
- *    RENDER VARS: $g (game row incl. ['players'] and ['comments']), $readonly.
- *    - edit/delete tabs + per-player resign: verify_can_show_buttons(owner id).
- *    - message envelopes: messaging_allowed() AND not read-only.
- *    - every slot links to the same sign_up.php; slot numbers are cosmetic.
- *  Styling lives in templates/classic/css/style.css (the gc-* classes).
+ *  WHY IT FORKS: two reasons, both structural rather than decorative.
+ *    1. Classic's two-panel split doesn't exist in light's card at all, so the
+ *       requested layout is impossible without this file.
+ *    2. THE GAUGE. The players panel carries a working pressure gauge whose
+ *       needle points at how full the game is. It needs a needle element and a
+ *       computed angle, which no amount of CSS on light's markup can invent.
+ *       It reads live data — an ornament that always showed the same thing
+ *       would just be a picture of a gauge.
+ *
+ *  THE DRIFT RISK is not hypothetical: classic forked this same file and its
+ *  comment form silently lost the anti-bot field, so commenting from that
+ *  theme was rejected outright until it was spotted. tests/test_steampunk.php
+ *  pins this file to light's on every control, and tests/test_antibot.php now
+ *  scans EVERY theme for a guarded form missing its field.
+ *
+ *  RENDER VARS: identical to light's — $g (game row + ['players'], ['comments'])
+ *  and $readonly.
  * ============================================================================= */
 ?>
-<?php if ((int)$g['is_archived'] === 1): // soft-deleted -> dimmed card + bring-back ?>
+<?php if ((int)$g['is_archived'] === 1): // soft-deleted -> a decommissioned rig ?>
     <article class="game-card game-archived" id="game-<?= (int)$g['id'] ?>">
         <div class="gc-info">
             <h3 class="gc-name"><?= e($g['name']) ?></h3>
@@ -30,7 +35,7 @@
             <?php if (!$readonly): ?>
                 <div class="gc-band">
                     <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>"><?= e(t('bringback_button')) ?></a>
-                    <?php if (is_admin()): // admins may remove the archived game for good ?>
+                    <?php if (is_admin()): ?>
                         <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('game_purge_button')) ?></a>
                     <?php endif; ?>
                 </div>
@@ -39,26 +44,28 @@
     </article>
 <?php else: ?>
     <?php
-    // Split players into confirmed (fill the numbered slots, in signup order)
-    // and reserves (listed after the slots). $g['players'] arrives ordered
-    // is_reserve ASC, id ASC, so both keep first-come order.
-    $confirmed = [];
-    $reserves  = [];
+    $bucket = weight_bucket($g['weight']);
+    $canMsg = !$readonly && messaging_allowed();
+    $crew = [];
+    $reserves = [];
     foreach ($g['players'] as $p) {
-        if ((int)$p['is_reserve'] === 0) { $confirmed[] = $p; } else { $reserves[] = $p; }
+        if ((int)$p['is_reserve'] === 1) { $reserves[] = $p; } else { $crew[] = $p; }
     }
-    $max      = (int)$g['max_players'];
-    $isFull   = count($confirmed) >= $max;
-    // SLOT CAP: some games allow 100+ players; rendering a button per free seat
-    // would flood the panel. Show at most 10 slots — but always keep at least
-    // one empty signup row visible while seats remain (so a full-looking list
-    // grows as people join). The hidden remainder is summarised in a note.
-    $shownSlots = min($max, max(10, count($confirmed) + 1));
-    $canMsg   = !$readonly && messaging_allowed();   // shared gate (guests allowed when toggled)
+    $max = (int)$g['max_players'];
+    // Slots shown: the full complement, but at least ten so a large game keeps
+    // a readable plate (classic uses the same rule).
+    $shownSlots = min($max, max(10, count($crew) + 1));
+
+    // THE GAUGE READING. The needle sweeps 180 degrees from lower-left to
+    // lower-right across the dial in img/gauge.svg, so 0 crew = -90deg and a
+    // full complement = +90deg. Computed here because only PHP knows the
+    // counts; CSS just rotates by whatever this says.
+    $fillPct   = $max > 0 ? min(1, count($crew) / $max) : 0;
+    $needleDeg = -90 + ($fillPct * 180);
     ?>
     <article class="game-card" id="game-<?= (int)$g['id'] ?>">
         <div class="gc-info">
-            <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): // the classic top tabs ?>
+            <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): ?>
                 <div class="gc-tabs">
                     <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
                     <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
@@ -76,16 +83,13 @@
                 <div class="gc-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></div>
             <?php endif; ?>
 
-            <?php $gLink = game_link($g); // BGG page, or the custom link (option-gated) ?>
+            <?php $gLink = game_link($g); ?>
             <h3 class="gc-name"><?php if ($gLink): ?><a href="<?= e($gLink) ?>" target="_blank" rel="noopener"><?= e($g['name']) ?></a><?php else: ?><?= e($g['name']) ?><?php endif; ?></h3>
 
-            <?php // Waga band, coloured by the 1..5 weight bucket (like the other
-                  // themes); Polish-style decimal comma to match the old look. ?>
-            <?php $bucket = weight_bucket($g['weight']); ?>
             <div class="gc-band gc-waga weight-<?= $bucket ?>"><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
-            <div class="gc-band gc-row"><?= e(t('cl_players')) ?>: <strong><?= count($confirmed) ?> / <?= $max ?></strong></div>
+            <div class="gc-band gc-row"><?= e(t('cl_players')) ?>: <strong><?= count($crew) ?> / <?= $max ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_start')) ?>: <strong><?= e($g['start_time']) ?></strong></div>
-            <?php if ((int)$g['length_minutes'] > 0): // the other themes already show this ?>
+            <?php if ((int)$g['length_minutes'] > 0): ?>
                 <div class="gc-band gc-row"><?= e(t('cl_length')) ?>: <strong><?= e(t('game_length_min', (int)$g['length_minutes'])) ?></strong></div>
             <?php endif; ?>
             <?php if (!empty($g['brings_name'])): ?>
@@ -100,7 +104,6 @@
                 <div class="gc-band gc-comment"><?= e(t('cl_comment')) ?>:<br><?= nl2br(e($g['comment'])) ?></div>
             <?php endif; ?>
 
-            <?php // Discussion thread + the "+ add comment" pill (native <details>). ?>
             <?php if (opt_bool('allow_discussions')): ?>
                 <div class="discussion">
                     <?php if (!empty($g['comments'])): ?>
@@ -111,8 +114,6 @@
                         </ul>
                     <?php endif; ?>
                     <?php if (!$readonly): ?>
-                        <?php // Same class (and so the same pill) as the poll card's
-                              // comment box — the theme's "+" comes from CSS. ?>
                         <details class="comment-add">
                             <summary><?= e(t('comment_add')) ?></summary>
                             <form method="post" action="add_comment.php">
@@ -129,52 +130,68 @@
             <?php endif; ?>
         </div>
 
-        <?php // Right panel: numbered slots 1..max, then reserves. ?>
+        <?php // ---- The crew plate: the gauge, then numbered berths ---- ?>
         <div class="gc-players">
+            <?php // THE GAUGE. The needle's angle is inline because it is data,
+                  // not styling — the stylesheet cannot know how full a game is. ?>
+            <div class="sk-gauge" role="img"
+                 aria-label="<?= e(t('cl_players')) ?>: <?= count($crew) ?> / <?= $max ?>">
+                <span class="sk-needle" style="transform: rotate(<?= (int)round($needleDeg) ?>deg)"></span>
+                <span class="sk-gauge-read"><?= count($crew) ?>/<?= $max ?></span>
+            </div>
+
             <?php for ($i = 0; $i < $shownSlots; $i++): ?>
-                <?php $p = $confirmed[$i] ?? null; ?>
-                <?php if ($p !== null): // filled slot ?>
-                    <div class="gc-slot">
-                        <span><?= e(t('player_n', $i + 1)) ?>: <strong><?= e($p['name']) ?></strong><?php if (is_admin() && !empty($p['user_id'])): // admin-only account-bound marker ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?>
-                            <?php // Same "signed up by X" note as the light theme (see there for the why).
-                            if (!empty($p['user_id']) && !empty($p['account_name'])
-                                && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
-                                <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
-                            <?php endif; ?>
-                            <?php $kn = knows_rules_label($p['knows_rules']); ?>
-                            <?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
-                        </span>
+                <?php $p = $crew[$i] ?? null; ?>
+                <?php if ($p !== null): ?>
+                    <div class="gc-slot sk-berth">
+                        <span class="sk-rivet" aria-hidden="true"></span>
+                        <strong><?= e($p['name']) ?></strong>
+                        <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?>
+                            <span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"><?= e(knows_rules_label($p['knows_rules'])) ?></span>
+                        <?php endif; ?>
+                        <?php if (is_admin() && !empty($p['user_id'])): ?>
+                            <span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span>
+                        <?php endif; ?>
                         <?php if ($canMsg && !empty($p['email'])): ?>
                             <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                         <?php endif; ?>
                         <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('resign')) ?></a>
+                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
+                        <?php endif; ?>
+                        <?php if (!empty($p['user_id']) && !empty($p['account_name'])
+                            && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
+                            <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
                         <?php endif; ?>
                     </div>
-                <?php elseif (!$readonly && can_signup()): // empty slot -> dark sign-up button ?>
-                    <a class="gc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>"><?= e(t('signup')) ?></a>
-                <?php else: // empty slot, but signups not possible -> plain empty row ?>
-                    <div class="gc-slot"><span class="muted"><?= e(t('player_n', $i + 1)) ?>: —</span></div>
+                <?php else: // an empty berth ?>
+                    <div class="gc-slot sk-berth sk-berth-free">
+                        <span class="sk-rivet" aria-hidden="true"></span>
+                        <span class="muted"><?= e(t('player_n', $i + 1)) ?></span>
+                    </div>
                 <?php endif; ?>
             <?php endfor; ?>
-            <?php if ($max > $shownSlots): // the summarised hidden free seats ?>
-                <p class="gc-more-slots"><?= e(t('cl_more_slots', $max - $shownSlots)) ?></p>
+
+            <?php if ($max > $shownSlots): ?>
+                <div class="gc-more-slots"><?= e(t('cl_more_slots', $max - $shownSlots)) ?></div>
             <?php endif; ?>
 
-            <?php foreach ($reserves as $p): // reserves listed under the slots ?>
-                <div class="gc-slot gc-reserve">
-                    <span><strong><?= e($p['name']) ?></strong> <?= e(t('reserve_tag')) ?></span>
+            <?php foreach ($reserves as $p): ?>
+                <div class="gc-slot gc-reserve sk-berth">
+                    <span class="sk-rivet" aria-hidden="true"></span>
+                    <strong><?= e($p['name']) ?></strong> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span>
                     <?php if ($canMsg && !empty($p['email'])): ?>
                         <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>
                     <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                        <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('resign')) ?></a>
+                        <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
 
-            <?php if (!$readonly && can_signup() && $isFull): // full -> offer the reserve list ?>
-                <a class="gc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>"><?= e(t('signup_reserve')) ?></a>
+            <?php if (!$readonly && can_signup()): ?>
+                <a class="gc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>">
+                    <?= count($crew) >= $max ? e(t('signup_reserve')) : e(t('signup')) ?>
+                </a>
             <?php endif; ?>
         </div>
     </article>

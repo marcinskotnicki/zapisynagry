@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="-100 -100 200 200">
+  <!-- A single gear, used very large and very faint behind the page as the
+       ambient layer. Sixteen teeth generated on a circle so the spacing is
+       exact rather than eyeballed. -->
+  <g fill="none" stroke="#b08d57" stroke-width="3" opacity=".9">
+    <circle r="62"/>
+    <circle r="46"/>
+    <circle r="17"/>
+    <g stroke-width="14">
+      <path d="M0 -62 V-78"/><path d="M23.7 -57.3 L29.8 -72.1"/>
+      <path d="M43.8 -43.8 L55.2 -55.2"/><path d="M57.3 -23.7 L72.1 -29.8"/>
+      <path d="M62 0 H78"/><path d="M57.3 23.7 L72.1 29.8"/>
+      <path d="M43.8 43.8 L55.2 55.2"/><path d="M23.7 57.3 L29.8 72.1"/>
+      <path d="M0 62 V78"/><path d="M-23.7 57.3 L-29.8 72.1"/>
+      <path d="M-43.8 43.8 L-55.2 55.2"/><path d="M-57.3 23.7 L-72.1 29.8"/>
+      <path d="M-62 0 H-78"/><path d="M-57.3 -23.7 L-72.1 -29.8"/>
+      <path d="M-43.8 -43.8 L-55.2 -55.2"/><path d="M-23.7 -57.3 L-29.8 -72.1"/>
+    </g>
+    <g stroke-width="6">
+      <path d="M0 -46 V-17"/><path d="M39.8 23 L14.7 8.5"/><path d="M-39.8 23 L-14.7 8.5"/>
+    </g>
+  </g>
+</svg>

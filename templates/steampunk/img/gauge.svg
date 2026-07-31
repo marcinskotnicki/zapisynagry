@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- Pressure-gauge dial face. The NEEDLE is not here — it's a CSS element
+       rotated by the fill percentage, so the reading is live data rather than
+       a picture of a gauge. This is just the brass face it sweeps across. -->
+  <defs>
+    <radialGradient id="face" cx="38%" cy="30%" r="75%">
+      <stop offset="0%"   stop-color="#f0dcb4"/>
+      <stop offset="60%"  stop-color="#d9bd8a"/>
+      <stop offset="100%" stop-color="#a8843f"/>
+    </radialGradient>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%"   stop-color="#e8c88a"/>
+      <stop offset="45%"  stop-color="#b08d57"/>
+      <stop offset="100%" stop-color="#6b5228"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bezel)"/>
+  <circle cx="60" cy="60" r="50" fill="url(#face)" stroke="#6b5228" stroke-width="1.5"/>
+  <!-- Eight bezel screws, on the ring rather than the face. -->
+  <g fill="#8a6c34">
+    <circle cx="60" cy="6"  r="2.6"/><circle cx="98" cy="22" r="2.6"/>
+    <circle cx="114" cy="60" r="2.6"/><circle cx="98" cy="98" r="2.6"/>
+    <circle cx="60" cy="114" r="2.6"/><circle cx="22" cy="98" r="2.6"/>
+    <circle cx="6"  cy="60" r="2.6"/><circle cx="22" cy="22" r="2.6"/>
+  </g>
+  <!-- Scale: a 180-degree sweep from lower-left to lower-right, so the needle
+       reads like a real pressure gauge rather than a clock. -->
+  <g stroke="#4a3717" stroke-linecap="round">
+    <g stroke-width="2.4">
+      <path d="M17 78 L25 74"/><path d="M60 14 L60 23"/><path d="M103 78 L95 74"/>
+    </g>
+    <g stroke-width="1.3" opacity=".75">
+      <path d="M22 62 L31 62"/><path d="M31 39 L38 44"/>
+      <path d="M82 44 L89 39"/><path d="M89 62 L98 62"/>
+    </g>
+  </g>
+  <!-- Red-line arc across the top of the scale: the "full" zone. -->
+  <path d="M84 32 A 36 36 0 0 1 96 62" fill="none" stroke="#a33418" stroke-width="4" opacity=".8"/>
+  <circle cx="60" cy="60" r="7" fill="#6b5228" stroke="#3a2b12" stroke-width="1.5"/>
+</svg>
