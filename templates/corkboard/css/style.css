@@ -54,6 +54,7 @@
     --ok:           var(--stamp-green);
     --error:        var(--stamp);
     --radius:       3px;      /* paper is cut, not rounded */
+    --max:          1600px;
 }
 
 /* ---- The board ------------------------------------------------------------
@@ -420,7 +421,7 @@ body.tpl-corkboard {
    again and you are back to that trap — the split has to stay exactly this
    way for the effect to work. */
 .tpl-corkboard .game-list { position: relative; z-index: 2; }
-.tpl-corkboard .game-card, .tpl-corkboard .poll-card{position:relative;margin: 20px 0;}
+.tpl-corkboard .game-card, .tpl-corkboard .poll-card{position:relative;margin: 10px; min-width:650px;}
 .tpl-corkboard .game-card:after,.tpl-corkboard .game-card:before, .tpl-corkboard .poll-card:after,.tpl-corkboard .poll-card:before{z-index:-2;background:inherit;position:absolute;width:100%;height:100%;box-shadow:inherit;top:0;left:0;transform: rotate(-1.8deg);content:' '}
 .tpl-corkboard .game-card:after,.tpl-corkboard .poll-card:after{transform: rotate(0.8deg);z-index:-1}
 
