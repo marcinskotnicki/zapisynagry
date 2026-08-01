@@ -208,7 +208,7 @@ body.tpl-schematic-compact {
         position: relative;
         padding-left: 28px;
         flex-direction:row;
-        flex-wrapw:wrap;
+        flex-wrap:wrap;
     }
     /* The spine itself, running the height of the list. */
     .tpl-schematic-compact .game-list::before {
