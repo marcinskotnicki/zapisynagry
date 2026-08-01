@@ -37,10 +37,10 @@
  *  consent, so quietly adding a third-party font request isn't a call to make
  *  on the admin's behalf.
  *
- *  Everything is scoped to .tpl-schematic (set on <body> by header.php).
+ *  Everything is scoped to .tpl-schematic-compact (set on <body> by header.php).
  * ========================================================================== */
 
-.tpl-schematic {
+.tpl-schematic-compact {
     /* ---- Substrate ------------------------------------------------------- */
     --board:     #1b212b;   /* graphite table the panels lie on */
     --board-2:   #232b37;
@@ -84,7 +84,7 @@
 /* ---- The table ------------------------------------------------------------
    Graphite with a fine drawing grid and one large calibrated rosette, both
    fixed so the panels scroll over them like sheets on a desk. */
-body.tpl-schematic {
+body.tpl-schematic-compact {
     background-color: var(--board);
     background-image:
         url("../img/rosette.svg"),
@@ -97,24 +97,24 @@ body.tpl-schematic {
     color: var(--paper);
     font-family: var(--font-sc);
 }
-.tpl-schematic .admin .tab-body{
+.tpl-schematic-compact .admin .tab-body{
     color: var(--board);
 }
-.tpl-schematic .admin .tab {
+.tpl-schematic-compact .admin .tab {
     color: var(--paper)
 }
-.tpl-schematic .admin .tab-active {
+.tpl-schematic-compact .admin .tab-active {
     color: var(--text);
 }
-.tpl-schematic .content { max-width: var(--maxw); }
+.tpl-schematic-compact .content { max-width: var(--maxw); }
 
 /* ---- Lettering ------------------------------------------------------------ */
-.tpl-schematic h1, .tpl-schematic h2, .tpl-schematic h3,
-.tpl-schematic .btn, .tpl-schematic input, .tpl-schematic select, .tpl-schematic textarea {
+.tpl-schematic-compact h1, .tpl-schematic-compact h2, .tpl-schematic-compact h3,
+.tpl-schematic-compact .btn, .tpl-schematic-compact input, .tpl-schematic-compact select, .tpl-schematic-compact textarea {
     font-family: var(--font-sc);
 }
-.tpl-schematic .event-header { text-align: left; }
-.tpl-schematic .event-header h1 {
+.tpl-schematic-compact .event-header { text-align: left; }
+.tpl-schematic-compact .event-header h1 {
     color: var(--paper-2);
     font-weight: 700;
     font-size: 2rem;
@@ -124,7 +124,7 @@ body.tpl-schematic {
 }
 /* The five channels as a keyline under the title: the legend for the whole
    page, stated once. */
-.tpl-schematic .event-header h1::after {
+.tpl-schematic-compact .event-header h1::after {
     content: "";
     display: block;
     height: 4px;
@@ -134,8 +134,8 @@ body.tpl-schematic {
         var(--ch1) 0 20%, var(--ch2) 20% 40%, var(--ch3) 40% 60%,
         var(--ch4) 60% 80%, var(--ch5) 80% 100%);
 }
-.tpl-schematic .event-date,
-.tpl-schematic .event-hours {
+.tpl-schematic-compact .event-date,
+.tpl-schematic-compact .event-hours {
     text-align: left;
     color: #93a1b2;
     letter-spacing: 0.2em;
@@ -145,8 +145,8 @@ body.tpl-schematic {
 }
 
 /* ---- Day tabs: index tabs on a folder ------------------------------------- */
-.tpl-schematic .day-tabs { justify-content: flex-start; border-bottom: 1px solid rgba(185, 178, 161, .35); gap: 2px; }
-.tpl-schematic .day-tab {
+.tpl-schematic-compact .day-tabs { justify-content: flex-start; border-bottom: 1px solid rgba(185, 178, 161, .35); gap: 2px; }
+.tpl-schematic-compact .day-tab {
     color: #93a1b2;
     background: var(--board-2);
     border: 1px solid rgba(185, 178, 161, .25);
@@ -156,24 +156,24 @@ body.tpl-schematic {
     font-size: 0.8rem;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
-.tpl-schematic .day-tab:hover { background: #2c3542; color: var(--paper-2); }
-.tpl-schematic .day-tab-active,
-.tpl-schematic .day-tab-active:hover {
+.tpl-schematic-compact .day-tab:hover { background: #2c3542; color: var(--paper-2); }
+.tpl-schematic-compact .day-tab-active,
+.tpl-schematic-compact .day-tab-active:hover {
     color: var(--ink);
     background: var(--paper);
     border-color: var(--rule);
 }
-.tpl-schematic .day-tab-date, .tpl-schematic .day-tab-hours { color: inherit; opacity: 0.75; }
+.tpl-schematic-compact .day-tab-date, .tpl-schematic-compact .day-tab-hours { color: inherit; opacity: 0.75; }
 
 /* ---- Table blocks: sheets on the desk ------------------------------------- */
-.tpl-schematic .table-block {
+.tpl-schematic-compact .table-block {
     background: rgba(35, 43, 55, .82);
     border: 1px solid rgba(185, 178, 161, .28);
     border-radius: 0;
     box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
     overflow:hidden;
 }
-.tpl-schematic .table-title {
+.tpl-schematic-compact .table-title {
     color: var(--paper-2);
     font-weight: 700;
     letter-spacing: 0.22em;
@@ -185,7 +185,7 @@ body.tpl-schematic {
 }
 
 /* ---- LAYOUT: one strip per row, stacked ----------------------------------- */
-.tpl-schematic .game-list {
+.tpl-schematic-compact .game-list {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
@@ -204,14 +204,14 @@ body.tpl-schematic {
    spacing follows the strips' own heights, which vary per card and cannot be
    expressed as a repeating background. */
 @media (min-width: 701px) {
-    .tpl-schematic .game-list {
+    .tpl-schematic-compact .game-list {
         position: relative;
         padding-left: 28px;
         flex-direction:row;
         flex-wrapw:wrap;
     }
     /* The spine itself, running the height of the list. */
-    .tpl-schematic .game-list::before {
+    .tpl-schematic-compact .game-list::before {
         content: "";
         position: absolute;
         left: 0px;
@@ -220,16 +220,16 @@ body.tpl-schematic {
         width: 1px;
         background: rgba(185, 178, 161, .45);
     }
-    .tpl-schematic .sc-strip{
+    .tpl-schematic-compact .sc-strip{
         width: calc(50% - 0.44rem);
     }
-    .tpl-schematic .sc-strip:nth-child(even):before,.tpl-schematic .sc-strip:nth-child(even):after{
+    .tpl-schematic-compact .sc-strip:nth-child(even):before,.tpl-schematic-compact .sc-strip:nth-child(even):after{
         display:none;
     }
-    .tpl-schematic .sc-actions{flex-basis:auto;}
+    .tpl-schematic-compact .sc-actions{flex-basis:auto;}
     /* The node: a filled dot centred on the spine, in the strip's own channel
        colour so the key carries through to the diagram. */
-    .tpl-schematic .game-list > .sc-strip::before {
+    .tpl-schematic-compact .game-list > .sc-strip::before {
         content: "";
         position: absolute;
         left: -32px;
@@ -242,7 +242,7 @@ body.tpl-schematic {
         box-shadow: 0 0 0 2px var(--board);   /* punches the spine out behind it */
     }
     /* The lead: from the node to the strip's edge. */
-    .tpl-schematic .game-list > .sc-strip::after {
+    .tpl-schematic-compact .game-list > .sc-strip::after {
         content: "";
         position: absolute;
         left: -23px;
@@ -256,7 +256,7 @@ body.tpl-schematic {
 /* ---- The strip ------------------------------------------------------------
    Chamfered top-right corner: the reference's most recognisable panel shape,
    done with clip-path so it holds at any height. */
-.tpl-schematic .sc-strip {
+.tpl-schematic-compact .sc-strip {
     position: relative;          /* hosts the rail connector; see the rail block */
     display: flex;
     align-items: stretch;
@@ -278,20 +278,20 @@ body.tpl-schematic {
        draw a square one and put a dark triangle back in the notch. */
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
 }
-.tpl-schematic .sc-body {
+.tpl-schematic-compact .sc-body {
     background: var(--paper);
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 /* The channel key. Each strip sets --chan once and everything downstream reads
    it, so a new channel is one line rather than a cascade of overrides. */
-.tpl-schematic .sc-chan-1 { --chan: var(--ch1); }
-.tpl-schematic .sc-chan-2 { --chan: var(--ch2); }
-.tpl-schematic .sc-chan-3 { --chan: var(--ch3); }
-.tpl-schematic .sc-chan-4 { --chan: var(--ch4); }
-.tpl-schematic .sc-chan-5 { --chan: var(--ch5); }
+.tpl-schematic-compact .sc-chan-1 { --chan: var(--ch1); }
+.tpl-schematic-compact .sc-chan-2 { --chan: var(--ch2); }
+.tpl-schematic-compact .sc-chan-3 { --chan: var(--ch3); }
+.tpl-schematic-compact .sc-chan-4 { --chan: var(--ch4); }
+.tpl-schematic-compact .sc-chan-5 { --chan: var(--ch5); }
 
 /* ---- Identity block: the coloured tab that keys the strip ----------------- */
-.tpl-schematic .sc-id {
+.tpl-schematic-compact .sc-id {
     flex: 0 0 74px;
     display: flex;
     flex-direction: column;
@@ -302,24 +302,24 @@ body.tpl-schematic {
     color: #fff;
     padding: 0.6rem 0.3rem;
 }
-.tpl-schematic .sc-id-time {
+.tpl-schematic-compact .sc-id-time {
     font-size: 1.05rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
 }
-.tpl-schematic .sc-id-num {
+.tpl-schematic-compact .sc-id-num {
     font-size: 0.55rem;
     letter-spacing: 0.14em;
     opacity: 0.85;
     font-variant-numeric: tabular-nums;
 }
-.tpl-schematic .game-card .sc-id-num:before{
+.tpl-schematic-compact .game-card .sc-id-num:before{
     content:'#';
 }
-.tpl-schematic .sc-body { flex: 1 1 auto; min-width: 0; padding: 0.5rem 0.75rem 0.6rem; }
+.tpl-schematic-compact .sc-body { flex: 1 1 auto; min-width: 0; padding: 0.5rem 0.75rem 0.6rem; }
 
-.tpl-schematic .sc-head {
+.tpl-schematic-compact .sc-head {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -328,7 +328,7 @@ body.tpl-schematic {
     padding-bottom: 0.35rem;
     margin-bottom: 0.45rem;
 }
-.tpl-schematic .game-name {
+.tpl-schematic-compact .game-name {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--ink);
@@ -338,21 +338,21 @@ body.tpl-schematic {
     text-transform: uppercase;
     margin: 0;
 }
-.tpl-schematic .game-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--chan); }
-.tpl-schematic .game-name a:hover { color: var(--chan); }
-.tpl-schematic .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 0 auto; }
-.tpl-schematic .sc-note { color: var(--ink-2); margin: 0.3rem 0; }
+.tpl-schematic-compact .game-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--chan); }
+.tpl-schematic-compact .game-name a:hover { color: var(--chan); }
+.tpl-schematic-compact .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 0 auto; }
+.tpl-schematic-compact .sc-note { color: var(--ink-2); margin: 0.3rem 0; }
 
 /* ---- Data cells: label over value ----------------------------------------
    The reference's core unit — a tiny uppercase key with the figure beneath it,
    boxed and ruled. Reading down a column of strips, the keys line up. */
-.tpl-schematic .sc-cells {
+.tpl-schematic-compact .sc-cells {
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
     margin-bottom: 0.5rem;
 }
-.tpl-schematic .sc-cell {
+.tpl-schematic-compact .sc-cell {
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -362,11 +362,11 @@ body.tpl-schematic {
     border: 1px solid var(--rule);
     justify-content: flex-end;
 }
-.tpl-schematic .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
+.tpl-schematic-compact .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
 /* The box-art chip: square, sized off the cell row so it lines up with the
    keys beside it. object-fit:cover keeps a non-square thumbnail from
    distorting — it crops instead, which is right for box art. */
-.tpl-schematic .sc-cell-thumb {
+.tpl-schematic-compact .sc-cell-thumb {
     min-width: 0;
     padding: 0;
     overflow: hidden;
@@ -379,21 +379,21 @@ body.tpl-schematic {
    that possible — cover would still fill a fixed box and crop; contain lets
    the box follow the image. width:auto is the default, stated for clarity
    since the earlier fixed 42px is exactly what this replaces. */
-.tpl-schematic .sc-cell-thumb img {
+.tpl-schematic-compact .sc-cell-thumb img {
     display: block;
     width: auto;
     height: 100%;
     height:55px;
     object-fit: contain;
 }
-.tpl-schematic .sc-key {
+.tpl-schematic-compact .sc-key {
     font-size: 0.58rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-2);
     line-height: 1.1;
 }
-.tpl-schematic .sc-val {
+.tpl-schematic-compact .sc-val {
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--ink);
@@ -403,19 +403,19 @@ body.tpl-schematic {
 /* Weight keeps the shared 1..5 scale — it encodes data every theme shares —
    but is expressed as a left keyline rather than a filled pill, so the cell
    still reads as part of the grid. */
-.tpl-schematic .sc-cell-weight { border-left-width: 4px; }
-.tpl-schematic .sc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
-.tpl-schematic .sc-cell-weight.weight-2 { border-left-color: #86b300; }
-.tpl-schematic .sc-cell-weight.weight-3 { border-left-color: #d6a400; }
-.tpl-schematic .sc-cell-weight.weight-4 { border-left-color: #e0701a; }
-.tpl-schematic .sc-cell-weight.weight-5 { border-left-color: #cf3b2e; }
-.tpl-schematic .sc-cell-weight .sc-val { background: none; color: var(--ink); }
+.tpl-schematic-compact .sc-cell-weight { border-left-width: 4px; }
+.tpl-schematic-compact .sc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
+.tpl-schematic-compact .sc-cell-weight.weight-2 { border-left-color: #86b300; }
+.tpl-schematic-compact .sc-cell-weight.weight-3 { border-left-color: #d6a400; }
+.tpl-schematic-compact .sc-cell-weight.weight-4 { border-left-color: #e0701a; }
+.tpl-schematic-compact .sc-cell-weight.weight-5 { border-left-color: #cf3b2e; }
+.tpl-schematic-compact .sc-cell-weight .sc-val { background: none; color: var(--ink); }
 /* The rules cell is tone-coded on its value, never flat — a flat colour here
    would outrank the shared .rules-* classes and paint every state alike. */
-.tpl-schematic .sc-cell-rules.rules-good .sc-val { color: #2f7f4a; }
-.tpl-schematic .sc-cell-rules.rules-mid  .sc-val { color: #9a6a12; }
-.tpl-schematic .sc-cell-rules.rules-bad  .sc-val { color: #b03060; }
-.tpl-schematic .sc-comment {
+.tpl-schematic-compact .sc-cell-rules.rules-good .sc-val { color: #2f7f4a; }
+.tpl-schematic-compact .sc-cell-rules.rules-mid  .sc-val { color: #9a6a12; }
+.tpl-schematic-compact .sc-cell-rules.rules-bad  .sc-val { color: #b03060; }
+.tpl-schematic-compact .sc-comment {
     background: var(--paper-3);
     border-left: 3px solid var(--chan);
     color: var(--ink);
@@ -428,14 +428,14 @@ body.tpl-schematic {
    A run of numbered chips, one per seat. Filled chips carry the channel
    colour; open ones are an empty ruled outline, so "three of five gone" is
    visible at a glance rather than something you compute from a fraction. */
-.tpl-schematic .sc-track {
+.tpl-schematic-compact .sc-track {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     gap: 2px;
     margin-bottom: 0.45rem;
 }
-.tpl-schematic .sc-slot {
+.tpl-schematic-compact .sc-slot {
     display: flex;
     align-items: center;
     gap: 0.35rem;
@@ -446,7 +446,7 @@ body.tpl-schematic {
     background: var(--paper-2);
     color: var(--ink);
 }
-.tpl-schematic .sc-slot-n {
+.tpl-schematic-compact .sc-slot-n {
     flex: 0 0 auto;
     font-size: 0.6rem;
     font-weight: 700;
@@ -454,26 +454,26 @@ body.tpl-schematic {
     color: var(--ink-2);
     font-variant-numeric: tabular-nums;
 }
-.tpl-schematic .sc-slot-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
+.tpl-schematic-compact .sc-slot-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
 /* Taken: the chip fills with the strip's channel colour. */
-.tpl-schematic .sc-slot-on {
+.tpl-schematic-compact .sc-slot-on {
     background: var(--chan);
     border-color: var(--chan);
     color: #fff;
 }
-.tpl-schematic .sc-slot-on .sc-slot-n { color: rgba(255, 255, 255, .8); }
-.tpl-schematic .sc-slot-on .msg-icon { color: #fff; }
+.tpl-schematic-compact .sc-slot-on .sc-slot-n { color: rgba(255, 255, 255, .8); }
+.tpl-schematic-compact .sc-slot-on .msg-icon { color: #fff; }
 /* Open: an outline with a hatched fill, the way an unfilled space is drawn on
    a diagram. Stated as its own object — the reason this theme forks the card. */
-.tpl-schematic .sc-slot-off {
+.tpl-schematic-compact .sc-slot-off {
     background: repeating-linear-gradient(45deg,
         var(--paper-2) 0 5px, var(--paper-3) 5px 10px);
     border-style: dashed;
     color: var(--ink-2);
 }
-.tpl-schematic .sc-slot-free { font-style: italic; opacity: 0.75; }
-.tpl-schematic .sc-slot-more { background: none; border: none; color: var(--ink-2); font-style: italic; font-size: 0.76rem; }
-.tpl-schematic .sc-slot-x {
+.tpl-schematic-compact .sc-slot-free { font-style: italic; opacity: 0.75; }
+.tpl-schematic-compact .sc-slot-more { background: none; border: none; color: var(--ink-2); font-style: italic; font-size: 0.76rem; }
+.tpl-schematic-compact .sc-slot-x {
     margin-left: 0.15rem;
     color: #fff;
     opacity: 0.75;
@@ -481,14 +481,14 @@ body.tpl-schematic {
     font-weight: 700;
     line-height: 1;
 }
-.tpl-schematic .sc-slot-x:hover { opacity: 1; text-decoration: none; }
+.tpl-schematic-compact .sc-slot-x:hover { opacity: 1; text-decoration: none; }
 /* The "knows the rules" dot: tone-coded, tiny, the way a diagram flags a state. */
-.tpl-schematic .sc-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; background: currentColor; }
-.tpl-schematic .sc-dot.rules-good { color: #b6f0c6; }
-.tpl-schematic .sc-dot.rules-mid  { color: #f5dd8e; }
-.tpl-schematic .sc-dot.rules-bad  { color: #ffb3b3; }
-.tpl-schematic .sc-track-reserve { opacity: 0.9; }
-.tpl-schematic .sc-track-label {
+.tpl-schematic-compact .sc-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; background: currentColor; }
+.tpl-schematic-compact .sc-dot.rules-good { color: #b6f0c6; }
+.tpl-schematic-compact .sc-dot.rules-mid  { color: #f5dd8e; }
+.tpl-schematic-compact .sc-dot.rules-bad  { color: #ffb3b3; }
+.tpl-schematic-compact .sc-track-reserve { opacity: 0.9; }
+.tpl-schematic-compact .sc-track-label {
     align-self: center;
     font-size: 0.6rem;
     letter-spacing: 0.14em;
@@ -496,18 +496,18 @@ body.tpl-schematic {
     color: var(--ink-2);
     margin-right: 0.3rem;
 }
-.tpl-schematic .sc-track-reserve .sc-slot-on { background: var(--ink-2); border-color: var(--ink-2); }
-.tpl-schematic .p-signedby { color: rgba(255, 255, 255, .75); font-size: 0.7rem; }
-.tpl-schematic .p-acct { color: rgba(255, 255, 255, .8); font-size: 0.7rem; }
+.tpl-schematic-compact .sc-track-reserve .sc-slot-on { background: var(--ink-2); border-color: var(--ink-2); }
+.tpl-schematic-compact .p-signedby { color: rgba(255, 255, 255, .75); font-size: 0.7rem; }
+.tpl-schematic-compact .p-acct { color: rgba(255, 255, 255, .8); font-size: 0.7rem; }
 
 /* ---- Foot: the one CTA, plus discussion --------------------------------- */
-.tpl-schematic .sc-foot { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.tpl-schematic .sc-signup { flex: 0 0 auto; }
-.tpl-schematic .sc-disc { flex: 1 1 100%; }
+.tpl-schematic-compact .sc-foot { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.tpl-schematic-compact .sc-signup { flex: 0 0 auto; }
+.tpl-schematic-compact .sc-disc { flex: 1 1 100%; }
 
 /* ---- Controls -------------------------------------------------------------
    Flat, square, hairline-ruled. No gloss anywhere — this is printed stock. */
-.tpl-schematic .btn {
+.tpl-schematic-compact .btn {
     background: var(--paper-2);
     border: 1px solid var(--ink);
     color: var(--ink);
@@ -518,40 +518,40 @@ body.tpl-schematic {
     border-radius: 0;
     padding: 0.22rem 0.55rem;
 }
-.tpl-schematic .btn:hover { background: var(--ink); color: var(--paper-2); }
-.tpl-schematic .btn-primary {
+.tpl-schematic-compact .btn:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic-compact .btn-primary {
     background: var(--ink);
     border-color: var(--ink);
     color: var(--paper-2);
 }
-.tpl-schematic .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
-.tpl-schematic .btn-danger,
-.tpl-schematic .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
-.tpl-schematic .msg-icon { color: var(--chan); }
+.tpl-schematic-compact .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
+.tpl-schematic-compact .btn-danger,
+.tpl-schematic-compact .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
+.tpl-schematic-compact .msg-icon { color: var(--chan); }
 
 /* ---- Forms ---------------------------------------------------------------- */
-.tpl-schematic input, .tpl-schematic select, .tpl-schematic textarea {
+.tpl-schematic-compact input, .tpl-schematic-compact select, .tpl-schematic-compact textarea {
     background: var(--paper-2);
     border: 1px solid var(--rule);
     color: var(--ink);
     border-radius: 0;
 }
-.tpl-schematic input:focus, .tpl-schematic select:focus, .tpl-schematic textarea:focus {
+.tpl-schematic-compact input:focus, .tpl-schematic-compact select:focus, .tpl-schematic-compact textarea:focus {
     border-color: var(--ink);
     outline: none;
     box-shadow: 0 0 0 2px rgba(29, 37, 48, .18);
 }
-.tpl-schematic .card {
+.tpl-schematic-compact .card {
     background: var(--paper);
     color: var(--ink);
     border: 1px solid var(--rule);
     border-radius: 0;
 }
-.tpl-schematic .card label, .tpl-schematic .card .field-note { color: var(--ink-2); }
-.tpl-schematic label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
+.tpl-schematic-compact .card label, .tpl-schematic-compact .card .field-note { color: var(--ink-2); }
+.tpl-schematic-compact label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
 
 /* ---- Discussion ------------------------------------------------------------ */
-.tpl-schematic .comment-add summary {
+.tpl-schematic-compact .comment-add summary {
     display: inline-block;
     cursor: pointer;
     list-style: none;
@@ -564,10 +564,10 @@ body.tpl-schematic {
     text-transform: uppercase;
     font-weight: 700;
 }
-.tpl-schematic .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
-.tpl-schematic .comment-add summary::-webkit-details-marker { display: none; }
-.tpl-schematic .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
-.tpl-schematic .comment-list li {
+.tpl-schematic-compact .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic-compact .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-schematic-compact .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
+.tpl-schematic-compact .comment-list li {
     background: var(--paper-2);
     border: none;
     border-left: 2px solid var(--rule);
@@ -576,8 +576,8 @@ body.tpl-schematic {
     font-size: 0.82rem;
     margin-bottom: 2px;
 }
-.tpl-schematic .comment-list .c-name { color: var(--chan); font-weight: 700; }
-.tpl-schematic .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
+.tpl-schematic-compact .comment-list .c-name { color: var(--chan); font-weight: 700; }
+.tpl-schematic-compact .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
 
 /* ---- Polls: candidates as side-by-side modules --------------------------- */
 /* The hazard stripe marks a poll as unresolved, but at .18 white it threw
@@ -585,10 +585,10 @@ body.tpl-schematic {
    and widened: the pattern still reads as "not settled", while the block stays
    near enough to a flat channel colour for white text to hold. The text also
    gets its own shadow below. */
-.tpl-schematic .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
+.tpl-schematic-compact .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
     var(--chan) 0 11px, rgba(255, 255, 255, .07) 11px 22px); }
-.tpl-schematic .sc-poll .sc-id-time { text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
-.tpl-schematic .sc-poll .poll-tag {
+.tpl-schematic-compact .sc-poll .sc-id-time { text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
+.tpl-schematic-compact .sc-poll .poll-tag {
     background: rgba(0, 0, 0, .3);
     color: #fff;
     border: none;
@@ -598,12 +598,12 @@ body.tpl-schematic {
     padding: 0.1rem 0.3rem;
     margin: 0;
 }
-.tpl-schematic .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
-.tpl-schematic .poll-by strong { color: var(--ink); }
+.tpl-schematic-compact .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
+.tpl-schematic-compact .poll-by strong { color: var(--ink); }
 /* Candidates stack as full-width ROWS, not side-by-side tiles. Tiles made each
    option as tall as its tallest element and left the name fighting for width;
    a row reads like a line in a table, which is what a candidate list is. */
-.tpl-schematic .sc-modules {
+.tpl-schematic-compact .sc-modules {
     display: flex;
     flex-direction: column;
     gap: 3px;
@@ -611,7 +611,7 @@ body.tpl-schematic {
     margin: 0 0 0.5rem;
     padding: 0;
 }
-.tpl-schematic .sc-module {
+.tpl-schematic-compact .sc-module {
     position: relative;          /* the gauge is pinned to this box's bottom edge */
     display: flex;
     align-items: center;
@@ -626,34 +626,34 @@ body.tpl-schematic {
     padding: 0.25rem 0.5rem 0.4rem;
     clip-path: none;             /* a chamfer on a thin row just clips the text */
 }
-.tpl-schematic .sc-module-full { border-left-color: #2f7f4a; }
+.tpl-schematic-compact .sc-module-full { border-left-color: #2f7f4a; }
 /* The name takes the room left over, and truncates rather than wrapping the
    row onto a second line. */
-.tpl-schematic .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tpl-schematic .poll-opt-name, .tpl-schematic a.poll-opt-name {
+.tpl-schematic-compact .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpl-schematic-compact .poll-opt-name, .tpl-schematic-compact a.poll-opt-name {
     color: var(--ink);
     font-weight: 700;
     font-size: 0.88rem;
     text-decoration: none;
 }
-.tpl-schematic a.poll-opt-name { border-bottom: 1px solid var(--chan); }
+.tpl-schematic-compact a.poll-opt-name { border-bottom: 1px solid var(--chan); }
 /* The figures sit inline after the name, not on their own line. */
-.tpl-schematic .poll-opt-meta {
+.tpl-schematic-compact .poll-opt-meta {
     display: flex; align-items: center; gap: 0.45rem; margin: 0;
     flex: 0 0 auto; white-space: nowrap;
 }
-.tpl-schematic .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+.tpl-schematic-compact .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
 /* The vote control is pushed to the right edge by an auto margin, so it lands
    in the same place on every row and the column can be scanned. */
-.tpl-schematic .sc-module > .btn,
-.tpl-schematic .sc-module > form.inline { margin-left: auto; flex: 0 0 auto; }
-.tpl-schematic .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
+.tpl-schematic-compact .sc-module > .btn,
+.tpl-schematic-compact .sc-module > form.inline { margin-left: auto; flex: 0 0 auto; }
+.tpl-schematic-compact .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
 /* The gauge: a ruled track, its fill in the channel colour, turning green once
    the candidate has the players it needs. */
 /* The gauge runs along the row's BOTTOM EDGE — a fill line under the option
    rather than a separate object taking its own line. Absolute against the row,
    so it costs no height in the flex flow. */
-.tpl-schematic .poll-opt-bar {
+.tpl-schematic-compact .poll-opt-bar {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     height: 4px;
@@ -661,18 +661,18 @@ body.tpl-schematic {
     border: none;
     border-top: 1px solid var(--rule);
 }
-.tpl-schematic .poll-opt-bar > span { display: block; height: 100%; background: var(--chan); }
-.tpl-schematic .poll-opt-bar.is-full > span { background: #2f7f4a; }
+.tpl-schematic-compact .poll-opt-bar > span { display: block; height: 100%; background: var(--chan); }
+.tpl-schematic-compact .poll-opt-bar.is-full > span { background: #2f7f4a; }
 
 /* ---- Timeline -------------------------------------------------------------- */
-.tpl-schematic .timeline { background: rgba(35, 43, 55, .8); border: 1px solid rgba(185, 178, 161, .28); border-radius: 0; }
-.tpl-schematic .tl-scroll { background: transparent; border-color: rgba(185, 178, 161, .28); }
-.tpl-schematic .timeline-title { color: var(--paper-2); letter-spacing: 0.2em; text-transform: uppercase; }
-.tpl-schematic .tl-hours { border-bottom-color: rgba(185, 178, 161, .28); }
-.tpl-schematic .tl-hour { color: #93a1b2; font-variant-numeric: tabular-nums; }
-.tpl-schematic .tl-hour::before { border-left-color: rgba(185, 178, 161, .3); }
-.tpl-schematic .tl-table-no { background: rgba(0, 0, 0, .35); color: #93a1b2; }
-.tpl-schematic .tl-game {
+.tpl-schematic-compact .timeline { background: rgba(35, 43, 55, .8); border: 1px solid rgba(185, 178, 161, .28); border-radius: 0; }
+.tpl-schematic-compact .tl-scroll { background: transparent; border-color: rgba(185, 178, 161, .28); }
+.tpl-schematic-compact .timeline-title { color: var(--paper-2); letter-spacing: 0.2em; text-transform: uppercase; }
+.tpl-schematic-compact .tl-hours { border-bottom-color: rgba(185, 178, 161, .28); }
+.tpl-schematic-compact .tl-hour { color: #93a1b2; font-variant-numeric: tabular-nums; }
+.tpl-schematic-compact .tl-hour::before { border-left-color: rgba(185, 178, 161, .3); }
+.tpl-schematic-compact .tl-table-no { background: rgba(0, 0, 0, .35); color: #93a1b2; }
+.tpl-schematic-compact .tl-game {
     background: var(--paper);
     color: var(--ink);
     border: 1px solid var(--rule);
@@ -687,51 +687,51 @@ body.tpl-schematic {
    step after the first table that needs two. The block carries the channel as
    a class instead, derived from the same table number the card uses, so the
    two agree by construction rather than by coincidence. */
-.tpl-schematic .tl-chan-1 { --chan: var(--ch1); }
-.tpl-schematic .tl-chan-2 { --chan: var(--ch2); }
-.tpl-schematic .tl-chan-3 { --chan: var(--ch3); }
-.tpl-schematic .tl-chan-4 { --chan: var(--ch4); }
-.tpl-schematic .tl-chan-5 { --chan: var(--ch5); }
-.tpl-schematic .tl-game:hover { background: var(--paper-2); }
-.tpl-schematic .tl-count-full { color: #b03060; }
+.tpl-schematic-compact .tl-chan-1 { --chan: var(--ch1); }
+.tpl-schematic-compact .tl-chan-2 { --chan: var(--ch2); }
+.tpl-schematic-compact .tl-chan-3 { --chan: var(--ch3); }
+.tpl-schematic-compact .tl-chan-4 { --chan: var(--ch4); }
+.tpl-schematic-compact .tl-chan-5 { --chan: var(--ch5); }
+.tpl-schematic-compact .tl-game:hover { background: var(--paper-2); }
+.tpl-schematic-compact .tl-count-full { color: #b03060; }
 /* Unresolved: the base sheet paints this near-white, which on the graphite
    board is the one bright patch on the page, so the value is replaced. */
-.tpl-schematic .tl-game.tl-poll {
+.tpl-schematic-compact .tl-game.tl-poll {
     background: repeating-linear-gradient(135deg,
         rgba(35, 43, 55, .9) 0 6px, rgba(45, 55, 70, .9) 6px 12px);
     color: var(--paper-2);
     border: 1px dashed rgba(185, 178, 161, .6);
 }
-.tpl-schematic .tl-game.tl-poll .tl-sub { color: #93a1b2; }
+.tpl-schematic-compact .tl-game.tl-poll .tl-sub { color: #93a1b2; }
 
 /* ---- Chrome ---------------------------------------------------------------- */
-.tpl-schematic .topbar {
+.tpl-schematic-compact .topbar {
     background: var(--board-2);
     border-bottom: 1px solid rgba(185, 178, 161, .3);
 }
-.tpl-schematic .topbar a, .tpl-schematic .brand { color: var(--paper-2); }
-.tpl-schematic .brand { letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
-.tpl-schematic .mailing-box {
+.tpl-schematic-compact .topbar a, .tpl-schematic-compact .brand { color: var(--paper-2); }
+.tpl-schematic-compact .brand { letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
+.tpl-schematic-compact .mailing-box {
     background: var(--paper);
     color: var(--ink);
     border: 1px solid var(--rule);
     border-radius: 0;
 }
-.tpl-schematic .game-archived { opacity: 0.5; }
-.tpl-schematic .game-archived .game-name { text-decoration: line-through; }
+.tpl-schematic-compact .game-archived { opacity: 0.5; }
+.tpl-schematic-compact .game-archived .game-name { text-decoration: line-through; }
 /* The open dropdown is painted by the OS; styling <option> is the only lever,
    honoured on Windows/Linux with macOS keeping its own legible list. */
-.tpl-schematic select option { background: var(--paper-2); color: var(--ink); }
-.tpl-schematic select option:checked,
-.tpl-schematic select option:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic-compact select option { background: var(--paper-2); color: var(--ink); }
+.tpl-schematic-compact select option:checked,
+.tpl-schematic-compact select option:hover { background: var(--ink); color: var(--paper-2); }
 
 /* ---- Quality floor --------------------------------------------------------- */
-.tpl-schematic a:focus-visible,
-.tpl-schematic button:focus-visible,
-.tpl-schematic input:focus-visible,
-.tpl-schematic select:focus-visible,
-.tpl-schematic textarea:focus-visible,
-.tpl-schematic summary:focus-visible {
+.tpl-schematic-compact a:focus-visible,
+.tpl-schematic-compact button:focus-visible,
+.tpl-schematic-compact input:focus-visible,
+.tpl-schematic-compact select:focus-visible,
+.tpl-schematic-compact textarea:focus-visible,
+.tpl-schematic-compact summary:focus-visible {
     outline: 2px solid var(--ch4);
     outline-offset: 2px;
 }
@@ -740,39 +740,39 @@ body.tpl-schematic {
     /* The strip becomes a stack: the identity block turns into a full-width
        header bar rather than a side tab, which is the only way it stays
        legible without squeezing the body to nothing. */
-    .tpl-schematic .sc-strip { flex-direction: column; }
+    .tpl-schematic-compact .sc-strip { flex-direction: column; }
     /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
        notch in the body's top-right corner would read as a bite taken out of
        the middle of the card rather than as the panel's edge. Squared off. */
-    .tpl-schematic .sc-body { clip-path: none; }
-    .tpl-schematic .sc-id {
+    .tpl-schematic-compact .sc-body { clip-path: none; }
+    .tpl-schematic-compact .sc-id {
         flex: 0 0 auto;
         flex-direction: row;
         justify-content: space-between;
         padding: 0.3rem 0.6rem;
     }
-    .tpl-schematic .sc-slot-name { max-width: 8rem; }
+    .tpl-schematic-compact .sc-slot-name { max-width: 8rem; }
     /* The base sheet's mobile rule drops a poll option's vote control onto its
        own full-width line (added when options were a stacked list). These rows
        are already narrow and inline, so that would undo the change: keep the
        control on the row and let the NAME give up width instead. */
-    .tpl-schematic .sc-module { flex-wrap: nowrap; row-gap: 0; }
-    .tpl-schematic .sc-module > .btn,
-    .tpl-schematic .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
-    .tpl-schematic .sc-module > form.inline .btn { width: auto; }
-    .tpl-schematic .sc-module-head { max-width: 45%; }
+    .tpl-schematic-compact .sc-module { flex-wrap: nowrap; row-gap: 0; }
+    .tpl-schematic-compact .sc-module > .btn,
+    .tpl-schematic-compact .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
+    .tpl-schematic-compact .sc-module > form.inline .btn { width: auto; }
+    .tpl-schematic-compact .sc-module-head { max-width: 45%; }
     /* Weight and length are the first things to go when there is no room —
        the vote tally and the control have to survive. */
-    .tpl-schematic .sc-module .weight-badge { display: none; }
+    .tpl-schematic-compact .sc-module .weight-badge { display: none; }
     /* A logged-in admin sees four poll controls (delete / edit / end / add), and
        .sc-actions is a nowrap inline-flex that will not shrink — so they ran
        straight off the side of the card. Given its own full-width line here,
        free to wrap onto a second row. */
-    .tpl-schematic .sc-actions {
+    .tpl-schematic-compact .sc-actions {
         flex: 1 1 100%;
         flex-wrap: wrap;
         justify-content: flex-start;
         margin-top: 0.25rem;
     }
-    .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
+    .tpl-schematic-compact .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }
