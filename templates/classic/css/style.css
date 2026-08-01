@@ -16,7 +16,7 @@
     --gc-row:    #d6d6d6;   /* player row band */
 }
 
-.tpl-classic .table-block{background:#ffffffba}
+.tpl-classic .table-block{background:#ffffff87}
 
 .tpl-classic .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; justify-content:center;}
 
