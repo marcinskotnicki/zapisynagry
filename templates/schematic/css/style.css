@@ -374,8 +374,7 @@ body.tpl-schematic {
     display: block;
     width: auto;
     height: 100%;
-    min-height: 42px;
-    max-width: 90px;   /* a very wide cover still gives the row's text room */
+    height:55px;
     object-fit: contain;
 }
 .tpl-schematic .sc-key {
