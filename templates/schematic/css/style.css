@@ -660,7 +660,7 @@ body.tpl-schematic {
     background: var(--paper);
     color: var(--ink);
     border: 1px solid var(--rule);
-    border-left: 3px solid var(--chan);
+    border-left: 4px solid var(--chan);
     border-radius: 0;
     font-weight: 700;
 }
