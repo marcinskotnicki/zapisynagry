@@ -1,0 +1,603 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  imperial — the evening's games as a Departmento Munitorum requisition.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a later edit doesn't sand off the point:
+ *
+ *  THE DELIBERATE SWERVE. "Grimdark" defaults to a near-black page with one
+ *  acid accent — which is both a generic dark-theme look and, more to the
+ *  point, not what this setting's own artefacts look like. Its visual
+ *  vernacular is BUREAUCRATIC: bone parchment, red wax, brass fittings,
+ *  gothic lettering, stamped serial numbers, purity seals hung on ribbons.
+ *  So this theme is parchment-forward, not black-forward. That is the risk
+ *  taken here, and it is what keeps it distinct from the steampunk theme it
+ *  shares a layout with as well as from the obvious answer.
+ *
+ *  MATERIALS: bone parchment, iron-gall ink, Imperial red, tarnished brass.
+ *  The dark is a deep iron brown-black, never neutral #000 — ink on vellum
+ *  ages toward brown, and a true black would read as a screen colour rather
+ *  than a document one.
+ *
+ *  SIGNATURE: the purity seal. Every record carries one, and the WEIGHT is
+ *  stamped into the wax — so the most decorative object on the page is also
+ *  the one reporting live data. An ornamental seal would just be a sticker.
+ *
+ *  LAYOUT is the classic/steampunk two-panel split, as asked, with three
+ *  deliberate departures so it isn't the same card in new paint: a numbered
+ *  DESIGNATION line above the name (a bureaucracy numbers everything), the
+ *  seal hanging off the record column, and a numbered muster roll that states
+ *  its vacancies rather than implying them.
+ *
+ *  TYPE: a serif for the record (documents are set in serif), and a condensed
+ *  face for the stamped labels and figures. No web fonts, matching every other
+ *  theme here — this site asks visitors for GDPR consent, so quietly adding a
+ *  third-party font request isn't a call to make on the admin's behalf.
+ *
+ *  Everything is scoped to .tpl-imperial (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-imperial {
+    /* ---- Materials ------------------------------------------------------- */
+    --vellum:      #d8cfb4;   /* bone parchment: the record's own surface */
+    --vellum-lit:  #eae2c9;   /* a fresher sheet, for raised panels */
+    --vellum-dim:  #bdb298;   /* a page that has seen more handling */
+    --iron:        #1a1613;   /* iron-gall ink: brown-black, never neutral */
+    --iron-soft:   #3a322a;   /* the same ink, thinned */
+    --ash:         #6b6459;   /* muted secondary text */
+    --imperial:    #8c1c13;   /* the red of wax, ribbons and stamps */
+    --imperial-lit:#c4392c;   /* its lit face */
+    --brass:       #a8863f;   /* tarnished fittings and rules */
+
+    /* Documents are set in serif; the labels and figures are stamped, so they
+       take a condensed face. Both are system stacks. */
+    --font-im:   'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+                 'Times New Roman', serif;
+    --font-stamp:'Haettenschweiler', 'Arial Narrow', 'Roboto Condensed',
+                 'Franklin Gothic Medium', Impact, sans-serif;
+
+    /* Remap the base variables onto those materials. */
+    --bg:           #14110e;
+    --surface:      var(--vellum);
+    --surface-2:    var(--vellum-dim);
+    --border:       rgba(26, 22, 19, .38);
+    --text:         var(--iron);
+    --text-muted:   var(--ash);
+    --primary:      var(--imperial);
+    --primary-text: #f2e9d6;
+    --ok:           #4a6b32;
+    --error:        var(--imperial);
+    --radius:       0;        /* documents are cut square */
+    --maxw:         1400px;
+}
+
+/* ---- The desk -------------------------------------------------------------
+   Dark iron behind the documents, with a single vast aquila watermark fixed
+   behind everything. Very faint: it is a mark pressed into the surface, not a
+   picture hung on it. */
+body.tpl-imperial {
+    background-color: #14110e;
+    background-image:
+        url("../img/aquila.svg"),
+        radial-gradient(ellipse at 50% 0%, rgba(168, 134, 63, .10), transparent 58%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 780px auto, 100% 100%;
+    background-position: center 12%, top center;
+    background-attachment: fixed, fixed;
+    color: var(--vellum);
+    font-family: var(--font-im);
+}
+.tpl-imperial .content { max-width: var(--maxw); }
+
+/* ---- Lettering ------------------------------------------------------------ */
+.tpl-imperial h1, .tpl-imperial h2, .tpl-imperial h3 { font-family: var(--font-im); }
+.tpl-imperial .event-header { text-align: center; }
+.tpl-imperial .event-header h1 {
+    color: var(--vellum-lit);
+    font-weight: 400;
+    font-size: 2.1rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, .7);
+}
+/* A stamped rule under the title: red bar, brass hairline beneath. */
+.tpl-imperial .event-header h1::after {
+    content: "";
+    display: block;
+    width: 180px;
+    height: 3px;
+    margin: 0.5rem auto 0;
+    background: linear-gradient(90deg, transparent, var(--imperial) 20%, var(--imperial) 80%, transparent);
+    box-shadow: 0 3px 0 -1px rgba(168, 134, 63, .55);
+}
+.tpl-imperial .event-date,
+.tpl-imperial .event-hours {
+    text-align: center;
+    font-family: var(--font-stamp);
+    color: var(--brass);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-size: 0.82rem;
+    margin: 0.1rem 0 0;
+}
+
+/* ---- Day tabs: file dividers ---------------------------------------------- */
+.tpl-imperial .day-tabs { justify-content: center; border-bottom: 2px solid var(--brass); gap: 0.3rem; }
+.tpl-imperial .day-tab {
+    font-family: var(--font-stamp);
+    color: var(--vellum-dim);
+    background: rgba(216, 207, 180, .10);
+    border: 1px solid rgba(168, 134, 63, .45);
+    border-bottom: none;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.tpl-imperial .day-tab:hover { background: rgba(216, 207, 180, .2); color: var(--vellum-lit); }
+.tpl-imperial .day-tab-active,
+.tpl-imperial .day-tab-active:hover {
+    color: var(--iron);
+    background: var(--vellum);
+    border-color: var(--brass);
+    box-shadow: inset 0 3px 0 var(--imperial);   /* the tab that is filed open */
+}
+.tpl-imperial .day-tab-date, .tpl-imperial .day-tab-hours { color: inherit; opacity: 0.8; }
+
+/* ---- Tables: bundles of records ------------------------------------------- */
+.tpl-imperial .table-block {
+    background: rgba(20, 17, 14, .55);
+    border: 1px solid rgba(168, 134, 63, .35);
+    border-radius: 0;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, .5);
+}
+.tpl-imperial .table-title {
+    font-family: var(--font-stamp);
+    color: var(--brass);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(168, 134, 63, .35);
+    padding-bottom: 0.4rem;
+}
+
+/* ---- Layout: the shared two-panel split ----------------------------------- */
+.tpl-imperial .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; }
+.tpl-imperial .game-card {
+    display: flex; align-items: flex-start; gap: 0;
+    flex: 0 0 auto;
+    background: transparent; border: none; padding: 0; box-shadow: none;
+}
+
+/* ---- The record column ----------------------------------------------------
+   A sheet of parchment: the fibre tile over a warm base, cut square, with a
+   red margin rule down its left edge the way a stamped form carries one. */
+.tpl-imperial .gc-info {
+    width: 250px; flex: 0 0 250px;
+    position: relative; z-index: 1;
+    background-color: var(--vellum);
+    background-image: url("../img/parchment.svg");
+    background-size: 200px 200px;
+    color: var(--iron);
+    text-align: left;
+    border: 1px solid #8a7f62;
+    border-left: 4px solid var(--imperial);
+    border-radius: 0;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .55);
+    padding-bottom: 0.6rem;
+}
+.tpl-imperial .gc-tabs { display: flex; gap: 0.25rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-imperial .gc-tab {
+    font-family: var(--font-stamp);
+    font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.18rem 0.5rem; border-radius: 0; text-decoration: none;
+    color: var(--vellum-lit);
+    background: var(--iron-soft);
+    border: 1px solid var(--iron);
+}
+.tpl-imperial .gc-tab:hover { background: var(--iron); text-decoration: none; }
+.tpl-imperial .gc-tab-del { background: var(--imperial); border-color: #5e1109; }
+.tpl-imperial .gc-tab-del:hover { background: var(--imperial-lit); }
+
+/* Designation line: the file reference and the sanctioned hour, in the stamped
+   face. Every record in a bureaucracy carries a number — this one is the
+   game's own id, so it is a reference you could actually quote. */
+.tpl-imperial .im-designation {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+    font-family: var(--font-stamp);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ash);
+    padding: 0.35rem 0.5rem 0.25rem;
+    border-bottom: 1px solid rgba(26, 22, 19, .25);
+}
+.tpl-imperial .im-ref { color: var(--imperial); font-weight: 700; }
+.tpl-imperial .im-sanction { color: var(--iron-soft); }
+
+.tpl-imperial .gc-thumb { padding: 0.5rem 0 0.2rem; text-align: center; }
+.tpl-imperial .gc-thumb img {
+    max-width: 150px; max-height: 190px;
+    border: 1px solid #8a7f62;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+/* The name is typed onto the form, not set in a plate: uppercase serif, ruled
+   underneath. */
+.tpl-imperial .gc-name {
+    color: var(--iron);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0.4rem 0.5rem 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--iron);
+    text-align: left;
+}
+.tpl-imperial .gc-name a { color: var(--iron); text-decoration: none; }
+.tpl-imperial .gc-name a:hover { color: var(--imperial); }
+
+/* ---- SIGNATURE: the purity seal -------------------------------------------
+   Hung on the record's right edge, half off the sheet, the way a seal is
+   actually affixed. The wax disc and ribbons are the SVG; the weight is real
+   text stamped over it, so the ornament is also the readout. The weight-N
+   class tints the wax — heavier games get a darker, angrier seal — using the
+   shared scale every other theme uses rather than a second one invented here. */
+.tpl-imperial .im-seal {
+    position: absolute;
+    top: 2.2rem; right: -26px;
+    width: 72px; height: 90px;
+    background: url("../img/seal.svg") center top / contain no-repeat;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+    text-align: center;
+    pointer-events: none;
+    z-index: 2;
+}
+.tpl-imperial .im-seal-value {
+    display: block;
+    font-family: var(--font-stamp);
+    font-size: 1.05rem;
+    line-height: 1;
+    color: #f0dcc8;
+    padding-top: 1.15rem;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .6);
+}
+.tpl-imperial .im-seal-label {
+    display: block;
+    font-family: var(--font-stamp);
+    font-size: 0.42rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(240, 220, 200, .75);
+}
+/* The wax takes the weight's colour. Multiply keeps the pressed highlights and
+   rim shadows from the SVG visible through the tint instead of flooding them. */
+.tpl-imperial .im-seal.weight-1 { background-color: transparent; }
+.tpl-imperial .im-seal.weight-1::after,
+.tpl-imperial .im-seal.weight-2::after,
+.tpl-imperial .im-seal.weight-3::after,
+.tpl-imperial .im-seal.weight-4::after,
+.tpl-imperial .im-seal.weight-5::after {
+    content: "";
+    position: absolute;
+    top: 8px; left: 6px;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+.tpl-imperial .im-seal.weight-1::after { background: #6f8a4a; }
+.tpl-imperial .im-seal.weight-2::after { background: #9a9a3c; }
+.tpl-imperial .im-seal.weight-3::after { background: #c08a2c; }
+.tpl-imperial .im-seal.weight-4::after { background: #b85a23; }
+.tpl-imperial .im-seal.weight-5::after { background: #8c1c13; }
+
+/* ---- Record rows ----------------------------------------------------------- */
+.tpl-imperial .gc-band {
+    padding: 0.28rem 0.5rem;
+    font-size: 0.86rem;
+    color: var(--iron-soft);
+    border-bottom: 1px solid rgba(26, 22, 19, .12);
+}
+.tpl-imperial .gc-band strong { color: var(--iron); font-weight: 700; }
+.tpl-imperial .gc-row { background: transparent; }
+/* Alternating tint, the way a ruled ledger reads. */
+.tpl-imperial .gc-band:nth-of-type(even) { background: rgba(26, 22, 19, .045); }
+.tpl-imperial .gc-rules { font-weight: 700; background: rgba(26, 22, 19, .06); }
+.tpl-imperial .gc-rules.rules-good { color: #4a6b32; }
+.tpl-imperial .gc-rules.rules-mid  { color: #9a6a12; }
+.tpl-imperial .gc-rules.rules-bad  { color: var(--imperial); }
+.tpl-imperial .gc-comment {
+    background: rgba(26, 22, 19, .07);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    font-style: italic;
+}
+.tpl-imperial .gc-comment .c-name { color: var(--imperial); font-style: normal; }
+
+/* ---- The muster roll -------------------------------------------------------
+   Iron rather than parchment: this panel is the duty list clipped to the
+   record, a different document from the sheet it overlaps. */
+.tpl-imperial .gc-players {
+    background: linear-gradient(rgba(216, 207, 180, .07), transparent 30%), rgba(26, 22, 19, .93);
+    border: 1px solid rgba(168, 134, 63, .4);
+    border-radius: 0;
+    padding: 0.6rem 0.6rem 0.6rem 1.4rem;
+    margin-left: -0.8rem; margin-top: 2rem;
+    min-width: 310px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .5);
+}
+.tpl-imperial .im-muster-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-stamp);
+    color: var(--brass);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.45rem;
+    border-bottom: 1px solid rgba(168, 134, 63, .4);
+}
+.tpl-imperial .im-muster-count { color: var(--vellum); }
+.tpl-imperial .gc-slot {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(168, 134, 63, .16);
+    border-radius: 0;
+    padding: 0.26rem 0.3rem;
+    margin-bottom: 0;
+    font-size: 0.86rem;
+    color: var(--vellum);
+}
+.tpl-imperial .gc-slot strong { color: var(--vellum-lit); font-weight: 700; }
+/* Line numbers: a roll is numbered, and fixed-width figures let the column be
+   scanned rather than read. */
+.tpl-imperial .im-line-no {
+    flex: 0 0 auto;
+    min-width: 1.5rem;
+    font-family: var(--font-stamp);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--brass);
+}
+/* A vacancy is stated, not implied by absence — the reason this theme forks
+   the card. */
+.tpl-imperial .im-vacant { opacity: 0.5; }
+.tpl-imperial .im-vacant .muted { color: var(--ash); font-style: italic; }
+.tpl-imperial .im-vacant .im-line-no { color: rgba(168, 134, 63, .5); }
+.tpl-imperial .gc-knows { color: #7fa055; font-size: 0.74rem; }
+.tpl-imperial .gc-knows.rules-good { color: #7fa055; }
+.tpl-imperial .gc-knows.rules-mid  { color: #c9a227; }
+.tpl-imperial .gc-knows.rules-bad  { color: var(--imperial-lit); }
+.tpl-imperial .gc-reserve { opacity: 0.85; font-style: italic; }
+.tpl-imperial .reserve-tag { color: var(--brass); font-family: var(--font-stamp); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.66rem; }
+.tpl-imperial .gc-more-slots { font-size: 0.76rem; color: var(--ash); font-style: italic; margin: 0.25rem 0 0.4rem 0.3rem; }
+.tpl-imperial .p-signedby { color: var(--ash); font-size: 0.74rem; }
+.tpl-imperial .msg-icon { color: var(--brass); }
+
+/* Struck from the roll: a red stamp, not a soft button. */
+.tpl-imperial .gc-resign {
+    margin-left: auto;
+    background: var(--imperial);
+    color: #f2e9d6;
+    font-family: var(--font-stamp);
+    font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.16rem 0.45rem; border-radius: 0; text-decoration: none; white-space: nowrap;
+    border: 1px solid #5e1109;
+}
+.tpl-imperial .gc-resign:hover { background: var(--imperial-lit); text-decoration: none; }
+
+/* The requisition: a stamped bar across the foot of the roll. */
+.tpl-imperial .gc-signup {
+    display: block; text-align: center;
+    background: var(--imperial);
+    color: #f2e9d6;
+    font-family: var(--font-stamp);
+    border: 1px solid #5e1109;
+    border-radius: 0; padding: 0.4rem 0.7rem; margin-top: 0.6rem;
+    font-size: 0.86rem; letter-spacing: 0.16em; text-transform: uppercase;
+    text-decoration: none;
+}
+.tpl-imperial .gc-signup:hover { background: var(--imperial-lit); text-decoration: none; }
+
+/* ---- Controls --------------------------------------------------------------
+   Stamped, square, no gloss anywhere — this is a form, not an instrument. */
+.tpl-imperial .btn {
+    font-family: var(--font-stamp);
+    background: var(--iron-soft);
+    border: 1px solid var(--iron);
+    color: var(--vellum-lit);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 0;
+}
+.tpl-imperial .btn:hover { background: var(--iron); color: var(--vellum-lit); }
+.tpl-imperial .btn-primary {
+    background: var(--imperial);
+    border-color: #5e1109;
+    color: #f2e9d6;
+}
+.tpl-imperial .btn-primary:hover { background: var(--imperial-lit); border-color: #5e1109; color: #f2e9d6; }
+.tpl-imperial .btn-danger,
+.tpl-imperial .btn-danger:hover { background: var(--imperial); border-color: #5e1109; color: #f2e9d6; }
+
+/* ---- Forms ----------------------------------------------------------------- */
+.tpl-imperial input, .tpl-imperial select, .tpl-imperial textarea {
+    background: rgba(20, 17, 14, .8);
+    border: 1px solid rgba(168, 134, 63, .4);
+    color: var(--vellum);
+    border-radius: 0;
+    font-family: var(--font-im);
+}
+.tpl-imperial input:focus, .tpl-imperial select:focus, .tpl-imperial textarea:focus {
+    border-color: var(--brass);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(168, 134, 63, .3);
+}
+/* The OPEN dropdown is painted by the OS; styling <option> is the only lever,
+   honoured on Windows/Linux, with macOS keeping its own legible list. */
+.tpl-imperial select option { background: #14110e; color: var(--vellum); }
+.tpl-imperial select option:checked,
+.tpl-imperial select option:hover { background: var(--imperial); color: #f2e9d6; }
+.tpl-imperial label { color: var(--brass); font-family: var(--font-stamp); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.8rem; }
+.tpl-imperial .field-note { color: var(--ash); font-family: var(--font-im); text-transform: none; letter-spacing: 0; }
+
+/* ---- Discussion ------------------------------------------------------------ */
+.tpl-imperial .gc-info .discussion { border-top: 1px solid rgba(26, 22, 19, .2); margin: 0; padding: 0.3rem 0 0; text-align: left; }
+.tpl-imperial .comment-list { list-style: none; margin: 0; padding: 0; }
+.tpl-imperial .comment-list li {
+    background: rgba(26, 22, 19, .06);
+    border: none;
+    border-bottom: 1px solid rgba(26, 22, 19, .12);
+    border-radius: 0;
+    color: var(--iron-soft);
+    font-size: 0.82rem;
+}
+.tpl-imperial .comment-add { margin: 0.4rem 0.5rem 0.2rem; }
+.tpl-imperial .comment-add summary {
+    display: inline-block; cursor: pointer; list-style: none;
+    font-family: var(--font-stamp);
+    background: var(--iron-soft);
+    color: var(--vellum-lit);
+    border: 1px solid var(--iron);
+    border-radius: 0;
+    padding: 0.18rem 0.7rem;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.tpl-imperial .comment-add summary:hover { background: var(--iron); }
+.tpl-imperial .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-imperial .comment-add form { padding: 0.4rem 0; display: flex; flex-direction: column; gap: 0.35rem; }
+
+/* ---- Polls: a requisition awaiting sanction -------------------------------- */
+.tpl-imperial .poll-card {
+    background-color: var(--vellum);
+    background-image: url("../img/parchment.svg");
+    background-size: 200px 200px;
+    color: var(--iron);
+    border: 1px solid #8a7f62;
+    border-left: 4px solid var(--brass);   /* brass, not red: not yet sanctioned */
+    border-radius: 0;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .5);
+}
+.tpl-imperial .poll-card .game-time { color: var(--iron); font-weight: 700; }
+.tpl-imperial .poll-card .game-time::before {
+    content: attr(data-label) ": ";
+    font-family: var(--font-stamp);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.76em;
+    color: var(--ash);
+}
+.tpl-imperial .poll-by { color: var(--iron-soft); }
+.tpl-imperial .poll-by strong { color: var(--iron); }
+.tpl-imperial .poll-card .msg-icon { color: var(--imperial); }
+.tpl-imperial .poll-tag {
+    margin-left: auto;
+    font-family: var(--font-stamp);
+    background: transparent;
+    border: 2px solid var(--imperial);
+    color: var(--imperial);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    border-radius: 0;
+    transform: rotate(-2deg);   /* stamped by hand, never quite square */
+}
+.tpl-imperial .poll-card .btn-small {
+    font-family: var(--font-stamp);
+    font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.18rem 0.5rem; border-radius: 0;
+    background: var(--iron-soft); color: var(--vellum-lit);
+    border: 1px solid var(--iron);
+}
+.tpl-imperial .poll-card .btn-small:hover { background: var(--iron); text-decoration: none; }
+.tpl-imperial .poll-card .btn-danger,
+.tpl-imperial .poll-card .btn-danger:hover { background: var(--imperial); border-color: #5e1109; color: #f2e9d6; }
+.tpl-imperial .poll-deadline { color: var(--iron-soft); }
+.tpl-imperial .poll-deadline strong { color: var(--imperial); }
+.tpl-imperial .poll-card .rules-good { color: #4a6b32; }
+.tpl-imperial .poll-card .rules-mid  { color: #9a6a12; }
+.tpl-imperial .poll-card .rules-bad  { color: var(--imperial); }
+.tpl-imperial .poll-option {
+    background: rgba(26, 22, 19, .06);
+    border: 1px solid rgba(26, 22, 19, .18);
+    border-radius: 0;
+}
+.tpl-imperial .poll-opt-name, .tpl-imperial a.poll-opt-name { color: var(--iron); }
+.tpl-imperial .poll-opt-votes { color: var(--ash); font-family: var(--font-stamp); letter-spacing: 0.06em; }
+.tpl-imperial .poll-opt-meta { color: var(--ash); }
+/* Votes fill a ruled bar in red ink. */
+.tpl-imperial .poll-opt-bar { background: rgba(26, 22, 19, .18); }
+.tpl-imperial .poll-opt-bar > span { background: var(--imperial); }
+.tpl-imperial .poll-opt-bar.is-full > span { background: #4a6b32; }
+
+/* ---- Timeline: the duty roster --------------------------------------------- */
+.tpl-imperial .timeline { background: rgba(20, 17, 14, .8); border: 1px solid rgba(168, 134, 63, .35); border-radius: 0; }
+.tpl-imperial .tl-scroll { background: transparent; border-color: rgba(168, 134, 63, .35); }
+.tpl-imperial .timeline-title { font-family: var(--font-stamp); color: var(--brass); letter-spacing: 0.2em; text-transform: uppercase; }
+.tpl-imperial .tl-hours { border-bottom-color: rgba(168, 134, 63, .35); }
+.tpl-imperial .tl-hour { color: var(--ash); font-family: var(--font-stamp); }
+.tpl-imperial .tl-hour::before { border-left-color: rgba(168, 134, 63, .3); }
+.tpl-imperial .tl-table-no { background: rgba(0, 0, 0, .4); color: var(--brass); font-family: var(--font-stamp); }
+.tpl-imperial .tl-game {
+    background: var(--vellum);
+    color: var(--iron);
+    border: 1px solid #8a7f62;
+    border-left: 3px solid var(--imperial);
+    border-radius: 0;
+    font-weight: 700;
+}
+.tpl-imperial .tl-game:hover { background: var(--vellum-lit); }
+.tpl-imperial .tl-count-full { color: var(--imperial); }
+/* Unsanctioned: the base sheet paints this near-white, which on the dark
+   roster is the one bright patch on the page, so the value is replaced. */
+.tpl-imperial .tl-game.tl-poll {
+    background: rgba(20, 17, 14, .85);
+    color: var(--brass);
+    border: 1px dashed var(--brass);
+    border-left: 3px dashed var(--brass);
+}
+.tpl-imperial .tl-game.tl-poll .tl-sub { color: rgba(168, 134, 63, .85); }
+
+/* ---- Chrome ---------------------------------------------------------------- */
+.tpl-imperial .topbar {
+    background: linear-gradient(#221c17, #14110e);
+    border-bottom: 2px solid var(--imperial);
+}
+.tpl-imperial .topbar a, .tpl-imperial .brand { color: var(--vellum-lit); }
+.tpl-imperial .brand { font-family: var(--font-stamp); letter-spacing: 0.2em; text-transform: uppercase; }
+.tpl-imperial .mailing-box {
+    background: rgba(26, 22, 19, .9);
+    border: 1px solid rgba(168, 134, 63, .4);
+    border-radius: 0;
+}
+.tpl-imperial .game-archived .gc-info { opacity: 0.5; }
+.tpl-imperial .game-archived .gc-name { text-decoration: line-through; }
+
+/* ---- Quality floor ---------------------------------------------------------- */
+.tpl-imperial a:focus-visible,
+.tpl-imperial button:focus-visible,
+.tpl-imperial input:focus-visible,
+.tpl-imperial select:focus-visible,
+.tpl-imperial textarea:focus-visible,
+.tpl-imperial summary:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+}
+
+/* Classic's breakpoints, since the footprint is shared. The seal moves inside
+   the sheet on narrow screens — hanging off the edge would clip or overflow. */
+@media (max-width: 700px) {
+    .tpl-imperial .game-card { flex-direction: column; width: 100%; }
+    .tpl-imperial .gc-players {
+        margin-left: 0; margin-top: 0.5rem;
+        width: 100%; box-sizing: border-box; min-width: 0;
+    }
+    .tpl-imperial .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
+    .tpl-imperial .im-seal { right: 4px; top: 1.6rem; }
+    .tpl-imperial .event-header h1 { font-size: 1.6rem; letter-spacing: 0.14em; }
+}
+@media (min-width: 701px) {
+    .tpl-imperial .game-list > article { width: 580px; }
+}

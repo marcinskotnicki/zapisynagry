@@ -175,16 +175,16 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Seven themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard**, **elvish**, **space** and **steampunk**. They're
-discovered by directory glob, so creating a folder registers one — there is no
-list to update.
+Eight themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard**, **elvish**, **space**, **steampunk** and
+**imperial**. They're discovered by directory glob, so creating a folder
+registers one — there is no list to update.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a
-stylesheet alone; `classic/`, `elvish/`, `space/` and `steampunk/` each
-override `game_card.php` plus their CSS; the last three also ship hand-written
-SVGs in their own `img/`.
+stylesheet alone; `classic/`, `elvish/`, `space/`, `steampunk/` and
+`imperial/` each override `game_card.php` plus their CSS; the last four also
+ship hand-written SVGs in their own `img/`.
 
 Non-base stylesheets `@import` light's, then override. Only the active theme's
 sheet is ever linked. **Scope every rule** to the theme's `.tpl-<name>` class —
@@ -197,13 +197,14 @@ using `$__tpl_*` locals internally to avoid collisions.
 **Prefer restyling shared markup over forking a template**, and when you do
 fork, pin it. Classic forked `game_card.php` with nothing tying it to light's,
 and its comment button drifted out of sync for months before anyone noticed.
-Elvish, space and steampunk fork the same file deliberately: each renders a
-*free* seat as an object (a bud on a vine, a numbered open slot, an unpolished
-rivet) and light's card has no element for a seat nobody occupies; steampunk
-additionally needs classic's two-panel split and a needle element for its
-gauge. All three are pinned — `tests/test_elvish.php`, `test_space.php` and
-`test_steampunk.php` assert every control light's card offers is still present
-in their fork. If you fork a template, write that test in the same commit, and
+Elvish, space, steampunk and imperial fork the same file deliberately: each
+renders a *free* seat as an object (a bud on a vine, a numbered open slot, an
+unpolished rivet, a stated vacancy) and light's card has no element for a seat
+nobody occupies. Steampunk and imperial additionally need classic's two-panel
+split, plus an element carrying live data — a gauge needle, a weight stamped
+into a wax seal. All four are pinned — `tests/test_elvish.php`,
+`test_space.php`, `test_steampunk.php` and `test_imperial.php` assert every
+control light's card offers is still present in their fork. If you fork a template, write that test in the same commit, and
 verify it actually fails when a control is removed, or it is not really pinning
 anything.
 

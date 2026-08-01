@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="-120 -60 240 120">
+  <!-- A double-headed eagle device, reduced to a stamped silhouette and used
+       once, very large and very faint, as the ambient watermark. Built from a
+       mirrored half so the two sides cannot drift apart. -->
+  <defs>
+    <g id="half">
+      <!-- wing: three descending pinions -->
+      <path d="M8 -14 L44 -30 L40 -18 L70 -26 L62 -12 L88 -16 L74 2 L44 6 L20 2 Z"/>
+      <!-- head + beak, turned outward -->
+      <path d="M9 -20 q6 -14 18 -16 q-2 8 -8 11 q7 1 9 6 q-8 3 -14 1 q-4 2 -5 -2 z"/>
+      <!-- tail feathers -->
+      <path d="M6 4 L18 8 L12 34 L4 42 Z"/>
+    </g>
+  </defs>
+  <g fill="#a8863f">
+    <use href="#half"/>
+    <use href="#half" transform="scale(-1,1)"/>
+    <!-- central body -->
+    <path d="M-8 -18 L8 -18 L10 6 L0 44 L-10 6 Z"/>
+  </g>
+</svg>
