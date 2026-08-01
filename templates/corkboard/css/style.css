@@ -455,7 +455,7 @@ body.tpl-corkboard {
     .tpl-corkboard .game-thumb img { padding: 5px 5px 16px; }
     .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
     .tpl-corkboard .game-list{flex-direction:column;}
-    .tpl-corkboard .game-card, .tpl-corkboard .poll-card{width:100%;margin-left:0;margin-right:0;}
+    .tpl-corkboard .game-card, .tpl-corkboard .poll-card, .tpl-corkboard .game-card:only-child, .tpl-corkboard .poll-card:only-child{width:100%;max-width:100%;margin-left:0;margin-right:0;}
     .tpl-corkboard .game-card{flex-direction:column}
     .tpl-corkboard .game-thumb{flex-direction:row;width:100%;justify-content:center;}
     .tpl-corkboard .game-thumb img{width:35%;}
