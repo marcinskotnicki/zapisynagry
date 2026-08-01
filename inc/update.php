@@ -85,9 +85,15 @@ function update_download($url, $dest) {
  * Recursive copy (used to overlay new files onto the app root).
  * Creates directories as needed; @-suppressed so a single unwritable file
  * doesn't abort the whole overlay.
+ *
+ * $failed is an OUT parameter: every path that could not be written is
+ * appended to it, so update_run() can report a partial overlay instead of
+ * claiming success. Typed `?array` rather than `array ... = null`, which PHP
+ * 8.4 deprecates as an implicitly-nullable parameter. The explicit form is
+ * valid from PHP 7.1, so it is safe against this app's 7.4 floor.
  * @return void
  */
-function update_rcopy($src, $dst, array &$failed = null) {
+function update_rcopy($src, $dst, ?array &$failed = null) {
     if (is_dir($src)) {
         if (!is_dir($dst) && !@mkdir($dst, 0775, true) && !is_dir($dst)) {
             if ($failed !== null) $failed[] = $dst;
