@@ -59,10 +59,13 @@
     }
     $max  = (int)$g['max_players'];
     $open = max(0, $max - count($crew));
-    // Colour key: games on the same table share a band. Five channels, chosen
-    // by table so the assignment is stable for a whole event rather than
-    // shuffling as games are added.
-    $chan = ((int)$g['table_id'] % 5) + 1;
+// THE COLOUR KEY comes from the table NUMBER, not its row id. Two reasons:
+    // the number is what the visitor sees ("Table #2") and is 1,2,3… per event,
+    // so adjacent tables always differ and the key is stable; and it is the one
+    // value the TIMELINE can also derive, which is what lets a game's band
+    // there match its strip here. Falls back to the row id if the render var is
+    // ever absent, so an older caller still gets a colour rather than none.
+    $chan = (((int)($table_no ?? $g['table_id'])) % 5) + 1;
     // The track draws a chip per seat, capped so a huge game stays one row.
     $trackSlots = min($max, 12);
     ?>
@@ -92,6 +95,14 @@
             <?php // ---- Data cells: label above value, the way a panel legend
                   // annotates a diagram. ---- ?>
             <div class="sc-cells">
+                <?php // The box art, sized to the cell row so it reads as the first
+                      // chip in the strip's data run rather than a floating image.
+                      // Placed here rather than out beside the roster because this
+                      // row always exists and is always the same height — the track
+                      // wraps, so the space next to it is not reliably free. ?>
+                <?php if (!empty($g['thumbnail'])): ?>
+                    <span class="sc-cell sc-cell-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></span>
+                <?php endif; ?>
                 <span class="sc-cell sc-cell-weight weight-<?= $bucket ?>">
                     <span class="sc-key"><?= e(t('cl_weight')) ?></span>
                     <span class="sc-val"><?= e(number_format((float)$g['weight'], 1, ',', '')) ?></span>

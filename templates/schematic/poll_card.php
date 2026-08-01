@@ -29,7 +29,13 @@ $canEnd = !$readonly && is_logged_in()
 $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
 $canMsgAll   = !$readonly && messaging_allowed();
 $canAddCand  = !$readonly && poll_can_add_candidate($poll);
-$chan        = ((int)$poll['table_id'] % 5) + 1;
+// THE COLOUR KEY comes from the table NUMBER, not its row id. Two reasons:
+    // the number is what the visitor sees ("Table #2") and is 1,2,3… per event,
+    // so adjacent tables always differ and the key is stable; and it is the one
+    // value the TIMELINE can also derive, which is what lets a game's band
+    // there match its strip here. Falls back to the row id if the render var is
+    // ever absent, so an older caller still gets a colour rather than none.
+    $chan = (((int)($table_no ?? $poll['table_id'])) % 5) + 1;
 ?>
 <article class="poll-card sc-strip sc-poll sc-chan-<?= $chan ?>" id="poll-<?= (int)$poll['id'] ?>">
 

@@ -305,7 +305,7 @@ body.tpl-schematic {
     opacity: 0.85;
     font-variant-numeric: tabular-nums;
 }
-.tpl-schematic .sc-id-num:before{
+.tpl-schematic .game-card .sc-id-num:before{
     content:'#';
 }
 .tpl-schematic .sc-body { flex: 1 1 auto; min-width: 0; padding: 0.5rem 0.75rem 0.6rem; }
@@ -354,6 +354,22 @@ body.tpl-schematic {
     justify-content: flex-end;
 }
 .tpl-schematic .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
+/* The box-art chip: square, sized off the cell row so it lines up with the
+   keys beside it. object-fit:cover keeps a non-square thumbnail from
+   distorting — it crops instead, which is right for box art. */
+.tpl-schematic .sc-cell-thumb {
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+.tpl-schematic .sc-cell-thumb img {
+    display: block;
+    width: 42px;
+    height: 100%;
+    min-height: 42px;
+    object-fit: cover;
+}
 .tpl-schematic .sc-key {
     font-size: 0.58rem;
     letter-spacing: 0.14em;
@@ -644,10 +660,22 @@ body.tpl-schematic {
     background: var(--paper);
     color: var(--ink);
     border: 1px solid var(--rule);
-    border-left: 3px solid var(--ch4);
+    border-left: 3px solid var(--chan);
     border-radius: 0;
     font-weight: 700;
 }
+/* The timeline band matches its strip's colour. It cannot be done with
+   nth-child, which was the obvious idea: a table's lanes are NOT wrapped —
+   .tl-table-no and .tl-lane are flat siblings and a table emits a VARIABLE
+   number of lanes when its games overlap, so positional counting drifts out of
+   step after the first table that needs two. The block carries the channel as
+   a class instead, derived from the same table number the card uses, so the
+   two agree by construction rather than by coincidence. */
+.tpl-schematic .tl-chan-1 { --chan: var(--ch1); }
+.tpl-schematic .tl-chan-2 { --chan: var(--ch2); }
+.tpl-schematic .tl-chan-3 { --chan: var(--ch3); }
+.tpl-schematic .tl-chan-4 { --chan: var(--ch4); }
+.tpl-schematic .tl-chan-5 { --chan: var(--ch5); }
 .tpl-schematic .tl-game:hover { background: var(--paper-2); }
 .tpl-schematic .tl-count-full { color: #b03060; }
 /* Unresolved: the base sheet paints this near-white, which on the graphite
@@ -720,5 +748,17 @@ body.tpl-schematic {
     /* Weight and length are the first things to go when there is no room —
        the vote tally and the control have to survive. */
     .tpl-schematic .sc-module .weight-badge { display: none; }
+    /* A logged-in admin sees four poll controls (delete / edit / end / add), and
+       .sc-actions is a nowrap inline-flex that will not shrink — so they ran
+       straight off the side of the card. Given its own full-width line here,
+       free to wrap onto a second row. */
+    .tpl-schematic .sc-actions {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-top: 0.25rem;
+    }
+    /* The thumbnail gives up its column first when the cell row gets tight. */
+    .tpl-schematic .sc-cell-thumb img { width: 34px; min-height: 34px; }
     .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }

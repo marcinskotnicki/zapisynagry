@@ -38,13 +38,13 @@
                     <div class="tl-lane">
                         <?php foreach ($lane as $b): // one block, positioned + sized by % ?>
                             <?php if (($b['type'] ?? 'game') === 'poll'): // provisional 2h poll block ?>
-                                <a class="tl-game tl-poll" href="#poll-<?= (int)$b['id'] ?>"
+                                <a class="tl-game tl-poll tl-chan-<?= ((int)$tbl['number'] % 5) + 1 ?>" href="#poll-<?= (int)$b['id'] ?>"
                                    style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
                                     <span class="tl-name"><?= e($b['name']) ?></span>
                                     <span class="tl-sub"><?= e($b['start_time']) ?></span>
                                 </a>
                             <?php else: ?>
-                                <a class="tl-game" href="#game-<?= (int)$b['id'] ?>"
+                                <a class="tl-game tl-chan-<?= ((int)$tbl['number'] % 5) + 1 ?>" href="#game-<?= (int)$b['id'] ?>"
                                    style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
                                     <span class="tl-name"><?= e($b['name']) ?></span>
                                     <span class="tl-sub"><?= e($b['start_time']) ?>,

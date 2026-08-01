@@ -95,9 +95,14 @@ $tokenQS = $readonly ? ('&e=' . urlencode($event['access_token'])) : '';
                 <div class="game-list">
                     <?php foreach ($tbl['items'] as $item): // items are time-sorted games + polls ?>
                         <?php if ($item['type'] === 'poll'): ?>
-                            <?php tpl_render('poll_card', ['poll' => $item['data'], 'readonly' => $readonly]); ?>
+                            <?php tpl_render('poll_card', ['poll' => $item['data'], 'readonly' => $readonly, 'table_no' => (int)$tbl['table_number']]); ?>
                         <?php else: ?>
-                            <?php tpl_render('game_card', ['g' => $item['data'], 'readonly' => $readonly]); ?>
+                            <?php // table_no is passed for themes that key a colour off the
+                                  // table (schematic). Inert everywhere else — an unused
+                                  // render var costs nothing. It is the table NUMBER, not
+                                  // its row id, so the key matches what the visitor sees
+                                  // and what the timeline can derive. ?>
+                            <?php tpl_render('game_card', ['g' => $item['data'], 'readonly' => $readonly, 'table_no' => (int)$tbl['table_number']]); ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
