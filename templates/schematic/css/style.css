@@ -765,7 +765,5 @@ body.tpl-schematic {
         justify-content: flex-start;
         margin-top: 0.25rem;
     }
-    /* The thumbnail gives up its column first when the cell row gets tight. */
-    .tpl-schematic .sc-cell-thumb img { min-height: 34px; max-width: 68px; }
     .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }
