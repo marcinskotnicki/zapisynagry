@@ -13,6 +13,7 @@
  *    4. reCAPTCHA v3 token minting on form submit (invisible captcha mode).
  *    5. Poll deadline live preview (add_poll.php): "resolves on ..." text.
  *    6. BGG search guard: no searching with an empty game name.
+ *    7. Double-submit guard: a second click cannot post the form twice.
  *  This file grows in the front-end phase (modals, add-game flow, etc.).
  * ========================================================================== */
 (function () {
@@ -25,6 +26,7 @@
         initRecaptchaV3();
         initPollDeadlinePreview();
         initBggSearchGuard();
+        initDoubleSubmitGuard();
     });
 
     /* ---- 1. Date cascade --------------------------------------------------- */
@@ -234,6 +236,94 @@
             }
             nameInput.addEventListener('input', sync);
             sync();
+        });
+    }
+
+    /* -----------------------------------------------------------------------
+     *  7. Double-submit guard.
+     * -----------------------------------------------------------------------
+     *  Clicking a submit button twice before the page navigates posted the form
+     *  twice, which added the game or the player twice. This blocks the second
+     *  one.
+     *
+     *  THREE THINGS THIS DELIBERATELY DOES NOT DO, each of which is a way the
+     *  obvious version breaks something:
+     *
+     *  1. It does NOT disable the button inside the handler. Nine submit
+     *     buttons in this app carry a name/value the controller branches on
+     *     (`choice=archive`, `do=finish`, `go=bgg`, …) and a disabled control
+     *     is not serialised — disabling it before the browser builds the
+     *     payload silently strips that value, so delete_game.php would receive
+     *     no `choice` at all. The disable is deferred to a 0ms timeout, which
+     *     runs after serialisation.
+     *
+     *  2. It hooks `submit`, not `click`. The submit event only fires once
+     *     HTML5 validation has PASSED, so a form that fails validation never
+     *     gets locked. Locking on click would leave a required-field form dead
+     *     until reload.
+     *
+     *  3. It re-enables on `pageshow`. Coming back via the browser's Back
+     *     button can restore the page from the bfcache with the buttons still
+     *     disabled — the form would look permanently dead.
+     *
+     *  The reCAPTCHA v3 path above preventDefaults and later calls
+     *  form.submit() directly; a programmatic submit does not fire this event,
+     *  so it passes through the guard rather than being blocked by it.
+     *
+     *  This is a client-side guard and an impatient-user fix, not a guarantee:
+     *  it does nothing for a replayed request or a browser with JS off. The
+     *  server-side protections (CSRF, the anti-bot timing check) are unchanged
+     *  and still do their own job.
+     */
+    function initDoubleSubmitGuard() {
+        /* Registered once, even if this file is somehow initialised twice (a
+         * duplicated <script>, a second DOMContentLoaded). Two copies of this
+         * listener would be worse than none: the first sets the flag, the
+         * second immediately sees it set and blocks the very submit that just
+         * set it, killing EVERY form on the page. Caught exactly that way while
+         * testing, where the harness fired DOMContentLoaded a second time. */
+        if (document.documentElement.dataset.dsGuard === '1') return;
+        document.documentElement.dataset.dsGuard = '1';
+
+        document.addEventListener('submit', function (ev) {
+            var form = ev.target;
+            if (!form || form.tagName !== 'FORM') return;
+            if (form.hasAttribute('data-allow-resubmit')) return;   // opt-out hook
+
+            if (form.dataset.submitting === '1') {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                return;
+            }
+            form.dataset.submitting = '1';
+
+            // Deferred so the button's own name/value is already in the payload.
+            window.setTimeout(function () {
+                var controls = form.querySelectorAll(
+                    'button[type="submit"], input[type="submit"], button:not([type])');
+                for (var i = 0; i < controls.length; i++) {
+                    controls[i].disabled = true;
+                    controls[i].setAttribute('aria-busy', 'true');
+                }
+                form.classList.add('is-submitting');
+            }, 0);
+        });
+
+        // bfcache restore: undo the lock, or Back leaves a dead form.
+        window.addEventListener('pageshow', function (ev) {
+            if (!ev.persisted) return;
+            var forms = document.querySelectorAll('form[data-submitting="1"], form.is-submitting');
+            for (var i = 0; i < forms.length; i++) {
+                var f = forms[i];
+                delete f.dataset.submitting;
+                f.classList.remove('is-submitting');
+                var controls = f.querySelectorAll(
+                    'button[type="submit"], input[type="submit"], button:not([type])');
+                for (var j = 0; j < controls.length; j++) {
+                    controls[j].disabled = false;
+                    controls[j].removeAttribute('aria-busy');
+                }
+            }
         });
     }
 
