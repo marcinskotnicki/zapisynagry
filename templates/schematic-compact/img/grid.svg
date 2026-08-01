@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <!-- Technical drawing grid for the page ground. Two scales, the way real
+       engineering paper is ruled: a fine 20px grid with a heavier line every
+       80px. Every line lands exactly on the tile edge, so copies join without
+       a doubled or missing rule at the seam. -->
+  <g stroke="#7c8896" fill="none">
+    <g stroke-width="0.5" opacity="0.30">
+      <path d="M20 0V160M40 0V160M60 0V160M100 0V160M120 0V160M140 0V160"/>
+      <path d="M0 20H160M0 40H160M0 60H160M0 100H160M0 120H160M0 140H160"/>
+    </g>
+    <g stroke-width="0.9" opacity="0.45">
+      <path d="M80 0V160"/><path d="M0 80H160"/>
+      <path d="M0 0V160M160 0V160"/><path d="M0 0H160M0 160H160"/>
+    </g>
+  </g>
+  <!-- Registration cross at the intersection: the mark a drawing carries for
+       plate alignment. -->
+  <g stroke="#7c8896" stroke-width="0.9" opacity="0.55">
+    <path d="M74 80H86M80 74V86"/>
+  </g>
+  <circle cx="80" cy="80" r="4" fill="none" stroke="#7c8896" stroke-width="0.6" opacity="0.4"/>
+</svg>
