@@ -86,13 +86,10 @@
    fixed so the panels scroll over them like sheets on a desk. */
 body.tpl-schematic-compact {
     background-color: var(--board);
-    background-image:
-        url("../img/rosette.svg"),
-        url("../img/grid.svg"),
-        radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);
+    background-image: url(../img/rosette.svg), url(../img/grid.svg), radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);
     background-repeat: no-repeat, repeat, no-repeat;
-    background-size: 620px 620px, 160px 160px, 100% 100%;
-    background-position: right -160px bottom -140px, top left, top center;
+    background-size: 1220px 1220px, 160px 160px, 100% 100%;
+    background-position: left -500px top -400px, top left, top center;
     background-attachment: fixed, fixed, fixed;
     color: var(--paper);
     font-family: var(--font-sc);
@@ -781,4 +778,9 @@ body.tpl-schematic-compact {
         margin-top: 0.25rem;
     }
     .tpl-schematic-compact .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
+
+    body.tpl-schematic-compact {
+        background-size: 620px 620px, 160px 160px, 100% 100%;
+        background-position: left -160px top -140px, top left, top center;
+    }
 }
