@@ -468,8 +468,14 @@ body.tpl-schematic {
 .tpl-schematic .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
 
 /* ---- Polls: candidates as side-by-side modules --------------------------- */
+/* The hazard stripe marks a poll as unresolved, but at .18 white it threw
+   enough contrast to break up the time sitting on top of it. Dropped to .07
+   and widened: the pattern still reads as "not settled", while the block stays
+   near enough to a flat channel colour for white text to hold. The text also
+   gets its own shadow below. */
 .tpl-schematic .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
-    var(--chan) 0 8px, rgba(255, 255, 255, .18) 8px 16px); }
+    var(--chan) 0 11px, rgba(255, 255, 255, .07) 11px 22px); }
+.tpl-schematic .sc-poll .sc-id-time { text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
 .tpl-schematic .sc-poll .poll-tag {
     background: rgba(0, 0, 0, .3);
     color: #fff;
@@ -482,29 +488,36 @@ body.tpl-schematic {
 }
 .tpl-schematic .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
 .tpl-schematic .poll-by strong { color: var(--ink); }
+/* Candidates stack as full-width ROWS, not side-by-side tiles. Tiles made each
+   option as tall as its tallest element and left the name fighting for width;
+   a row reads like a line in a table, which is what a candidate list is. */
 .tpl-schematic .sc-modules {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    flex-direction: column;
+    gap: 3px;
     list-style: none;
     margin: 0 0 0.5rem;
     padding: 0;
 }
 .tpl-schematic .sc-module {
-    flex: 1 1 190px;
+    position: relative;          /* the gauge is pinned to this box's bottom edge */
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
     background: var(--paper-2);
     border: 1px solid var(--rule);
-    border-top: 3px solid var(--chan);
+    border-left: 3px solid var(--chan);
     border-radius: 0;
-    padding: 0.4rem 0.5rem;
-    /* Same chamfer as the strip, one scale down — the shape is the system. */
-    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+    /* Bottom padding leaves the gauge its own strip along the edge, so it never
+       sits under the text. */
+    padding: 0.25rem 0.5rem 0.4rem;
+    clip-path: none;             /* a chamfer on a thin row just clips the text */
 }
-.tpl-schematic .sc-module-full { border-top-color: #2f7f4a; }
-.tpl-schematic .sc-module-head { min-width: 0; }
+.tpl-schematic .sc-module-full { border-left-color: #2f7f4a; }
+/* The name takes the room left over, and truncates rather than wrapping the
+   row onto a second line. */
+.tpl-schematic .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpl-schematic .poll-opt-name, .tpl-schematic a.poll-opt-name {
     color: var(--ink);
     font-weight: 700;
@@ -512,20 +525,32 @@ body.tpl-schematic {
     text-decoration: none;
 }
 .tpl-schematic a.poll-opt-name { border-bottom: 1px solid var(--chan); }
-.tpl-schematic .poll-opt-meta { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
+/* The figures sit inline after the name, not on their own line. */
+.tpl-schematic .poll-opt-meta {
+    display: flex; align-items: center; gap: 0.45rem; margin: 0;
+    flex: 0 0 auto; white-space: nowrap;
+}
 .tpl-schematic .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+/* The vote control is pushed to the right edge by an auto margin, so it lands
+   in the same place on every row and the column can be scanned. */
+.tpl-schematic .sc-module > .btn,
+.tpl-schematic .sc-module > form.inline { margin-left: auto; flex: 0 0 auto; }
 .tpl-schematic .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
 /* The gauge: a ruled track, its fill in the channel colour, turning green once
    the candidate has the players it needs. */
+/* The gauge runs along the row's BOTTOM EDGE — a fill line under the option
+   rather than a separate object taking its own line. Absolute against the row,
+   so it costs no height in the flex flow. */
 .tpl-schematic .poll-opt-bar {
-    position: relative;
-    height: 8px;
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
     background: var(--paper-3);
-    border: 1px solid var(--rule);
+    border: none;
+    border-top: 1px solid var(--rule);
 }
-.tpl-schematic .poll-opt-bar > span { background: var(--chan); }
+.tpl-schematic .poll-opt-bar > span { display: block; height: 100%; background: var(--chan); }
 .tpl-schematic .poll-opt-bar.is-full > span { background: #2f7f4a; }
-.tpl-schematic .sc-module .btn { align-self: flex-start; }
 
 /* ---- Timeline -------------------------------------------------------------- */
 .tpl-schematic .timeline { background: rgba(35, 43, 55, .8); border: 1px solid rgba(185, 178, 161, .28); border-radius: 0; }
@@ -599,6 +624,17 @@ body.tpl-schematic {
         padding: 0.3rem 0.6rem;
     }
     .tpl-schematic .sc-slot-name { max-width: 8rem; }
-    .tpl-schematic .sc-module { flex: 1 1 100%; }
+    /* The base sheet's mobile rule drops a poll option's vote control onto its
+       own full-width line (added when options were a stacked list). These rows
+       are already narrow and inline, so that would undo the change: keep the
+       control on the row and let the NAME give up width instead. */
+    .tpl-schematic .sc-module { flex-wrap: nowrap; row-gap: 0; }
+    .tpl-schematic .sc-module > .btn,
+    .tpl-schematic .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
+    .tpl-schematic .sc-module > form.inline .btn { width: auto; }
+    .tpl-schematic .sc-module-head { max-width: 45%; }
+    /* Weight and length are the first things to go when there is no room —
+       the vote tally and the control have to survive. */
+    .tpl-schematic .sc-module .weight-badge { display: none; }
     .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }
