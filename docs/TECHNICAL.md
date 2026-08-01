@@ -308,6 +308,23 @@ migrates the schema by diffing the live database against `database.sql`:
 It then calls `opcache_reset()` and `clearstatcache()`, or the old bytecode
 lingers.
 
+**It refuses to leave a half-overlaid tree.** `update_rcopy()` checks every
+`copy()` return value and verifies each file's size afterwards; any failure
+aborts the run before the schema step and names the affected files, so an admin
+knows what to re-upload. The downloaded archive is also opened with
+`ZipArchive::CHECKCONS` and every entry size-checked *before* the overlay
+begins, so a truncated download costs nothing.
+
+This is not hypothetical: the copy used to be a bare `@copy()` with its return
+value discarded, so a file that failed to write was skipped in silence while
+the update reported success. That shipped a server where
+`templates/light/header.php` had been replaced but `inc/template.php` had not —
+and since the header calls a function that file defines, and every page renders
+the header, the entire site fataled. When a template calls a helper from
+`inc/`, the two files are one change; guarding such calls with
+`function_exists()` in `header.php`/`footer.php` is cheap insurance, because
+those two run on every page.
+
 **It only ever adds, and never deletes.** Files removed from the repo stay on the
 server, so deletions must be done by hand. Local-only indexes are left alone.
 

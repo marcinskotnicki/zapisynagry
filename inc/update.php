@@ -87,15 +87,34 @@ function update_download($url, $dest) {
  * doesn't abort the whole overlay.
  * @return void
  */
-function update_rcopy($src, $dst) {
+function update_rcopy($src, $dst, array &$failed = null) {
     if (is_dir($src)) {
-        if (!is_dir($dst)) @mkdir($dst, 0775, true);
+        if (!is_dir($dst) && !@mkdir($dst, 0775, true) && !is_dir($dst)) {
+            if ($failed !== null) $failed[] = $dst;
+            return;
+        }
         foreach (scandir($src) as $i) {
             if ($i === '.' || $i === '..') continue;
-            update_rcopy($src . '/' . $i, $dst . '/' . $i);
+            update_rcopy($src . '/' . $i, $dst . '/' . $i, $failed);
         }
     } else {
-        @copy($src, $dst);
+        // The @ suppresses the warning, NOT the failure — the return value is
+        // what matters and it used to be discarded entirely. A file that
+        // failed to copy (locked by opcache, a transient permission problem, a
+        // full disk) was skipped silently and the update still reported
+        // success. That shipped a half-updated tree once: a template was
+        // written but the inc/ file defining the function it calls was not, so
+        // every page fataled.
+        if (!@copy($src, $dst)) {
+            if ($failed !== null) $failed[] = $dst;
+            return;
+        }
+        // Byte-for-byte check. copy() can return true having written a short
+        // file if the disk filled mid-write, and a truncated PHP file is worse
+        // than a missing one — it parses far enough to break confusingly.
+        if (filesize($src) !== @filesize($dst) && $failed !== null) {
+            $failed[] = $dst;
+        }
     }
 }
 
@@ -222,12 +241,33 @@ function update_run($root) {
     $tmp = $root . '/_update_tmp_' . bin2hex(random_bytes(4));
     @mkdir($tmp, 0775, true);
     $za = new ZipArchive();
-    if ($za->open($zip) !== true || !$za->extractTo($tmp)) {
+    // CHECKCONS validates the archive's internal consistency on open, which
+    // catches a truncated download — a half-received zip can still open and
+    // extract its early entries happily, producing exactly the partial tree
+    // this whole guard exists to prevent.
+    if ($za->open($zip, ZipArchive::CHECKCONS) !== true || !$za->extractTo($tmp)) {
         $za->close(); @unlink($zip); update_rrmdir($tmp);
         return [t('update_failed', 'unzip')];
     }
+
+    // Every entry must have landed at its declared size before we touch the
+    // live tree. Verifying here rather than after the overlay means a bad
+    // download costs nothing — the app is still untouched at this point.
+    $shortEntries = [];
+    for ($i = 0; $i < $za->numFiles; $i++) {
+        $st = $za->statIndex($i);
+        if (!$st || substr($st['name'], -1) === '/') continue;
+        $out = $tmp . '/' . $st['name'];
+        if (!is_file($out) || filesize($out) !== $st['size']) {
+            $shortEntries[] = $st['name'];
+        }
+    }
     $za->close();
     @unlink($zip);                                   // zip no longer needed
+    if ($shortEntries) {
+        update_rrmdir($tmp);
+        return [t('update_failed', 'incomplete archive: ' . count($shortEntries) . ' file(s)')];
+    }
 
     $src = update_extracted_root($tmp);              // the "<repo>-<branch>/" wrapper
     if (!$src) { update_rrmdir($tmp); return [t('update_failed', 'empty archive')]; }
@@ -236,11 +276,30 @@ function update_run($root) {
     // server owns (settings, data, uploads) and things the release ships but
     // shouldn't deploy (docs, tests).
     $skip = array_merge(update_protected_paths(), update_skipped_paths());
+    $failed = [];
     foreach (scandir($src) as $item) {
         if ($item === '.' || $item === '..') continue;
         if (in_array($item, $skip, true)) continue;
-        update_rcopy($src . '/' . $item, $root . '/' . $item);
+        update_rcopy($src . '/' . $item, $root . '/' . $item, $failed);
     }
+
+    // STOP HERE if anything failed to land. A partially-overlaid tree is the
+    // worst outcome available: files that reference each other get out of step
+    // (a template calling a helper its inc/ file no longer defines takes every
+    // page down), and carrying on to migrate the schema would compound it.
+    //
+    // Reporting the names matters as much as stopping — the admin needs to
+    // know WHICH files to re-upload by hand, which is exactly the information
+    // the silent version threw away.
+    if ($failed) {
+        update_rrmdir($tmp);
+        $results[] = t('update_failed', 'copy: ' . implode(', ', array_map(
+            function ($f) use ($root) { return ltrim(str_replace($root, '', $f), '/'); },
+            array_slice($failed, 0, 12)
+        )) . (count($failed) > 12 ? ' (+' . (count($failed) - 12) . ')' : ''));
+        return $results;
+    }
+
     update_rrmdir($tmp);                             // clean up the extraction dir
     $results[] = t('update_files_ok');
 
