@@ -90,6 +90,9 @@ body.tpl-imperial {
     color: var(--vellum);
     font-family: var(--font-im);
 }
+.tpl-imperial .admin .tab-body{color:var(--vellum);}
+
+}
 .tpl-imperial .content { max-width: var(--maxw); }
 
 /* ---- Lettering ------------------------------------------------------------ */
