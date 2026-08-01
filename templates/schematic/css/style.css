@@ -97,8 +97,11 @@ body.tpl-schematic {
     color: var(--paper);
     font-family: var(--font-sc);
 }
-.tpl-schematic .tab-body{
+.tpl-schematic .admin .tab-body{
     color: var(--board);
+}
+.tpl-schematic .admin .tab {
+    color: var(--paper)
 }
 .tpl-schematic .content { max-width: var(--maxw); }
 
