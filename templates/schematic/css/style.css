@@ -363,12 +363,20 @@ body.tpl-schematic {
     overflow: hidden;
     flex: 0 0 auto;
 }
+/* Height-locked, width free: the box sets the row's height (matching the other
+   cells) and the image supplies its own natural width at that height, so a
+   portrait or landscape cover keeps its real proportions instead of being
+   cropped to a square. object-fit:contain rather than cover is what makes
+   that possible — cover would still fill a fixed box and crop; contain lets
+   the box follow the image. width:auto is the default, stated for clarity
+   since the earlier fixed 42px is exactly what this replaces. */
 .tpl-schematic .sc-cell-thumb img {
     display: block;
-    width: 42px;
+    width: auto;
     height: 100%;
     min-height: 42px;
-    object-fit: cover;
+    max-width: 90px;   /* a very wide cover still gives the row's text room */
+    object-fit: contain;
 }
 .tpl-schematic .sc-key {
     font-size: 0.58rem;
@@ -759,6 +767,6 @@ body.tpl-schematic {
         margin-top: 0.25rem;
     }
     /* The thumbnail gives up its column first when the cell row gets tight. */
-    .tpl-schematic .sc-cell-thumb img { width: 34px; min-height: 34px; }
+    .tpl-schematic .sc-cell-thumb img { min-height: 34px; max-width: 68px; }
     .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }
