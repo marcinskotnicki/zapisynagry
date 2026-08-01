@@ -1,21 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="-120 -60 240 120">
-  <!-- A double-headed eagle device, reduced to a stamped silhouette and used
-       once, very large and very faint, as the ambient watermark. Built from a
-       mirrored half so the two sides cannot drift apart. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="140" viewBox="-130 -70 260 140">
+  <!-- The aquila watermark: one large, very faint device fixed behind the page.
+       Built from a MIRRORED half so the two sides cannot drift apart, and
+       detailed enough to reward a second look — individual pinions with quills,
+       a laurel, and a hatched breast — while staying quiet enough at low
+       opacity to read as a mark pressed into the surface rather than a picture
+       hung on it. -->
   <defs>
     <g id="half">
-      <!-- wing: three descending pinions -->
-      <path d="M8 -14 L44 -30 L40 -18 L70 -26 L62 -12 L88 -16 L74 2 L44 6 L20 2 Z"/>
-      <!-- head + beak, turned outward -->
-      <path d="M9 -20 q6 -14 18 -16 q-2 8 -8 11 q7 1 9 6 q-8 3 -14 1 q-4 2 -5 -2 z"/>
-      <!-- tail feathers -->
-      <path d="M6 4 L18 8 L12 34 L4 42 Z"/>
+      <!-- Wing: five pinions, each drawn as its own shape with a quill line,
+           descending in length the way real flight feathers do. -->
+      <g class="pinions">
+        <path d="M10 -20 L40 -34 L46 -27 L18 -14 Z"/>
+        <path d="M14 -13 L52 -25 L57 -17 L20 -7 Z"/>
+        <path d="M17 -6 L62 -15 L66 -6 L22 0 Z"/>
+        <path d="M19 1 L68 -3 L70 6 L23 7 Z"/>
+        <path d="M20 8 L66 11 L66 19 L22 14 Z"/>
+      </g>
+      <!-- Quill lines down each pinion: the detail that reads as feather
+           rather than as a blade. -->
+      <g stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75">
+        <path d="M14 -18 L42 -30"/><path d="M17 -11 L52 -21"/>
+        <path d="M20 -4 L61 -11"/><path d="M21 3 L67 1"/><path d="M22 10 L64 15"/>
+      </g>
+      <!-- Coverts: the short overlapping feathers at the wing root. -->
+      <g opacity=".85">
+        <path d="M8 -16 L20 -20 L22 -12 L10 -9 Z"/>
+        <path d="M9 -7 L22 -10 L23 -2 L11 0 Z"/>
+        <path d="M10 2 L23 1 L23 9 L11 9 Z"/>
+      </g>
+      <!-- Head turned outward: crown, eye socket, hooked beak. -->
+      <path d="M9 -24 q3 -13 14 -17 q3 6 -1 11 q6 0 9 5 q-6 4 -13 3 l-6 4 z"/>
+      <circle cx="17" cy="-31" r="1.6" fill="#14110e"/>
+      <!-- Tail: three splayed feathers rather than one slab. -->
+      <path d="M6 16 L14 19 L11 40 L5 47 Z"/>
+      <path d="M13 18 L20 22 L17 38 L11 42 Z"/>
+      <!-- A laurel spray tucked under the wing. -->
+      <g opacity=".7">
+        <path d="M26 18 q10 4 16 12 q-10 1 -16 -6 z"/>
+        <path d="M34 24 q9 5 13 13 q-9 0 -14 -7 z"/>
+      </g>
     </g>
   </defs>
-  <g fill="#a8863f">
+  <!-- The whole device is faded here rather than in CSS: a background
+       layer has no opacity property of its own, and fading the body
+       would take the page content with it. Low enough to read as a
+       pressed mark, strong enough that the detail is findable. -->
+  <g fill="#a8863f" stroke="#a8863f" opacity="0.20">
     <use href="#half"/>
     <use href="#half" transform="scale(-1,1)"/>
-    <!-- central body -->
-    <path d="M-8 -18 L8 -18 L10 6 L0 44 L-10 6 Z"/>
+    <!-- Body: a tapered breast down to the tail, hatched so it does not read
+         as a flat slab at this size. -->
+    <path d="M-9 -22 L9 -22 L11 8 L0 50 L-11 8 Z" stroke="none"/>
+    <g stroke="#14110e" stroke-width="0.8" opacity=".35" fill="none">
+      <path d="M-7 -14 H7"/><path d="M-7 -7 H7"/><path d="M-8 0 H8"/>
+      <path d="M-8 7 H8"/><path d="M-6 14 H6"/><path d="M-5 21 H5"/>
+    </g>
+    <!-- A small skull device at the throat, the way the Imperial aquila
+         usually carries one. -->
+    <g stroke="none">
+      <path d="M0 -30 q7 0 7 7 q0 5 -3 7 l1 4 h-10 l1 -4 q-3 -2 -3 -7 q0 -7 7 -7 z"/>
+    </g>
+    <g fill="#14110e" opacity=".55" stroke="none">
+      <circle cx="-2.6" cy="-25" r="1.5"/><circle cx="2.6" cy="-25" r="1.5"/>
+    </g>
   </g>
 </svg>

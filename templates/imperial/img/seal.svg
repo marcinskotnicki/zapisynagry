@@ -1,13 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="120" height="150" viewBox="0 0 120 150">
-  <!-- Purity seal: two wax-stained ribbons hanging from a pressed wax disc.
-       The DISC is deliberately empty in the middle — the card stamps the
-       game's weight into it as live text, so the seal reports real data
-       instead of being a sticker. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="160" viewBox="0 0 120 160">
+  <!-- Purity seal: two stamped ribbons hanging BEHIND a pressed wax disc.
+       Paint order is load-bearing — ribbons first, disc second, so the disc
+       sits on top the way real wax is pressed over the ribbon ends.
+
+       The wax is a red-VIOLET rather than a flat scarlet: real sealing wax is
+       cut with shellac and reads cooler and deeper than pure red, and the blue
+       in it is what keeps the seal from dissolving into the parchment's warm
+       tones. The disc is deliberately empty in the middle — the card stamps
+       the game's weight into it as live text. -->
   <defs>
-    <radialGradient id="wax" cx="36%" cy="30%" r="72%">
-      <stop offset="0%"   stop-color="#c4392c"/>
-      <stop offset="55%"  stop-color="#8c1c13"/>
-      <stop offset="100%" stop-color="#4d0d07"/>
+    <!-- Lit from upper-left, cooling to a blue-violet shadow at the lower
+         right, with a near-black rim. Three stops, not two: wax has a soft
+         shoulder where the dome turns away from the light. -->
+    <radialGradient id="wax" cx="34%" cy="26%" r="78%">
+      <stop offset="0%"   stop-color="#d4574a"/>
+      <stop offset="34%"  stop-color="#a8281d"/>
+      <stop offset="70%"  stop-color="#6d1626"/>
+      <stop offset="100%" stop-color="#33101f"/>
+    </radialGradient>
+    <!-- The specular: a soft off-centre highlight, the giveaway that a surface
+         is domed rather than flat. -->
+    <radialGradient id="sheen" cx="32%" cy="24%" r="42%">
+      <stop offset="0%"   stop-color="#ffd9c8" stop-opacity=".55"/>
+      <stop offset="55%"  stop-color="#ffd9c8" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#ffd9c8" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Cool bounce along the lower-left edge: light picked up off the page. -->
+    <radialGradient id="bounce" cx="70%" cy="82%" r="45%">
+      <stop offset="0%"   stop-color="#5a7fb0" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#5a7fb0" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="vellum" x1="0" y1="0" x2="0.3" y2="1">
       <stop offset="0%"   stop-color="#e8dfc4"/>
@@ -15,26 +36,33 @@
       <stop offset="100%" stop-color="#a9a084"/>
     </linearGradient>
   </defs>
-  <!-- Ribbons: two strips of stamped parchment, hanging at slightly different
-       angles and lengths, because a hand pressed them there. -->
+
+  <!-- RIBBONS FIRST, so the disc covers their tops. -->
   <g stroke="#8a7f62" stroke-width="1">
-    <path d="M46 56 L38 146 L56 150 L62 58 Z" fill="url(#vellum)"/>
-    <path d="M62 56 L74 140 L90 134 L78 54 Z" fill="url(#vellum)"/>
+    <path d="M44 44 L34 152 L54 157 L60 46 Z" fill="url(#vellum)"/>
+    <path d="M62 44 L76 146 L94 140 L80 42 Z" fill="url(#vellum)"/>
   </g>
-  <!-- Faint ruled lines on the ribbons: illegible small print, the way the
-       real thing carries litanies nobody reads. -->
-  <g stroke="#8a7f62" stroke-width="0.8" opacity=".55">
-    <path d="M42 74 L59 75"/><path d="M41 86 L58 87"/><path d="M40 98 L57 99"/>
-    <path d="M39 110 L56 111"/><path d="M67 72 L79 70"/><path d="M69 84 L81 82"/>
-    <path d="M71 96 L83 94"/><path d="M73 108 L85 106"/>
+  <!-- Illegible litanies: small print nobody reads. -->
+  <g stroke="#8a7f62" stroke-width="0.7" opacity=".5">
+    <path d="M40 70 L57 71"/><path d="M39 82 L56 83"/><path d="M38 94 L55 95"/>
+    <path d="M37 106 L54 107"/><path d="M36 118 L53 119"/>
+    <path d="M67 68 L80 66"/><path d="M69 80 L82 78"/><path d="M71 92 L84 90"/>
+    <path d="M73 104 L86 102"/><path d="M75 116 L88 114"/>
   </g>
-  <!-- The wax disc, pressed slightly off-round because wax is. -->
-  <circle cx="60" cy="42" r="34" fill="url(#wax)" stroke="#3d0a05" stroke-width="1.5"/>
-  <circle cx="60" cy="42" r="27" fill="none" stroke="#5e1109" stroke-width="1.5" opacity=".8"/>
-  <!-- Radiating press marks around the rim: the die's serration. -->
-  <g stroke="#5e1109" stroke-width="1.6" opacity=".7">
-    <path d="M60 10 V17"/><path d="M83 19 L78 24"/><path d="M92 42 H85"/>
-    <path d="M83 65 L78 60"/><path d="M60 74 V67"/><path d="M37 65 L42 60"/>
-    <path d="M28 42 H35"/><path d="M37 19 L42 24"/>
+  <!-- A shadow cast by the disc onto the ribbons, so the disc reads as ABOVE
+       them rather than merely drawn after. -->
+  <ellipse cx="60" cy="48" rx="33" ry="10" fill="#2a1810" opacity=".35"/>
+
+  <!-- THE DISC, pressed over the ribbon ends. -->
+  <circle cx="60" cy="40" r="34" fill="url(#wax)" stroke="#2a0c16" stroke-width="1.5"/>
+  <circle cx="60" cy="40" r="34" fill="url(#bounce)"/>
+  <circle cx="60" cy="40" r="34" fill="url(#sheen)"/>
+  <!-- Inner die ring, and the serration the press leaves around the rim. -->
+  <circle cx="60" cy="40" r="27" fill="none" stroke="#3f0f1c" stroke-width="1.4" opacity=".85"/>
+  <circle cx="60" cy="40" r="28.5" fill="none" stroke="#e08a7a" stroke-width="0.6" opacity=".3"/>
+  <g stroke="#3f0f1c" stroke-width="1.7" opacity=".65">
+    <path d="M60 8 V15"/><path d="M83 17 L78 22"/><path d="M92 40 H85"/>
+    <path d="M83 63 L78 58"/><path d="M60 72 V65"/><path d="M37 63 L42 58"/>
+    <path d="M28 40 H35"/><path d="M37 17 L42 22"/>
   </g>
 </svg>

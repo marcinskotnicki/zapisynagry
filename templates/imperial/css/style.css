@@ -79,10 +79,13 @@ body.tpl-imperial {
     background-color: #14110e;
     background-image:
         url("../img/aquila.svg"),
-        radial-gradient(ellipse at 50% 0%, rgba(168, 134, 63, .10), transparent 58%);
+        radial-gradient(ellipse at 50% 0%, rgba(168, 134, 63, .07), transparent 58%);
     background-repeat: no-repeat, no-repeat;
-    background-size: 780px auto, 100% 100%;
-    background-position: center 12%, top center;
+    background-size: 900px auto, 100% 100%;
+    background-position: center 14%, top center;
+    /* The watermark's own fade lives INSIDE the SVG (a group opacity), not
+       here: `opacity` on the body would fade the entire page with it, and
+       background-image has no per-layer opacity property. */
     background-attachment: fixed, fixed;
     color: var(--vellum);
     font-family: var(--font-im);
@@ -173,7 +176,10 @@ body.tpl-imperial {
    red margin rule down its left edge the way a stamped form carries one. */
 .tpl-imperial .gc-info {
     width: 250px; flex: 0 0 250px;
-    position: relative; z-index: 1;
+    /* z-index 2 puts the record ABOVE the roster panel it overlaps, so the
+       seal (z-index 3, inside this stacking context) can hang over the join
+       instead of disappearing behind the roster. */
+    position: relative; z-index: 2;
     background-color: var(--vellum);
     background-image: url("../img/parchment.svg");
     background-size: 200px 200px;
@@ -208,7 +214,10 @@ body.tpl-imperial {
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ash);
-    padding: 0.35rem 0.5rem 0.25rem;
+    padding: 0.35rem 0.5rem 0.3rem;
+    /* Right padding keeps the sanctioned hour clear of the seal hanging off
+       the edge below it. */
+    padding-right: 2.6rem;
     border-bottom: 1px solid rgba(26, 22, 19, .25);
 }
 .tpl-imperial .im-ref { color: var(--imperial); font-weight: 700; }
@@ -244,52 +253,50 @@ body.tpl-imperial {
    shared scale every other theme uses rather than a second one invented here. */
 .tpl-imperial .im-seal {
     position: absolute;
-    top: 2.2rem; right: -26px;
-    width: 72px; height: 90px;
+    /* Clear of the designation line above it. The seal used to start at 2.2rem
+       and sat straight on top of the file reference and the sanctioned hour —
+       it hangs BELOW that row now, not across it. */
+    top: 3.4rem; right: -30px;
+    width: 78px; height: 104px;
     background: url("../img/seal.svg") center top / contain no-repeat;
-    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+    /* A real drop shadow rather than a flat one: the seal is a physical object
+       lying on the sheet, so it casts. */
+    filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5));
     text-align: center;
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
 }
 .tpl-imperial .im-seal-value {
     display: block;
     font-family: var(--font-stamp);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     line-height: 1;
-    color: #f0dcc8;
-    padding-top: 1.15rem;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .6);
+    color: #f6e2d6;
+    padding-top: 1.05rem;
+    /* Struck INTO the wax: dark above, faint light below — the opposite of
+       raised lettering. */
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .75), 0 1px 0 rgba(255, 210, 190, .28);
 }
 .tpl-imperial .im-seal-label {
     display: block;
     font-family: var(--font-stamp);
-    font-size: 0.42rem;
-    letter-spacing: 0.14em;
+    font-size: 0.44rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(240, 220, 200, .75);
+    color: rgba(246, 226, 214, .7);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .6);
 }
-/* The wax takes the weight's colour. Multiply keeps the pressed highlights and
-   rim shadows from the SVG visible through the tint instead of flooding them. */
-.tpl-imperial .im-seal.weight-1 { background-color: transparent; }
-.tpl-imperial .im-seal.weight-1::after,
-.tpl-imperial .im-seal.weight-2::after,
-.tpl-imperial .im-seal.weight-3::after,
-.tpl-imperial .im-seal.weight-4::after,
-.tpl-imperial .im-seal.weight-5::after {
-    content: "";
-    position: absolute;
-    top: 8px; left: 6px;
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    mix-blend-mode: multiply;
-    pointer-events: none;
-}
-.tpl-imperial .im-seal.weight-1::after { background: #6f8a4a; }
-.tpl-imperial .im-seal.weight-2::after { background: #9a9a3c; }
-.tpl-imperial .im-seal.weight-3::after { background: #c08a2c; }
-.tpl-imperial .im-seal.weight-4::after { background: #b85a23; }
-.tpl-imperial .im-seal.weight-5::after { background: #8c1c13; }
+/* The wax takes its hue from the weight. `hue-rotate` on the whole element
+   rather than a tinted overlay: the previous ::after painted a flat disc over
+   everything — the sheen, the rim shadow AND the ribbons — which is what made
+   the seal look like a sticker with the layers in the wrong order. Rotating
+   the hue keeps every one of those highlights intact and only shifts the
+   colour, so a light game reads green-waxed and a heavy one stays blood red. */
+.tpl-imperial .im-seal.weight-1 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(108deg) saturate(.85); }
+.tpl-imperial .im-seal.weight-2 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(72deg)  saturate(.9); }
+.tpl-imperial .im-seal.weight-3 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(34deg)  saturate(1); }
+.tpl-imperial .im-seal.weight-4 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(14deg)  saturate(1.05); }
+.tpl-imperial .im-seal.weight-5 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)); }
 
 /* ---- Record rows ----------------------------------------------------------- */
 .tpl-imperial .gc-band {
