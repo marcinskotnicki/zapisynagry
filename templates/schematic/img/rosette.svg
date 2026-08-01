@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="-100 -100 200 200">
+  <!-- A dial/compass rosette, used once and very large as the ambient
+       watermark: the kind of calibrated ring these boards put at the centre of
+       a rondel. Ticks are GENERATED at exact 6-degree intervals rather than
+       eyeballed, with every fifth one long — a real instrument scale. -->
+  <g fill="none" stroke="#8fa0b3" stroke-linecap="round" opacity="0.5">
+    <circle r="92" stroke-width="1"/>
+    <circle r="78" stroke-width="0.6"/>
+    <circle r="46" stroke-width="1"/>
+    <circle r="40" stroke-width="0.6"/>
+    <circle r="12" stroke-width="1"/>
+    <!-- cardinal spokes -->
+    <g stroke-width="0.8">
+      <path d="M0 -92V-46"/><path d="M0 92V46"/><path d="M-92 0H-46"/><path d="M92 0H46"/>
+    </g>
+    <!-- chamfered inner frame, the panel shape this theme uses throughout -->
+    <path d="M-30 -30 H22 L30 -22 V30 H-22 L-30 22 Z" stroke-width="0.8"/>
+  </g>
+  <g stroke="#8fa0b3" stroke-linecap="round" opacity="0.5">
+    <path d="M0.00 -78.00 L0.00 -92.00" stroke-width="1.0"/>
+    <path d="M8.88 -84.53 L9.62 -91.50" stroke-width="0.5"/>
+    <path d="M17.67 -83.14 L19.13 -89.99" stroke-width="0.5"/>
+    <path d="M26.27 -80.84 L28.43 -87.50" stroke-width="0.5"/>
+    <path d="M34.57 -77.65 L37.42 -84.05" stroke-width="0.5"/>
+    <path d="M39.00 -67.55 L46.00 -79.67" stroke-width="1.0"/>
+    <path d="M49.96 -68.77 L54.08 -74.43" stroke-width="0.5"/>
+    <path d="M56.88 -63.17 L61.56 -68.37" stroke-width="0.5"/>
+    <path d="M63.17 -56.88 L68.37 -61.56" stroke-width="0.5"/>
+    <path d="M68.77 -49.96 L74.43 -54.08" stroke-width="0.5"/>
+    <path d="M67.55 -39.00 L79.67 -46.00" stroke-width="1.0"/>
+    <path d="M77.65 -34.57 L84.05 -37.42" stroke-width="0.5"/>
+    <path d="M80.84 -26.27 L87.50 -28.43" stroke-width="0.5"/>
+    <path d="M83.14 -17.67 L89.99 -19.13" stroke-width="0.5"/>
+    <path d="M84.53 -8.88 L91.50 -9.62" stroke-width="0.5"/>
+    <path d="M78.00 -0.00 L92.00 -0.00" stroke-width="1.0"/>
+    <path d="M84.53 8.88 L91.50 9.62" stroke-width="0.5"/>
+    <path d="M83.14 17.67 L89.99 19.13" stroke-width="0.5"/>
+    <path d="M80.84 26.27 L87.50 28.43" stroke-width="0.5"/>
+    <path d="M77.65 34.57 L84.05 37.42" stroke-width="0.5"/>
+    <path d="M67.55 39.00 L79.67 46.00" stroke-width="1.0"/>
+    <path d="M68.77 49.96 L74.43 54.08" stroke-width="0.5"/>
+    <path d="M63.17 56.88 L68.37 61.56" stroke-width="0.5"/>
+    <path d="M56.88 63.17 L61.56 68.37" stroke-width="0.5"/>
+    <path d="M49.96 68.77 L54.08 74.43" stroke-width="0.5"/>
+    <path d="M39.00 67.55 L46.00 79.67" stroke-width="1.0"/>
+    <path d="M34.57 77.65 L37.42 84.05" stroke-width="0.5"/>
+    <path d="M26.27 80.84 L28.43 87.50" stroke-width="0.5"/>
+    <path d="M17.67 83.14 L19.13 89.99" stroke-width="0.5"/>
+    <path d="M8.88 84.53 L9.62 91.50" stroke-width="0.5"/>
+    <path d="M0.00 78.00 L0.00 92.00" stroke-width="1.0"/>
+    <path d="M-8.88 84.53 L-9.62 91.50" stroke-width="0.5"/>
+    <path d="M-17.67 83.14 L-19.13 89.99" stroke-width="0.5"/>
+    <path d="M-26.27 80.84 L-28.43 87.50" stroke-width="0.5"/>
+    <path d="M-34.57 77.65 L-37.42 84.05" stroke-width="0.5"/>
+    <path d="M-39.00 67.55 L-46.00 79.67" stroke-width="1.0"/>
+    <path d="M-49.96 68.77 L-54.08 74.43" stroke-width="0.5"/>
+    <path d="M-56.88 63.17 L-61.56 68.37" stroke-width="0.5"/>
+    <path d="M-63.17 56.88 L-68.37 61.56" stroke-width="0.5"/>
+    <path d="M-68.77 49.96 L-74.43 54.08" stroke-width="0.5"/>
+    <path d="M-67.55 39.00 L-79.67 46.00" stroke-width="1.0"/>
+    <path d="M-77.65 34.57 L-84.05 37.42" stroke-width="0.5"/>
+    <path d="M-80.84 26.27 L-87.50 28.43" stroke-width="0.5"/>
+    <path d="M-83.14 17.67 L-89.99 19.13" stroke-width="0.5"/>
+    <path d="M-84.53 8.88 L-91.50 9.62" stroke-width="0.5"/>
+    <path d="M-78.00 0.00 L-92.00 0.00" stroke-width="1.0"/>
+    <path d="M-84.53 -8.88 L-91.50 -9.62" stroke-width="0.5"/>
+    <path d="M-83.14 -17.67 L-89.99 -19.13" stroke-width="0.5"/>
+    <path d="M-80.84 -26.27 L-87.50 -28.43" stroke-width="0.5"/>
+    <path d="M-77.65 -34.57 L-84.05 -37.42" stroke-width="0.5"/>
+    <path d="M-67.55 -39.00 L-79.67 -46.00" stroke-width="1.0"/>
+    <path d="M-68.77 -49.96 L-74.43 -54.08" stroke-width="0.5"/>
+    <path d="M-63.17 -56.88 L-68.37 -61.56" stroke-width="0.5"/>
+    <path d="M-56.88 -63.17 L-61.56 -68.37" stroke-width="0.5"/>
+    <path d="M-49.96 -68.77 L-54.08 -74.43" stroke-width="0.5"/>
+    <path d="M-39.00 -67.55 L-46.00 -79.67" stroke-width="1.0"/>
+    <path d="M-34.57 -77.65 L-37.42 -84.05" stroke-width="0.5"/>
+    <path d="M-26.27 -80.84 L-28.43 -87.50" stroke-width="0.5"/>
+    <path d="M-17.67 -83.14 L-19.13 -89.99" stroke-width="0.5"/>
+    <path d="M-8.88 -84.53 L-9.62 -91.50" stroke-width="0.5"/>
+  </g>
+</svg>

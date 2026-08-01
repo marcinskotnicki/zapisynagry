@@ -1,0 +1,604 @@
+@import url("../../light/css/style.css");
+
+/* =============================================================================
+ *  schematic — the evening's games as a technical diagram.
+ * -----------------------------------------------------------------------------
+ *  DESIGN NOTE, so a later edit doesn't sand off the point:
+ *
+ *  THE REFERENCE is the modern euro-board information design school — Ian
+ *  O'Toole and company. What actually characterises that work is not a colour
+ *  scheme but a SYSTEM: flat colour-blocked modules, hairline rules, chamfered
+ *  panel corners, tiny label-over-value cells, numbered tracks read left to
+ *  right, and everything keyed by colour so a dense board stays scannable.
+ *
+ *  TWO THINGS MAKE THIS THEME UNLIKE THE OTHER EIGHT:
+ *
+ *  1. IT IS THE ONLY MULTI-ACCENT THEME. Every other theme here has exactly one
+ *     accent (gold, brass, worm red, imperial red…). This one has FIVE, used as
+ *     a key: a strip's colour comes from its TABLE, so games sharing a table
+ *     share a band and the page reads as a keyed system rather than a list.
+ *     That is the reference's actual signature, and it is real information —
+ *     not decoration.
+ *
+ *  2. THE LAYOUT IS HORIZONTAL. Every other theme is a grid of cards or a
+ *     two-panel split. Here a game is a full-width STRIP: identity block, data
+ *     cells, capacity track — read across, stacked down. Both card templates
+ *     are forked because that reading order does not exist in light's markup.
+ *
+ *  SIGNATURE: the capacity track. The roster is a run of numbered slot chips,
+ *  filled or open, exactly like a resource track on one of these boards. It
+ *  makes "three of five seats gone" a thing you see rather than read.
+ *
+ *  GEOMETRY: chamfered corners via clip-path, not images — the notch is the
+ *  reference's most recognisable shape and it has to survive any card height,
+ *  which a fixed asset cannot do.
+ *
+ *  NO WEB FONTS, matching every other theme: this site asks visitors for GDPR
+ *  consent, so quietly adding a third-party font request isn't a call to make
+ *  on the admin's behalf.
+ *
+ *  Everything is scoped to .tpl-schematic (set on <body> by header.php).
+ * ========================================================================== */
+
+.tpl-schematic {
+    /* ---- Substrate ------------------------------------------------------- */
+    --board:     #1b212b;   /* graphite table the panels lie on */
+    --board-2:   #232b37;
+    --paper:     #ece7db;   /* the warm card stock every module is printed on */
+    --paper-2:   #f6f2e8;   /* a lighter cell inside it */
+    --paper-3:   #ded8c8;   /* a recessed cell */
+    --ink:       #1d2530;   /* navy-charcoal, never pure black */
+    --ink-2:     #55606f;   /* secondary annotation */
+    --rule:      #b9b2a1;   /* the hairline every panel is ruled with */
+
+    /* ---- The five channels ------------------------------------------------
+       Saturated but slightly dusty, the way process inks print. Used as a KEY,
+       never decoratively: channel = table. */
+    --ch1: #c2562a;   /* orange   */
+    --ch2: #2f7f7a;   /* teal     */
+    --ch3: #6a4b8c;   /* purple   */
+    --ch4: #2b5c96;   /* blue     */
+    --ch5: #b03060;   /* magenta  */
+    --chan: var(--ch1);   /* per-strip override sets this */
+
+    /* One condensed grotesque throughout, at several sizes — technical
+       drawings letter everything in one hand and vary the scale. */
+    --font-sc: 'Roboto Condensed', 'Archivo Narrow', 'Helvetica Neue',
+               'Segoe UI', Arial, sans-serif;
+
+    /* Remap the base variables. */
+    --bg:           var(--board);
+    --surface:      var(--paper);
+    --surface-2:    var(--paper-3);
+    --border:       var(--rule);
+    --text:         var(--ink);
+    --text-muted:   var(--ink-2);
+    --primary:      var(--ink);
+    --primary-text: var(--paper-2);
+    --ok:           #2f7f4a;
+    --error:        #b03060;
+    --radius:       0;
+    --maxw:         1500px;
+}
+
+/* ---- The table ------------------------------------------------------------
+   Graphite with a fine drawing grid and one large calibrated rosette, both
+   fixed so the panels scroll over them like sheets on a desk. */
+body.tpl-schematic {
+    background-color: var(--board);
+    background-image:
+        url("../img/rosette.svg"),
+        url("../img/grid.svg"),
+        radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);
+    background-repeat: no-repeat, repeat, no-repeat;
+    background-size: 620px 620px, 160px 160px, 100% 100%;
+    background-position: right -160px bottom -140px, top left, top center;
+    background-attachment: fixed, fixed, fixed;
+    color: var(--paper);
+    font-family: var(--font-sc);
+}
+.tpl-schematic .content { max-width: var(--maxw); }
+
+/* ---- Lettering ------------------------------------------------------------ */
+.tpl-schematic h1, .tpl-schematic h2, .tpl-schematic h3,
+.tpl-schematic .btn, .tpl-schematic input, .tpl-schematic select, .tpl-schematic textarea {
+    font-family: var(--font-sc);
+}
+.tpl-schematic .event-header { text-align: left; }
+.tpl-schematic .event-header h1 {
+    color: var(--paper-2);
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+}
+/* The five channels as a keyline under the title: the legend for the whole
+   page, stated once. */
+.tpl-schematic .event-header h1::after {
+    content: "";
+    display: block;
+    height: 4px;
+    margin-top: 0.5rem;
+    max-width: 340px;
+    background: linear-gradient(90deg,
+        var(--ch1) 0 20%, var(--ch2) 20% 40%, var(--ch3) 40% 60%,
+        var(--ch4) 60% 80%, var(--ch5) 80% 100%);
+}
+.tpl-schematic .event-date,
+.tpl-schematic .event-hours {
+    text-align: left;
+    color: #93a1b2;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    margin: 0.15rem 0 0;
+}
+
+/* ---- Day tabs: index tabs on a folder ------------------------------------- */
+.tpl-schematic .day-tabs { justify-content: flex-start; border-bottom: 1px solid rgba(185, 178, 161, .35); gap: 2px; }
+.tpl-schematic .day-tab {
+    color: #93a1b2;
+    background: var(--board-2);
+    border: 1px solid rgba(185, 178, 161, .25);
+    border-bottom: none;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+.tpl-schematic .day-tab:hover { background: #2c3542; color: var(--paper-2); }
+.tpl-schematic .day-tab-active,
+.tpl-schematic .day-tab-active:hover {
+    color: var(--ink);
+    background: var(--paper);
+    border-color: var(--rule);
+}
+.tpl-schematic .day-tab-date, .tpl-schematic .day-tab-hours { color: inherit; opacity: 0.75; }
+
+/* ---- Table blocks: sheets on the desk ------------------------------------- */
+.tpl-schematic .table-block {
+    background: rgba(35, 43, 55, .82);
+    border: 1px solid rgba(185, 178, 161, .28);
+    border-radius: 0;
+    box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
+}
+.tpl-schematic .table-title {
+    color: var(--paper-2);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(185, 178, 161, .28);
+    padding-bottom: 0.4rem;
+    text-align: left;
+}
+
+/* ---- LAYOUT: one strip per row, stacked ----------------------------------- */
+.tpl-schematic .game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+/* ---- The strip ------------------------------------------------------------
+   Chamfered top-right corner: the reference's most recognisable panel shape,
+   done with clip-path so it holds at any height. */
+.tpl-schematic .sc-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    background: var(--paper);
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    overflow: hidden;
+}
+/* The channel key. Each strip sets --chan once and everything downstream reads
+   it, so a new channel is one line rather than a cascade of overrides. */
+.tpl-schematic .sc-chan-1 { --chan: var(--ch1); }
+.tpl-schematic .sc-chan-2 { --chan: var(--ch2); }
+.tpl-schematic .sc-chan-3 { --chan: var(--ch3); }
+.tpl-schematic .sc-chan-4 { --chan: var(--ch4); }
+.tpl-schematic .sc-chan-5 { --chan: var(--ch5); }
+
+/* ---- Identity block: the coloured tab that keys the strip ----------------- */
+.tpl-schematic .sc-id {
+    flex: 0 0 74px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    background: var(--chan);
+    color: #fff;
+    padding: 0.6rem 0.3rem;
+}
+.tpl-schematic .sc-id-time {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+}
+.tpl-schematic .sc-id-num {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+}
+.tpl-schematic .sc-body { flex: 1 1 auto; min-width: 0; padding: 0.5rem 0.75rem 0.6rem; }
+
+.tpl-schematic .sc-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.35rem;
+    margin-bottom: 0.45rem;
+}
+.tpl-schematic .game-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0;
+}
+.tpl-schematic .game-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--chan); }
+.tpl-schematic .game-name a:hover { color: var(--chan); }
+.tpl-schematic .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 0 auto; }
+.tpl-schematic .sc-note { color: var(--ink-2); margin: 0.3rem 0; }
+
+/* ---- Data cells: label over value ----------------------------------------
+   The reference's core unit — a tiny uppercase key with the figure beneath it,
+   boxed and ruled. Reading down a column of strips, the keys line up. */
+.tpl-schematic .sc-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 0.5rem;
+}
+.tpl-schematic .sc-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 58px;
+    padding: 0.2rem 0.45rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+}
+.tpl-schematic .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
+.tpl-schematic .sc-key {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    line-height: 1.1;
+}
+.tpl-schematic .sc-val {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+/* Weight keeps the shared 1..5 scale — it encodes data every theme shares —
+   but is expressed as a left keyline rather than a filled pill, so the cell
+   still reads as part of the grid. */
+.tpl-schematic .sc-cell-weight { border-left-width: 4px; }
+.tpl-schematic .sc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
+.tpl-schematic .sc-cell-weight.weight-2 { border-left-color: #86b300; }
+.tpl-schematic .sc-cell-weight.weight-3 { border-left-color: #d6a400; }
+.tpl-schematic .sc-cell-weight.weight-4 { border-left-color: #e0701a; }
+.tpl-schematic .sc-cell-weight.weight-5 { border-left-color: #cf3b2e; }
+.tpl-schematic .sc-cell-weight .sc-val { background: none; color: var(--ink); }
+/* The rules cell is tone-coded on its value, never flat — a flat colour here
+   would outrank the shared .rules-* classes and paint every state alike. */
+.tpl-schematic .sc-cell-rules.rules-good .sc-val { color: #2f7f4a; }
+.tpl-schematic .sc-cell-rules.rules-mid  .sc-val { color: #9a6a12; }
+.tpl-schematic .sc-cell-rules.rules-bad  .sc-val { color: #b03060; }
+.tpl-schematic .sc-comment {
+    background: var(--paper-3);
+    border-left: 3px solid var(--chan);
+    color: var(--ink);
+    font-size: 0.84rem;
+    padding: 0.35rem 0.55rem;
+    margin: 0 0 0.5rem;
+}
+
+/* ---- SIGNATURE: the capacity track ----------------------------------------
+   A run of numbered chips, one per seat. Filled chips carry the channel
+   colour; open ones are an empty ruled outline, so "three of five gone" is
+   visible at a glance rather than something you compute from a fraction. */
+.tpl-schematic .sc-track {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 2px;
+    margin-bottom: 0.45rem;
+}
+.tpl-schematic .sc-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 24px;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--rule);
+    font-size: 0.8rem;
+    background: var(--paper-2);
+    color: var(--ink);
+}
+.tpl-schematic .sc-slot-n {
+    flex: 0 0 auto;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+.tpl-schematic .sc-slot-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
+/* Taken: the chip fills with the strip's channel colour. */
+.tpl-schematic .sc-slot-on {
+    background: var(--chan);
+    border-color: var(--chan);
+    color: #fff;
+}
+.tpl-schematic .sc-slot-on .sc-slot-n { color: rgba(255, 255, 255, .8); }
+.tpl-schematic .sc-slot-on .msg-icon { color: #fff; }
+/* Open: an outline with a hatched fill, the way an unfilled space is drawn on
+   a diagram. Stated as its own object — the reason this theme forks the card. */
+.tpl-schematic .sc-slot-off {
+    background: repeating-linear-gradient(45deg,
+        var(--paper-2) 0 5px, var(--paper-3) 5px 10px);
+    border-style: dashed;
+    color: var(--ink-2);
+}
+.tpl-schematic .sc-slot-free { font-style: italic; opacity: 0.75; }
+.tpl-schematic .sc-slot-more { background: none; border: none; color: var(--ink-2); font-style: italic; font-size: 0.76rem; }
+.tpl-schematic .sc-slot-x {
+    margin-left: 0.15rem;
+    color: #fff;
+    opacity: 0.75;
+    text-decoration: none;
+    font-weight: 700;
+    line-height: 1;
+}
+.tpl-schematic .sc-slot-x:hover { opacity: 1; text-decoration: none; }
+/* The "knows the rules" dot: tone-coded, tiny, the way a diagram flags a state. */
+.tpl-schematic .sc-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; background: currentColor; }
+.tpl-schematic .sc-dot.rules-good { color: #b6f0c6; }
+.tpl-schematic .sc-dot.rules-mid  { color: #f5dd8e; }
+.tpl-schematic .sc-dot.rules-bad  { color: #ffb3b3; }
+.tpl-schematic .sc-track-reserve { opacity: 0.9; }
+.tpl-schematic .sc-track-label {
+    align-self: center;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-right: 0.3rem;
+}
+.tpl-schematic .sc-track-reserve .sc-slot-on { background: var(--ink-2); border-color: var(--ink-2); }
+.tpl-schematic .p-signedby { color: rgba(255, 255, 255, .75); font-size: 0.7rem; }
+.tpl-schematic .p-acct { color: rgba(255, 255, 255, .8); font-size: 0.7rem; }
+
+/* ---- Foot: the one CTA, plus discussion --------------------------------- */
+.tpl-schematic .sc-foot { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.tpl-schematic .sc-signup { flex: 0 0 auto; }
+.tpl-schematic .sc-disc { flex: 1 1 100%; }
+
+/* ---- Controls -------------------------------------------------------------
+   Flat, square, hairline-ruled. No gloss anywhere — this is printed stock. */
+.tpl-schematic .btn {
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 0;
+    padding: 0.22rem 0.55rem;
+}
+.tpl-schematic .btn:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic .btn-primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper-2);
+}
+.tpl-schematic .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
+.tpl-schematic .btn-danger,
+.tpl-schematic .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
+.tpl-schematic .msg-icon { color: var(--chan); }
+
+/* ---- Forms ---------------------------------------------------------------- */
+.tpl-schematic input, .tpl-schematic select, .tpl-schematic textarea {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    border-radius: 0;
+}
+.tpl-schematic input:focus, .tpl-schematic select:focus, .tpl-schematic textarea:focus {
+    border-color: var(--ink);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(29, 37, 48, .18);
+}
+.tpl-schematic .card {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+}
+.tpl-schematic .card label, .tpl-schematic .card .field-note { color: var(--ink-2); }
+.tpl-schematic label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
+
+/* ---- Discussion ------------------------------------------------------------ */
+.tpl-schematic .comment-add summary {
+    display: inline-block;
+    cursor: pointer;
+    list-style: none;
+    color: var(--ink);
+    background: var(--paper-3);
+    border: 1px solid var(--rule);
+    padding: 0.15rem 0.6rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+.tpl-schematic .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-schematic .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
+.tpl-schematic .comment-list li {
+    background: var(--paper-2);
+    border: none;
+    border-left: 2px solid var(--rule);
+    border-radius: 0;
+    color: var(--ink);
+    font-size: 0.82rem;
+    margin-bottom: 2px;
+}
+.tpl-schematic .comment-list .c-name { color: var(--chan); font-weight: 700; }
+.tpl-schematic .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
+
+/* ---- Polls: candidates as side-by-side modules --------------------------- */
+.tpl-schematic .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
+    var(--chan) 0 8px, rgba(255, 255, 255, .18) 8px 16px); }
+.tpl-schematic .sc-poll .poll-tag {
+    background: rgba(0, 0, 0, .3);
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    font-size: 0.56rem;
+    letter-spacing: 0.14em;
+    padding: 0.1rem 0.3rem;
+    margin: 0;
+}
+.tpl-schematic .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
+.tpl-schematic .poll-by strong { color: var(--ink); }
+.tpl-schematic .sc-modules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+}
+.tpl-schematic .sc-module {
+    flex: 1 1 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--chan);
+    border-radius: 0;
+    padding: 0.4rem 0.5rem;
+    /* Same chamfer as the strip, one scale down — the shape is the system. */
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+}
+.tpl-schematic .sc-module-full { border-top-color: #2f7f4a; }
+.tpl-schematic .sc-module-head { min-width: 0; }
+.tpl-schematic .poll-opt-name, .tpl-schematic a.poll-opt-name {
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+}
+.tpl-schematic a.poll-opt-name { border-bottom: 1px solid var(--chan); }
+.tpl-schematic .poll-opt-meta { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
+.tpl-schematic .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+.tpl-schematic .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
+/* The gauge: a ruled track, its fill in the channel colour, turning green once
+   the candidate has the players it needs. */
+.tpl-schematic .poll-opt-bar {
+    position: relative;
+    height: 8px;
+    background: var(--paper-3);
+    border: 1px solid var(--rule);
+}
+.tpl-schematic .poll-opt-bar > span { background: var(--chan); }
+.tpl-schematic .poll-opt-bar.is-full > span { background: #2f7f4a; }
+.tpl-schematic .sc-module .btn { align-self: flex-start; }
+
+/* ---- Timeline -------------------------------------------------------------- */
+.tpl-schematic .timeline { background: rgba(35, 43, 55, .8); border: 1px solid rgba(185, 178, 161, .28); border-radius: 0; }
+.tpl-schematic .tl-scroll { background: transparent; border-color: rgba(185, 178, 161, .28); }
+.tpl-schematic .timeline-title { color: var(--paper-2); letter-spacing: 0.2em; text-transform: uppercase; }
+.tpl-schematic .tl-hours { border-bottom-color: rgba(185, 178, 161, .28); }
+.tpl-schematic .tl-hour { color: #93a1b2; font-variant-numeric: tabular-nums; }
+.tpl-schematic .tl-hour::before { border-left-color: rgba(185, 178, 161, .3); }
+.tpl-schematic .tl-table-no { background: rgba(0, 0, 0, .35); color: #93a1b2; }
+.tpl-schematic .tl-game {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--ch4);
+    border-radius: 0;
+    font-weight: 700;
+}
+.tpl-schematic .tl-game:hover { background: var(--paper-2); }
+.tpl-schematic .tl-count-full { color: #b03060; }
+/* Unresolved: the base sheet paints this near-white, which on the graphite
+   board is the one bright patch on the page, so the value is replaced. */
+.tpl-schematic .tl-game.tl-poll {
+    background: repeating-linear-gradient(135deg,
+        rgba(35, 43, 55, .9) 0 6px, rgba(45, 55, 70, .9) 6px 12px);
+    color: var(--paper-2);
+    border: 1px dashed rgba(185, 178, 161, .6);
+}
+.tpl-schematic .tl-game.tl-poll .tl-sub { color: #93a1b2; }
+
+/* ---- Chrome ---------------------------------------------------------------- */
+.tpl-schematic .topbar {
+    background: var(--board-2);
+    border-bottom: 1px solid rgba(185, 178, 161, .3);
+}
+.tpl-schematic .topbar a, .tpl-schematic .brand { color: var(--paper-2); }
+.tpl-schematic .brand { letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
+.tpl-schematic .mailing-box {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+}
+.tpl-schematic .game-archived { opacity: 0.5; }
+.tpl-schematic .game-archived .game-name { text-decoration: line-through; }
+/* The open dropdown is painted by the OS; styling <option> is the only lever,
+   honoured on Windows/Linux with macOS keeping its own legible list. */
+.tpl-schematic select option { background: var(--paper-2); color: var(--ink); }
+.tpl-schematic select option:checked,
+.tpl-schematic select option:hover { background: var(--ink); color: var(--paper-2); }
+
+/* ---- Quality floor --------------------------------------------------------- */
+.tpl-schematic a:focus-visible,
+.tpl-schematic button:focus-visible,
+.tpl-schematic input:focus-visible,
+.tpl-schematic select:focus-visible,
+.tpl-schematic textarea:focus-visible,
+.tpl-schematic summary:focus-visible {
+    outline: 2px solid var(--ch4);
+    outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+    /* The strip becomes a stack: the identity block turns into a full-width
+       header bar rather than a side tab, which is the only way it stays
+       legible without squeezing the body to nothing. */
+    .tpl-schematic .sc-strip { flex-direction: column; }
+    .tpl-schematic .sc-id {
+        flex: 0 0 auto;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.3rem 0.6rem;
+    }
+    .tpl-schematic .sc-slot-name { max-width: 8rem; }
+    .tpl-schematic .sc-module { flex: 1 1 100%; }
+    .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
+}

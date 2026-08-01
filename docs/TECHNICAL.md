@@ -175,16 +175,17 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Eight themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard**, **elvish**, **space**, **steampunk** and
-**imperial**. They're discovered by directory glob, so creating a folder
+Nine themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard**, **elvish**, **space**, **steampunk**, **imperial**
+and **schematic**. They're discovered by directory glob, so creating a folder
 registers one — there is no list to update.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a
 stylesheet alone; `classic/`, `elvish/`, `space/`, `steampunk/` and
-`imperial/` each override `game_card.php` plus their CSS; the last four also
-ship hand-written SVGs in their own `img/`.
+`imperial/` each override `game_card.php` plus their CSS; `schematic/` is the
+only one to override BOTH card templates; the last five also ship hand-written
+SVGs in their own `img/`.
 
 Non-base stylesheets `@import` light's, then override. Only the active theme's
 sheet is ever linked. **Scope every rule** to the theme's `.tpl-<name>` class —
@@ -202,9 +203,24 @@ renders a *free* seat as an object (a bud on a vine, a numbered open slot, an
 unpolished rivet, a stated vacancy) and light's card has no element for a seat
 nobody occupies. Steampunk and imperial additionally need classic's two-panel
 split, plus an element carrying live data — a gauge needle, a weight stamped
-into a wax seal. All four are pinned — `tests/test_elvish.php`,
-`test_space.php`, `test_steampunk.php` and `test_imperial.php` assert every
-control light's card offers is still present in their fork. If you fork a template, write that test in the same commit, and
+into a wax seal. Schematic goes further: its layout is horizontal (one full-width strip per
+game, read across) rather than a grid or a two-panel split, which is a reading
+order light's markup has no equivalent for — so it forks the poll card too.
+All five are pinned — `tests/test_elvish.php`, `test_space.php`,
+`test_steampunk.php`, `test_imperial.php` and `test_schematic.php` assert every
+control light's cards offer is still present in their fork.
+
+**Count fields PER FORM, not per page.** The schematic suite originally checked
+`substr_count($html, 'name="af_ts"') >= 2` across the whole page; deleting the
+field from one of its two forks still left the other form's copy and the
+assertion passed. Split the HTML on `<form` and assert each guarded form
+carries its own csrf + anti-bot + honeypot.
+
+**Don't hardcode a theme's asset list in its test.** `test_imperial.php` named
+`aquila.svg` explicitly and broke the moment the watermark was swapped for a
+different device. Parse the referenced filenames out of the stylesheet instead,
+then assert those exist — and separately that every SVG in `img/` parses, so an
+unused spare can't be malformed. If you fork a template, write that test in the same commit, and
 verify it actually fails when a control is removed, or it is not really pinning
 anything.
 
