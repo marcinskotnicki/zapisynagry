@@ -78,7 +78,7 @@
 body.tpl-imperial {
     background-color: #14110e;
     background-image:
-        url("../img/aquila.svg"),
+        url("../img/astartes.svg"),
         radial-gradient(ellipse at 50% 0%, rgba(168, 134, 63, .07), transparent 58%);
     background-repeat: no-repeat, no-repeat;
     background-size: 900px auto, 100% 100%;
