@@ -85,7 +85,7 @@
                   // this entry again. ?>
             <div class="im-designation">
                 <span class="im-ref">M<?= str_pad((string)(int)$g['id'], 5, '0', STR_PAD_LEFT) ?></span>
-                <span class="im-sanction"><?= e(t('cl_start')) ?> <?= e($g['start_time']) ?></span>
+                <span class="im-sanction"><?= e(t('cl_start')) ?> <span class="sanction-time"><?= e($g['start_time']) ?></span></span>
             </div>
 
             <?php if (!empty($g['thumbnail'])): ?>
