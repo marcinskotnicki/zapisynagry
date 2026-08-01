@@ -225,7 +225,19 @@ body.tpl-imperial {
     border-bottom: 1px solid rgba(26, 22, 19, .25);
 }
 .tpl-imperial .im-ref { color: var(--imperial); font-weight: 700; }
-.tpl-imperial .im-sanction { color: var(--iron-soft); }
+.tpl-imperial .im-sanction {
+    color: var(--iron-soft);
+    font-family: var(--font-stamp);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.76em;
+}
+.tpl-imperial .im-sanction .sanction-time{
+    color: var(--iron);
+    font-weight: 700;
+    font-size: 1.15rem;
+}
 
 .tpl-imperial .gc-thumb { padding: 0.5rem 0 0.2rem; text-align: center; }
 .tpl-imperial .gc-thumb img {
@@ -498,7 +510,7 @@ body.tpl-imperial {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     font-size: 0.76em;
-    color: var(--ash);
+    color: var(--iron-soft);
 }
 .tpl-imperial .poll-by { color: var(--iron-soft); }
 .tpl-imperial .poll-by strong { color: var(--iron); }
