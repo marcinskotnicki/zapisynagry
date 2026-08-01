@@ -458,3 +458,14 @@ body.tpl-corkboard {
     .tpl-corkboard .game-card, .tpl-corkboard .poll-card{min-width:90%;max-width:100%;margin-left:0;margin-right:0;}
     .tpl-corkboard .timeline {margin:0;width:100%;}
 }
+
+/* Corkboard opts OUT of the base sheet's mobile tab scrolling: its day slips
+   are small enough that two rows of paper on a board looks intentional, which
+   is not true of the other themes' joined tab strips. */
+@media (max-width: 700px) {
+    .tpl-corkboard .day-tabs {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        justify-content: center;
+    }
+}

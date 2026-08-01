@@ -168,7 +168,17 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('allow_user_template',          '1'),  -- 1 = logged-in users may pick a theme (user panel)
     ('allow_guest_template',         '1'),  -- 1 = guests may pick a theme (topbar dropdown)
     ('allow_user_language',          '1'),  -- 1 = logged-in users may pick a language (user panel)
-    ('allow_guest_language',         '1');  -- 1 = guests may pick a language (topbar dropdown)
+    ('allow_guest_language',         '1'),  -- 1 = guests may pick a language (topbar dropdown)
+    -- WHERE the two switchers appear: 'header' | 'footer' | 'both' | 'none'.
+    -- Separate from the allow_* flags above, which decide WHETHER a given
+    -- audience may switch at all; these only decide placement.
+    ('switcher_pos_template',        'footer'),
+    ('switcher_pos_language',        'footer'),
+    -- Whether logged-in users see the switchers in the page chrome. Off by
+    -- default: they already have both controls in the user panel, so showing
+    -- them twice is clutter — but some admins prefer the convenience.
+    ('switcher_show_user_template',  '0'),
+    ('switcher_show_user_language',  '0');
 
 
 -- =============================================================================

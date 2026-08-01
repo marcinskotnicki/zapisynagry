@@ -88,6 +88,15 @@ return [
     'opt_antibot_delay_click_note'  => 'To samo, ale dla akcji jednego kliknięcia: usuwanie, głosowanie, logowanie. 0 wyłącza tę kontrolę. Nie dotyczy zalogowanych.',
     'opt_antibot_honeypot'          => 'Ukryte pole-pułapka',
     'opt_antibot_honeypot_note'     => 'Dodaje niewidoczne pole „Website” do tych samych formularzy. Prawdziwy odwiedzający nigdy go nie wypełni — bot często tak. Niezależne od powyższych opóźnień; nie dotyczy zalogowanych.',
+    'opt_switcher_pos_template'     => 'Przełącznik motywu — położenie',
+    'opt_switcher_pos_language'     => 'Przełącznik języka — położenie',
+    'opt_switcher_pos_header'       => 'W nagłówku',
+    'opt_switcher_pos_footer'       => 'W stopce',
+    'opt_switcher_pos_both'         => 'W nagłówku i stopce',
+    'opt_switcher_pos_none'         => 'Nigdzie (ukryty)',
+    'opt_switcher_show_user_template' => 'Pokazuj przełącznik motywu zalogowanym',
+    'opt_switcher_show_user_language' => 'Pokazuj przełącznik języka zalogowanym',
+    'opt_switcher_show_user_note'   => 'Zalogowani mają oba przełączniki w panelu użytkownika, więc domyślnie nie są pokazywane też na stronie.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Niezalogowani mogą dodawać gry',

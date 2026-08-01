@@ -16,12 +16,13 @@
 <?= $after_content ?? '' ?>
 </main>
 <?php
-// Guest pickers (moved here from the top bar): logged-in users change theme /
-// language in the user panel instead, so these render only for guests — and
-// only for the pref(s) the admin enabled. Selects auto-submit; the <noscript>
-// button covers JS-free browsers. 'back' returns the visitor to this page.
-$showTplPick  = !is_logged_in() && tpl_switch_allowed()  && count(tpl_available())  > 1;
-$showLangPick = !is_logged_in() && lang_switch_allowed() && count(lang_available()) > 1;
+// The preference pickers. WHETHER they may switch, WHERE the switcher sits,
+// and whether logged-in users see it in the chrome at all are three separate
+// admin settings — switcher_visible() is the one place that combines them, so
+// the header and this footer can never disagree. Selects auto-submit; the
+// <noscript> button covers JS-free browsers. 'back' returns to this page.
+$showTplPick  = switcher_visible('template', 'footer', 'tpl_switch_allowed',  count(tpl_available()));
+$showLangPick = switcher_visible('language', 'footer', 'lang_switch_allowed', count(lang_available()));
 ?>
 <?php if ($showTplPick || $showLangPick): ?>
 <footer class="sitefooter">

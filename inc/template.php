@@ -63,6 +63,37 @@ function tpl_switch_allowed() {
     return opt_bool(is_logged_in() ? 'allow_user_template' : 'allow_guest_template');
 }
 
+/**
+ * Should a switcher render in this slot, for this visitor?
+ *
+ * THREE independent questions, deliberately kept apart because admins asked
+ * for them separately and conflating them is how one ends up unable to express
+ * a combination:
+ *   1. May this audience switch at all?  -> the allow_* options, via the
+ *      $allowed callback (already per-audience: user vs guest).
+ *   2. WHERE should it appear?           -> switcher_pos_* : header|footer|both|none
+ *   3. Should LOGGED-IN users see it in the page chrome at all?
+ *      -> switcher_show_user_* , off by default since the user panel already
+ *         carries both controls and showing them twice is clutter.
+ *
+ * Guests are never affected by (3) — it exists purely to keep the chrome quiet
+ * for people who have a panel.
+ *
+ * @param string   $which   'template' | 'language'
+ * @param string   $slot    'header' | 'footer'
+ * @param callable $allowed Returns whether the visitor may switch at all.
+ * @param int      $choices How many options exist; one is not a choice.
+ * @return bool
+ */
+function switcher_visible($which, $slot, callable $allowed, $choices) {
+    if ($choices < 2) return false;
+    if (!$allowed()) return false;
+    if (is_logged_in() && !opt_bool('switcher_show_user_' . $which)) return false;
+
+    $pos = opt('switcher_pos_' . $which, 'footer');
+    return $pos === 'both' || $pos === $slot;
+}
+
 function tpl_current() {
     $cookie = $_COOKIE['template'] ?? '';
     if (tpl_switch_allowed() && tpl_exists($cookie)) return $cookie;

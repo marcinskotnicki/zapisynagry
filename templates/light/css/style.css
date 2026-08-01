@@ -535,3 +535,53 @@ html { scroll-behavior: smooth; }
 .bgg_logo{display:block;text-align:center;padding:20px 10px;}
 .bgg_logo img{width:60%;max-width:300px;height:auto;}
 
+/* Header preference pickers. Compact by design — the header is chrome, so the
+   labels are visually hidden (still read aloud) and only the selects show. */
+.topbar-prefs { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.6rem; }
+.topbar-prefs-item { display: inline-flex; align-items: center; }
+.topbar-prefs select {
+    font-size: 0.8rem;
+    padding: 0.15rem 0.3rem;
+    margin: 0;
+}
+
+/* ===========================================================================
+ *  Mobile refinements, in the base sheet so every theme inherits them.
+ * ======================================================================== */
+@media (max-width: 700px) {
+    /* ---- Day tabs -------------------------------------------------------
+       The three lines must read name > date > hours. They already do at
+       desktop sizes, but themes override .day-tab's size freely and the hours
+       line is the one most likely to end up competing, so the order is stated
+       explicitly here rather than left to whatever each theme happens to set. */
+    .day-tab       { font-size: 0.95rem; }
+    .day-tab-date  { font-size: 0.80rem; }
+    .day-tab-hours { font-size: 0.68rem; }
+
+    /* Three or four days no longer fit across a phone, and wrapping to a
+       second row costs vertical space and breaks the strip's read. Scroll
+       horizontally instead: one row, always. flex-wrap must be nowrap AND the
+       tabs must not shrink, or flex compresses them instead of overflowing. */
+    .day-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .day-tab { flex: 0 0 auto; }
+
+    /* ---- Poll options ---------------------------------------------------
+       Give the candidate's title the full width by dropping the vote control
+       onto its own row beneath the vote count. Both shapes are covered: the
+       plain link when you have not voted, and the little form when you have. */
+    .poll-option { flex-wrap: wrap; row-gap: 0.3rem; }
+    .poll-option > .btn,
+    .poll-option > form.inline { flex: 1 0 100%; margin-top: 0.1rem; }
+    .poll-option > form.inline .btn { width: 100%; }
+
+    /* Header switchers drop onto their own line rather than squeezing the nav
+       into unreadability on a narrow screen. */
+    .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
+    .topbar-prefs { margin-left: 0; }
+}

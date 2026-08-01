@@ -38,6 +38,7 @@ $OPTION_VALUES = [
     'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
     'antibot_delay_form', 'antibot_delay_click',   // seconds; 0 = off; validated below
+    'switcher_pos_template', 'switcher_pos_language',  // header|footer|both|none; validated below
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -59,6 +60,7 @@ $OPTION_TOGGLES = [
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'show_venue_name', 'mailing_list', 'antibot_honeypot',
+    'switcher_show_user_template', 'switcher_show_user_language',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -105,6 +107,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'header_button_style':
                 // How the top-bar nav renders: text only / icon only / both.
                 if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
+                break;
+            case 'switcher_pos_template':
+            case 'switcher_pos_language':
+                // Anything else would fall through to "not this slot" in
+                // switcher_visible() and the switcher would silently vanish.
+                if (!in_array($val, ['header', 'footer', 'both', 'none'], true)) continue 2;
                 break;
             case 'email_subject_prefix':
                 // Anything else would silently fall through to the venue branch

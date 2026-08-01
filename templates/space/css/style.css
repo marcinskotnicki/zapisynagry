@@ -375,6 +375,18 @@ body.tpl-space {
     outline: none;
     box-shadow: 0 0 0 2px rgba(88, 166, 232, .25);
 }
+/* The OPEN dropdown is painted by the OS, not by the rule above: the control
+   is dark but its list would stay light-on-light. Styling <option> is the only
+   lever, honoured on Windows/Linux; macOS keeps its own legible system list. */
+.tpl-space select option {
+    background: var(--hull);
+    color: var(--ceramic);
+}
+.tpl-space select option:checked,
+.tpl-space select option:hover {
+    background: var(--azure);
+    color: #06121f;
+}
 .tpl-space label { color: var(--slate); letter-spacing: 0.06em; }
 .tpl-space .field-note { color: var(--slate); opacity: 0.85; }
 

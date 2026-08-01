@@ -86,7 +86,11 @@
             <?php $gLink = game_link($g); ?>
             <h3 class="gc-name"><?php if ($gLink): ?><a href="<?= e($gLink) ?>" target="_blank" rel="noopener"><?= e($g['name']) ?></a><?php else: ?><?= e($g['name']) ?><?php endif; ?></h3>
 
-            <div class="gc-band gc-waga weight-<?= $bucket ?>"><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
+            <?php // The bulb carries the weight-N class the base theme already uses
+                  // for its colour scale, so the green-to-red reading matches every
+                  // other theme rather than inventing a second scale. The band keeps
+                  // its brass so the row still reads as an instrument label. ?>
+            <div class="gc-band gc-waga"><span class="sk-bulb weight-<?= $bucket ?>" aria-hidden="true"></span><?= e(t('cl_weight')) ?>: <strong><?= e(number_format((float)$g['weight'], 2, ',', '')) ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_players')) ?>: <strong><?= count($crew) ?> / <?= $max ?></strong></div>
             <div class="gc-band gc-row"><?= e(t('cl_start')) ?>: <strong><?= e($g['start_time']) ?></strong></div>
             <?php if ((int)$g['length_minutes'] > 0): ?>
@@ -155,12 +159,16 @@
                         <?php if ($canMsg && !empty($p['email'])): ?>
                             <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                         <?php endif; ?>
-                        <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
-                        <?php endif; ?>
+                        <?php // "signed up by X" comes BEFORE the delete link, not after:
+                              // .gc-resign carries margin-left:auto, which parks it at the
+                              // right edge — so anything rendered after it lands to its
+                              // RIGHT, leaving the delete button stranded mid-row. ?>
                         <?php if (!empty($p['user_id']) && !empty($p['account_name'])
                             && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
                             <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                        <?php endif; ?>
+                        <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
                         <?php endif; ?>
                     </div>
                 <?php else: // an empty berth ?>

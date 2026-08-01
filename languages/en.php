@@ -96,6 +96,15 @@ return [
     'opt_antibot_delay_click_note'  => 'The same idea for single-click actions: deletions, voting, logging in. 0 disables the check. Logged-in visitors are exempt.',
     'opt_antibot_honeypot'          => 'Hidden trap field',
     'opt_antibot_honeypot_note'     => 'Adds an invisible "Website" field to those same forms. A real visitor never fills it in — a bot often does. Independent of the delays above; logged-in visitors are exempt.',
+    'opt_switcher_pos_template'     => 'Theme switcher position',
+    'opt_switcher_pos_language'     => 'Language switcher position',
+    'opt_switcher_pos_header'       => 'In the header',
+    'opt_switcher_pos_footer'       => 'In the footer',
+    'opt_switcher_pos_both'         => 'Header and footer',
+    'opt_switcher_pos_none'         => 'Nowhere (hidden)',
+    'opt_switcher_show_user_template' => 'Show the theme switcher to logged-in users',
+    'opt_switcher_show_user_language' => 'Show the language switcher to logged-in users',
+    'opt_switcher_show_user_note'   => 'Logged-in users already have both switchers in their user panel, so by default they are not shown in the page as well.',
 
     // ---- Admin: toggles labels ----------------------------------------------
     'opt_allow_unregistered_add_games' => 'Unregistered users can add games',

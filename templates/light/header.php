@@ -91,8 +91,18 @@ ob_start();
     }
 $topnav   = trim(ob_get_clean());
 $showName = opt_bool('show_venue_name');
+
+// The preference pickers, when the admin has placed them in the header. Three
+// separate settings decide this (may they switch / where / do logged-in users
+// see it); switcher_visible() combines them, and the footer asks the same
+// question for its own slot, so the two can never disagree.
+$hdrTplPick  = switcher_visible('template', 'header', 'tpl_switch_allowed',  count(tpl_available()));
+$hdrLangPick = switcher_visible('language', 'header', 'lang_switch_allowed', count(lang_available()));
 ?>
-<?php if ($showName || $topnav !== ''): ?>
+<?php // The bar hides itself when it would be empty (see the note above), so
+      // header switchers have to count as content — otherwise placing them
+      // here on an otherwise-bare bar would render nothing at all. ?>
+<?php if ($showName || $topnav !== '' || $hdrTplPick || $hdrLangPick): ?>
 <header class="topbar">
     <div class="topbar-inner">
         <?php // Brand (venue name) top-left, unless the admin hid it (when the
@@ -104,6 +114,35 @@ $showName = opt_bool('show_venue_name');
             <span class="brand-spacer"></span>
         <?php endif; ?>
         <nav class="topnav"><?= $topnav ?></nav>
+        <?php if ($hdrTplPick || $hdrLangPick): ?>
+            <form class="topbar-prefs" method="post" action="prefs.php">
+                <?= csrf_field() ?>
+                <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>">
+                <?php if ($hdrTplPick): ?>
+                    <label class="topbar-prefs-item">
+                        <span class="sr-only"><?= e(t('pref_template')) ?></span>
+                        <select name="template" onchange="this.form.submit()"
+                                aria-label="<?= e(t('pref_template')) ?>">
+                            <?php foreach (tpl_available() as $tn): ?>
+                                <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                <?php endif; ?>
+                <?php if ($hdrLangPick): ?>
+                    <label class="topbar-prefs-item">
+                        <span class="sr-only"><?= e(t('pref_language')) ?></span>
+                        <select name="lang" onchange="this.form.submit()"
+                                aria-label="<?= e(t('pref_language')) ?>">
+                            <?php foreach (lang_available() as $lc): ?>
+                                <option value="<?= e($lc) ?>"<?= $lc === ($GLOBALS['LANG_CODE'] ?? '') ? ' selected' : '' ?>><?= e(strtoupper($lc)) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                <?php endif; ?>
+                <noscript><button type="submit" class="btn btn-small">OK</button></noscript>
+            </form>
+        <?php endif; ?>
     </div>
 </header>
 <?php endif; ?>

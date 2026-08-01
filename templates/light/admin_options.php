@@ -104,6 +104,32 @@ $toggle = function($key) {
             <p class="field-note"><?= e(t('opt_antibot_honeypot_note')) ?></p>
         </div>
         <?php
+        // Where the theme / language switchers appear, and whether logged-in
+        // users see them in the page chrome at all. Separate from the allow_*
+        // toggles further down, which decide WHETHER each audience may switch.
+        foreach (['template', 'language'] as $sw): ?>
+            <div class="field">
+                <label for="switcher_pos_<?= e($sw) ?>"><?= e(t('opt_switcher_pos_' . $sw)) ?></label>
+                <select id="switcher_pos_<?= e($sw) ?>" name="switcher_pos_<?= e($sw) ?>">
+                    <?php foreach (['header', 'footer', 'both', 'none'] as $posOpt): ?>
+                        <option value="<?= e($posOpt) ?>"<?= opt('switcher_pos_' . $sw) === $posOpt ? ' selected' : '' ?>>
+                            <?= e(t('opt_switcher_pos_' . $posOpt)) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endforeach; ?>
+        <?php foreach (['template', 'language'] as $sw): ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="switcher_show_user_<?= e($sw) ?>" value="1"
+                           <?= opt_bool('switcher_show_user_' . $sw) ? 'checked' : '' ?>>
+                    <?= e(t('opt_switcher_show_user_' . $sw)) ?>
+                </label>
+            </div>
+        <?php endforeach; ?>
+        <p class="field-note"><?= e(t('opt_switcher_show_user_note')) ?></p>
+        <?php
         ?>
         <?php // The site's clock. Event times and poll deadlines are wall-clock
               // values, so this has to be the venue's real timezone or polls

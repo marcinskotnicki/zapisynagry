@@ -197,7 +197,7 @@ body.tpl-steampunk {
     border: 1px solid var(--brass-dark);
     box-shadow: inset 0 1px 0 rgba(255, 245, 220, .5);
 }
-.tpl-steampunk .gc-tab:hover { filter: brightness(1.1); text-decoration: none; }
+.tpl-steampunk .gc-tab:hover { filter: brightness(1.08); text-decoration: none; }
 .tpl-steampunk .gc-tab-del { background: linear-gradient(#d9633a, var(--ember)); color: #fff5ef; }
 
 .tpl-steampunk .gc-thumb { padding: 0.5rem 0 0.2rem; }
@@ -206,22 +206,45 @@ body.tpl-steampunk {
     border: 3px solid var(--brass-dark);
     box-shadow: 0 0 0 1px #100b08;
 }
-/* The nameplate: an engraved brass strip screwed to the casing. */
+/* The nameplate: an ENGRAVED plate, recessed into the casing — deliberately
+   not the raised brass the buttons use, which is what made it read as
+   clickable. Everything is inverted from a button: the gradient runs dark at
+   the top rather than light, the inset highlight moves to the BOTTOM edge, and
+   the lettering carries a dark shadow above it as if cut into the surface.
+   Four corner screws, the same fitting the crew berths use, finish it as
+   hardware rather than a label. */
 .tpl-steampunk .gc-name {
-    color: #241a10;
+    position: relative;
+    color: var(--brass-lit);
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     margin: 0.5rem 0.5rem;
-    padding: 0.3rem 0.5rem;
-    background: linear-gradient(var(--brass-lit), var(--brass) 60%, var(--brass-dark));
+    padding: 0.35rem 1.1rem;
+    background: linear-gradient(#161009, #241a10 45%, #33261a);
     border: 1px solid var(--brass-dark);
     border-radius: 2px;
-    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .6), 0 1px 3px rgba(0, 0, 0, .5);
-    text-shadow: 0 1px 0 rgba(255, 245, 220, .35);
+    /* Concave: dark rim at the top, light one at the bottom — the exact
+       opposite of the raised controls. */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .85),
+                inset 0 -1px 0 rgba(234, 207, 154, .22);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .8), 0 1px 0 rgba(234, 207, 154, .18);
 }
-.tpl-steampunk .gc-name a { color: #241a10; text-decoration: none; border-bottom: 1px dotted rgba(36, 26, 16, .5); }
+/* Corner screws: one gradient per corner, sized and pinned, so they cost no
+   extra markup. */
+.tpl-steampunk .gc-name::before,
+.tpl-steampunk .gc-name::after {
+    content: "";
+    position: absolute;
+    top: 4px; bottom: 4px;
+    width: 5px;
+    background: radial-gradient(circle at 34% 30%, #f2e0bb, var(--brass) 55%, #4a3717) top center / 5px 5px no-repeat,
+                radial-gradient(circle at 34% 30%, #f2e0bb, var(--brass) 55%, #4a3717) bottom center / 5px 5px no-repeat;
+}
+.tpl-steampunk .gc-name::before { left: 5px; }
+.tpl-steampunk .gc-name::after  { right: 5px; }
+.tpl-steampunk .gc-name a { color: var(--brass-lit); text-decoration: none; border-bottom: 1px dotted rgba(234, 207, 154, .45); }
 .tpl-steampunk .gc-name a:hover { border-bottom-style: solid; }
 
 .tpl-steampunk .gc-band { padding: 0.3rem 0.5rem; font-size: 0.85rem; color: var(--parchment); }
@@ -230,6 +253,30 @@ body.tpl-steampunk {
 .tpl-steampunk .gc-row { background: rgba(0, 0, 0, .22); }
 .tpl-steampunk .gc-waga { background: linear-gradient(var(--brass), var(--brass-dark)); color: #241a10; font-weight: 700; }
 .tpl-steampunk .gc-waga strong { color: #241a10; }
+/* Weight indicator: a lit bulb set into the band, green through red as the
+   game gets heavier. It takes its colour from the SHARED .weight-N classes, so
+   the scale matches every other theme rather than being a second one invented
+   here; only the bulb shape and its glow belong to this theme. The glow ties
+   it to the reagent in the poll tubes. */
+.tpl-steampunk .sk-bulb {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 0.45rem;
+    vertical-align: -1px;
+    border: 1px solid rgba(0, 0, 0, .55);
+    /* The lit dome: a highlight offset up-left, over whatever colour the
+       weight-N class supplies as the background. */
+    background-image: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .85), rgba(255, 255, 255, 0) 55%);
+    box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .45), 0 0 6px currentColor;
+}
+/* currentColor drives the outer glow, so each bucket glows its own colour
+   without repeating the five shadows. */
+.tpl-steampunk .sk-bulb.weight-1 { color: #2e9e5b; }
+.tpl-steampunk .sk-bulb.weight-2 { color: #86b300; }
+.tpl-steampunk .sk-bulb.weight-3 { color: #d6a400; }
+.tpl-steampunk .sk-bulb.weight-4 { color: #e0701a; }
+.tpl-steampunk .sk-bulb.weight-5 { color: #cf3b2e; }
 /* The weight scale keeps its colours — those encode complexity and are shared
    across every theme; only the shading changes. */
 /* The rules line is TONE-CODED — good / mid / bad — and a flat colour here
@@ -382,6 +429,20 @@ body.tpl-steampunk {
     outline: none;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), 0 0 0 2px rgba(176, 141, 87, .3);
 }
+/* Native <select> DROPDOWN rows are painted by the OS, not by the rules above:
+   the control itself was dark but the open list stayed light-on-light. Styling
+   <option> directly is the only lever, and it is honoured on Windows/Linux
+   browsers (macOS ignores it entirely, which is a graceful fallback rather
+   than a break — the system list is legible there anyway). */
+.tpl-steampunk select option {
+    background: #1b1512;
+    color: var(--parchment);
+}
+.tpl-steampunk select option:checked,
+.tpl-steampunk select option:hover {
+    background: var(--brass);
+    color: #241a10;
+}
 .tpl-steampunk label { color: var(--text-muted); letter-spacing: 0.04em; }
 .tpl-steampunk .field-note { color: var(--text-muted); opacity: 0.9; }
 
@@ -405,8 +466,34 @@ body.tpl-steampunk {
     padding: 0.2rem 0.8rem;
     font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
 }
+/* Every struck-brass control brightens by the same 1.08 on hover — the tabs,
+   the signup lever, the primary button and this pill. They looked identical
+   at rest but behaved differently, which reads as a bug. */
+.tpl-steampunk .comment-add summary:hover { filter: brightness(1.08); }
 .tpl-steampunk .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-steampunk .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
+
+/* ---- Polls: pressure not yet raised ----------------------------------------
+   The poll's top buttons are the same KIND of control as the game card's tabs,
+   so they get the same struck-brass treatment and the same padding off the top
+   border — they were falling through to the generic .btn and looked like a
+   different family. Delete keeps the ember, exactly as .gc-tab-del does. */
+.tpl-steampunk .poll-actions { padding: 0.35rem 0.4rem 0; gap: 0.3rem; }
+.tpl-steampunk .poll-card .btn-small {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 2px; text-decoration: none;
+    color: #241a10;
+    background: linear-gradient(var(--brass-lit), var(--brass));
+    border: 1px solid var(--brass-dark);
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, .5);
+}
+.tpl-steampunk .poll-card .btn-small:hover { filter: brightness(1.08); text-decoration: none; }
+.tpl-steampunk .poll-card .btn-danger,
+.tpl-steampunk .poll-card .btn-danger:hover {
+    background: linear-gradient(#d9633a, var(--ember));
+    border-color: #7d2c11;
+    color: #fff5ef;
+}
 
 /* ---- Polls: pressure not yet raised ---------------------------------------- */
 .tpl-steampunk .poll-card {

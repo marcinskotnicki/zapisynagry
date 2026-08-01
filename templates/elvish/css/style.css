@@ -382,6 +382,18 @@ body.tpl-elvish {
     outline: none;
     box-shadow: 0 0 0 2px rgba(201, 162, 39, .22);
 }
+/* The OPEN dropdown is painted by the OS, not by the rule above: the control
+   is dark but its list would stay light-on-light. Styling <option> is the only
+   lever, honoured on Windows/Linux; macOS keeps its own legible system list. */
+.tpl-elvish select option {
+    background: var(--moss-deep);
+    color: var(--vellum);
+}
+.tpl-elvish select option:checked,
+.tpl-elvish select option:hover {
+    background: var(--gold);
+    color: #14261c;
+}
 .tpl-elvish label { color: var(--sage); letter-spacing: 0.04em; }
 .tpl-elvish .field-note { color: var(--sage); opacity: 0.85; }
 
