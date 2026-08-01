@@ -165,6 +165,7 @@ body.tpl-schematic {
     border: 1px solid rgba(185, 178, 161, .28);
     border-radius: 0;
     box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
+    overflow:hidden;
 }
 .tpl-schematic .table-title {
     color: var(--paper-2);
@@ -205,9 +206,9 @@ body.tpl-schematic {
     .tpl-schematic .game-list::before {
         content: "";
         position: absolute;
-        left: 10px;
-        top: 4px;
-        bottom: 4px;
+        left: 0px;
+        top: -12px;
+        bottom: -70px;
         width: 1px;
         background: rgba(185, 178, 161, .45);
     }
@@ -216,7 +217,7 @@ body.tpl-schematic {
     .tpl-schematic .game-list > .sc-strip::before {
         content: "";
         position: absolute;
-        left: -22px;
+        left: -32px;
         top: 50%;
         margin-top: -4.5px;
         width: 9px;
@@ -229,9 +230,9 @@ body.tpl-schematic {
     .tpl-schematic .game-list > .sc-strip::after {
         content: "";
         position: absolute;
-        left: -13px;
+        left: -23px;
         top: 50%;
-        width: 13px;
+        width: 23px;
         height: 1px;
         background: rgba(185, 178, 161, .55);
     }
@@ -344,6 +345,7 @@ body.tpl-schematic {
     padding: 0.2rem 0.45rem;
     background: var(--paper-2);
     border: 1px solid var(--rule);
+    justify-content: flex-end;
 }
 .tpl-schematic .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
 .tpl-schematic .sc-key {
