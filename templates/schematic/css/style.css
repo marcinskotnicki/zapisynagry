@@ -97,6 +97,9 @@ body.tpl-schematic {
     color: var(--paper);
     font-family: var(--font-sc);
 }
+.tpl-schematic .tab-body{
+    color: var(--board);
+}
 .tpl-schematic .content { max-width: var(--maxw); }
 
 /* ---- Lettering ------------------------------------------------------------ */
