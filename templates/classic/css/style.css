@@ -16,7 +16,9 @@
     --gc-row:    #d6d6d6;   /* player row band */
 }
 
-.tpl-classic .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; }
+.tpl-classic .table-block{background:#ffffffba}
+
+.tpl-classic .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; justify-content:center;}
 
 .tpl-classic .game-card {
     display: flex; align-items: flex-start; gap: 0;
