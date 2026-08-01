@@ -250,6 +250,9 @@ body.tpl-schematic-compact {
     .tpl-schematic-compact .sc-strip{
         width: calc(50% - 0.44rem);
     }
+    .tpl-schematic-compact .sc-strip:only-child{
+        width: 100%
+    }
     .tpl-schematic-compact .sc-strip:nth-child(even):before,.tpl-schematic-compact .sc-strip:nth-child(even):after{
         display:none;
     }
