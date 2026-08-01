@@ -309,3 +309,7 @@
 .tpl-classic .no-games{padding-bottom:10px;text-align:center;}
 
 .tpl-classic .add-table-form{justify-content:center}
+
+.tpl-classic  .add-game-btn {
+    margin: 2rem auto 1rem;
+}
