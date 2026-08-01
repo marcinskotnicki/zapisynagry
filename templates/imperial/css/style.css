@@ -90,9 +90,8 @@ body.tpl-imperial {
     color: var(--vellum);
     font-family: var(--font-im);
 }
-.tpl-imperial .admin .tab-body{color:var(--vellum);}
+.tpl-imperial .admin .tab-body{color:var(--iron);}
 .tpl-imperial .admin .update-log li{color:black;}
-.tpl-imperial .admin td{color:black;}
 
 }
 .tpl-imperial .content { max-width: var(--maxw); }
