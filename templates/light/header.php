@@ -96,8 +96,15 @@ $showName = opt_bool('show_venue_name');
 // separate settings decide this (may they switch / where / do logged-in users
 // see it); switcher_visible() combines them, and the footer asks the same
 // question for its own slot, so the two can never disagree.
-$hdrTplPick  = switcher_visible('template', 'header', 'tpl_switch_allowed',  count(tpl_available()));
-$hdrLangPick = switcher_visible('language', 'header', 'lang_switch_allowed', count(lang_available()));
+// function_exists guard: this template and inc/template.php (which defines
+// switcher_visible) must ship together, but an FTP upload that copies one and
+// not the other would otherwise take the WHOLE SITE down with a fatal — every
+// page renders this header. Degrading to "no header switcher" is a far better
+// failure than a white screen, and the footer keeps working meanwhile.
+$hdrTplPick  = function_exists('switcher_visible')
+    && switcher_visible('template', 'header', 'tpl_switch_allowed',  count(tpl_available()));
+$hdrLangPick = function_exists('switcher_visible')
+    && switcher_visible('language', 'header', 'lang_switch_allowed', count(lang_available()));
 ?>
 <?php // The bar hides itself when it would be empty (see the note above), so
       // header switchers have to count as content — otherwise placing them

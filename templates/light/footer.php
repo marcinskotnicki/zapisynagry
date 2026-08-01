@@ -21,8 +21,17 @@
 // admin settings — switcher_visible() is the one place that combines them, so
 // the header and this footer can never disagree. Selects auto-submit; the
 // <noscript> button covers JS-free browsers. 'back' returns to this page.
-$showTplPick  = switcher_visible('template', 'footer', 'tpl_switch_allowed',  count(tpl_available()));
-$showLangPick = switcher_visible('language', 'footer', 'lang_switch_allowed', count(lang_available()));
+// See the note in header.php: guarded so a partial upload (this file present,
+// inc/template.php not yet) degrades to "no switcher" instead of fataling on
+// every page. Falls back to the pre-placement behaviour — guests only — so the
+// footer keeps doing something sensible in the meantime.
+if (function_exists('switcher_visible')) {
+    $showTplPick  = switcher_visible('template', 'footer', 'tpl_switch_allowed',  count(tpl_available()));
+    $showLangPick = switcher_visible('language', 'footer', 'lang_switch_allowed', count(lang_available()));
+} else {
+    $showTplPick  = !is_logged_in() && tpl_switch_allowed()  && count(tpl_available())  > 1;
+    $showLangPick = !is_logged_in() && lang_switch_allowed() && count(lang_available()) > 1;
+}
 ?>
 <?php if ($showTplPick || $showLangPick): ?>
 <footer class="sitefooter">
