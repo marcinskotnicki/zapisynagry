@@ -232,6 +232,7 @@ body.tpl-imperial {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     font-size: 0.76em;
+
 }
 .tpl-imperial .im-sanction .sanction-time{
     color: var(--iron);
