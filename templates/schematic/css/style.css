@@ -181,21 +181,87 @@ body.tpl-schematic {
     gap: 0.85rem;
 }
 
+/* ---- The rail -------------------------------------------------------------
+   A spine down the left of the table with a node per item, each tied to its
+   strip by a short lead — the connector language these boards use to show that
+   a row belongs to a track.
+
+   DESKTOP ONLY, deliberately: on a phone the 28px gutter is width the strips
+   need more than the diagram does, so the whole thing is inside a min-width
+   query and mobile keeps its full measure.
+
+   The nodes are drawn on each strip rather than on the rail because their
+   spacing follows the strips' own heights, which vary per card and cannot be
+   expressed as a repeating background. */
+@media (min-width: 701px) {
+    .tpl-schematic .game-list {
+        position: relative;
+        padding-left: 28px;
+    }
+    /* The spine itself, running the height of the list. */
+    .tpl-schematic .game-list::before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 4px;
+        bottom: 4px;
+        width: 1px;
+        background: rgba(185, 178, 161, .45);
+    }
+    /* The node: a filled dot centred on the spine, in the strip's own channel
+       colour so the key carries through to the diagram. */
+    .tpl-schematic .game-list > .sc-strip::before {
+        content: "";
+        position: absolute;
+        left: -22px;
+        top: 50%;
+        margin-top: -4.5px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--chan);
+        box-shadow: 0 0 0 2px var(--board);   /* punches the spine out behind it */
+    }
+    /* The lead: from the node to the strip's edge. */
+    .tpl-schematic .game-list > .sc-strip::after {
+        content: "";
+        position: absolute;
+        left: -13px;
+        top: 50%;
+        width: 13px;
+        height: 1px;
+        background: rgba(185, 178, 161, .55);
+    }
+}
+
 /* ---- The strip ------------------------------------------------------------
    Chamfered top-right corner: the reference's most recognisable panel shape,
    done with clip-path so it holds at any height. */
 .tpl-schematic .sc-strip {
+    position: relative;          /* hosts the rail connector; see the rail block */
     display: flex;
     align-items: stretch;
     gap: 0;
     width: 100%;
-    background: var(--paper);
+    background: none;            /* the paper moved to .sc-body — see below */
     border: none;
     border-radius: 0;
     padding: 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+    /* THE CHAMFER MOVED INWARD, and this is load-bearing. It used to sit on
+       this element together with overflow:hidden, which meant anything drawn
+       outside the strip — like the rail's dot and connector — was clipped away
+       and simply never appeared. Clipping .sc-body instead gives the identical
+       shape (the notch is on the top-right, which is .sc-body's corner; .sc-id
+       is a solid block at the far left and unaffected) while leaving this box
+       free to paint outside itself.
+       drop-shadow rather than box-shadow: a filter follows the ALPHA of what is
+       actually rendered, so the shadow traces the chamfer. A box-shadow would
+       draw a square one and put a dark triangle back in the notch. */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
+}
+.tpl-schematic .sc-body {
+    background: var(--paper);
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
-    overflow: hidden;
 }
 /* The channel key. Each strip sets --chan once and everything downstream reads
    it, so a new channel is one line rather than a cascade of overrides. */
@@ -617,6 +683,10 @@ body.tpl-schematic {
        header bar rather than a side tab, which is the only way it stays
        legible without squeezing the body to nothing. */
     .tpl-schematic .sc-strip { flex-direction: column; }
+    /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
+       notch in the body's top-right corner would read as a bite taken out of
+       the middle of the card rather than as the panel's edge. Squared off. */
+    .tpl-schematic .sc-body { clip-path: none; }
     .tpl-schematic .sc-id {
         flex: 0 0 auto;
         flex-direction: row;
