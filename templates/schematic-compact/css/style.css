@@ -191,6 +191,33 @@ body.tpl-schematic-compact {
     gap: 0.85rem;
 }
 
+
+/* ---- The strip ------------------------------------------------------------
+ *  Chamfered top-right corner: the reference's most recognisable panel shape,
+ *  done with clip-path so it holds at any height. */
+.tpl-schematic-compact .sc-strip {
+    position: relative;          /* hosts the rail connector; see the rail block */
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    background: none;            /* the paper moved to .sc-body — see below */
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    /* THE CHAMFER MOVED INWARD, and this is load-bearing. It used to sit on
+     *      this element together with overflow:hidden, which meant anything drawn
+     *      outside the strip — like the rail's dot and connector — was clipped away
+     *      and simply never appeared. Clipping .sc-body instead gives the identical
+     *      shape (the notch is on the top-right, which is .sc-body's corner; .sc-id
+     *      is a solid block at the far left and unaffected) while leaving this box
+     *      free to paint outside itself.
+     *      drop-shadow rather than box-shadow: a filter follows the ALPHA of what is
+     *      actually rendered, so the shadow traces the chamfer. A box-shadow would
+     *      draw a square one and put a dark triangle back in the notch. */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
+}
+
 /* ---- The rail -------------------------------------------------------------
    A spine down the left of the table with a node per item, each tied to its
    strip by a short lead — the connector language these boards use to show that
@@ -253,31 +280,7 @@ body.tpl-schematic-compact {
     }
 }
 
-/* ---- The strip ------------------------------------------------------------
-   Chamfered top-right corner: the reference's most recognisable panel shape,
-   done with clip-path so it holds at any height. */
-.tpl-schematic-compact .sc-strip {
-    position: relative;          /* hosts the rail connector; see the rail block */
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    width: 100%;
-    background: none;            /* the paper moved to .sc-body — see below */
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    /* THE CHAMFER MOVED INWARD, and this is load-bearing. It used to sit on
-       this element together with overflow:hidden, which meant anything drawn
-       outside the strip — like the rail's dot and connector — was clipped away
-       and simply never appeared. Clipping .sc-body instead gives the identical
-       shape (the notch is on the top-right, which is .sc-body's corner; .sc-id
-       is a solid block at the far left and unaffected) while leaving this box
-       free to paint outside itself.
-       drop-shadow rather than box-shadow: a filter follows the ALPHA of what is
-       actually rendered, so the shadow traces the chamfer. A box-shadow would
-       draw a square one and put a dark triangle back in the notch. */
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
-}
+
 .tpl-schematic-compact .sc-body {
     background: var(--paper);
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
