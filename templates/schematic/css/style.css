@@ -104,7 +104,7 @@ body.tpl-schematic {
     color: var(--paper)
 }
 .tpl-schematic .admin .tab-active {
-    color: var(--board);
+    color: var(--text);
 }
 .tpl-schematic .content { max-width: var(--maxw); }
 
