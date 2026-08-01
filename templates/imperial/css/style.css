@@ -92,6 +92,7 @@ body.tpl-imperial {
 }
 .tpl-imperial .admin .tab-body{color:var(--vellum);}
 .tpl-imperial .admin .update-log li{color:black;}
+.tpl-imperial .admin td{color:black;}
 
 }
 .tpl-imperial .content { max-width: var(--maxw); }
