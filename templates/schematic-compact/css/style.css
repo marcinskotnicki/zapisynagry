@@ -462,6 +462,9 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
 .tpl-schematic-compact .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-schematic-compact .comment-add summary.has-comments::before { content: "\1F5E9  "; }
+.tpl-schematic-compact .comment-add summary.has-comments { border-color: var(--chan); }
+
 .tpl-schematic-compact .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .tpl-schematic-compact .comment-list li {
     background: var(--paper-2);

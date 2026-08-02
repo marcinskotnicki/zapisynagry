@@ -323,6 +323,7 @@ return [
     'bringback_email'       => 'E-mail',
     'bringback_submit'      => 'Przywróć',
     'comment_add'           => 'Dodaj komentarz',
+    'comments_toggle'       => 'Komentarze',
     'comment_name'          => 'Imię',
     'comment_text'          => 'Komentarz',
     'comment_submit'        => 'Dodaj',

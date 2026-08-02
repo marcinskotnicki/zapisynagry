@@ -138,7 +138,8 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
         <?php if (opt_bool('allow_discussions')): ?>
             <div class="sc-foot">
                 <details class="comment-add sc-disc">
-                    <summary><?= e(t('comment_add')) ?><?= !empty($poll['comments']) ? ' (' . count($poll['comments']) . ')' : '' ?></summary>
+                    <?php $cCount = !empty($poll['comments']) ? count($poll['comments']) : 0; ?>
+                    <summary class="sc-comments<?= $cCount > 0 ? ' has-comments' : '' ?>"><?= e(t('comments_toggle')) ?><?= $cCount > 0 ? ' (' . $cCount . ')' : '' ?></summary>
                     <?php if (!empty($poll['comments'])): ?>
                         <ul class="comment-list">
                             <?php foreach ($poll['comments'] as $c): ?>

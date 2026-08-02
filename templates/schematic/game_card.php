@@ -225,7 +225,8 @@
             <div class="sc-foot">
                 <?php if (opt_bool('allow_discussions')): ?>
                     <details class="comment-add sc-disc">
-                        <summary><?= e(t('comment_add')) ?><?= !empty($g['comments']) ? ' (' . count($g['comments']) . ')' : '' ?></summary>
+                        <?php $cCount = !empty($g['comments']) ? count($g['comments']) : 0; ?>
+                        <summary class="sc-comments<?= $cCount > 0 ? ' has-comments' : '' ?>"><?= e(t('comments_toggle')) ?><?= $cCount > 0 ? ' (' . $cCount . ')' : '' ?></summary>
                         <?php if (!empty($g['comments'])): ?>
                             <ul class="comment-list">
                                 <?php foreach ($g['comments'] as $c): ?>

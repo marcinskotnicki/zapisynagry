@@ -572,6 +572,9 @@ body.tpl-schematic {
 }
 .tpl-schematic .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
 .tpl-schematic .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-schematic .comment-add summary.has-comments::before { content: "\1F5E9  "; }
+.tpl-schematic .comment-add summary.has-comments { border-color: var(--chan); }
+
 .tpl-schematic .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .tpl-schematic .comment-list li {
     background: var(--paper-2);
