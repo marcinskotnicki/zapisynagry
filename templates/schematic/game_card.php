@@ -95,14 +95,6 @@
             <?php // ---- Data cells: label above value, the way a panel legend
                   // annotates a diagram. ---- ?>
             <div class="sc-cells">
-                <?php // The box art, sized to the cell row so it reads as the first
-                      // chip in the strip's data run rather than a floating image.
-                      // Placed here rather than out beside the roster because this
-                      // row always exists and is always the same height — the track
-                      // wraps, so the space next to it is not reliably free. ?>
-                <?php if (!empty($g['thumbnail'])): ?>
-                    <span class="sc-cell sc-cell-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></span>
-                <?php endif; ?>
                 <span class="sc-cell sc-cell-weight weight-<?= $bucket ?>">
                     <span class="sc-key"><?= e(t('cl_weight')) ?></span>
                     <span class="sc-val"><?= e(number_format((float)$g['weight'], 1, ',', '')) ?></span>
@@ -113,10 +105,6 @@
                         <span class="sc-val"><?= (int)$g['length_minutes'] ?>&#8242;</span>
                     </span>
                 <?php endif; ?>
-                <span class="sc-cell">
-                    <span class="sc-key"><?= e(t('cl_players')) ?></span>
-                    <span class="sc-val"><?= count($crew) ?>/<?= $max ?></span>
-                </span>
                 <?php if (!empty($g['language'])): ?>
                     <span class="sc-cell">
                         <span class="sc-key"><?= e(t('cl_version')) ?></span>
@@ -141,8 +129,28 @@
                 <p class="sc-comment"><?= nl2br(e($g['comment'])) ?></p>
             <?php endif; ?>
 
-            <?php // ---- THE CAPACITY TRACK ---- ?>
-            <div class="sc-track" role="group" aria-label="<?= e(t('cl_players')) ?>: <?= count($crew) ?>/<?= $max ?>">
+            <?php // ---- THE ROSTER ROW: capacity readout, track, and the CTA ----
+                  // The player count is promoted out of the data cells to sit at
+                  // the head of the seats it describes, carrying a fill bar and —
+                  // once every seat is taken — a warning, because at that point
+                  // the button beside it signs you onto the RESERVE list rather
+                  // than into the game. That is a different action, so it is
+                  // flagged rather than left to be inferred from "5/5". ?>
+            <div class="sc-roster">
+                <div class="sc-count<?= $open === 0 ? ' sc-count-full' : '' ?>">
+                    <?php if ($open === 0): ?>
+                        <span class="sc-warn" title="<?= e(t('signup_reserve')) ?>" aria-hidden="true">&#9888;</span>
+                    <?php endif; ?>
+                    <span class="sc-key"><?= e(t('cl_players')) ?></span>
+                    <span class="sc-val"><?= count($crew) ?>/<?= $max ?></span>
+                    <?php // Fill ratio. aria-hidden because the figure above already
+                          // states it — a screen reader should not hear it twice. ?>
+                    <span class="sc-count-bar" aria-hidden="true">
+                        <span style="width: <?= $max > 0 ? (int)round(count($crew) / $max * 100) : 0 ?>%"></span>
+                    </span>
+                </div>
+
+                <div class="sc-track" role="group" aria-label="<?= e(t('cl_players')) ?>: <?= count($crew) ?>/<?= $max ?>">
                 <?php for ($i = 0; $i < $trackSlots; $i++): ?>
                     <?php $p = $crew[$i] ?? null; ?>
                     <span class="sc-slot<?= $p ? ' sc-slot-on' : ' sc-slot-off' ?>">
@@ -176,6 +184,13 @@
                 <?php endif; ?>
             </div>
 
+                <?php if (!$readonly && can_signup()): ?>
+                    <a class="btn btn-small btn-primary sc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>">
+                        <?= $open === 0 ? e(t('signup_reserve')) : e(t('signup')) ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+
             <?php if (!empty($reserves)): ?>
                 <div class="sc-track sc-track-reserve">
                     <span class="sc-track-label"><?= e(t('reserve_tag')) ?></span>
@@ -194,11 +209,6 @@
             <?php endif; ?>
 
             <div class="sc-foot">
-                <?php if (!$readonly && can_signup()): ?>
-                    <a class="btn btn-small btn-primary sc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>">
-                        <?= $open === 0 ? e(t('signup_reserve')) : e(t('signup')) ?>
-                    </a>
-                <?php endif; ?>
                 <?php if (opt_bool('allow_discussions')): ?>
                     <details class="comment-add sc-disc">
                         <summary><?= e(t('comment_add')) ?><?= !empty($g['comments']) ? ' (' . count($g['comments']) . ')' : '' ?></summary>
@@ -223,5 +233,13 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php // ---- Box art, in its own column at the right end of the strip.
+              // Moved out of the data cells so it can be large enough to read;
+              // the lead line is the same connector language the rail on the
+              // left uses, tying the art back to the strip it belongs to. ?>
+        <?php if (!empty($g['thumbnail'])): ?>
+            <div class="sc-art"><img src="<?= e($g['thumbnail']) ?>" alt=""></div>
+        <?php endif; ?>
     </article>
 <?php endif; ?>

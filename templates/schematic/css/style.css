@@ -357,6 +357,38 @@ body.tpl-schematic {
 /* The box-art chip: square, sized off the cell row so it lines up with the
    keys beside it. object-fit:cover keeps a non-square thumbnail from
    distorting — it crops instead, which is right for box art. */
+/* ---- Box art column -------------------------------------------------------
+   At the right end of the strip, large enough to actually recognise. Sized off
+   the strip's height rather than a fixed box, so a tall card gets a tall image
+   and a short one stays proportionate. The lead line repeats the rail's
+   connector language on the opposite edge. */
+.tpl-schematic .sc-art {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem 0.5rem 0.5rem;
+}
+.tpl-schematic .sc-art img {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-height: 96px;
+    min-height: 56px;
+    object-fit: contain;
+    border: 1px solid var(--rule);
+}
+/* The lead: runs from the art out to the strip's right edge. */
+.tpl-schematic .sc-art::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 0.9rem;
+    height: 1px;
+    background: rgba(185, 178, 161, .55);
+}
+
 .tpl-schematic .sc-cell-thumb {
     min-width: 0;
     padding: 0;
@@ -419,6 +451,58 @@ body.tpl-schematic {
    A run of numbered chips, one per seat. Filled chips carry the channel
    colour; open ones are an empty ruled outline, so "three of five gone" is
    visible at a glance rather than something you compute from a fraction. */
+/* ---- The roster row -------------------------------------------------------
+   Capacity readout, then the seats, then the one CTA — read left to right like
+   everything else in this theme. align-items:stretch makes the readout match
+   the seat chips' height without either being told a pixel size. */
+.tpl-schematic .sc-roster {
+    display: flex;
+    align-items: stretch;
+    gap: 0.4rem;
+    margin-bottom: 0.45rem;
+}
+.tpl-schematic .sc-roster .sc-track { flex: 1 1 auto; margin-bottom: 0; }
+.tpl-schematic .sc-roster .sc-signup { flex: 0 0 auto; align-self: center; }
+
+/* The capacity readout: the same label-over-value unit as a data cell, but
+   sitting at the head of the seats it describes rather than lost among the
+   other figures, and carrying its own fill bar. */
+.tpl-schematic .sc-count {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    min-width: 62px;
+    padding: 0.2rem 0.45rem 0.4rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--chan);
+}
+/* The fill bar, along the bottom edge — the same gauge treatment the poll
+   options use, so "how full is this" reads the same way everywhere. */
+.tpl-schematic .sc-count-bar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
+    background: var(--paper-3);
+    border-top: 1px solid var(--rule);
+}
+.tpl-schematic .sc-count-bar > span { display: block; height: 100%; background: var(--chan); }
+/* At capacity the readout switches to the caution colour and shows a warning,
+   because the button beside it now signs you onto the RESERVE list — a
+   different action, so it is flagged rather than inferred from "5/5". */
+.tpl-schematic .sc-count-full { border-left-color: #c2562a; }
+.tpl-schematic .sc-count-full .sc-count-bar > span { background: #c2562a; }
+.tpl-schematic .sc-warn {
+    position: absolute;
+    top: 2px; right: 4px;
+    font-size: 0.8rem;
+    line-height: 1;
+    color: #c2562a;
+}
+
 .tpl-schematic .sc-track {
     display: flex;
     flex-wrap: wrap;
@@ -732,6 +816,16 @@ body.tpl-schematic {
        header bar rather than a side tab, which is the only way it stays
        legible without squeezing the body to nothing. */
     .tpl-schematic .sc-strip { flex-direction: column; }
+    /* Stacked, the art column becomes a band under the body rather than a
+       third column squeezed against it, and its lead line goes — there is no
+       strip edge to the right of it to lead to any more. */
+    .tpl-schematic .sc-art { padding: 0 0.6rem 0.6rem; justify-content: center; }
+    .tpl-schematic .sc-art img { max-height: 120px; }
+    .tpl-schematic .sc-art::after { content: none; }
+    /* The roster stacks: the readout keeps full width above the seats so its
+       fill bar stays readable, and the CTA drops below them. */
+    .tpl-schematic .sc-roster { flex-direction: column; align-items: stretch; }
+    .tpl-schematic .sc-roster .sc-signup { align-self: flex-start; }
     /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
        notch in the body's top-right corner would read as a bite taken out of
        the middle of the card rather than as the panel's edge. Squared off. */
