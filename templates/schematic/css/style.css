@@ -739,11 +739,7 @@ body.tpl-schematic {
 .tpl-schematic .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
 
 /* ---- Polls: candidates as side-by-side modules --------------------------- */
-/* The hazard stripe marks a poll as unresolved, but at .18 white it threw
-   enough contrast to break up the time sitting on top of it. Dropped to .07
-   and widened: the pattern still reads as "not settled", while the block stays
-   near enough to a flat channel colour for white text to hold. The text also
-   gets its own shadow below. */
+
 .tpl-schematic .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
     var(--chan) 0 11px, rgba(255, 255, 255, .07) 11px 22px); }
 .tpl-schematic .sc-poll .sc-id-time { text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
@@ -759,9 +755,7 @@ body.tpl-schematic {
 }
 .tpl-schematic .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
 .tpl-schematic .poll-by strong { color: var(--ink); }
-/* Candidates stack as full-width ROWS, not side-by-side tiles. Tiles made each
-   option as tall as its tallest element and left the name fighting for width;
-   a row reads like a line in a table, which is what a candidate list is. */
+
 .tpl-schematic .sc-modules {
     display: flex;
     flex-direction: column;
@@ -771,7 +765,7 @@ body.tpl-schematic {
     padding: 0;
 }
 .tpl-schematic .sc-module {
-    position: relative;          /* the gauge is pinned to this box's bottom edge */
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -780,14 +774,11 @@ body.tpl-schematic {
     border: 1px solid var(--rule);
     border-left: 3px solid var(--chan);
     border-radius: 0;
-    /* Bottom padding leaves the gauge its own strip along the edge, so it never
-       sits under the text. */
+
     padding: 0.25rem 0.5rem 0.4rem;
-    clip-path: none;             /* a chamfer on a thin row just clips the text */
-}
+    clip-path: none;
 .tpl-schematic .sc-module-full { border-left-color: #2f7f4a; }
-/* The name takes the room left over, and truncates rather than wrapping the
-   row onto a second line. */
+
 .tpl-schematic .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpl-schematic .poll-opt-name, .tpl-schematic a.poll-opt-name {
     color: var(--ink);
@@ -802,16 +793,11 @@ body.tpl-schematic {
     flex: 0 0 auto; white-space: nowrap;
 }
 .tpl-schematic .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
-/* The vote control is pushed to the right edge by an auto margin, so it lands
-   in the same place on every row and the column can be scanned. */
+
 .tpl-schematic .sc-module > .btn,
 .tpl-schematic .sc-module > form.inline { margin-left: auto; flex: 0 0 auto; }
 .tpl-schematic .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
-/* The gauge: a ruled track, its fill in the channel colour, turning green once
-   the candidate has the players it needs. */
-/* The gauge runs along the row's BOTTOM EDGE — a fill line under the option
-   rather than a separate object taking its own line. Absolute against the row,
-   so it costs no height in the flex flow. */
+
 .tpl-schematic .poll-opt-bar {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -839,13 +825,7 @@ body.tpl-schematic {
     border-radius: 0;
     font-weight: 700;
 }
-/* The timeline band matches its strip's colour. It cannot be done with
-   nth-child, which was the obvious idea: a table's lanes are NOT wrapped —
-   .tl-table-no and .tl-lane are flat siblings and a table emits a VARIABLE
-   number of lanes when its games overlap, so positional counting drifts out of
-   step after the first table that needs two. The block carries the channel as
-   a class instead, derived from the same table number the card uses, so the
-   two agree by construction rather than by coincidence. */
+
 .tpl-schematic .tl-chan-1 { --chan: var(--ch1); }
 .tpl-schematic .tl-chan-2 { --chan: var(--ch2); }
 .tpl-schematic .tl-chan-3 { --chan: var(--ch3); }
@@ -853,8 +833,7 @@ body.tpl-schematic {
 .tpl-schematic .tl-chan-5 { --chan: var(--ch5); }
 .tpl-schematic .tl-game:hover { background: var(--paper-2); }
 .tpl-schematic .tl-count-full { color: #b03060; }
-/* Unresolved: the base sheet paints this near-white, which on the graphite
-   board is the one bright patch on the page, so the value is replaced. */
+
 .tpl-schematic .tl-game.tl-poll {
     background: repeating-linear-gradient(135deg,
         rgba(35, 43, 55, .9) 0 6px, rgba(45, 55, 70, .9) 6px 12px);
@@ -878,8 +857,7 @@ body.tpl-schematic {
 }
 .tpl-schematic .game-archived { opacity: 0.5; }
 .tpl-schematic .game-archived .game-name { text-decoration: line-through; }
-/* The open dropdown is painted by the OS; styling <option> is the only lever,
-   honoured on Windows/Linux with macOS keeping its own legible list. */
+
 .tpl-schematic select option { background: var(--paper-2); color: var(--ink); }
 .tpl-schematic select option:checked,
 .tpl-schematic select option:hover { background: var(--ink); color: var(--paper-2); }
@@ -901,32 +879,22 @@ body.tpl-schematic {
 
 
 @media (max-width: 700px) {
-    /* The strip becomes a stack: the identity block turns into a full-width
-       header bar rather than a side tab, which is the only way it stays
-       legible without squeezing the body to nothing. */
+
     .tpl-schematic .sc-strip { flex-direction: column; }
-    /* Stacked, the art column becomes a band under the body rather than a
-       third column squeezed against it, and its lead line goes — there is no
-       strip edge to the right of it to lead to any more. */
+
     .tpl-schematic .sc-art { padding: 0 0.6rem 0.6rem; justify-content: center; }
     .tpl-schematic .sc-art::after { content: none; }
-    /* The roster stacks: the readout keeps full width above the seats so its
-       fill bar stays readable, and the CTA drops below them. */
-    /* Stacked, the chevron would point down the page at nothing, and the fixed
-       square readout would waste a whole row — so the row squares off and the
-       readout goes full width above the seats it describes. */
+
     .tpl-schematic .sc-roster { flex-direction: column; align-items: stretch; }
     .tpl-schematic .sc-count { width: 100%; height: auto; padding-bottom: 0.5rem; }
-    /* Stacked, the arrows would point sideways at nothing. */
+
     .tpl-schematic .sc-count::before,
     .tpl-schematic .sc-count::after,
     .tpl-schematic .sc-seats::after { content: none; }
     .tpl-schematic .sc-roster .sc-seats { margin-left: 0; padding: 0.35rem 0.4rem; }
     .tpl-schematic .sc-roster .sc-signup { align-self: flex-start; margin: 0.4rem 0 0; }
     .tpl-schematic .sc-art img { width: 120px; max-height: none; }
-    /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
-       notch in the body's top-right corner would read as a bite taken out of
-       the middle of the card rather than as the panel's edge. Squared off. */
+
     .tpl-schematic .sc-body { clip-path: none; }
     .tpl-schematic .sc-id {
         flex: 0 0 auto;
@@ -935,22 +903,15 @@ body.tpl-schematic {
         padding: 0.3rem 0.6rem;
     }
     .tpl-schematic .sc-slot-name { max-width: 8rem; }
-    /* The base sheet's mobile rule drops a poll option's vote control onto its
-       own full-width line (added when options were a stacked list). These rows
-       are already narrow and inline, so that would undo the change: keep the
-       control on the row and let the NAME give up width instead. */
+
     .tpl-schematic .sc-module { flex-wrap: nowrap; row-gap: 0; }
     .tpl-schematic .sc-module > .btn,
     .tpl-schematic .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
     .tpl-schematic .sc-module > form.inline .btn { width: auto; }
     .tpl-schematic .sc-module-head { max-width: 45%; }
-    /* Weight and length are the first things to go when there is no room —
-       the vote tally and the control have to survive. */
+
     .tpl-schematic .sc-module .weight-badge { display: none; }
-    /* A logged-in admin sees four poll controls (delete / edit / end / add), and
-       .sc-actions is a nowrap inline-flex that will not shrink — so they ran
-       straight off the side of the card. Given its own full-width line here,
-       free to wrap onto a second row. */
+
     .tpl-schematic .sc-actions {
         flex: 1 1 100%;
         flex-wrap: wrap;
