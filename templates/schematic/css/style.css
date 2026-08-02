@@ -894,6 +894,11 @@ body.tpl-schematic {
     outline: 2px solid var(--ch4);
     outline-offset: 2px;
 }
+.tpl-schematic .tl-count-full:after{
+    content:' ⚠';
+    color: #c2562a;
+}
+
 
 @media (max-width: 700px) {
     /* The strip becomes a stack: the identity block turns into a full-width
