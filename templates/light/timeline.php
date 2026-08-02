@@ -25,6 +25,17 @@
 
     <div class="tl-scroll">
         <div class="tl-inner">
+            <?php // Alternating hour stripes, behind everything. Decorative only —
+                  // the hour labels above already carry the information — so the
+                  // whole layer is hidden from assistive tech. ?>
+            <?php if (!empty($timeline['bands'])): ?>
+                <div class="tl-bands" aria-hidden="true">
+                    <?php foreach ($timeline['bands'] as $b): ?>
+                        <span class="tl-band" style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%"></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <?php // Hour brackets across the top (positioned by left%). ?>
             <div class="tl-hours">
                 <?php foreach ($timeline['hours'] as $h): ?>

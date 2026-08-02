@@ -462,6 +462,7 @@ function knows_rules_label($code) {
  *
  *  OUTPUT SHAPE (consumed by templates/light/timeline.php):
  *    ['hours'  => [ ['label'=>'14:00','left'=>33.3], ... ],
+ *     'bands'  => [ ['left'=>0,'width'=>8.3], ... ],   // one per hour, for the stripes
  *     'tables' => [ ['number'=>1, 'lanes'=> [ [block, block...], [block...] ] ], ... ]]
  *  where a block = ['type'('game'|'poll'),'id','name','start_time','cur','max','full','left','width'].
  * --------------------------------------------------------------------------- */
@@ -532,6 +533,30 @@ function timeline_build($dayRow, $tables, $extHours) {
                     'left'  => round(($h - $startMin) / $total * 100, 3)];   // % from left edge
     }
 
+    /* Hour BANDS: one box per hour for the alternating background stripes.
+     *
+     * Emitted as real positioned boxes rather than a repeating gradient because
+     * the hour edges are percentages of a span that changes with the day — a
+     * gradient would need its tile width and its starting offset both fed in,
+     * and background-position percentages do not mean what you would want here
+     * (they align image-% to container-%, which is a no-op when the two are the
+     * same width). Boxes just land where the labels land, by construction.
+     *
+     * The first and last bands are CLAMPED: a day starting at 17:30 opens with
+     * a half-hour band, and the span rarely ends exactly on the hour either.
+     * Without that the stripes would run past the edge and misalign everything
+     * after the first partial hour. */
+    $bands  = [];
+    $firstH = (int)(ceil($startMin / 60) * 60);
+    if ($firstH > $startMin) {                       // leading part-hour
+        $bands[] = ['left' => 0.0,
+                    'width' => round(($firstH - $startMin) / $total * 100, 3)];
+    }
+    for ($h = $firstH; $h < $endMin; $h += 60) {
+        $bands[] = ['left'  => round(($h - $startMin) / $total * 100, 3),
+                    'width' => round(min(60, $endMin - $h) / $total * 100, 3)];
+    }
+
     // Second pass: pack each table's games into lanes (greedy interval
     // partitioning). Sort by start; place each game in the first lane whose last
     // game has already ended by this game's start — otherwise open a new lane.
@@ -569,7 +594,7 @@ function timeline_build($dayRow, $tables, $extHours) {
     }
     unset($td);
 
-    return ['hours' => $hours, 'tables' => $tableData];
+    return ['hours' => $hours, 'bands' => $bands, 'tables' => $tableData];
 }
 
 /* ---- Signups / reserve --------------------------------------------------- */

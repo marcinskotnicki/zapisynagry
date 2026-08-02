@@ -314,7 +314,7 @@
 }
 
 .tpl-classic .day-tabs{justify-content:center;}
-.tpl-classic .day-tabs, .day-tab-active {border-color:#b8b9bd;}
+.tpl-classic .day-tabs, .tpl-classic .day-tab-active {border-color:#b8b9bd;}
 .tpl-classic .day-tab-active{
     background: linear-gradient(var(--surface), var(--bg));
 }

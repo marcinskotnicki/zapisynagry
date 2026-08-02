@@ -93,7 +93,6 @@ body.tpl-imperial {
 .tpl-imperial .admin .tab-body{color:var(--iron);}
 .tpl-imperial .admin .update-log li{color:black;}
 
-}
 .tpl-imperial .content { max-width: var(--maxw); }
 
 /* ---- Lettering ------------------------------------------------------------ */

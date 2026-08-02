@@ -346,7 +346,30 @@ html { scroll-behavior: smooth; }
 .timeline { margin: 1rem 0 2.5rem; padding: 0 1rem; }
 .timeline-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
 .tl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.tl-inner { position: relative; min-width: 700px; padding: 0 1.6rem 0.5rem; } /* side padding: the edge hour labels are centred on their tick (translateX(-50%)), so without it the last label overflows a few px and forces a useless scrollbar */
+.tl-inner { --tl-pad: 1.6rem; position: relative; min-width: 700px; padding: 0 var(--tl-pad) 0.5rem; } /* side padding: the edge hour labels are centred on their tick (translateX(-50%)), so without it the last label overflows a few px and forces a useless scrollbar */
+
+/* ---- Hour stripes ---------------------------------------------------------
+   Alternating vertical bands, one per hour, so a block's start and length can
+   be read off the chart instead of counted against the labels.
+
+   Inset by the SAME padding .tl-inner uses, because an absolutely positioned
+   child resolves against the padding box while the hour labels and the game
+   blocks are positioned inside the content box — without matching the two the
+   stripes would sit a padding-width out of step with everything they are meant
+   to line up with. Hence the shared --tl-pad.
+
+   Deliberately a translucent black rather than a named colour: every theme
+   inherits this file, and a tint that just darkens whatever is underneath works
+   on parchment, graphite and cork alike without nine overrides. A theme that
+   wants something else can still restyle .tl-band. */
+.tl-bands { position: absolute; top: 0; bottom: 0.5rem; left: var(--tl-pad); right: var(--tl-pad); z-index: 0; }
+.tl-band  { position: absolute; top: 0; bottom: 0; }
+.tl-band:nth-child(odd) { background: rgba(0, 0, 0, 0.045); }
+
+/* The content sits above the stripes. .tl-table-no is otherwise static, and a
+   static box with a background paints BELOW positioned siblings — so without
+   this its bar would disappear behind the band layer. */
+.tl-hours, .tl-lane, .tl-table-no { position: relative; z-index: 1; }
 
 .tl-hours { position: relative; height: 1.6rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; }
 .tl-hour { position: absolute; top: 0.3rem; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
