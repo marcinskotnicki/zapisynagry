@@ -150,6 +150,7 @@
                     </span>
                 </div>
 
+                <div class="sc-seats">
                 <div class="sc-track" role="group" aria-label="<?= e(t('cl_players')) ?>: <?= count($crew) ?>/<?= $max ?>">
                 <?php for ($i = 0; $i < $trackSlots; $i++): ?>
                     <?php $p = $crew[$i] ?? null; ?>
@@ -183,6 +184,8 @@
                     <span class="sc-slot sc-slot-more"><?= e(t('cl_more_slots', $max - $trackSlots)) ?></span>
                 <?php endif; ?>
             </div>
+
+                </div>
 
                 <?php if (!$readonly && can_signup()): ?>
                     <a class="btn btn-small btn-primary sc-signup" href="sign_up.php?game=<?= (int)$g['id'] ?>">

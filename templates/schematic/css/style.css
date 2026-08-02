@@ -269,8 +269,14 @@ body.tpl-schematic {
        draw a square one and put a dark triangle back in the notch. */
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
 }
-.tpl-schematic .sc-body {
-    background: var(--paper);
+.tpl-schematic .sc-body { background: var(--paper); }
+/* THE CHAMFER GOES ON WHICHEVER BLOCK IS LAST. It used to be pinned to
+   .sc-body, which was the right edge until the art column moved in after it —
+   after that the notch appeared in the MIDDLE of the card, with the art
+   stranded on the dark board beyond it. Both blocks carry the paper, and
+   :last-child puts the corner wherever the card actually ends. */
+.tpl-schematic .sc-body:last-child,
+.tpl-schematic .sc-art:last-child {
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 /* The channel key. Each strip sets --chan once and everything downstream reads
@@ -367,6 +373,7 @@ body.tpl-schematic {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    background: var(--paper);   /* the art sits ON the card, not beside it */
     padding: 0.5rem 0.9rem 0.5rem 0.5rem;
 }
 .tpl-schematic .sc-art img {
@@ -457,16 +464,22 @@ body.tpl-schematic {
    the seat chips' height without either being told a pixel size. */
 .tpl-schematic .sc-roster {
     display: flex;
-    align-items: stretch;
-    gap: 0.4rem;
+    align-items: center;        /* not stretch: the seats are shorter than the readout */
+    gap: 0;                     /* the chevron notches supply the spacing */
     margin-bottom: 0.45rem;
 }
-.tpl-schematic .sc-roster .sc-track { flex: 1 1 auto; margin-bottom: 0; }
-.tpl-schematic .sc-roster .sc-signup { flex: 0 0 auto; align-self: center; }
+/* The seats band does NOT grow. It used to be flex:1, which stretched it
+   across the card and shoved the signup button to the far right, away from the
+   thing it acts on. */
+.tpl-schematic .sc-roster .sc-seats { flex: 0 1 auto; min-width: 0; }
+.tpl-schematic .sc-roster .sc-track { margin-bottom: 0; }
+.tpl-schematic .sc-roster .sc-signup { flex: 0 0 auto; margin-left: 0.5rem; }
 
 /* The capacity readout: the same label-over-value unit as a data cell, but
    sitting at the head of the seats it describes rather than lost among the
    other figures, and carrying its own fill bar. */
+/* Square and fixed: it is the one figure that anchors the row, so it keeps its
+   size regardless of how many seats sit beside it. */
 .tpl-schematic .sc-count {
     position: relative;
     flex: 0 0 auto;
@@ -474,11 +487,33 @@ body.tpl-schematic {
     flex-direction: column;
     justify-content: center;
     gap: 1px;
-    min-width: 62px;
-    padding: 0.2rem 0.45rem 0.4rem;
+    width: 58px;
+    height: 46px;
+    padding: 0.2rem 0.4rem 0.4rem;
     background: var(--paper-2);
     border: 1px solid var(--rule);
     border-left: 3px solid var(--chan);
+    box-sizing: border-box;
+}
+
+/* ---- The seats band -------------------------------------------------------
+   A darker strip carrying the seat chips, cut as a chevron: notched on the
+   left where the count feeds into it, pointed on the right where it feeds the
+   button. That makes the row read as a flow — this many players, these people,
+   now join — rather than as three unrelated boxes side by side.
+   The horizontal padding is what keeps the chips clear of the two diagonals. */
+.tpl-schematic .sc-seats {
+    background: var(--paper-3);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.25rem 1.15rem 0.25rem 1.15rem;
+    clip-path: polygon(
+        0 0,
+        calc(100% - 13px) 0,
+        100% 50%,
+        calc(100% - 13px) 100%,
+        0 100%,
+        13px 50%);
 }
 /* The fill bar, along the bottom edge — the same gauge treatment the poll
    options use, so "how full is this" reads the same way everywhere. */
@@ -824,8 +859,18 @@ body.tpl-schematic {
     .tpl-schematic .sc-art::after { content: none; }
     /* The roster stacks: the readout keeps full width above the seats so its
        fill bar stays readable, and the CTA drops below them. */
+    /* Stacked, the chevron would point down the page at nothing, and the fixed
+       square readout would waste a whole row — so the row squares off and the
+       readout goes full width above the seats it describes. */
     .tpl-schematic .sc-roster { flex-direction: column; align-items: stretch; }
-    .tpl-schematic .sc-roster .sc-signup { align-self: flex-start; }
+    .tpl-schematic .sc-count { width: 100%; height: auto; padding-bottom: 0.5rem; }
+    .tpl-schematic .sc-seats {
+        clip-path: none;
+        padding: 0.3rem 0.4rem;
+        border: 1px solid var(--rule);
+        border-top: none;
+    }
+    .tpl-schematic .sc-roster .sc-signup { align-self: flex-start; margin: 0.4rem 0 0; }
     /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
        notch in the body's top-right corner would read as a bite taken out of
        the middle of the card rather than as the panel's edge. Squared off. */
