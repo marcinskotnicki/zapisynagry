@@ -1,67 +1,23 @@
 @import url("../../light/css/style.css");
 
-/* =============================================================================
- *  steampunk — the evening's games as a boiler room of pressure vessels.
- * -----------------------------------------------------------------------------
- *  DESIGN NOTE, so a later edit doesn't sand off the point:
- *
- *  LAYOUT IS CLASSIC'S, deliberately — this theme was asked for on that
- *  footprint. The card is classic's two-panel split: a narrow instrument
- *  column beside a wider crew plate that overlaps it, in a wrapping row of
- *  550px cards. The structure and the class names are re-used rather than
- *  reinvented; only the material changes. If you're comparing the two files,
- *  the positioning rules should look familiar on purpose.
- *
- *  MATERIALS are oiled walnut, patinated brass and oxidised copper. The
- *  ground is warm dark brown rather than the near-black a dark theme reaches
- *  for by default, and the contrast comes from VERDIGRIS — the blue-green of
- *  weathered copper — rather than from a second warm tone, which would just
- *  make everything brass-on-brass.
- *
- *  SIGNATURE: the pressure gauge. Every crew plate carries a working brass
- *  gauge whose needle points at how full the game is, swept across the dial in
- *  img/gauge.svg. The angle is computed in PHP and set inline, because only
- *  the card knows the counts — a gauge that always read the same would be a
- *  picture of an instrument rather than an instrument. That, plus the rivets,
- *  is where this theme spends its boldness; everything else is quiet metal.
- *
- *  INTRICACY, without the noise: the ornament here is repetition of a few
- *  honest details — rivet heads, banded plate edging, a hairline of specular
- *  brass on every raised edge — rather than a different flourish everywhere.
- *  Resist adding a fourth kind of decoration; a boiler room is busy because it
- *  has many of the same fittings, not many different ones.
- *
- *  ASSETS: three hand-written SVGs in ../img/. Vector so they stay crisp as
- *  border-image stretches them, text so they diff like code. NO WEB FONTS,
- *  matching the rest of the app — this site asks visitors for GDPR consent, so
- *  quietly adding a third-party font request isn't a call to make on the
- *  admin's behalf.
- *
- *  Everything is scoped to .tpl-steampunk (set on <body> by header.php).
- * ========================================================================== */
-
 .tpl-steampunk {
-    /* ---- Materials ------------------------------------------------------- */
-    --soot:       #1b1512;   /* the boiler room: warm dark, never neutral black */
-    --walnut:     #2a201a;   /* oiled casing */
-    --walnut-up:  #3a2c23;   /* a raised panel */
-    --brass:      #b08d57;   /* patinated brass: the working metal */
-    --brass-lit:  #eacf9a;   /* polished highlight and lettering */
-    --brass-dark: #6b5228;   /* the shadowed side of every fitting */
-    --vial:       #b8d43a;   /* the reagent in the sight-glass: yellow-green */
-    --vial-core:  #e6f39a;   /* its lit core, where the light passes through */
-    --glow:       #f0952f;   /* glowing orange: pending, and past the threshold */
-    --ember-lit:  #e2683c;   /* the firebox colour, lifted enough to read as text */
-    --parchment:  #ece0c6;   /* label card / body text */
-    --ember:      #b8431c;   /* firebox glow: danger and the red line */
 
-    /* Slab serif for lettering — Victorian industrial signage was slab, and it
-       sets this theme apart from the other five at a glance. Rockwell ships
-       with Office, DIN-era slabs are the fallbacks; nothing is fetched. */
+    --soot:       #1b1512;
+    --walnut:     #2a201a;
+    --walnut-up:  #3a2c23;
+    --brass:      #b08d57;
+    --brass-lit:  #eacf9a;
+    --brass-dark: #6b5228;
+    --vial:       #b8d43a;
+    --vial-core:  #e6f39a;
+    --glow:       #f0952f;
+    --ember-lit:  #e2683c;
+    --parchment:  #ece0c6;
+    --ember:      #b8431c;
+
     --font-sk:   Rockwell, 'Rockwell Nova', 'Bookman Old Style', 'Roboto Slab',
                  Georgia, 'Times New Roman', serif;
 
-    /* Remap the base variables so untouched rules still land somewhere sane. */
     --bg:           var(--soot);
     --surface:      var(--walnut-up);
     --surface-2:    var(--walnut);
@@ -76,18 +32,9 @@
     --maxw:         1400px;
 }
 
-/* ---- The boiler room ------------------------------------------------------
-   Two enormous cogs, very faint, fixed behind the page — the machinery the
-   whole thing is bolted to. Faint enough to read as depth rather than as a
-   pattern you're meant to look at. */
 body.tpl-steampunk {
     background-color: var(--soot);
-    /* Four fixed layers, painted FIRST-LISTED ON TOP: grain over the two cogs
-       over the wash. The cogs sit half off opposite corners so they read as
-       machinery the page is bolted between, rather than as two ornaments
-       floating in the margins. Every list below has to stay four long and in
-       the same order — a short list silently repeats from the start, which is
-       a confusing way to lose a layer. */
+
     background-image:
         url("../img/grain.svg"),
         url("../img/cog.svg"),
@@ -101,11 +48,9 @@ body.tpl-steampunk {
     font-family: var(--font-sk);
 }
 .tpl-steampunk .content { max-width: var(--maxw); }
-/* The cogs are decoration behind everything; without this they can sit over a
-   panel's own background on some stacking orders. */
+
 .tpl-steampunk .content, .tpl-steampunk .topbar { position: relative; z-index: 1; }
 
-/* ---- Lettering ------------------------------------------------------------ */
 .tpl-steampunk h1, .tpl-steampunk h2, .tpl-steampunk h3,
 .tpl-steampunk .btn, .tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
     font-family: var(--font-sk);
@@ -121,7 +66,7 @@ body.tpl-steampunk {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 0.2rem;
-    /* Struck-metal lettering: a dark edge below, a light one above. */
+
     text-shadow: 0 1px 0 #100b08, 0 -1px 0 rgba(234, 207, 154, .3);
 }
 .tpl-steampunk .event-date,
@@ -134,7 +79,6 @@ body.tpl-steampunk {
     margin: 0.1rem 0 0;
 }
 
-/* ---- Day tabs: lever positions -------------------------------------------- */
 .tpl-steampunk .day-tabs { justify-content: center; border-bottom: 2px solid var(--brass-dark); gap: 0.35rem; }
 .tpl-steampunk .day-tab {
     color: var(--text-muted);
@@ -155,7 +99,6 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .day-tab-date, .tpl-steampunk .day-tab-hours { color: inherit; opacity: 0.8; }
 
-/* ---- Tables: banks of machinery ------------------------------------------- */
 .tpl-steampunk .table-block {
     background: linear-gradient(rgba(176, 141, 87, .06), transparent 40%), rgba(42, 32, 26, .9);
     border: 1px solid var(--brass-dark);
@@ -172,7 +115,6 @@ body.tpl-steampunk {
     padding-bottom: 0.4rem;
 }
 
-/* ---- Layout: classic's, unchanged ----------------------------------------- */
 .tpl-steampunk .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; }
 .tpl-steampunk .game-card {
     display: flex; align-items: flex-start; gap: 0;
@@ -180,7 +122,6 @@ body.tpl-steampunk {
     background: transparent; border: none; padding: 0; box-shadow: none;
 }
 
-/* ---- The instrument column ------------------------------------------------ */
 .tpl-steampunk .gc-info {
     width: 235px; flex: 0 0 235px;
     background: linear-gradient(var(--walnut-up), var(--walnut));
@@ -209,13 +150,7 @@ body.tpl-steampunk {
     border: 3px solid var(--brass-dark);
     box-shadow: 0 0 0 1px #100b08;
 }
-/* The nameplate: an ENGRAVED plate, recessed into the casing — deliberately
-   not the raised brass the buttons use, which is what made it read as
-   clickable. Everything is inverted from a button: the gradient runs dark at
-   the top rather than light, the inset highlight moves to the BOTTOM edge, and
-   the lettering carries a dark shadow above it as if cut into the surface.
-   Four corner screws, the same fitting the crew berths use, finish it as
-   hardware rather than a label. */
+
 .tpl-steampunk .gc-name {
     position: relative;
     color: var(--brass-lit);
@@ -228,14 +163,12 @@ body.tpl-steampunk {
     background: linear-gradient(#161009, #241a10 45%, #33261a);
     border: 1px solid var(--brass-dark);
     border-radius: 2px;
-    /* Concave: dark rim at the top, light one at the bottom — the exact
-       opposite of the raised controls. */
+
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, .85),
                 inset 0 -1px 0 rgba(234, 207, 154, .22);
     text-shadow: 0 -1px 0 rgba(0, 0, 0, .8), 0 1px 0 rgba(234, 207, 154, .18);
 }
-/* Corner screws: one gradient per corner, sized and pinned, so they cost no
-   extra markup. */
+
 .tpl-steampunk .gc-name::before,
 .tpl-steampunk .gc-name::after {
     content: "";
@@ -256,11 +189,7 @@ body.tpl-steampunk {
 .tpl-steampunk .gc-row { background: rgba(0, 0, 0, .22); }
 .tpl-steampunk .gc-waga { background: linear-gradient(var(--brass), var(--brass-dark)); color: #241a10; font-weight: 700; }
 .tpl-steampunk .gc-waga strong { color: #241a10; }
-/* Weight indicator: a lit bulb set into the band, green through red as the
-   game gets heavier. It takes its colour from the SHARED .weight-N classes, so
-   the scale matches every other theme rather than being a second one invented
-   here; only the bulb shape and its glow belong to this theme. The glow ties
-   it to the reagent in the poll tubes. */
+
 .tpl-steampunk .sk-bulb {
     display: inline-block;
     width: 10px; height: 10px;
@@ -268,25 +197,17 @@ body.tpl-steampunk {
     margin-right: 0.45rem;
     vertical-align: -1px;
     border: 1px solid rgba(0, 0, 0, .55);
-    /* The lit dome: a highlight offset up-left, over whatever colour the
-       weight-N class supplies as the background. */
+
     background-image: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .85), rgba(255, 255, 255, 0) 55%);
     box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .45), 0 0 6px currentColor;
 }
-/* currentColor drives the outer glow, so each bucket glows its own colour
-   without repeating the five shadows. */
+
 .tpl-steampunk .sk-bulb.weight-1 { color: #2e9e5b; }
 .tpl-steampunk .sk-bulb.weight-2 { color: #86b300; }
 .tpl-steampunk .sk-bulb.weight-3 { color: #d6a400; }
 .tpl-steampunk .sk-bulb.weight-4 { color: #e0701a; }
 .tpl-steampunk .sk-bulb.weight-5 { color: #cf3b2e; }
-/* The weight scale keeps its colours — those encode complexity and are shared
-   across every theme; only the shading changes. */
-/* The rules line is TONE-CODED — good / mid / bad — and a flat colour here
-   would outrank the base .rules-* rules (0,2,0 beats 0,1,0) and paint every
-   state the same. That is exactly what happened: "rules not explained" showed
-   green. Set the background once, then let each tone carry its own colour, the
-   way the classic theme does. */
+
 .tpl-steampunk .gc-rules { background: rgba(0, 0, 0, .3); font-weight: 700; }
 .tpl-steampunk .gc-rules.rules-good { color: var(--vial); }
 .tpl-steampunk .gc-rules.rules-mid  { color: var(--glow); }
@@ -294,9 +215,6 @@ body.tpl-steampunk {
 .tpl-steampunk .gc-comment { background: rgba(0, 0, 0, .4); font-size: 0.8rem; line-height: 1.35; }
 .tpl-steampunk .gc-comment .c-name { color: var(--brass-lit); }
 
-/* ---- The crew plate: riveted brass ----------------------------------------
-   border-image puts the plate's banded, rivet-headed edging on all four sides
-   from one 9-slice asset — corners at natural size, edges stretched. */
 .tpl-steampunk .gc-players {
     background: linear-gradient(rgba(234, 207, 154, .1), transparent 30%), var(--walnut-up);
     border: 14px solid transparent;
@@ -307,11 +225,6 @@ body.tpl-steampunk {
     box-shadow: 0 2px 12px rgba(0, 0, 0, .45);
 }
 
-/* ---- SIGNATURE: the pressure gauge ----------------------------------------
-   The dial is the SVG; the needle is this element, rotated by the angle the
-   card computed from the crew count. transform-origin sits at the needle's
-   pivot, not its centre, so it swings like a needle rather than spinning like
-   a propeller. */
 .tpl-steampunk .sk-gauge {
     position: relative;
     width: 88px; height: 88px;
@@ -326,7 +239,7 @@ body.tpl-steampunk {
     margin-left: -1.5px;
     background: linear-gradient(#3a2b12, var(--ember) 65%, #d9633a);
     border-radius: 2px 2px 0 0;
-    transform-origin: 50% 100%;   /* pivot at the hub, not the middle */
+    transform-origin: 50% 100%;
     box-shadow: 0 0 3px rgba(0, 0, 0, .6);
 }
 .tpl-steampunk .sk-gauge-read {
@@ -339,9 +252,6 @@ body.tpl-steampunk {
     letter-spacing: 0.04em;
 }
 
-/* ---- Berths ---------------------------------------------------------------
-   The intricacy is repetition: every berth carries the same rivet head, so the
-   plate reads as fabricated rather than as a list with an icon. */
 .tpl-steampunk .gc-slot {
     display: flex; align-items: center; gap: 0.4rem;
     background: linear-gradient(rgba(255, 255, 255, .05), transparent), var(--walnut);
@@ -359,7 +269,7 @@ body.tpl-steampunk {
     background: radial-gradient(circle at 34% 30%, #f2e0bb, var(--brass) 55%, #5d4620);
     box-shadow: 0 1px 1px rgba(0, 0, 0, .6);
 }
-/* An empty berth is stated rather than implied — its rivet is unpolished. */
+
 .tpl-steampunk .sk-berth-free { opacity: 0.62; }
 .tpl-steampunk .sk-berth-free .sk-rivet {
     background: radial-gradient(circle at 34% 30%, #6f6250, #3d362c 60%, #241f19);
@@ -374,7 +284,6 @@ body.tpl-steampunk {
 .tpl-steampunk .p-signedby { color: var(--text-muted); font-size: 0.76rem; }
 .tpl-steampunk .msg-icon { color: var(--brass-lit); }
 
-/* The resign tag: a small stamped ticket. */
 .tpl-steampunk .gc-resign {
     margin-left: auto;
     background: linear-gradient(#d9633a, var(--ember));
@@ -385,7 +294,6 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .gc-resign:hover { filter: brightness(1.12); text-decoration: none; }
 
-/* The signup bar: a brass lever across the plate. */
 .tpl-steampunk .gc-signup {
     display: block; text-align: center;
     background: linear-gradient(var(--brass-lit), var(--brass) 55%, var(--brass-dark));
@@ -398,7 +306,6 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .gc-signup:hover { filter: brightness(1.08); text-decoration: none; }
 
-/* ---- Controls -------------------------------------------------------------- */
 .tpl-steampunk .btn {
     background: linear-gradient(var(--walnut-up), var(--walnut));
     border: 1px solid var(--brass-dark);
@@ -419,7 +326,6 @@ body.tpl-steampunk {
 .tpl-steampunk .btn-danger,
 .tpl-steampunk .btn-danger:hover { background: linear-gradient(#d9633a, var(--ember)); border-color: #7d2c11; color: #fff5ef; }
 
-/* ---- Forms ----------------------------------------------------------------- */
 .tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
     background: rgba(0, 0, 0, .35);
     border: 1px solid var(--brass-dark);
@@ -432,11 +338,7 @@ body.tpl-steampunk {
     outline: none;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), 0 0 0 2px rgba(176, 141, 87, .3);
 }
-/* Native <select> DROPDOWN rows are painted by the OS, not by the rules above:
-   the control itself was dark but the open list stayed light-on-light. Styling
-   <option> directly is the only lever, and it is honoured on Windows/Linux
-   browsers (macOS ignores it entirely, which is a graceful fallback rather
-   than a break — the system list is legible there anyway). */
+
 .tpl-steampunk select option {
     background: #1b1512;
     color: var(--parchment);
@@ -449,7 +351,6 @@ body.tpl-steampunk {
 .tpl-steampunk label { color: var(--text-muted); letter-spacing: 0.04em; }
 .tpl-steampunk .field-note { color: var(--text-muted); opacity: 0.9; }
 
-/* ---- Discussion ------------------------------------------------------------ */
 .tpl-steampunk .gc-info .discussion { border-top: none; margin: 0; padding: 0; text-align: center; }
 .tpl-steampunk .comment-list { list-style: none; gap: 0; margin: 0; padding: 0; text-align: left; }
 .tpl-steampunk .comment-list li {
@@ -469,18 +370,11 @@ body.tpl-steampunk {
     padding: 0.2rem 0.8rem;
     font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
 }
-/* Every struck-brass control brightens by the same 1.08 on hover — the tabs,
-   the signup lever, the primary button and this pill. They looked identical
-   at rest but behaved differently, which reads as a bug. */
+
 .tpl-steampunk .comment-add summary:hover { filter: brightness(1.08); }
 .tpl-steampunk .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-steampunk .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
 
-/* ---- Polls: pressure not yet raised ----------------------------------------
-   The poll's top buttons are the same KIND of control as the game card's tabs,
-   so they get the same struck-brass treatment and the same padding off the top
-   border — they were falling through to the generic .btn and looked like a
-   different family. Delete keeps the ember, exactly as .gc-tab-del does. */
 .tpl-steampunk .poll-actions { padding: 0.35rem 0.4rem 0; gap: 0.3rem; }
 .tpl-steampunk .poll-card .btn-small {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -498,7 +392,6 @@ body.tpl-steampunk {
     color: #fff5ef;
 }
 
-/* ---- Polls: pressure not yet raised ---------------------------------------- */
 .tpl-steampunk .poll-card {
     background: linear-gradient(var(--walnut-up), var(--walnut));
     border: 1px solid var(--brass-dark);
@@ -520,23 +413,10 @@ body.tpl-steampunk {
     background: rgba(0, 0, 0, .3);
     border: 1px solid rgba(176, 141, 87, .2);
     border-radius: 2px;
-    /* Room at the foot for the sight-glass below. The base rule pins the bar to
-       bottom:0 with only 0.45rem of padding, which the tube and its collars
-       would otherwise sit on top of. */
+
     padding-bottom: 1.6rem;
 }
-/* The poll card's rules line uses .game-rules, not .gc-rules, so without these
-   it falls through to the BASE theme's greens and reds — close, but a
-   different green from the game card beside it. Same three tones, same
-   colours, so the two cards agree. */
-/* The poll card's start time comes from the SHARED poll_card.php, which the
-   base theme prefixes with a clock emoji — a flat pictogram that sits badly
-   against brass and slab lettering. This theme's own game card spells the same
-   fact out as a band ("Start: 16:00"), so the poll card is made to match.
 
-   The word comes from the data-label attribute the shared template already
-   carries for exactly this purpose, so it stays translated and no markup
-   changes — the same mechanism the corkboard theme uses. */
 .tpl-steampunk .poll-card .game-time {
     color: var(--brass-lit);
     font-weight: 700;
@@ -557,17 +437,6 @@ body.tpl-steampunk {
 .tpl-steampunk .poll-opt-name, .tpl-steampunk a.poll-opt-name { color: var(--brass-lit); }
 .tpl-steampunk .poll-opt-votes { color: var(--text-muted); }
 
-/* ---- The sight-glass ------------------------------------------------------
-   A dark glass tube in brass collars, with the vote level standing in it as a
-   lit reagent. Inset from the option's edges so it reads as a fitted
-   instrument rather than a progress bar bleeding to the border.
-
-   Only lightly rounded (3px), NOT a pill: a fully rounded bar reads as a
-   lozenge, and the collars at each end need a squared body to clamp onto.
-
-   NOTE: .poll-option sets overflow:hidden, so the reagent's glow is clipped at
-   the option's bounds — the tube is inset partly to give that glow somewhere
-   to fall. */
 .tpl-steampunk .poll-opt-bar {
     left: 0.85rem; right: 0.85rem; bottom: 0.32rem;
     height: 14px;
@@ -578,11 +447,7 @@ body.tpl-steampunk {
                 inset 0 -1px 2px rgba(0, 0, 0, .7),
                 0 1px 0 rgba(234, 207, 154, .14);
 }
-/* THE COLLARS. Both live in ::after rather than one per pseudo-element,
-   because ::before paints BENEATH the reagent span and the left collar would
-   disappear under the fluid as soon as the tube started filling. Two
-   background layers, pinned left and right, with the block extending past the
-   tube on all sides so the brass wraps its ends. */
+
 .tpl-steampunk .poll-opt-bar::after {
     content: "";
     position: absolute;
@@ -594,11 +459,7 @@ body.tpl-steampunk {
         linear-gradient(180deg, #f2e0bb, var(--brass) 38%, var(--brass-dark) 72%, #4a3717) right center / 9px 100% no-repeat;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6));
 }
-/* THE REAGENT. The vertical gradient is doing the real work: dark at both
-   rims, brightest just above the middle. That is how a cylinder of lit fluid
-   actually reads — an even fill looks like a painted bar, which is what this
-   was before. The outer glow spills onto the glass; the inner one keeps the
-   fluid looking lit from within rather than merely coloured. */
+
 .tpl-steampunk .poll-opt-bar > span {
     border-radius: 2px;
     background: linear-gradient(180deg,
@@ -610,9 +471,7 @@ body.tpl-steampunk {
     box-shadow: 0 0 9px rgba(184, 212, 58, .8),
                 inset 0 0 6px rgba(230, 243, 154, .55);
 }
-/* Past the threshold the reagent runs hot — the same orange that marks a poll
-   as pending elsewhere, so "at pressure" is legible at a glance and not just
-   "more green". */
+
 .tpl-steampunk .poll-opt-bar.is-full > span {
     background: linear-gradient(180deg,
                 #a85a0e 0%,
@@ -624,7 +483,6 @@ body.tpl-steampunk {
                 inset 0 0 6px rgba(255, 216, 160, .6);
 }
 
-/* ---- Timeline: the pressure log -------------------------------------------- */
 .tpl-steampunk .timeline { background: rgba(42, 32, 26, .85); border: 1px solid var(--brass-dark); border-radius: 3px; }
 .tpl-steampunk .tl-scroll { background: transparent; border-color: var(--brass-dark); }
 .tpl-steampunk .timeline-title { color: var(--brass-lit); letter-spacing: 0.16em; text-transform: uppercase; }
@@ -642,9 +500,7 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .tl-game:hover { filter: brightness(1.08); }
 .tpl-steampunk .tl-count-full { color: #6b1f08; }
-/* A poll has no pressure raised yet: the base sheet paints this near-white
-   (#eef3fc), which on this ground is the one bright patch on the page, so the
-   value has to be replaced rather than tinted. */
+
 .tpl-steampunk .tl-game.tl-poll {
     background: rgba(0, 0, 0, .55);
     color: var(--glow);
@@ -653,7 +509,6 @@ body.tpl-steampunk {
 }
 .tpl-steampunk .tl-game.tl-poll .tl-sub { color: rgba(240, 149, 47, .85); }
 
-/* ---- Chrome ---------------------------------------------------------------- */
 .tpl-steampunk .topbar {
     background: linear-gradient(var(--walnut-up), #170f0b);
     border-bottom: 2px solid var(--brass-dark);
@@ -669,7 +524,6 @@ body.tpl-steampunk {
 .tpl-steampunk .game-archived .gc-info { opacity: 0.55; }
 .tpl-steampunk .game-archived .gc-name { text-decoration: line-through; }
 
-/* ---- Quality floor --------------------------------------------------------- */
 .tpl-steampunk a:focus-visible,
 .tpl-steampunk button:focus-visible,
 .tpl-steampunk input:focus-visible,
@@ -680,7 +534,6 @@ body.tpl-steampunk {
     outline-offset: 2px;
 }
 
-/* Classic's own breakpoints, so the footprint really is the same one. */
 @media (max-width: 700px) {
     .tpl-steampunk .game-card { flex-direction: column; width: 100%; }
     .tpl-steampunk .gc-players {
@@ -693,3 +546,4 @@ body.tpl-steampunk {
 @media (min-width: 701px) {
     .tpl-steampunk .game-list > article { width: 550px; }
 }
+

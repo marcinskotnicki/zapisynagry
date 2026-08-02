@@ -1,19 +1,17 @@
 @import url("../../light/css/style.css");
 
-/* ---- Palette (from the old app's look) ------------------------------------ */
 :root {
-    --bg:        #ececec;   /* light grey page, so the dark cards pop */
-    --primary:   #c40000;   /* the classic red accent */
+    --bg:        #ececec;
+    --primary:   #c40000;
     --primary-text: #ffffff;
 
-    /* classic-only extras (used by the gc-* rules below) */
-    --gc-dark-1: #3d3d3d;   /* card gradient top */
-    --gc-dark-2: #1f1f1f;   /* card gradient bottom */
-    --gc-band:   #2a2a2a;   /* info row band */
-    --gc-red:    #c40000;   /* waga band / delete buttons */
-    --gc-green:  #2eb82e;   /* rules labels */
-    --gc-panel:  #e3e3e3;   /* player panel background */
-    --gc-row:    #d6d6d6;   /* player row band */
+    --gc-dark-1: #3d3d3d;
+    --gc-dark-2: #1f1f1f;
+    --gc-band:   #2a2a2a;
+    --gc-red:    #c40000;
+    --gc-green:  #2eb82e;
+    --gc-panel:  #e3e3e3;
+    --gc-row:    #d6d6d6;
 }
 
 .tpl-classic .table-block{background:#ffffff87}
@@ -26,35 +24,21 @@
     background: transparent; border: none; padding: 0; box-shadow: none;
 }
 
-/* ---- Poll cards -----------------------------------------------------------
- *  poll_card.php is NOT overridden for this theme (one template, three looks),
- *  so the whole classic look is done here by restyling the light markup to echo
- *  the game card sitting next to it: the same dark gradient shell with rounded
- *  corners, the same full-bleed "band" rows for its facts, and the same light
- *  grey action rows the player slots use. Everything is scoped to .tpl-classic
- *  so the light and dark themes keep their own poll card.
- * ------------------------------------------------------------------------- */
 .tpl-classic .poll-card {
     background: linear-gradient(var(--gc-dark-1), var(--gc-dark-2));
     color: #eee;
-    border: none;                        /* light's 1px box + 4px left accent */
+    border: none;
     border-radius: 12px; overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
-    padding: 0;                          /* the bands below run edge to edge */
+    padding: 0;
 }
 
-/* Header strip: reads like .gc-tabs, with the POLL tag standing in for the
-   delete tab's red. */
 .tpl-classic .poll-head {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
     padding: 0 0.4rem 0.35rem; margin: 0;
     width:100%;
 }
-/* NOT a solid red pill: that is exactly what .gc-tab-del (the game card's
-   DELETE tab) looks like, and it used to sit in the same top-left corner —
-   people read it as a button. An outlined label in the card's own grey reads as
-   a caption, which is what it is. (Its position is handled by the shared rules:
-   last in .poll-head, pushed right by an auto margin.) */
+
 .tpl-classic .poll-tag {
     background: black; color: #cfcfcf;
     font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -62,39 +46,30 @@
     text-align:center;
     width:100%;
 }
-/* The base theme prefixes the time with a clock glyph; the classic game card
-   spells its fields out as "Label: value" bands, so the poll card matches by
-   swapping the glyph for the word carried in data-label. */
+
 .tpl-classic .poll-card .game-time { color: #fff; font-size: 0.95rem; font-weight: 600; }
 .tpl-classic .poll-card .game-time::before { content: attr(data-label) ": "; font-weight: 400; color: #cfcfcf; }
 
-/* Candidate details sit on the light grey rows, so they need a dark muted grey
-   rather than the base theme's --text-muted. */
 .tpl-classic .poll-opt-meta { color: #5a5a5a; }
 .tpl-classic .poll-by { font-size: 0.8rem; color: #ddd; }
 .tpl-classic .poll-by strong { color: #fff; }
 .tpl-classic .poll-card .msg-icon { color: #ffb3ab; }
 
-/* The actions row is the poll's answer to .gc-tabs, so it gets the same padding
-   and left alignment. .poll-head above it holds only the time/proposer/tag. */
 .tpl-classic .poll-actions {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
     padding: 0.35rem 0.4rem 0.25rem; margin: 0;
 }
 
-/* The head's buttons are the poll's equivalent of the game card's tabs, so
-   they borrow .gc-tab's shape exactly. */
 .tpl-classic .poll-card .btn-small {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
     padding: 0.2rem 0.5rem; border-radius: 6px; border: none;
     background: #555; color: #fff; text-decoration: none;
 }
 .tpl-classic .poll-card .btn-small:hover { filter: brightness(1.15); text-decoration: none; }
-/* Delete carries the red now, so it matches the game card's DELETE tab. */
+
 .tpl-classic .poll-card .btn-danger,
 .tpl-classic .poll-del-btn { background: var(--gc-red); color: #fff; }
 
-/* Fact rows -> .gc-band, including the hairline between neighbours. */
 .tpl-classic .poll-deadline,
 .tpl-classic .poll-card .game-rules,
 .tpl-classic .poll-card .game-comment {
@@ -110,8 +85,6 @@
 .tpl-classic .poll-card .rules-mid  { color: #e0c341; }
 .tpl-classic .poll-card .rules-bad  { color: #ff6b5e; }
 
-/* Candidates are the poll's actionable rows, so they mirror .gc-slot: light
-   grey on the dark card, exactly like the player slots. */
 .tpl-classic .poll-options { margin: 0; padding: 0.5rem; gap: 0.35rem; }
 .tpl-classic .poll-option {
     background: var(--gc-row); border: none; border-radius: 4px;
@@ -121,15 +94,11 @@
 .tpl-classic a.poll-opt-name { text-decoration: none; border-bottom: 1px dotted rgba(0, 0, 0, .45); }
 .tpl-classic a.poll-opt-name:hover { border-bottom-style: solid; }
 .tpl-classic .poll-opt-votes { color: #555; }
-/* The rows are light grey here, so the track darkens rather than lightens.
-   The fill takes the theme's accent red: near-black read as part of the row
-   rather than as a bar. Green still marks a candidate that has hit its
-   required count, so "filling" and "full" stay tellable apart at a glance. */
+
 .tpl-classic .poll-opt-bar { height: 4px; background: rgba(0, 0, 0, .14); }
 .tpl-classic .poll-opt-bar > span { background: var(--gc-red); }
 .tpl-classic .poll-opt-bar.is-full > span { background: var(--gc-green); }
-/* The vote CTA is the poll's "Zapisz się", so it takes .gc-signup's dark fill;
-   the cancel-vote button stays quiet grey beside it. */
+
 .tpl-classic .poll-option .btn-primary { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
 .tpl-classic .poll-option .btn-primary:hover { background: #000; }
 .tpl-classic .poll-option .btn-small { background: #777; }
@@ -173,17 +142,13 @@
 .tpl-classic .gc-comment { background: #0d0d0d; font-size: 0.8rem; line-height: 1.35; }
 .tpl-classic .gc-comment .c-name { color: #bbb; }
 
-/* Discussion + "add comment": ONE set of rules for both card types. Both
-   templates use .comment-add, so the pill is identical on a game and on a
-   poll — which is the whole point of the shared class. */
 .tpl-classic .gc-info .discussion,
 .tpl-classic .poll-card .discussion { border-top: none; margin: 0; padding: 0; }
 .tpl-classic .gc-info .comment-list,
 .tpl-classic .poll-card .comment-list { gap: 0; margin: 0; }
 .tpl-classic .gc-info .comment-list li,
 .tpl-classic .poll-card .comment-list li { background: #0d0d0d; border: none; border-radius: 0; color: #ccc; border-top: 1px solid rgba(255,255,255,.06); text-align: left; }
-/* .gc-info centres its contents and leaves 0.6rem below; the poll card is a
-   plain block, so it needs both stated explicitly to match. */
+
 .tpl-classic .poll-card .discussion { text-align: center; }
 .tpl-classic .comment-add { margin-top: 0.5rem; padding-bottom: 0.6rem; }
 .tpl-classic .comment-add summary {
@@ -191,8 +156,7 @@
     background: #4a4a4a; color: #fff; border-radius: 999px;
     padding: 0.25rem 0.9rem; font-size: 0.8rem;
 }
-/* The "+" is a flourish of THIS theme only, so it lives here rather than in the
-   markup — that way the shared template stays clean for light and dark. */
+
 .tpl-classic .comment-add summary::before { content: "+ "; }
 .tpl-classic .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-classic .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
@@ -216,7 +180,6 @@
 .tpl-classic .gc-knows { color: var(--gc-green); font-size: 0.78rem; }
 .tpl-classic .gc-slot-q { flex: 1 1 100%; font-size: 0.8rem; color: #444; padding-left: 0.2rem; }
 
-
 .tpl-classic .gc-resign {
     margin-left: auto;
     background: var(--gc-red); color: #fff;
@@ -233,7 +196,6 @@
     font-size: 0.85rem; text-decoration: none;
 }
 .tpl-classic .gc-signup:hover { background: #000; text-decoration: none; }
-
 
 .tpl-classic .gc-reserve { opacity: 0.75; font-style: italic; }
 
@@ -330,3 +292,4 @@
 }
 
 .tpl-classic .tl-scroll{background:#d8d8d8;}
+

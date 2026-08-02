@@ -1,62 +1,19 @@
 @import url("../../light/css/style.css");
 
-/* =============================================================================
- *  elvish — an illuminated ledger of the evening's games.
- * -----------------------------------------------------------------------------
- *  DESIGN NOTE, so a later edit doesn't sand off the point:
- *
- *  The reference is Art Nouveau at its most botanical — Mucha's panels, Horta's
- *  ironwork, Tiffany glass — read through a woodland-elvish lens. The materials
- *  are lacquered malachite, gold leaf, and warm vellum, and every colour below
- *  is named for one of them rather than for its role, so the palette stays
- *  answerable to the subject instead of drifting into generic "dark theme".
- *
- *  TWO SIGNATURES, and they are the only places this theme is loud:
- *    1. THE ILLUMINATED FRAME — a hand-drawn SVG border (img/frame.svg) applied
- *       with border-image, so one 9-slice asset frames a card of any size with
- *       true ornamental corners rather than a plain rounded rectangle.
- *    2. THE VINE OF SEATS — the player list as a stem: a leaf for every taken
- *       seat, an unopened bud for every free one. This is the whole reason the
- *       theme forks game_card.php (see that file's header); it makes free seats
- *       into objects you can see and count, which the base card never does.
- *  Everything else is deliberately quiet. Resist adding a third flourish —
- *  ornament everywhere reads as noise, and the frame stops being special.
- *
- *  LAYOUT sits between the two existing themes on purpose: classic's fixed
- *  550px cards in a wrapping row, and corkboard's 44%-width centred grid.
- *  Here: ~48% wrapping cards, centred, but stacked internally like corkboard
- *  rather than split into two panels like classic.
- *
- *  ASSETS are three hand-written SVGs in ../img/ — vector so they stay crisp
- *  at any card size, text so they diff and version like code, and small enough
- *  that the whole theme is four files. NO WEB FONTS, matching the rest of the
- *  app: this site asks visitors for GDPR consent, so quietly adding a
- *  third-party font request isn't a call to make on the admin's behalf.
- *
- *  Everything is scoped to .tpl-elvish (set on <body> by header.php).
- * ========================================================================== */
-
 .tpl-elvish {
-    /* ---- Materials ------------------------------------------------------- */
-    --moss:       #0d2a1f;   /* lacquered malachite: the ground */
-    --moss-deep:  #061710;   /* recessed panels and the page vignette */
-    --moss-lift:  #143829;   /* a panel raised off the ground */
-    --gold:       #c9a227;   /* gold leaf: linework, frames, rules */
-    --gilt:       #eddba6;   /* bright gilt: lettering that must read */
-    --vellum:     #ece2cc;   /* warm off-white body text */
-    --sage:       #86a894;   /* muted secondary text */
-    --garnet:     #9d3b46;   /* Art Nouveau's muted rose, standing in for red */
 
-    /* ONE lettering family, varied by weight and spacing. Art Nouveau posters
-       lettered a whole design in a single hand rather than pairing a display
-       face with a body face, so this is the subject's own convention, not a
-       shortcut. Optima and Candara are the closest system faces to that
-       flared-stem humanist lettering; the rest is fallback. */
+    --moss:       #0d2a1f;
+    --moss-deep:  #061710;
+    --moss-lift:  #143829;
+    --gold:       #c9a227;
+    --gilt:       #eddba6;
+    --vellum:     #ece2cc;
+    --sage:       #86a894;
+    --garnet:     #9d3b46;
+
     --font-el: Optima, 'Segoe UI Variable Display', Candara, 'Gill Sans MT',
                'Trebuchet MS', 'Lucida Grande', sans-serif;
 
-    /* Remap the base theme's variables onto those materials, so every rule
-       this file never touches still lands somewhere sensible. */
     --bg:           var(--moss);
     --surface:      var(--moss-lift);
     --surface-2:    var(--moss-deep);
@@ -71,10 +28,6 @@
     --maxw:         1400px;
 }
 
-/* ---- The ground -----------------------------------------------------------
-   Lacquer over a faint botanical: the vine tile at 4% is texture in the
-   surface, not wallpaper. The radial lift keeps the top of the page from
-   reading as flat black-green. */
 body.tpl-elvish {
     background-color: var(--moss);
     background-image:
@@ -90,9 +43,6 @@ body.tpl-elvish {
 
 .tpl-elvish .game-main{text-align:center;}
 
-/* ---- Lettering ------------------------------------------------------------
-   Everything is the one family; the hierarchy comes from spacing and gilt.
-   Small-caps + wide tracking is the Art Nouveau label voice. */
 .tpl-elvish h1, .tpl-elvish h2, .tpl-elvish h3,
 .tpl-elvish .btn, .tpl-elvish input, .tpl-elvish select, .tpl-elvish textarea {
     font-family: var(--font-el);
@@ -107,8 +57,7 @@ body.tpl-elvish {
     margin-bottom: 0.2rem;
     text-shadow: 0 1px 0 rgba(0, 0, 0, .5), 0 0 22px rgba(201, 162, 39, .22);
 }
-/* The flourish under the event name: the divider asset, centred, as a
-   background rather than an extra element — no markup change needed. */
+
 .tpl-elvish .event-header h1::after {
     content: "";
     display: block;
@@ -127,7 +76,6 @@ body.tpl-elvish {
     margin: 0.1rem 0 0;
 }
 
-/* ---- Day tabs: leaves on a bough ------------------------------------------ */
 .tpl-elvish .day-tabs {
     justify-content: center;
     border-bottom: 1px solid rgba(201, 162, 39, .28);
@@ -151,7 +99,6 @@ body.tpl-elvish {
 .tpl-elvish .day-tab-date { color: inherit; opacity: 0.85; }
 .tpl-elvish .day-tab-hours { color: inherit; opacity: 0.6; }
 
-/* ---- Tables: the ledger's sections ---------------------------------------- */
 .tpl-elvish .table-block {
     background: linear-gradient(rgba(255, 255, 255, .025), transparent 40%), var(--moss-deep);
     border: 1px solid rgba(201, 162, 39, .22);
@@ -178,7 +125,6 @@ body.tpl-elvish {
     opacity: 0.85;
 }
 
-/* ---- Layout: between classic's fixed row and corkboard's centred grid ----- */
 .tpl-elvish .game-list {
     display: flex;
     flex-direction: row;
@@ -194,12 +140,6 @@ body.tpl-elvish {
     max-width: 620px;
 }
 
-/* ---- SIGNATURE 1: the illuminated frame ----------------------------------
-   border-image is the right tool for this and not a trick: one 9-slice asset
-   gives true ornamental corners at their natural size while the edges stretch
-   to whatever height the card ends up. A background-image could not do the
-   corners without four separate layers. The padding is what stops content
-   colliding with the ornament. */
 .tpl-elvish .game-card,
 .tpl-elvish .poll-card {
     background: linear-gradient(rgba(201, 162, 39, .05), transparent 45%), var(--moss-lift);
@@ -212,7 +152,6 @@ body.tpl-elvish {
 .tpl-elvish .game-card.active,
 .tpl-elvish .poll-card.active { box-shadow: 0 0 0 2px rgba(201, 162, 39, .5), 0 3px 16px rgba(0, 0, 0, .4); }
 
-/* ---- Cartouche ------------------------------------------------------------ */
 .tpl-elvish .el-cartouche { text-align: center; }
 .tpl-elvish .game-name-row { justify-content: center; }
 .tpl-elvish .game-name {
@@ -231,7 +170,6 @@ body.tpl-elvish {
     border-radius: 2px;
 }
 
-/* ---- The inscribed attribute line ----------------------------------------- */
 .tpl-elvish .game-meta {
     justify-content: center;
     gap: 0.55rem;
@@ -245,11 +183,10 @@ body.tpl-elvish {
     letter-spacing: 0.1em;
     font-weight: 600;
 }
-.tpl-elvish .game-time:before { content: none; }   /* the clock glyph fights the lettering */
+.tpl-elvish .game-time:before { content: none; }
 .tpl-elvish .game-length,
 .tpl-elvish .game-language { color: var(--sage); letter-spacing: 0.06em; font-size: 0.85rem; }
-/* The weight scale keeps its colours — that encodes data — but loses its pill
-   shape so it sits on the line like everything else. */
+
 .tpl-elvish .weight-badge { border-radius: 2px; font-size: 0.78rem; }
 .tpl-elvish .game-brings { color: var(--vellum); text-align: center; font-size: 0.9rem; margin: 0.2rem 0; }
 .tpl-elvish .game-brings strong { color: var(--gilt); }
@@ -263,11 +200,6 @@ body.tpl-elvish {
     margin: 0.5rem 0;
 }
 
-/* ---- SIGNATURE 2: the vine of seats ---------------------------------------
-   A stem down the left, a leaf per taken seat, an unopened bud per free one.
-   The glyphs are Unicode rather than more SVG: at this size a 16px asset would
-   be indistinguishable, and this keeps the seat list as real, selectable text.
-   The stem is the ul's left border; each li reaches it with a short branch. */
 .tpl-elvish .players { margin-top: 0.6rem; }
 .tpl-elvish .players-label {
     display: block;
@@ -296,7 +228,7 @@ body.tpl-elvish {
     color: var(--vellum);
     font-size: 0.9rem;
 }
-/* The branch: a short rule from the stem out to the leaf. */
+
 .tpl-elvish .el-vine .player::after {
     content: "";
     position: absolute;
@@ -306,15 +238,15 @@ body.tpl-elvish {
     height: 1px;
     background: rgba(201, 162, 39, .32);
 }
-/* Leaf = a seat that is taken. Bud = a seat still open. */
+
 .tpl-elvish .el-vine .el-leaf::before {
-    content: "\2767";                 /* rotated floral heart — reads as a leaf */
+    content: "\2767";
     color: var(--gold);
     margin-right: 0.4rem;
     font-size: 0.95em;
 }
 .tpl-elvish .el-vine .el-bud::before {
-    content: "\2022";                 /* a closed bud on the stem */
+    content: "\2022";
     color: rgba(201, 162, 39, .45);
     margin-right: 0.4rem;
 }
@@ -332,9 +264,6 @@ body.tpl-elvish {
 .tpl-elvish .p-signedby { color: var(--sage); font-size: 0.78rem; }
 .tpl-elvish .msg-icon { color: var(--gold); }
 
-/* ---- Controls -------------------------------------------------------------
-   Gold-outlined on the lacquer, filling with gilt on hover — the ironwork
-   reading rather than a solid button. */
 .tpl-elvish .btn {
     background: transparent;
     border: 1px solid rgba(201, 162, 39, .55);
@@ -343,11 +272,7 @@ body.tpl-elvish {
     border-radius: 2px;
 }
 .tpl-elvish .btn:hover { background: rgba(201, 162, 39, .14); color: var(--gilt); }
-/* Gilt metal rather than flat paint: a three-stop gradient with the bright
-   band sitting just ABOVE centre is what the eye reads as a specular highlight
-   on a curved surface — an even top-to-bottom fade just looks like a gradient.
-   The inset rim lifts the top edge and drops the bottom, the same trick as a
-   struck coin. */
+
 .tpl-elvish .btn-primary {
     background: linear-gradient(#f0dda6 0%, var(--gilt) 38%, var(--gold) 52%, #9d7d18 100%);
     border-color: #8a6d14;
@@ -372,7 +297,6 @@ body.tpl-elvish {
 }
 .tpl-elvish .signup-btn:hover { background: rgba(201, 162, 39, .26); }
 
-/* ---- Forms ---------------------------------------------------------------- */
 .tpl-elvish input, .tpl-elvish select, .tpl-elvish textarea {
     background: var(--moss-deep);
     border: 1px solid rgba(201, 162, 39, .35);
@@ -384,9 +308,7 @@ body.tpl-elvish {
     outline: none;
     box-shadow: 0 0 0 2px rgba(201, 162, 39, .22);
 }
-/* The OPEN dropdown is painted by the OS, not by the rule above: the control
-   is dark but its list would stay light-on-light. Styling <option> is the only
-   lever, honoured on Windows/Linux; macOS keeps its own legible system list. */
+
 .tpl-elvish select option {
     background: var(--moss-deep);
     color: var(--vellum);
@@ -399,7 +321,6 @@ body.tpl-elvish {
 .tpl-elvish label { color: var(--sage); letter-spacing: 0.04em; }
 .tpl-elvish .field-note { color: var(--sage); opacity: 0.85; }
 
-/* ---- Discussion ----------------------------------------------------------- */
 .tpl-elvish .discussion { text-align: center; border-top: 1px solid rgba(201, 162, 39, .18); margin-top: 0.6rem; }
 .tpl-elvish .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; text-align: left; }
 .tpl-elvish .comment-list li {
@@ -426,9 +347,6 @@ body.tpl-elvish {
 .tpl-elvish .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-elvish .comment-add form { text-align: left; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
-/* ---- Polls: the undecided entry -------------------------------------------
-   A poll is a page not yet written, so its frame is the same but its tag is a
-   gilt caption rather than anything button-like. */
 .tpl-elvish .poll-tag {
     margin-left: auto;
     background: transparent;
@@ -452,7 +370,6 @@ body.tpl-elvish {
 .tpl-elvish .poll-opt-bar > span { background: var(--gold); }
 .tpl-elvish .poll-opt-bar.is-full > span { background: #7fbf9a; }
 
-/* ---- Chrome --------------------------------------------------------------- */
 .tpl-elvish .topbar {
     background: linear-gradient(var(--moss-deep), #04120c);
     border-bottom: 1px solid rgba(201, 162, 39, .4);
@@ -467,8 +384,6 @@ body.tpl-elvish {
 .tpl-elvish .tl-hour::before { border-left-color: rgba(201, 162, 39, .3); }
 .tpl-elvish .tl-table-no { background: rgba(0, 0, 0, .3); color: var(--sage); }
 
-/* Scheduled games take the same struck-metal treatment as the primary button,
-   so a booked slot reads as a gold inlay set into the timeline. */
 .tpl-elvish .tl-game {
     background: linear-gradient(#f0dda6 0%, var(--gilt) 38%, var(--gold) 52%, #9d7d18 100%);
     color: var(--primary-text);
@@ -481,11 +396,6 @@ body.tpl-elvish {
 .tpl-elvish .tl-game:hover { filter: brightness(1.06); }
 .tpl-elvish .tl-count-full { color: #5c1f14; }
 
-/* A poll is a slot not yet decided, so it is the UNFILLED version of that
-   inlay: the same metal, darkened and matte, with the dashed edge light's
-   timeline already uses to mean "provisional". Light's own rule paints this
-   near-white (#eef3fc), which on the lacquer was the one bright patch on the
-   page — the base value has to be overridden, not just tinted. */
 .tpl-elvish .tl-game.tl-poll {
     background: linear-gradient(#6d5713 0%, #55430e 55%, #3a2d08 100%);
     color: var(--gilt);
@@ -502,8 +412,6 @@ body.tpl-elvish {
 .tpl-elvish .game-archived .game-name { text-decoration: line-through; color: var(--sage); }
 .tpl-elvish .game-archived { opacity: 0.6; }
 
-/* ---- Quality floor --------------------------------------------------------
-   Focus has to be visible against both the lacquer and the gilt. */
 .tpl-elvish a:focus-visible,
 .tpl-elvish button:focus-visible,
 .tpl-elvish input:focus-visible,
@@ -514,8 +422,6 @@ body.tpl-elvish {
     outline-offset: 2px;
 }
 
-/* One card per row once two would be cramped; the frame and vine are unchanged,
-   they simply have the full width to breathe. */
 @media (max-width: 900px) {
     .tpl-elvish .game-card,
     .tpl-elvish .poll-card { flex: 1 1 100%; min-width: 0; max-width: 100%; }
@@ -523,3 +429,4 @@ body.tpl-elvish {
     .tpl-elvish .game-card,
     .tpl-elvish .poll-card { border-width: 14px; border-image-width: 14px; }
 }
+

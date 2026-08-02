@@ -1,21 +1,4 @@
-/* =============================================================================
- *  js/scripts.js — shared client behaviour.
- * -----------------------------------------------------------------------------
- *  Kept deliberately small (project rule: minimal JS). Uses plain DOM APIs, no
- *  jQuery required for what's here so far. Strings that need translating come
- *  from window.APP_LANG (set inline in the page <head>).
- *
- *  Currently provides:
- *    1. New-event date cascade — pick the first day's date and the rest fill in
- *       as consecutive days.
- *    2. Copy-to-clipboard buttons (archive links).
- *    3. Hash highlight for in-page anchors.
- *    4. reCAPTCHA v3 token minting on form submit (invisible captcha mode).
- *    5. Poll deadline live preview (add_poll.php): "resolves on ..." text.
- *    6. BGG search guard: no searching with an empty game name.
- *    7. Double-submit guard: a second click cannot post the form twice.
- *  This file grows in the front-end phase (modals, add-game flow, etc.).
- * ========================================================================== */
+/* js/scripts.js — shared client behaviour. Plain DOM APIs, no dependencies. */
 (function () {
     'use strict';
 
@@ -29,7 +12,7 @@
         initDoubleSubmitGuard();
     });
 
-    /* ---- 1. Date cascade --------------------------------------------------- */
+    // 1. New-event date cascade: fill in consecutive days from the first.
     function initDateCascade() {
         var dateInputs = Array.prototype.slice.call(
             document.querySelectorAll('input.day-date')
@@ -44,20 +27,19 @@
 
             for (var i = 1; i < dateInputs.length; i++) {
                 var d = new Date(base.getTime());
-                d.setDate(d.getDate() + i);          // consecutive days
+                d.setDate(d.getDate() + i);
                 dateInputs[i].value = toISODate(d);
             }
         });
     }
 
-    // Format a Date as YYYY-MM-DD in local time.
     function toISODate(d) {
         var m = String(d.getMonth() + 1).padStart(2, '0');
         var day = String(d.getDate()).padStart(2, '0');
         return d.getFullYear() + '-' + m + '-' + day;
     }
 
-    /* ---- 2. Copy buttons --------------------------------------------------- */
+    // 2. Copy-to-clipboard buttons.
     function initCopyButtons() {
         document.querySelectorAll('.copy-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
@@ -67,20 +49,15 @@
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(target.value);
                 } else {
-                    document.execCommand('copy');     // older browsers
+                    document.execCommand('copy');
                 }
             });
         });
     }
 
-    /* ---- 3. "Just interacted" highlight ------------------------------------ *
-     * After signing up / voting / adding (the controllers redirect to #game-N
-     * or #poll-N) and on timeline clicks, mark the card the hash points at
-     * with .active — one card at a time. CSS decides what .active looks like.
-     * ------------------------------------------------------------------------- */
+    // 3. Highlight the card a redirect or in-page link points at.
     function initHashHighlight() {
         function apply() {
-            // Clear the previous highlight first: exactly one card is .active.
             document.querySelectorAll('.game-card.active, .poll-card.active').forEach(function (n) {
                 n.classList.remove('active');
             });
@@ -90,61 +67,40 @@
                 el.classList.add('active');
             }
         }
-        window.addEventListener('hashchange', apply);   // timeline / in-page clicks
-        apply();                                        // arriving via a redirect anchor
+        window.addEventListener('hashchange', apply);
+        apply();
     }
 
-    /* ---- 4. reCAPTCHA v3 token -------------------------------------------- *
-     * v3 is invisible and score-based: there's no widget to tick, so the page
-     * has to ask Google for a token itself. Tokens expire after about two
-     * minutes, so we mint one at SUBMIT time rather than on page load — a user
-     * who spends a while filling the form would otherwise send a stale token.
-     *
-     * The hidden input is rendered by captcha_html() (PHP) and carries the site
-     * key + action as data attributes, so no key is hardcoded here.
-     *
-     * If Google's script didn't load (blocked, offline), we let the submit go
-     * through with an empty token: the server rejects it and shows the normal
-     * captcha error, which is clearer than silently freezing the form.
-     * --------------------------------------------------------------------- */
+    // 4. reCAPTCHA v3: mint a token at submit time (tokens expire quickly).
     function initRecaptchaV3() {
         var field = document.querySelector('input.recaptcha-v3-token');
-        if (!field) return;                       // not in v3 mode on this page
+        if (!field) return;
         var form = field.form;
         if (!form) return;
 
         var siteKey = field.getAttribute('data-sitekey') || '';
         var action  = field.getAttribute('data-action') || 'submit';
-        var minting = false;                      // guards the re-submit below
+        var minting = false;
 
         form.addEventListener('submit', function (ev) {
-            if (minting) return;                  // our own re-submit: let it pass
-            if (typeof grecaptcha === 'undefined' || !siteKey) return;  // fail open to the server
+            if (minting) return;
+            if (typeof grecaptcha === 'undefined' || !siteKey) return;
 
             ev.preventDefault();
             minting = true;
             grecaptcha.ready(function () {
                 grecaptcha.execute(siteKey, { action: action }).then(function (token) {
                     field.value = token;
-                    form.submit();                // native submit; listener short-circuits
+                    form.submit();
                 })['catch'](function () {
-                    field.value = '';             // let the server reject it
+                    field.value = '';
                     form.submit();
                 });
             });
         });
     }
 
-    /* ---- 5. Poll deadline preview ------------------------------------------ *
-     * Both poll forms (create in add_poll.php, edit in edit_poll.php) carry the
-     * day's date / opening hour / grace window as data-* attributes, because
-     * only the server knows the event's calendar. From those plus the two live
-     * inputs we reproduce day_rel_min()'s overnight rollover client-side and
-     * show the exact moment the poll will auto-resolve, updating on every edit.
-     *
-     * Mirrors poll_deadline_from_hours() in inc/polls.php — including its clamp
-     * — so the preview never promises a moment the server would overrule.
-     * ------------------------------------------------------------------------- */
+    // 5. Poll deadline live preview (mirrors poll_deadline_from_hours() server-side).
     function initPollDeadlinePreview() {
         document.querySelectorAll('form[data-day-date]').forEach(function (form) {
             var startInput    = form.querySelector('input[name="start_time"]');
@@ -155,7 +111,7 @@
             var dayDate  = form.getAttribute('data-day-date') || '';
             var dayStart = form.getAttribute('data-day-start') || '';
             var graceMin = (parseFloat(form.getAttribute('data-grace-hours')) || 0) * 60;
-            if (!dayDate || !dayStart) return;   // no calendar date -> nothing to preview
+            if (!dayDate || !dayStart) return;
 
             function update() {
                 var deadlineHours = parseFloat(deadlineInput.value);
@@ -167,8 +123,6 @@
                 var dayStartMin = hhmmToMin(dayStart);
                 if (startMin === null || dayStartMin === null) { out.textContent = ''; return; }
 
-                // Same pivot as day_rel_min() in inc/events.php: a start earlier
-                // than (opening hour - grace) belongs to the next calendar day.
                 var pivot  = dayStartMin - graceMin;
                 var relMin = startMin < pivot ? startMin + 1440 : startMin;
 
@@ -178,8 +132,6 @@
                 startMoment.setMinutes(startMoment.getMinutes() + relMin);
 
                 var deadlineMoment = new Date(startMoment.getTime() - deadlineHours * 3600000);
-                // The server's clamp: a deadline that already passed becomes
-                // "an hour from now", so the poll keeps some voting window.
                 var now = new Date();
                 if (deadlineMoment <= now) {
                     deadlineMoment = new Date(now.getTime() + 3600000);
@@ -201,8 +153,6 @@
         });
     }
 
-    // 'HH:MM' -> minutes since midnight, or null when it isn't a time yet
-    // (a half-typed <input type="time"> reports an empty value).
     function hhmmToMin(s) {
         var m = /^(\d{1,2}):(\d{2})$/.exec(s || '');
         return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) : null;
@@ -210,20 +160,9 @@
 
     function pad2(n) { return String(n).padStart(2, '0'); }
 
-    /* ---- 6. BGG search guard ----------------------------------------------- *
-     * Searching BoardGameGeek for an empty string returns nothing, which the
-     * results page can only report as "no matches" — misleading, since the user
-     * simply didn't type anything. Grey the button out until there's something
-     * to search for.
-     *
-     * Applied HERE rather than as a `disabled` attribute in the markup on
-     * purpose: with JS off the button must stay usable, and the server-side
-     * check in add_game.php / add_poll_game.php produces the message instead.
-     * This is the convenience; that is the guarantee.
-     * ------------------------------------------------------------------------ */
+    // 6. BGG search guard: disable "search" until something is typed.
     function initBggSearchGuard() {
         document.querySelectorAll('button[name="go"][value="bgg"]').forEach(function (btn) {
-            // .form resolves both a nested button and one tied by form="...".
             var form = btn.form;
             if (!form) return;
             var nameInput = form.querySelector('input[name="name"]');
@@ -239,56 +178,18 @@
         });
     }
 
-    /* -----------------------------------------------------------------------
-     *  7. Double-submit guard.
-     * -----------------------------------------------------------------------
-     *  Clicking a submit button twice before the page navigates posted the form
-     *  twice, which added the game or the player twice. This blocks the second
-     *  one.
-     *
-     *  THREE THINGS THIS DELIBERATELY DOES NOT DO, each of which is a way the
-     *  obvious version breaks something:
-     *
-     *  1. It does NOT disable the button inside the handler. Nine submit
-     *     buttons in this app carry a name/value the controller branches on
-     *     (`choice=archive`, `do=finish`, `go=bgg`, …) and a disabled control
-     *     is not serialised — disabling it before the browser builds the
-     *     payload silently strips that value, so delete_game.php would receive
-     *     no `choice` at all. The disable is deferred to a 0ms timeout, which
-     *     runs after serialisation.
-     *
-     *  2. It hooks `submit`, not `click`. The submit event only fires once
-     *     HTML5 validation has PASSED, so a form that fails validation never
-     *     gets locked. Locking on click would leave a required-field form dead
-     *     until reload.
-     *
-     *  3. It re-enables on `pageshow`. Coming back via the browser's Back
-     *     button can restore the page from the bfcache with the buttons still
-     *     disabled — the form would look permanently dead.
-     *
-     *  The reCAPTCHA v3 path above preventDefaults and later calls
-     *  form.submit() directly; a programmatic submit does not fire this event,
-     *  so it passes through the guard rather than being blocked by it.
-     *
-     *  This is a client-side guard and an impatient-user fix, not a guarantee:
-     *  it does nothing for a replayed request or a browser with JS off. The
-     *  server-side protections (CSRF, the anti-bot timing check) are unchanged
-     *  and still do their own job.
-     */
+    // 7. Double-submit guard: a second click cannot post the form twice.
+    // Disabling is deferred so the clicked button's own name/value still
+    // serialises; hooks 'submit' (fires only after validation passes) rather
+    // than 'click'; and re-enables on a bfcache 'pageshow' restore.
     function initDoubleSubmitGuard() {
-        /* Registered once, even if this file is somehow initialised twice (a
-         * duplicated <script>, a second DOMContentLoaded). Two copies of this
-         * listener would be worse than none: the first sets the flag, the
-         * second immediately sees it set and blocks the very submit that just
-         * set it, killing EVERY form on the page. Caught exactly that way while
-         * testing, where the harness fired DOMContentLoaded a second time. */
         if (document.documentElement.dataset.dsGuard === '1') return;
         document.documentElement.dataset.dsGuard = '1';
 
         document.addEventListener('submit', function (ev) {
             var form = ev.target;
             if (!form || form.tagName !== 'FORM') return;
-            if (form.hasAttribute('data-allow-resubmit')) return;   // opt-out hook
+            if (form.hasAttribute('data-allow-resubmit')) return;
 
             if (form.dataset.submitting === '1') {
                 ev.preventDefault();
@@ -297,7 +198,6 @@
             }
             form.dataset.submitting = '1';
 
-            // Deferred so the button's own name/value is already in the payload.
             window.setTimeout(function () {
                 var controls = form.querySelectorAll(
                     'button[type="submit"], input[type="submit"], button:not([type])');
@@ -309,7 +209,6 @@
             }, 0);
         });
 
-        // bfcache restore: undo the lock, or Back leaves a dead form.
         window.addEventListener('pageshow', function (ev) {
             if (!ev.persisted) return;
             var forms = document.querySelectorAll('form[data-submitting="1"], form.is-submitting');

@@ -1,72 +1,26 @@
 @import url("../../light/css/style.css");
 
-/* =============================================================================
- *  schematic — the evening's games as a technical diagram.
- * -----------------------------------------------------------------------------
- *  DESIGN NOTE, so a later edit doesn't sand off the point:
- *
- *  THE REFERENCE is the modern euro-board information design school — Ian
- *  O'Toole and company. What actually characterises that work is not a colour
- *  scheme but a SYSTEM: flat colour-blocked modules, hairline rules, chamfered
- *  panel corners, tiny label-over-value cells, numbered tracks read left to
- *  right, and everything keyed by colour so a dense board stays scannable.
- *
- *  TWO THINGS MAKE THIS THEME UNLIKE THE OTHER EIGHT:
- *
- *  1. IT IS THE ONLY MULTI-ACCENT THEME. Every other theme here has exactly one
- *     accent (gold, brass, worm red, imperial red…). This one has FIVE, used as
- *     a key: a strip's colour comes from its TABLE, so games sharing a table
- *     share a band and the page reads as a keyed system rather than a list.
- *     That is the reference's actual signature, and it is real information —
- *     not decoration.
- *
- *  2. THE LAYOUT IS HORIZONTAL. Every other theme is a grid of cards or a
- *     two-panel split. Here a game is a full-width STRIP: identity block, data
- *     cells, capacity track — read across, stacked down. Both card templates
- *     are forked because that reading order does not exist in light's markup.
- *
- *  SIGNATURE: the capacity track. The roster is a run of numbered slot chips,
- *  filled or open, exactly like a resource track on one of these boards. It
- *  makes "three of five seats gone" a thing you see rather than read.
- *
- *  GEOMETRY: chamfered corners via clip-path, not images — the notch is the
- *  reference's most recognisable shape and it has to survive any card height,
- *  which a fixed asset cannot do.
- *
- *  NO WEB FONTS, matching every other theme: this site asks visitors for GDPR
- *  consent, so quietly adding a third-party font request isn't a call to make
- *  on the admin's behalf.
- *
- *  Everything is scoped to .tpl-schematic-compact (set on <body> by header.php).
- * ========================================================================== */
-
 .tpl-schematic-compact {
-    /* ---- Substrate ------------------------------------------------------- */
-    --board:     #1b212b;   /* graphite table the panels lie on */
+
+    --board:     #1b212b;
     --board-2:   #232b37;
-    --paper:     #ece7db;   /* the warm card stock every module is printed on */
-    --paper-2:   #f6f2e8;   /* a lighter cell inside it */
-    --paper-3:   #ded8c8;   /* a recessed cell */
-    --ink:       #1d2530;   /* navy-charcoal, never pure black */
-    --ink-2:     #55606f;   /* secondary annotation */
-    --rule:      #b9b2a1;   /* the hairline every panel is ruled with */
+    --paper:     #ece7db;
+    --paper-2:   #f6f2e8;
+    --paper-3:   #ded8c8;
+    --ink:       #1d2530;
+    --ink-2:     #55606f;
+    --rule:      #b9b2a1;
 
-    /* ---- The five channels ------------------------------------------------
-       Saturated but slightly dusty, the way process inks print. Used as a KEY,
-       never decoratively: channel = table. */
-    --ch1: #c2562a;   /* orange   */
-    --ch2: #2f7f7a;   /* teal     */
-    --ch3: #6a4b8c;   /* purple   */
-    --ch4: #2b5c96;   /* blue     */
-    --ch5: #b03060;   /* magenta  */
-    --chan: var(--ch1);   /* per-strip override sets this */
+    --ch1: #c2562a;
+    --ch2: #2f7f7a;
+    --ch3: #6a4b8c;
+    --ch4: #2b5c96;
+    --ch5: #b03060;
+    --chan: var(--ch1);
 
-    /* One condensed grotesque throughout, at several sizes — technical
-       drawings letter everything in one hand and vary the scale. */
     --font-sc: 'Roboto Condensed', 'Archivo Narrow', 'Helvetica Neue',
                'Segoe UI', Arial, sans-serif;
 
-    /* Remap the base variables. */
     --bg:           var(--board);
     --surface:      var(--paper);
     --surface-2:    var(--paper-3);
@@ -81,9 +35,6 @@
     --maxw:         1500px;
 }
 
-/* ---- The table ------------------------------------------------------------
-   Graphite with a fine drawing grid and one large calibrated rosette, both
-   fixed so the panels scroll over them like sheets on a desk. */
 body.tpl-schematic-compact {
     background-color: var(--board);
     background-image: url(../img/rosette.svg), url(../img/grid.svg), radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);
@@ -105,7 +56,6 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .content { max-width: var(--maxw); }
 
-/* ---- Lettering ------------------------------------------------------------ */
 .tpl-schematic-compact h1, .tpl-schematic-compact h2, .tpl-schematic-compact h3,
 .tpl-schematic-compact .btn, .tpl-schematic-compact input, .tpl-schematic-compact select, .tpl-schematic-compact textarea {
     font-family: var(--font-sc);
@@ -119,8 +69,7 @@ body.tpl-schematic-compact {
     text-transform: uppercase;
     margin-bottom: 0.2rem;
 }
-/* The five channels as a keyline under the title: the legend for the whole
-   page, stated once. */
+
 .tpl-schematic-compact .event-header h1::after {
     content: "";
     display: block;
@@ -141,7 +90,6 @@ body.tpl-schematic-compact {
     margin: 0.15rem 0 0;
 }
 
-/* ---- Day tabs: index tabs on a folder ------------------------------------- */
 .tpl-schematic-compact .day-tabs { justify-content: flex-start; border-bottom: 1px solid rgba(185, 178, 161, .35); gap: 2px; }
 .tpl-schematic-compact .day-tab {
     color: #93a1b2;
@@ -162,7 +110,6 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .day-tab-date, .tpl-schematic-compact .day-tab-hours { color: inherit; opacity: 0.75; }
 
-/* ---- Table blocks: sheets on the desk ------------------------------------- */
 .tpl-schematic-compact .table-block {
     background: rgba(35, 43, 55, .82);
     border: 1px solid rgba(185, 178, 161, .28);
@@ -181,52 +128,26 @@ body.tpl-schematic-compact {
     text-align: left;
 }
 
-/* ---- LAYOUT: one strip per row, stacked ----------------------------------- */
 .tpl-schematic-compact .game-list {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
 }
 
-
-/* ---- The strip ------------------------------------------------------------
- *  Chamfered top-right corner: the reference's most recognisable panel shape,
- *  done with clip-path so it holds at any height. */
 .tpl-schematic-compact .sc-strip {
-    position: relative;          /* hosts the rail connector; see the rail block */
+    position: relative;
     display: flex;
     align-items: stretch;
     gap: 0;
     width: 100%;
-    background: none;            /* the paper moved to .sc-body — see below */
+    background: none;
     border: none;
     border-radius: 0;
     padding: 0;
-    /* THE CHAMFER MOVED INWARD, and this is load-bearing. It used to sit on
-     *      this element together with overflow:hidden, which meant anything drawn
-     *      outside the strip — like the rail's dot and connector — was clipped away
-     *      and simply never appeared. Clipping .sc-body instead gives the identical
-     *      shape (the notch is on the top-right, which is .sc-body's corner; .sc-id
-     *      is a solid block at the far left and unaffected) while leaving this box
-     *      free to paint outside itself.
-     *      drop-shadow rather than box-shadow: a filter follows the ALPHA of what is
-     *      actually rendered, so the shadow traces the chamfer. A box-shadow would
-     *      draw a square one and put a dark triangle back in the notch. */
+
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
 }
 
-/* ---- The rail -------------------------------------------------------------
-   A spine down the left of the table with a node per item, each tied to its
-   strip by a short lead — the connector language these boards use to show that
-   a row belongs to a track.
-
-   DESKTOP ONLY, deliberately: on a phone the 28px gutter is width the strips
-   need more than the diagram does, so the whole thing is inside a min-width
-   query and mobile keeps its full measure.
-
-   The nodes are drawn on each strip rather than on the rail because their
-   spacing follows the strips' own heights, which vary per card and cannot be
-   expressed as a repeating background. */
 @media (min-width: 701px) {
     .tpl-schematic-compact .game-list {
         position: relative;
@@ -234,7 +155,7 @@ body.tpl-schematic-compact {
         flex-direction:row;
         flex-wrap:wrap;
     }
-    /* The spine itself, running the height of the list. */
+
     .tpl-schematic-compact .game-list::before {
         content: "";
         position: absolute;
@@ -254,8 +175,7 @@ body.tpl-schematic-compact {
         display:none;
     }
     .tpl-schematic-compact .sc-actions{flex-basis:auto;}
-    /* The node: a filled dot centred on the spine, in the strip's own channel
-       colour so the key carries through to the diagram. */
+
     .tpl-schematic-compact .game-list > .sc-strip::before {
         content: "";
         position: absolute;
@@ -266,9 +186,9 @@ body.tpl-schematic-compact {
         height: 9px;
         border-radius: 50%;
         background: var(--chan);
-        box-shadow: 0 0 0 2px var(--board);   /* punches the spine out behind it */
+        box-shadow: 0 0 0 2px var(--board);
     }
-    /* The lead: from the node to the strip's edge. */
+
     .tpl-schematic-compact .game-list > .sc-strip::after {
         content: "";
         position: absolute;
@@ -280,20 +200,17 @@ body.tpl-schematic-compact {
     }
 }
 
-
 .tpl-schematic-compact .sc-body {
     background: var(--paper);
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
-/* The channel key. Each strip sets --chan once and everything downstream reads
-   it, so a new channel is one line rather than a cascade of overrides. */
+
 .tpl-schematic-compact .sc-chan-1 { --chan: var(--ch1); }
 .tpl-schematic-compact .sc-chan-2 { --chan: var(--ch2); }
 .tpl-schematic-compact .sc-chan-3 { --chan: var(--ch3); }
 .tpl-schematic-compact .sc-chan-4 { --chan: var(--ch4); }
 .tpl-schematic-compact .sc-chan-5 { --chan: var(--ch5); }
 
-/* ---- Identity block: the coloured tab that keys the strip ----------------- */
 .tpl-schematic-compact .sc-id {
     flex: 0 0 74px;
     display: flex;
@@ -346,9 +263,6 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 0 auto; }
 .tpl-schematic-compact .sc-note { color: var(--ink-2); margin: 0.3rem 0; }
 
-/* ---- Data cells: label over value ----------------------------------------
-   The reference's core unit — a tiny uppercase key with the figure beneath it,
-   boxed and ruled. Reading down a column of strips, the keys line up. */
 .tpl-schematic-compact .sc-cells {
     display: flex;
     flex-wrap: wrap;
@@ -366,22 +280,14 @@ body.tpl-schematic-compact {
     justify-content: flex-end;
 }
 .tpl-schematic-compact .sc-cell-wide { min-width: 0; flex: 0 1 auto; }
-/* The box-art chip: square, sized off the cell row so it lines up with the
-   keys beside it. object-fit:cover keeps a non-square thumbnail from
-   distorting — it crops instead, which is right for box art. */
+
 .tpl-schematic-compact .sc-cell-thumb {
     min-width: 0;
     padding: 0;
     overflow: hidden;
     flex: 0 0 auto;
 }
-/* Height-locked, width free: the box sets the row's height (matching the other
-   cells) and the image supplies its own natural width at that height, so a
-   portrait or landscape cover keeps its real proportions instead of being
-   cropped to a square. object-fit:contain rather than cover is what makes
-   that possible — cover would still fill a fixed box and crop; contain lets
-   the box follow the image. width:auto is the default, stated for clarity
-   since the earlier fixed 42px is exactly what this replaces. */
+
 .tpl-schematic-compact .sc-cell-thumb img {
     display: block;
     width: auto;
@@ -403,9 +309,7 @@ body.tpl-schematic-compact {
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
 }
-/* Weight keeps the shared 1..5 scale — it encodes data every theme shares —
-   but is expressed as a left keyline rather than a filled pill, so the cell
-   still reads as part of the grid. */
+
 .tpl-schematic-compact .sc-cell-weight { border-left-width: 4px; }
 .tpl-schematic-compact .sc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
 .tpl-schematic-compact .sc-cell-weight.weight-2 { border-left-color: #86b300; }
@@ -413,8 +317,7 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .sc-cell-weight.weight-4 { border-left-color: #e0701a; }
 .tpl-schematic-compact .sc-cell-weight.weight-5 { border-left-color: #cf3b2e; }
 .tpl-schematic-compact .sc-cell-weight .sc-val { background: none; color: var(--ink); }
-/* The rules cell is tone-coded on its value, never flat — a flat colour here
-   would outrank the shared .rules-* classes and paint every state alike. */
+
 .tpl-schematic-compact .sc-cell-rules.rules-good .sc-val { color: #2f7f4a; }
 .tpl-schematic-compact .sc-cell-rules.rules-mid  .sc-val { color: #9a6a12; }
 .tpl-schematic-compact .sc-cell-rules.rules-bad  .sc-val { color: #b03060; }
@@ -427,10 +330,6 @@ body.tpl-schematic-compact {
     margin: 0 0 0.5rem;
 }
 
-/* ---- SIGNATURE: the capacity track ----------------------------------------
-   A run of numbered chips, one per seat. Filled chips carry the channel
-   colour; open ones are an empty ruled outline, so "three of five gone" is
-   visible at a glance rather than something you compute from a fraction. */
 .tpl-schematic-compact .sc-track {
     display: flex;
     flex-wrap: wrap;
@@ -458,7 +357,7 @@ body.tpl-schematic-compact {
     font-variant-numeric: tabular-nums;
 }
 .tpl-schematic-compact .sc-slot-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
-/* Taken: the chip fills with the strip's channel colour. */
+
 .tpl-schematic-compact .sc-slot-on {
     background: var(--chan);
     border-color: var(--chan);
@@ -466,8 +365,7 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .sc-slot-on .sc-slot-n { color: rgba(255, 255, 255, .8); }
 .tpl-schematic-compact .sc-slot-on .msg-icon { color: #fff; }
-/* Open: an outline with a hatched fill, the way an unfilled space is drawn on
-   a diagram. Stated as its own object — the reason this theme forks the card. */
+
 .tpl-schematic-compact .sc-slot-off {
     background: repeating-linear-gradient(45deg,
         var(--paper-2) 0 5px, var(--paper-3) 5px 10px);
@@ -485,7 +383,7 @@ body.tpl-schematic-compact {
     line-height: 1;
 }
 .tpl-schematic-compact .sc-slot-x:hover { opacity: 1; text-decoration: none; }
-/* The "knows the rules" dot: tone-coded, tiny, the way a diagram flags a state. */
+
 .tpl-schematic-compact .sc-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; background: currentColor; }
 .tpl-schematic-compact .sc-dot.rules-good { color: #b6f0c6; }
 .tpl-schematic-compact .sc-dot.rules-mid  { color: #f5dd8e; }
@@ -503,13 +401,10 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .p-signedby { color: rgba(255, 255, 255, .75); font-size: 0.7rem; }
 .tpl-schematic-compact .p-acct { color: rgba(255, 255, 255, .8); font-size: 0.7rem; }
 
-/* ---- Foot: the one CTA, plus discussion --------------------------------- */
 .tpl-schematic-compact .sc-foot { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .tpl-schematic-compact .sc-signup { flex: 0 0 auto; }
 .tpl-schematic-compact .sc-disc { flex: 1 1 100%; }
 
-/* ---- Controls -------------------------------------------------------------
-   Flat, square, hairline-ruled. No gloss anywhere — this is printed stock. */
 .tpl-schematic-compact .btn {
     background: var(--paper-2);
     border: 1px solid var(--ink);
@@ -532,7 +427,6 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
 .tpl-schematic-compact .msg-icon { color: var(--chan); }
 
-/* ---- Forms ---------------------------------------------------------------- */
 .tpl-schematic-compact input, .tpl-schematic-compact select, .tpl-schematic-compact textarea {
     background: var(--paper-2);
     border: 1px solid var(--rule);
@@ -553,7 +447,6 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .card label, .tpl-schematic-compact .card .field-note { color: var(--ink-2); }
 .tpl-schematic-compact label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
 
-/* ---- Discussion ------------------------------------------------------------ */
 .tpl-schematic-compact .comment-add summary {
     display: inline-block;
     cursor: pointer;
@@ -582,12 +475,6 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .comment-list .c-name { color: var(--chan); font-weight: 700; }
 .tpl-schematic-compact .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; }
 
-/* ---- Polls: candidates as side-by-side modules --------------------------- */
-/* The hazard stripe marks a poll as unresolved, but at .18 white it threw
-   enough contrast to break up the time sitting on top of it. Dropped to .07
-   and widened: the pattern still reads as "not settled", while the block stays
-   near enough to a flat channel colour for white text to hold. The text also
-   gets its own shadow below. */
 .tpl-schematic-compact .sc-poll .sc-id { background: repeating-linear-gradient(135deg,
     var(--chan) 0 11px, rgba(255, 255, 255, .07) 11px 22px); }
 .tpl-schematic-compact .sc-poll .sc-id-time { text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
@@ -603,9 +490,7 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .sc-poll-title { font-size: 0.85rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
 .tpl-schematic-compact .poll-by strong { color: var(--ink); }
-/* Candidates stack as full-width ROWS, not side-by-side tiles. Tiles made each
-   option as tall as its tallest element and left the name fighting for width;
-   a row reads like a line in a table, which is what a candidate list is. */
+
 .tpl-schematic-compact .sc-modules {
     display: flex;
     flex-direction: column;
@@ -615,7 +500,7 @@ body.tpl-schematic-compact {
     padding: 0;
 }
 .tpl-schematic-compact .sc-module {
-    position: relative;          /* the gauge is pinned to this box's bottom edge */
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -624,14 +509,12 @@ body.tpl-schematic-compact {
     border: 1px solid var(--rule);
     border-left: 3px solid var(--chan);
     border-radius: 0;
-    /* Bottom padding leaves the gauge its own strip along the edge, so it never
-       sits under the text. */
+
     padding: 0.25rem 0.5rem 0.4rem;
-    clip-path: none;             /* a chamfer on a thin row just clips the text */
+    clip-path: none;
 }
 .tpl-schematic-compact .sc-module-full { border-left-color: #2f7f4a; }
-/* The name takes the room left over, and truncates rather than wrapping the
-   row onto a second line. */
+
 .tpl-schematic-compact .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpl-schematic-compact .poll-opt-name, .tpl-schematic-compact a.poll-opt-name {
     color: var(--ink);
@@ -640,22 +523,17 @@ body.tpl-schematic-compact {
     text-decoration: none;
 }
 .tpl-schematic-compact a.poll-opt-name { border-bottom: 1px solid var(--chan); }
-/* The figures sit inline after the name, not on their own line. */
+
 .tpl-schematic-compact .poll-opt-meta {
     display: flex; align-items: center; gap: 0.45rem; margin: 0;
     flex: 0 0 auto; white-space: nowrap;
 }
 .tpl-schematic-compact .poll-opt-votes { color: var(--ink-2); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
-/* The vote control is pushed to the right edge by an auto margin, so it lands
-   in the same place on every row and the column can be scanned. */
+
 .tpl-schematic-compact .sc-module > .btn,
 .tpl-schematic-compact .sc-module > form.inline { margin-left: auto; flex: 0 0 auto; }
 .tpl-schematic-compact .weight-badge { border-radius: 0; font-size: 0.7rem; padding: 0.05rem 0.3rem; }
-/* The gauge: a ruled track, its fill in the channel colour, turning green once
-   the candidate has the players it needs. */
-/* The gauge runs along the row's BOTTOM EDGE — a fill line under the option
-   rather than a separate object taking its own line. Absolute against the row,
-   so it costs no height in the flex flow. */
+
 .tpl-schematic-compact .poll-opt-bar {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -667,7 +545,6 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .poll-opt-bar > span { display: block; height: 100%; background: var(--chan); }
 .tpl-schematic-compact .poll-opt-bar.is-full > span { background: #2f7f4a; }
 
-/* ---- Timeline -------------------------------------------------------------- */
 .tpl-schematic-compact .timeline { background: rgba(35, 43, 55, .8); border: 1px solid rgba(185, 178, 161, .28); border-radius: 0; }
 .tpl-schematic-compact .tl-scroll { background: transparent; border-color: rgba(185, 178, 161, .28); }
 .tpl-schematic-compact .timeline-title { color: var(--paper-2); letter-spacing: 0.2em; text-transform: uppercase; }
@@ -683,13 +560,7 @@ body.tpl-schematic-compact {
     border-radius: 0;
     font-weight: 700;
 }
-/* The timeline band matches its strip's colour. It cannot be done with
-   nth-child, which was the obvious idea: a table's lanes are NOT wrapped —
-   .tl-table-no and .tl-lane are flat siblings and a table emits a VARIABLE
-   number of lanes when its games overlap, so positional counting drifts out of
-   step after the first table that needs two. The block carries the channel as
-   a class instead, derived from the same table number the card uses, so the
-   two agree by construction rather than by coincidence. */
+
 .tpl-schematic-compact .tl-chan-1 { --chan: var(--ch1); }
 .tpl-schematic-compact .tl-chan-2 { --chan: var(--ch2); }
 .tpl-schematic-compact .tl-chan-3 { --chan: var(--ch3); }
@@ -697,8 +568,7 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .tl-chan-5 { --chan: var(--ch5); }
 .tpl-schematic-compact .tl-game:hover { background: var(--paper-2); }
 .tpl-schematic-compact .tl-count-full { color: #b03060; }
-/* Unresolved: the base sheet paints this near-white, which on the graphite
-   board is the one bright patch on the page, so the value is replaced. */
+
 .tpl-schematic-compact .tl-game.tl-poll {
     background: repeating-linear-gradient(135deg,
         rgba(35, 43, 55, .9) 0 6px, rgba(45, 55, 70, .9) 6px 12px);
@@ -707,7 +577,6 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .tl-game.tl-poll .tl-sub { color: #93a1b2; }
 
-/* ---- Chrome ---------------------------------------------------------------- */
 .tpl-schematic-compact .topbar {
     background: var(--board-2);
     border-bottom: 1px solid rgba(185, 178, 161, .3);
@@ -722,13 +591,11 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .game-archived { opacity: 0.5; }
 .tpl-schematic-compact .game-archived .game-name { text-decoration: line-through; }
-/* The open dropdown is painted by the OS; styling <option> is the only lever,
-   honoured on Windows/Linux with macOS keeping its own legible list. */
+
 .tpl-schematic-compact select option { background: var(--paper-2); color: var(--ink); }
 .tpl-schematic-compact select option:checked,
 .tpl-schematic-compact select option:hover { background: var(--ink); color: var(--paper-2); }
 
-/* ---- Quality floor --------------------------------------------------------- */
 .tpl-schematic-compact a:focus-visible,
 .tpl-schematic-compact button:focus-visible,
 .tpl-schematic-compact input:focus-visible,
@@ -744,13 +611,9 @@ body.tpl-schematic-compact {
 }
 
 @media (max-width: 700px) {
-    /* The strip becomes a stack: the identity block turns into a full-width
-       header bar rather than a side tab, which is the only way it stays
-       legible without squeezing the body to nothing. */
+
     .tpl-schematic-compact .sc-strip { flex-direction: column; }
-    /* Stacked, the id block becomes a full-width bar ON TOP of the body, so a
-       notch in the body's top-right corner would read as a bite taken out of
-       the middle of the card rather than as the panel's edge. Squared off. */
+
     .tpl-schematic-compact .sc-body { clip-path: none; }
     .tpl-schematic-compact .sc-id {
         flex: 0 0 auto;
@@ -759,22 +622,15 @@ body.tpl-schematic-compact {
         padding: 0.3rem 0.6rem;
     }
     .tpl-schematic-compact .sc-slot-name { max-width: 8rem; }
-    /* The base sheet's mobile rule drops a poll option's vote control onto its
-       own full-width line (added when options were a stacked list). These rows
-       are already narrow and inline, so that would undo the change: keep the
-       control on the row and let the NAME give up width instead. */
+
     .tpl-schematic-compact .sc-module { flex-wrap: nowrap; row-gap: 0; }
     .tpl-schematic-compact .sc-module > .btn,
     .tpl-schematic-compact .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
     .tpl-schematic-compact .sc-module > form.inline .btn { width: auto; }
     .tpl-schematic-compact .sc-module-head { max-width: 45%; }
-    /* Weight and length are the first things to go when there is no room —
-       the vote tally and the control have to survive. */
+
     .tpl-schematic-compact .sc-module .weight-badge { display: none; }
-    /* A logged-in admin sees four poll controls (delete / edit / end / add), and
-       .sc-actions is a nowrap inline-flex that will not shrink — so they ran
-       straight off the side of the card. Given its own full-width line here,
-       free to wrap onto a second row. */
+
     .tpl-schematic-compact .sc-actions {
         flex: 1 1 100%;
         flex-wrap: wrap;
@@ -788,3 +644,4 @@ body.tpl-schematic-compact {
         background-position: left -160px top -140px, top left, top center;
     }
 }
+

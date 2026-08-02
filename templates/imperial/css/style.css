@@ -1,62 +1,22 @@
 @import url("../../light/css/style.css");
 
-/* =============================================================================
- *  imperial — the evening's games as a Departmento Munitorum requisition.
- * -----------------------------------------------------------------------------
- *  DESIGN NOTE, so a later edit doesn't sand off the point:
- *
- *  THE DELIBERATE SWERVE. "Grimdark" defaults to a near-black page with one
- *  acid accent — which is both a generic dark-theme look and, more to the
- *  point, not what this setting's own artefacts look like. Its visual
- *  vernacular is BUREAUCRATIC: bone parchment, red wax, brass fittings,
- *  gothic lettering, stamped serial numbers, purity seals hung on ribbons.
- *  So this theme is parchment-forward, not black-forward. That is the risk
- *  taken here, and it is what keeps it distinct from the steampunk theme it
- *  shares a layout with as well as from the obvious answer.
- *
- *  MATERIALS: bone parchment, iron-gall ink, Imperial red, tarnished brass.
- *  The dark is a deep iron brown-black, never neutral #000 — ink on vellum
- *  ages toward brown, and a true black would read as a screen colour rather
- *  than a document one.
- *
- *  SIGNATURE: the purity seal. Every record carries one, and the WEIGHT is
- *  stamped into the wax — so the most decorative object on the page is also
- *  the one reporting live data. An ornamental seal would just be a sticker.
- *
- *  LAYOUT is the classic/steampunk two-panel split, as asked, with three
- *  deliberate departures so it isn't the same card in new paint: a numbered
- *  DESIGNATION line above the name (a bureaucracy numbers everything), the
- *  seal hanging off the record column, and a numbered muster roll that states
- *  its vacancies rather than implying them.
- *
- *  TYPE: a serif for the record (documents are set in serif), and a condensed
- *  face for the stamped labels and figures. No web fonts, matching every other
- *  theme here — this site asks visitors for GDPR consent, so quietly adding a
- *  third-party font request isn't a call to make on the admin's behalf.
- *
- *  Everything is scoped to .tpl-imperial (set on <body> by header.php).
- * ========================================================================== */
-
 .tpl-imperial {
-    /* ---- Materials ------------------------------------------------------- */
-    --vellum:      #d8cfb4;   /* bone parchment: the record's own surface */
-    --vellum-lit:  #eae2c9;   /* a fresher sheet, for raised panels */
-    --vellum-dim:  #bdb298;   /* a page that has seen more handling */
-    --iron:        #1a1613;   /* iron-gall ink: brown-black, never neutral */
-    --iron-soft:   #3a322a;   /* the same ink, thinned */
-    --ash:         #6b6459;   /* muted secondary text */
-    --imperial:    #8c1c13;   /* the red of wax, ribbons and stamps */
-    --imperial-lit:#c4392c;   /* its lit face */
-    --brass:       #a8863f;   /* tarnished fittings and rules */
 
-    /* Documents are set in serif; the labels and figures are stamped, so they
-       take a condensed face. Both are system stacks. */
+    --vellum:      #d8cfb4;
+    --vellum-lit:  #eae2c9;
+    --vellum-dim:  #bdb298;
+    --iron:        #1a1613;
+    --iron-soft:   #3a322a;
+    --ash:         #6b6459;
+    --imperial:    #8c1c13;
+    --imperial-lit:#c4392c;
+    --brass:       #a8863f;
+
     --font-im:   'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
                  'Times New Roman', serif;
     --font-stamp:'Haettenschweiler', 'Arial Narrow', 'Roboto Condensed',
                  'Franklin Gothic Medium', Impact, sans-serif;
 
-    /* Remap the base variables onto those materials. */
     --bg:           #14110e;
     --surface:      var(--vellum);
     --surface-2:    var(--vellum-dim);
@@ -67,14 +27,10 @@
     --primary-text: #f2e9d6;
     --ok:           #4a6b32;
     --error:        var(--imperial);
-    --radius:       0;        /* documents are cut square */
+    --radius:       0;
     --maxw:         1400px;
 }
 
-/* ---- The desk -------------------------------------------------------------
-   Dark iron behind the documents, with a single vast aquila watermark fixed
-   behind everything. Very faint: it is a mark pressed into the surface, not a
-   picture hung on it. */
 body.tpl-imperial {
     background-color: #14110e;
     background-image:
@@ -83,9 +39,7 @@ body.tpl-imperial {
     background-repeat: no-repeat, no-repeat;
     background-size: 900px auto, 100% 100%;
     background-position: center 14%, top center;
-    /* The watermark's own fade lives INSIDE the SVG (a group opacity), not
-       here: `opacity` on the body would fade the entire page with it, and
-       background-image has no per-layer opacity property. */
+
     background-attachment: fixed, fixed;
     color: var(--vellum);
     font-family: var(--font-im);
@@ -95,7 +49,6 @@ body.tpl-imperial {
 
 .tpl-imperial .content { max-width: var(--maxw); }
 
-/* ---- Lettering ------------------------------------------------------------ */
 .tpl-imperial h1, .tpl-imperial h2, .tpl-imperial h3 { font-family: var(--font-im); }
 .tpl-imperial .event-header { text-align: center; }
 .tpl-imperial .event-header h1 {
@@ -107,7 +60,7 @@ body.tpl-imperial {
     margin-bottom: 0.25rem;
     text-shadow: 0 2px 0 rgba(0, 0, 0, .7);
 }
-/* A stamped rule under the title: red bar, brass hairline beneath. */
+
 .tpl-imperial .event-header h1::after {
     content: "";
     display: block;
@@ -128,7 +81,6 @@ body.tpl-imperial {
     margin: 0.1rem 0 0;
 }
 
-/* ---- Day tabs: file dividers ---------------------------------------------- */
 .tpl-imperial .day-tabs { justify-content: center; border-bottom: 2px solid var(--brass); gap: 0.3rem; }
 .tpl-imperial .day-tab {
     font-family: var(--font-stamp);
@@ -145,11 +97,10 @@ body.tpl-imperial {
     color: var(--iron);
     background: var(--vellum);
     border-color: var(--brass);
-    box-shadow: inset 0 3px 0 var(--imperial);   /* the tab that is filed open */
+    box-shadow: inset 0 3px 0 var(--imperial);
 }
 .tpl-imperial .day-tab-date, .tpl-imperial .day-tab-hours { color: inherit; opacity: 0.8; }
 
-/* ---- Tables: bundles of records ------------------------------------------- */
 .tpl-imperial .table-block {
     background: rgba(20, 17, 14, .55);
     border: 1px solid rgba(168, 134, 63, .35);
@@ -166,7 +117,6 @@ body.tpl-imperial {
     padding-bottom: 0.4rem;
 }
 
-/* ---- Layout: the shared two-panel split ----------------------------------- */
 .tpl-imperial .game-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3em; align-items: flex-start; }
 .tpl-imperial .game-card {
     display: flex; align-items: flex-start; gap: 0;
@@ -174,14 +124,9 @@ body.tpl-imperial {
     background: transparent; border: none; padding: 0; box-shadow: none;
 }
 
-/* ---- The record column ----------------------------------------------------
-   A sheet of parchment: the fibre tile over a warm base, cut square, with a
-   red margin rule down its left edge the way a stamped form carries one. */
 .tpl-imperial .gc-info {
     width: 250px; flex: 0 0 250px;
-    /* z-index 2 puts the record ABOVE the roster panel it overlaps, so the
-       seal (z-index 3, inside this stacking context) can hang over the join
-       instead of disappearing behind the roster. */
+
     position: relative; z-index: 2;
     background-color: var(--vellum);
     background-image: url("../img/parchment.svg");
@@ -207,9 +152,6 @@ body.tpl-imperial {
 .tpl-imperial .gc-tab-del { background: var(--imperial); border-color: #5e1109; }
 .tpl-imperial .gc-tab-del:hover { background: var(--imperial-lit); }
 
-/* Designation line: the file reference and the sanctioned hour, in the stamped
-   face. Every record in a bureaucracy carries a number — this one is the
-   game's own id, so it is a reference you could actually quote. */
 .tpl-imperial .im-designation {
     display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
     font-family: var(--font-stamp);
@@ -218,8 +160,7 @@ body.tpl-imperial {
     text-transform: uppercase;
     color: var(--ash);
     padding: 0.35rem 0.5rem 0.3rem;
-    /* Right padding keeps the sanctioned hour clear of the seal hanging off
-       the edge below it. */
+
     padding-right: 2.6rem;
     border-bottom: 1px solid rgba(26, 22, 19, .25);
 }
@@ -244,8 +185,7 @@ body.tpl-imperial {
     border: 1px solid #8a7f62;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
 }
-/* The name is typed onto the form, not set in a plate: uppercase serif, ruled
-   underneath. */
+
 .tpl-imperial .gc-name {
     color: var(--iron);
     font-size: 1.05rem;
@@ -260,22 +200,13 @@ body.tpl-imperial {
 .tpl-imperial .gc-name a { color: var(--iron); text-decoration: none; }
 .tpl-imperial .gc-name a:hover { color: var(--imperial); }
 
-/* ---- SIGNATURE: the purity seal -------------------------------------------
-   Hung on the record's right edge, half off the sheet, the way a seal is
-   actually affixed. The wax disc and ribbons are the SVG; the weight is real
-   text stamped over it, so the ornament is also the readout. The weight-N
-   class tints the wax — heavier games get a darker, angrier seal — using the
-   shared scale every other theme uses rather than a second one invented here. */
 .tpl-imperial .im-seal {
     position: absolute;
-    /* Clear of the designation line above it. The seal used to start at 2.2rem
-       and sat straight on top of the file reference and the sanctioned hour —
-       it hangs BELOW that row now, not across it. */
+
     top: 3.4rem; right: -30px;
     width: 78px; height: 104px;
     background: url("../img/seal.svg") center top / contain no-repeat;
-    /* A real drop shadow rather than a flat one: the seal is a physical object
-       lying on the sheet, so it casts. */
+
     filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5));
     text-align: center;
     pointer-events: none;
@@ -288,8 +219,7 @@ body.tpl-imperial {
     line-height: 1;
     color: #f6e2d6;
     padding-top: 1.05rem;
-    /* Struck INTO the wax: dark above, faint light below — the opposite of
-       raised lettering. */
+
     text-shadow: 0 -1px 0 rgba(0, 0, 0, .75), 0 1px 0 rgba(255, 210, 190, .28);
 }
 .tpl-imperial .im-seal-label {
@@ -301,19 +231,13 @@ body.tpl-imperial {
     color: rgba(246, 226, 214, .7);
     text-shadow: 0 -1px 0 rgba(0, 0, 0, .6);
 }
-/* The wax takes its hue from the weight. `hue-rotate` on the whole element
-   rather than a tinted overlay: the previous ::after painted a flat disc over
-   everything — the sheen, the rim shadow AND the ribbons — which is what made
-   the seal look like a sticker with the layers in the wrong order. Rotating
-   the hue keeps every one of those highlights intact and only shifts the
-   colour, so a light game reads green-waxed and a heavy one stays blood red. */
+
 .tpl-imperial .im-seal.weight-1 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(108deg) saturate(.85); }
 .tpl-imperial .im-seal.weight-2 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(72deg)  saturate(.9); }
 .tpl-imperial .im-seal.weight-3 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(34deg)  saturate(1); }
 .tpl-imperial .im-seal.weight-4 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)) hue-rotate(14deg)  saturate(1.05); }
 .tpl-imperial .im-seal.weight-5 { filter: drop-shadow(2px 4px 5px rgba(0, 0, 0, .5)); }
 
-/* ---- Record rows ----------------------------------------------------------- */
 .tpl-imperial .gc-band {
     padding: 0.28rem 0.5rem;
     font-size: 0.86rem;
@@ -322,7 +246,7 @@ body.tpl-imperial {
 }
 .tpl-imperial .gc-band strong { color: var(--iron); font-weight: 700; }
 .tpl-imperial .gc-row { background: transparent; }
-/* Alternating tint, the way a ruled ledger reads. */
+
 .tpl-imperial .gc-band:nth-of-type(even) { background: rgba(26, 22, 19, .045); }
 .tpl-imperial .gc-rules { font-weight: 700; background: rgba(26, 22, 19, .06); }
 .tpl-imperial .gc-rules.rules-good { color: #4a6b32; }
@@ -336,9 +260,6 @@ body.tpl-imperial {
 }
 .tpl-imperial .gc-comment .c-name { color: var(--imperial); font-style: normal; }
 
-/* ---- The muster roll -------------------------------------------------------
-   Iron rather than parchment: this panel is the duty list clipped to the
-   record, a different document from the sheet it overlaps. */
 .tpl-imperial .gc-players {
     background: linear-gradient(rgba(216, 207, 180, .07), transparent 30%), rgba(26, 22, 19, .93);
     border: 1px solid rgba(168, 134, 63, .4);
@@ -372,8 +293,7 @@ body.tpl-imperial {
     color: var(--vellum);
 }
 .tpl-imperial .gc-slot strong { color: var(--vellum-lit); font-weight: 700; }
-/* Line numbers: a roll is numbered, and fixed-width figures let the column be
-   scanned rather than read. */
+
 .tpl-imperial .im-line-no {
     flex: 0 0 auto;
     min-width: 1.5rem;
@@ -382,8 +302,7 @@ body.tpl-imperial {
     letter-spacing: 0.06em;
     color: var(--brass);
 }
-/* A vacancy is stated, not implied by absence — the reason this theme forks
-   the card. */
+
 .tpl-imperial .im-vacant { opacity: 0.5; }
 .tpl-imperial .im-vacant .muted { color: var(--ash); font-style: italic; }
 .tpl-imperial .im-vacant .im-line-no { color: rgba(168, 134, 63, .5); }
@@ -397,7 +316,6 @@ body.tpl-imperial {
 .tpl-imperial .p-signedby { color: var(--ash); font-size: 0.74rem; }
 .tpl-imperial .msg-icon { color: var(--brass); }
 
-/* Struck from the roll: a red stamp, not a soft button. */
 .tpl-imperial .gc-resign {
     margin-left: auto;
     background: var(--imperial);
@@ -409,7 +327,6 @@ body.tpl-imperial {
 }
 .tpl-imperial .gc-resign:hover { background: var(--imperial-lit); text-decoration: none; }
 
-/* The requisition: a stamped bar across the foot of the roll. */
 .tpl-imperial .gc-signup {
     display: block; text-align: center;
     background: var(--imperial);
@@ -422,8 +339,6 @@ body.tpl-imperial {
 }
 .tpl-imperial .gc-signup:hover { background: var(--imperial-lit); text-decoration: none; }
 
-/* ---- Controls --------------------------------------------------------------
-   Stamped, square, no gloss anywhere — this is a form, not an instrument. */
 .tpl-imperial .btn {
     font-family: var(--font-stamp);
     background: var(--iron-soft);
@@ -446,7 +361,6 @@ body.tpl-imperial {
 .tpl-imperial .btn-danger,
 .tpl-imperial .btn-danger:hover { background: var(--imperial); border-color: #5e1109; color: #f2e9d6; }
 
-/* ---- Forms ----------------------------------------------------------------- */
 .tpl-imperial input, .tpl-imperial select, .tpl-imperial textarea {
     background: rgba(20, 17, 14, .8);
     border: 1px solid rgba(168, 134, 63, .4);
@@ -459,15 +373,13 @@ body.tpl-imperial {
     outline: none;
     box-shadow: 0 0 0 2px rgba(168, 134, 63, .3);
 }
-/* The OPEN dropdown is painted by the OS; styling <option> is the only lever,
-   honoured on Windows/Linux, with macOS keeping its own legible list. */
+
 .tpl-imperial select option { background: #14110e; color: var(--vellum); }
 .tpl-imperial select option:checked,
 .tpl-imperial select option:hover { background: var(--imperial); color: #f2e9d6; }
 .tpl-imperial label { color: var(--brass); font-family: var(--font-stamp); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.8rem; }
 .tpl-imperial .field-note { color: var(--ash); font-family: var(--font-im); text-transform: none; letter-spacing: 0; }
 
-/* ---- Discussion ------------------------------------------------------------ */
 .tpl-imperial .gc-info .discussion { border-top: 1px solid rgba(26, 22, 19, .2); margin: 0; padding: 0.3rem 0 0; text-align: left; }
 .tpl-imperial .comment-list { list-style: none; margin: 0; padding: 0; }
 .tpl-imperial .comment-list li {
@@ -493,14 +405,13 @@ body.tpl-imperial {
 .tpl-imperial .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-imperial .comment-add form { padding: 0.4rem 0; display: flex; flex-direction: column; gap: 0.35rem; }
 
-/* ---- Polls: a requisition awaiting sanction -------------------------------- */
 .tpl-imperial .poll-card {
     background-color: var(--vellum);
     background-image: url("../img/parchment.svg");
     background-size: 200px 200px;
     color: var(--iron);
     border: 1px solid #8a7f62;
-    border-left: 4px solid var(--brass);   /* brass, not red: not yet sanctioned */
+    border-left: 4px solid var(--brass);
     border-radius: 0;
     box-shadow: 0 3px 14px rgba(0, 0, 0, .5);
 }
@@ -527,7 +438,7 @@ body.tpl-imperial {
     text-transform: uppercase;
     font-size: 0.7rem;
     border-radius: 0;
-    transform: rotate(-2deg);   /* stamped by hand, never quite square */
+    transform: rotate(-2deg);
 }
 .tpl-imperial .poll-card .btn-small {
     font-family: var(--font-stamp);
@@ -552,12 +463,11 @@ body.tpl-imperial {
 .tpl-imperial .poll-opt-name, .tpl-imperial a.poll-opt-name { color: var(--iron); }
 .tpl-imperial .poll-opt-votes { color: var(--ash); font-family: var(--font-stamp); letter-spacing: 0.06em; }
 .tpl-imperial .poll-opt-meta { color: var(--ash); }
-/* Votes fill a ruled bar in red ink. */
+
 .tpl-imperial .poll-opt-bar { background: rgba(26, 22, 19, .18); }
 .tpl-imperial .poll-opt-bar > span { background: var(--imperial); }
 .tpl-imperial .poll-opt-bar.is-full > span { background: #4a6b32; }
 
-/* ---- Timeline: the duty roster --------------------------------------------- */
 .tpl-imperial .timeline { background: rgba(20, 17, 14, .8); border: 1px solid rgba(168, 134, 63, .35); border-radius: 0; }
 .tpl-imperial .tl-scroll { background: transparent; border-color: rgba(168, 134, 63, .35); }
 .tpl-imperial .timeline-title { font-family: var(--font-stamp); color: var(--brass); letter-spacing: 0.2em; text-transform: uppercase; }
@@ -575,8 +485,7 @@ body.tpl-imperial {
 }
 .tpl-imperial .tl-game:hover { background: var(--vellum-lit); }
 .tpl-imperial .tl-count-full { color: var(--imperial); }
-/* Unsanctioned: the base sheet paints this near-white, which on the dark
-   roster is the one bright patch on the page, so the value is replaced. */
+
 .tpl-imperial .tl-game.tl-poll {
     background: rgba(20, 17, 14, .85);
     color: var(--brass);
@@ -585,7 +494,6 @@ body.tpl-imperial {
 }
 .tpl-imperial .tl-game.tl-poll .tl-sub { color: rgba(168, 134, 63, .85); }
 
-/* ---- Chrome ---------------------------------------------------------------- */
 .tpl-imperial .topbar {
     background: linear-gradient(#221c17, #14110e);
     border-bottom: 2px solid var(--imperial);
@@ -600,7 +508,6 @@ body.tpl-imperial {
 .tpl-imperial .game-archived .gc-info { opacity: 0.5; }
 .tpl-imperial .game-archived .gc-name { text-decoration: line-through; }
 
-/* ---- Quality floor ---------------------------------------------------------- */
 .tpl-imperial a:focus-visible,
 .tpl-imperial button:focus-visible,
 .tpl-imperial input:focus-visible,
@@ -611,8 +518,6 @@ body.tpl-imperial {
     outline-offset: 2px;
 }
 
-/* Classic's breakpoints, since the footprint is shared. The seal moves inside
-   the sheet on narrow screens — hanging off the edge would clip or overflow. */
 @media (max-width: 700px) {
     .tpl-imperial .game-card { flex-direction: column; width: 100%; }
     .tpl-imperial .gc-players {
@@ -626,3 +531,4 @@ body.tpl-imperial {
 @media (min-width: 701px) {
     .tpl-imperial .game-list > article { width: 580px; }
 }
+

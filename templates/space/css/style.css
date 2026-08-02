@@ -1,67 +1,21 @@
 @import url("../../light/css/style.css");
 
-/* =============================================================================
- *  space — the evening's games as a launch manifest.
- * -----------------------------------------------------------------------------
- *  DESIGN NOTE, so a later edit doesn't sand off the point:
- *
- *  The subject isn't "sci-fi", it's MISSION CONTROL — and that's a real fit
- *  rather than a costume: this app is already a schedule of timed events with
- *  people assigned to them, which is what a launch manifest is. Games are
- *  missions with a scheduled time, players are crew, empty seats are open
- *  crew slots, the timeline is a window schedule. Every naming and layout
- *  decision below follows from that reading.
- *
- *  PALETTE is deliberately NOT the near-black-plus-one-acid-accent that space
- *  themes default to. The ground is the blue-violet of the night side of a
- *  planet, not black; and there are two accents, both drawn from the subject —
- *  NASA's own signal red (#fc3d21, the "worm") for anything live or primary,
- *  and instrument azure for secondary readouts. No terminal-green anywhere.
- *
- *  TYPE is two roles, and the split is the subject's own: a condensed
- *  technical face for labels and headings (aerospace signage is DIN-derived),
- *  and a MONOSPACE for every number. Mission control displays really do split
- *  that way, because fixed-width digits let a value be read at a glance
- *  without its column shifting. So the monospace here is on times, counts,
- *  slot numbers and telemetry only — never on prose.
- *
- *  SIGNATURE: the world on the horizon. A single large SVG limb fixed to the
- *  foot of the viewport with the whole page floating above it, over a seamless
- *  starfield. That ambient hero is where this theme spends its boldness; the
- *  cards themselves stay restrained instrument modules so the view stays the
- *  thing you notice.
- *
- *  LAYOUT is loosely corkboard's: a centred wrapping row of ~46% cards with
- *  the same breakpoint shape, rather than classic's fixed 550px columns.
- *
- *  NO WEB FONTS, matching the rest of the app: this site asks visitors for
- *  GDPR consent, so quietly adding a third-party font request isn't a call to
- *  make on the admin's behalf. Both stacks are system faces.
- *
- *  Everything is scoped to .tpl-space (set on <body> by header.php).
- * ========================================================================== */
-
 .tpl-space {
-    /* ---- Materials ------------------------------------------------------- */
-    --void:       #080d1a;   /* the night side: blue-violet, never pure black */
-    --hull:       #131b2e;   /* instrument housing */
-    --hull-lift:  #1d2740;   /* a raised panel */
-    --ceramic:    #e6ecf7;   /* thermal-tile white: body text */
-    --slate:      #7d8aa5;   /* muted readouts and secondary text */
-    --worm:       #fc3d21;   /* NASA signal red: live, primary, contrasting */
-    --azure:      #58a6e8;   /* instrument blue: links and secondary accents */
-    --caution:    #f0b429;   /* amber, for anything at capacity */
 
-    /* Condensed technical for lettering; fixed-width for numbers. Bahnschrift
-       (Windows) and DIN Alternate (macOS) are the closest system faces to
-       aerospace signage; the monospace stack is whatever the platform ships. */
+    --void:       #080d1a;
+    --hull:       #131b2e;
+    --hull-lift:  #1d2740;
+    --ceramic:    #e6ecf7;
+    --slate:      #7d8aa5;
+    --worm:       #fc3d21;
+    --azure:      #58a6e8;
+    --caution:    #f0b429;
+
     --font-sp:   'Bahnschrift', 'DIN Alternate', 'Roboto Condensed',
                  'Helvetica Neue', Helvetica, Arial, sans-serif;
     --font-tele: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas,
                  'Roboto Mono', 'DejaVu Sans Mono', monospace;
 
-    /* Remap the base theme's variables so rules this file never touches still
-       land somewhere sensible. */
     --bg:           var(--void);
     --surface:      var(--hull);
     --surface-2:    var(--hull-lift);
@@ -76,12 +30,6 @@
     --maxw:         1500px;
 }
 
-/* ---- SIGNATURE: the view ---------------------------------------------------
-   Three fixed layers, painted back to front: a wash that lifts the top of the
-   frame, the starfield tile, and the planet limb anchored to the bottom. All
-   three are background-attachment:fixed so the content scrolls THROUGH the
-   view rather than dragging it along — which is what makes it read as a
-   window rather than as wallpaper. */
 body.tpl-space {
     background-color: var(--void);
     background-image:
@@ -97,12 +45,11 @@ body.tpl-space {
 }
 .tpl-space .content { max-width: var(--maxw); }
 
-/* ---- Lettering ------------------------------------------------------------ */
 .tpl-space h1, .tpl-space h2, .tpl-space h3,
 .tpl-space .btn, .tpl-space input, .tpl-space select, .tpl-space textarea {
     font-family: var(--font-sp);
 }
-/* Numbers only — see the note at the top on why this split is the subject's. */
+
 .tpl-space .game-time, .tpl-space .game-length, .tpl-space .weight-badge,
 .tpl-space .sp-num, .tpl-space .sp-clock, .tpl-space .players-label,
 .tpl-space .tl-hour, .tpl-space .poll-opt-votes, .tpl-space .event-hours {
@@ -119,8 +66,7 @@ body.tpl-space {
     text-transform: uppercase;
     margin-bottom: 0.25rem;
 }
-/* The rule under the designation: a signal-red bar, offset left, the way a
-   mission patch or a panel label is underscored rather than centred. */
+
 .tpl-space .event-header h1::after {
     content: "";
     display: block;
@@ -139,7 +85,6 @@ body.tpl-space {
     margin: 0.1rem 0 0;
 }
 
-/* ---- Day tabs: channel selectors ------------------------------------------ */
 .tpl-space .day-tabs { justify-content: center; border-bottom: 1px solid var(--border); gap: 0.3rem; }
 .tpl-space .day-tab {
     color: var(--slate);
@@ -156,17 +101,16 @@ body.tpl-space {
     color: var(--ceramic);
     background: var(--hull-lift);
     border-color: var(--border);
-    box-shadow: inset 0 2px 0 var(--worm);   /* the lit channel */
+    box-shadow: inset 0 2px 0 var(--worm);
 }
 .tpl-space .day-tab-date, .tpl-space .day-tab-hours { color: inherit; opacity: 0.75; }
 
-/* ---- Tables: console groups ----------------------------------------------- */
 .tpl-space .table-block {
     background: linear-gradient(rgba(88, 166, 232, .05), transparent 40%), rgba(19, 27, 46, .82);
     border: 1px solid var(--border);
     border-radius: 4px;
     box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
-    backdrop-filter: blur(2px);   /* the view stays visible behind the glass */
+    backdrop-filter: blur(2px);
 }
 .tpl-space .table-title {
     color: var(--ceramic);
@@ -178,7 +122,6 @@ body.tpl-space {
     padding-bottom: 0.4rem;
 }
 
-/* ---- Layout: loosely corkboard's --------------------------------------- */
 .tpl-space .game-list {
     display: flex;
     flex-direction: row;
@@ -199,9 +142,7 @@ body.tpl-space {
     box-shadow: 0 2px 16px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .05);
     position: relative;
 }
-/* Mechanical detail, kept to one thing: a hairline seam across the top of the
-   module, the way a panel meets its housing. Not four rivets in the corners —
-   that's the costume version. */
+
 .tpl-space .game-card::before,
 .tpl-space .poll-card::before {
     content: "";
@@ -213,7 +154,6 @@ body.tpl-space {
 .tpl-space .game-card.active,
 .tpl-space .poll-card.active { box-shadow: 0 0 0 1px var(--worm), 0 2px 16px rgba(0, 0, 0, .45); }
 
-/* ---- Module header --------------------------------------------------------- */
 .tpl-space .sp-header {
     display: flex;
     align-items: center;
@@ -222,9 +162,7 @@ body.tpl-space {
     border-bottom: 1px solid var(--border);
     margin-bottom: 0.5rem;
 }
-/* Status lamp: green while seats remain, amber once the module is at capacity.
-   It encodes the same fact the signup button's label does, which is the point —
-   a status light that means nothing is decoration. */
+
 .tpl-space .sp-lamp {
     flex: 0 0 auto;
     width: 9px; height: 9px;
@@ -244,12 +182,11 @@ body.tpl-space {
 .tpl-space .game-name a { color: var(--ceramic); text-decoration: none; }
 .tpl-space .game-name a:hover { color: var(--azure); }
 .tpl-space .sp-clock { color: var(--azure); font-size: 1rem; letter-spacing: 0.06em; white-space: nowrap; }
-.tpl-space .sp-clock:before { content: none; }   /* the clock glyph fights the readout */
+.tpl-space .sp-clock:before { content: none; }
 .tpl-space .sp-actions { display: inline-flex; gap: 0.35rem; margin-bottom: 0.5rem; }
 .tpl-space .game-thumb { text-align: center; margin: 0.2rem 0 0.4rem; }
 .tpl-space .game-thumb img { max-width: 150px; border: 1px solid var(--border); border-radius: 3px; }
 
-/* ---- Telemetry strip ------------------------------------------------------- */
 .tpl-space .sp-telemetry {
     display: flex;
     flex-wrap: wrap;
@@ -261,7 +198,7 @@ body.tpl-space {
     margin: 0 0 0.5rem;
 }
 .tpl-space .sp-cell { display: inline-flex; align-items: baseline; gap: 0.35rem; }
-/* The key is the label; it stays quiet so the value reads first. */
+
 .tpl-space .sp-key {
     color: var(--slate);
     font-size: 0.66rem;
@@ -269,8 +206,7 @@ body.tpl-space {
     text-transform: uppercase;
 }
 .tpl-space .game-length, .tpl-space .game-language { color: var(--ceramic); font-size: 0.85rem; }
-/* The weight scale keeps its colours — those encode complexity and are shared
-   with every theme — but drops to a square chip to match the panel. */
+
 .tpl-space .weight-badge { border-radius: 2px; font-size: 0.76rem; min-width: 1.9rem; }
 .tpl-space .game-brings { color: var(--ceramic); font-size: 0.88rem; margin: 0.25rem 0; }
 .tpl-space .game-rules { font-size: 0.85rem; letter-spacing: 0.04em; }
@@ -283,10 +219,6 @@ body.tpl-space {
     margin: 0.5rem 0;
 }
 
-/* ---- CREW MANIFEST --------------------------------------------------------
-   A numbered roster: every seat has a slot number and a filled/open state, and
-   standby crew sit in their own block below rather than mixed in. Fixed-width
-   numbering is what lets the column be scanned. */
 .tpl-space .players { margin-top: 0.5rem; }
 .tpl-space .players-label {
     display: block;
@@ -318,8 +250,7 @@ body.tpl-space {
 }
 .tpl-space .sp-who { flex: 1 1 auto; min-width: 0; }
 .tpl-space .sp-slot-filled { border-left-color: var(--azure); }
-/* An open slot is stated, not implied by absence — that's the whole reason
-   this theme forks the card. */
+
 .tpl-space .sp-slot-open {
     border-left-color: rgba(125, 138, 165, .35);
     background: rgba(8, 13, 26, .22);
@@ -332,9 +263,6 @@ body.tpl-space {
 .tpl-space .msg-icon { color: var(--azure); }
 .tpl-space .reserve-tag { color: var(--caution); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.68rem; }
 
-/* ---- Controls --------------------------------------------------------------
-   Flat panel switches: a quiet outline that lights on hover, with the primary
-   action carrying the signal red. */
 .tpl-space .btn {
     background: rgba(88, 166, 232, .08);
     border: 1px solid var(--border);
@@ -363,7 +291,6 @@ body.tpl-space {
 }
 .tpl-space .signup-btn:hover { background: rgba(88, 166, 232, .26); }
 
-/* ---- Forms ----------------------------------------------------------------- */
 .tpl-space input, .tpl-space select, .tpl-space textarea {
     background: rgba(8, 13, 26, .7);
     border: 1px solid var(--border);
@@ -375,9 +302,7 @@ body.tpl-space {
     outline: none;
     box-shadow: 0 0 0 2px rgba(88, 166, 232, .25);
 }
-/* The OPEN dropdown is painted by the OS, not by the rule above: the control
-   is dark but its list would stay light-on-light. Styling <option> is the only
-   lever, honoured on Windows/Linux; macOS keeps its own legible system list. */
+
 .tpl-space select option {
     background: var(--hull);
     color: var(--ceramic);
@@ -390,7 +315,6 @@ body.tpl-space {
 .tpl-space label { color: var(--slate); letter-spacing: 0.06em; }
 .tpl-space .field-note { color: var(--slate); opacity: 0.85; }
 
-/* ---- Discussion ------------------------------------------------------------ */
 .tpl-space .discussion { border-top: 1px solid var(--border); margin-top: 0.6rem; }
 .tpl-space .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .tpl-space .comment-list li {
@@ -419,7 +343,6 @@ body.tpl-space {
 .tpl-space .comment-add summary::-webkit-details-marker { display: none; }
 .tpl-space .comment-add form { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
-/* ---- Polls: awaiting go / no-go -------------------------------------------- */
 .tpl-space .poll-tag {
     margin-left: auto;
     background: transparent;
@@ -443,7 +366,6 @@ body.tpl-space {
 .tpl-space .poll-opt-bar > span { background: var(--azure); }
 .tpl-space .poll-opt-bar.is-full > span { background: var(--ok); }
 
-/* ---- Timeline: the window schedule ----------------------------------------- */
 .tpl-space .timeline { background: rgba(19, 27, 46, .75); border: 1px solid var(--border); border-radius: 4px; }
 .tpl-space .tl-scroll { background: transparent; border-color: var(--border); }
 .tpl-space .timeline-title { color: var(--ceramic); letter-spacing: 0.18em; text-transform: uppercase; }
@@ -460,9 +382,7 @@ body.tpl-space {
 }
 .tpl-space .tl-game:hover { filter: brightness(1.1); }
 .tpl-space .tl-count-full { color: #5c1200; }
-/* A poll is a slot with no go/no-go yet: the base sheet paints this near-white
-   (#eef3fc), which on this ground is the one bright patch on the page, so the
-   value has to be replaced rather than tinted. */
+
 .tpl-space .tl-game.tl-poll {
     background: rgba(8, 13, 26, .85);
     color: var(--caution);
@@ -470,7 +390,6 @@ body.tpl-space {
 }
 .tpl-space .tl-game.tl-poll .tl-sub { color: rgba(240, 180, 41, .8); }
 
-/* ---- Chrome ---------------------------------------------------------------- */
 .tpl-space .topbar {
     background: linear-gradient(rgba(19, 27, 46, .95), rgba(8, 13, 26, .95));
     border-bottom: 1px solid var(--border);
@@ -485,8 +404,6 @@ body.tpl-space {
 .tpl-space .game-archived { opacity: 0.5; }
 .tpl-space .game-archived .game-name { text-decoration: line-through; color: var(--slate); }
 
-/* ---- Quality floor ---------------------------------------------------------
-   Focus has to read against both the hull panels and the view behind them. */
 .tpl-space a:focus-visible,
 .tpl-space button:focus-visible,
 .tpl-space input:focus-visible,
@@ -503,7 +420,7 @@ body.tpl-space {
 }
 @media (max-width: 700px) {
     .tpl-space .event-header h1 { font-size: 1.6rem; letter-spacing: 0.14em; }
-    /* The limb is a horizon, not a backdrop: on a tall narrow screen a
-       full-width planet swallows the page, so it drops back to a band. */
+
     body.tpl-space { background-size: 200% auto, 220px 220px, 100% 100%; }
 }
+

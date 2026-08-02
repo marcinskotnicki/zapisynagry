@@ -1,11 +1,3 @@
-/* =============================================================================
- *  templates/light/css/style.css — base theme.
- * -----------------------------------------------------------------------------
- *  All colours are CSS custom properties on :root, and everything else is laid
- *  out in terms of those variables. A new theme (e.g. dark) can therefore just
- *  @import this file and redefine the variables — no need to copy layout rules.
- * ========================================================================== */
-
 :root {
     --bg:           #f4f5f7;
     --surface:      #ffffff;
@@ -34,7 +26,6 @@ body {
 a { color: var(--primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* ---- Top bar -------------------------------------------------------------- */
 .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
 .topbar-inner {
     max-width: var(--maxw);
@@ -47,10 +38,8 @@ a:hover { text-decoration: underline; }
 .brand { font-weight: 700; font-size: 0.8rem; color: var(--text); }
 .topnav a { margin-left: 1rem; font-size: 0.8rem; }
 
-/* ---- Content shell -------------------------------------------------------- */
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
 
-/* ---- Cards ---------------------------------------------------------------- */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -59,13 +48,11 @@ a:hover { text-decoration: underline; }
 }
 .card-narrow { max-width: 380px; margin: 2rem auto; }
 
-/* ---- Messages ------------------------------------------------------------- */
 .msg { padding: 0.6rem 0.9rem; border-radius: var(--radius); margin: 0 0 1rem; }
 .msg-ok    { background: #e8f6ee; color: var(--ok); }
 .msg-error { background: #fdecea; color: var(--error); }
 .muted     { color: var(--text-muted); font-size: 0.92rem; }
 
-/* ---- Forms ---------------------------------------------------------------- */
 label { display: block; font-weight: 600; margin: 0.8rem 0 0.25rem; }
 input, select, textarea {
     width: 100%;
@@ -79,12 +66,6 @@ input, select, textarea {
 .field-check label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
 .field-check input { width: auto; }
 
-/* IMPORTANT: this must give a background, a colour AND a font, or <a class="btn">
-   and <button class="btn"> do not look alike. Left unset, the anchor falls back
-   to link styling (bare red text in the classic theme) while the button picks up
-   the browser's own grey chrome — and since browsers don't inherit font-family
-   into form controls, the two also came out at different sizes. Stating all of
-   it here is what makes a link and a submit button interchangeable. */
 .btn {
     display: inline-block;
     margin-top: 1.2rem;
@@ -101,13 +82,12 @@ input, select, textarea {
     cursor: pointer;
 }
 .btn:hover { background: var(--border); color: var(--text); text-decoration: none; }
-/* Set by the BGG search guard in scripts.js while the name box is empty. */
+
 .btn[disabled], .btn[disabled]:hover { opacity: 0.5; cursor: not-allowed; filter: none; }
-/* The variants restate border-color too, or the neutral border above frames them. */
+
 .btn-primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
 .btn-primary:hover { background: var(--primary); color: var(--primary-text); border-color: var(--primary); filter: brightness(0.95); text-decoration: none; }
 
-/* ---- Admin panel ---------------------------------------------------------- */
 .admin h1 { font-size: 1.4rem; }
 .tabs {
     display: flex;
@@ -139,7 +119,6 @@ input, select, textarea {
     padding: 1.25rem;
 }
 
-/* ---- Options form layout -------------------------------------------------- */
 .options-form fieldset {
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -149,7 +128,6 @@ input, select, textarea {
 .options-form legend { font-weight: 700; padding: 0 0.4rem; }
 .options-form .field { margin-bottom: 0.5rem; }
 
-/* ---- Updater -------------------------------------------------------------- */
 .update-log {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -157,63 +135,47 @@ input, select, textarea {
     padding: 0.75rem 1.25rem;
 }
 
-/* ---- Admin: small buttons & danger ---------------------------------------- */
 .btn-small { margin-top: 0; padding: 0.35rem 0.7rem; font-size: 0.85rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 .btn-small:hover { background: var(--border); text-decoration: none; }
 .btn-danger { background: var(--error); color: #fff; border-color: var(--error); }
-/* Without this, .btn-small:hover (same specificity, defined just above) won
-   the cascade and repainted a red button light grey — white text on grey.
-   Restating the background is what keeps that from applying. */
+
 .btn-danger:hover { background: var(--error); border-color: var(--error); color: #fff; filter: brightness(0.9); text-decoration: none; }
 
-/* ---- Admin: data tables --------------------------------------------------- */
 .grid { width: 100%; border-collapse: collapse; }
 .grid th, .grid td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 .grid th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); }
 .nowrap { white-space: nowrap; }
 
-/* Inline mini-forms inside a table cell (users actions). */
 .row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .row-actions .inline { display: flex; gap: 0.25rem; align-items: center; }
 .row-actions input[type="email"], .row-actions input[type="password"] { width: 11rem; padding: 0.35rem 0.5rem; font-size: 0.85rem; }
 
-/* ---- New event: per-day blocks -------------------------------------------- */
 .day-block { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; padding: 0.5rem 1rem 1rem; }
 .day-block legend { font-weight: 700; padding: 0 0.4rem; }
 .day-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
 @media (max-width: 560px) { .day-grid { grid-template-columns: 1fr; } }
 
-/* ---- Thumbnails grid ------------------------------------------------------ */
 .thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
 .thumb-item { margin: 0; text-align: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem; }
 .thumb-item img { max-width: 100%; height: 110px; object-fit: contain; display: block; margin: 0 auto 0.4rem; }
 
-/* ---- Logs filter / archive links ------------------------------------------ */
 .log-filter { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
 .log-filter select { width: auto; min-width: 14rem; }
 .link-cell { display: flex; gap: 0.4rem; align-items: center; }
 .link-cell input { font-size: 0.8rem; }
 
-/* ===========================================================================
- *  FRONT END — event view, game cards, add-game flow
- * ======================================================================== */
-
-/* ---- Event header & day tabs ---------------------------------------------- */
 .event-header{
     padding-bottom:10px;
 }
 .event-header h1 { margin-bottom: 0.2rem; }
 .event-date { color: var(--text-muted); margin-top: 0; margin-bottom:0; font-size:1.1rem;font-weight:700;}
-/* Opening hours, under the date and quieter than it — useful at a glance,
-   not something to read first. */
+
 .event-hours { color: var(--text-muted); font-size: 0.9rem; margin: 0.1rem 0 10px; font-weight:600}
-.day-tab-hours { display: block; font-size: 0.72rem; color: var(--text-muted); }   /* smaller than the date above it, on purpose */
+.day-tab-hours { display: block; font-size: 0.72rem; color: var(--text-muted); }
 .event-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
 
 .day-tabs { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.25rem; border-bottom: 2px solid var(--border); margin: 1rem 0 1.5rem; }
-/* Flex column + centering: a day missing its date or hours (a shorter tab) still
-   lands centered in the row rather than sitting flush at the top of a taller
-   neighbour — align-items:stretch above equalises every tab's height first. */
+
 .day-tab {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center;
@@ -222,22 +184,19 @@ input, select, textarea {
     border: 1px solid transparent;
     border-bottom: none;
     border-radius: var(--radius) var(--radius) 0 0;
-    font-size: 1.05rem;   /* the day name itself, a little bigger than body text */
+    font-size: 1.05rem;
 }
 .day-tab:hover { background: var(--surface-2); text-decoration: none; }
 .day-tab-active { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -2px; font-weight: 600; }
-/* The date reads as the header of the two lines below the name, so it is
-   sized above the hours line rather than left to look incidental beside it. */
+
 .day-tab-date { display: block; font-size: 0.85rem; color: var(--text-muted); }
 
-/* ---- Tables --------------------------------------------------------------- */
 .table-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
 .table-title { font-size: 1rem; color: var(--text-muted); margin: 0 0 0.75rem; }
 .no-games { margin: 0.5rem 0 1rem; }
-.add-game-btn { display: block; width: fit-content; margin: 0.5rem auto 0; } /* centred under the table's games, all themes */
+.add-game-btn { display: block; width: fit-content; margin: 0.5rem auto 0; }
 .add-table-form { margin: 1rem 0 2rem; }
 
-/* ---- Game cards ----------------------------------------------------------- */
 .game-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
 .game-card { display: flex; gap: 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; background: var(--surface-2); }
 .game-thumb img { width: 90%; height: auto; object-fit: contain; border-radius: 6px; background: none; }
@@ -246,14 +205,13 @@ input, select, textarea {
 .game-name { margin: 0 0 0.3rem; font-size: 1.1rem; }
 .game-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
 .game-length { color: var(--text-muted); font-size: 0.9rem; }
-/* The start hour is THE key fact on a card — bigger, bolder, accent-coloured. */
+
 .game-time { color: var(--primary); font-size: 1.15rem; font-weight: 700; }
 .game-time:before {content: '🕑';}
 .game-brings, .game-rules, .game-comment { margin: 0.25rem 0; font-size: 0.92rem; }
 .game-language {font-size: 0.92rem;}
 .game-comment { color: var(--text-muted); }
 
-/* Weight colour buckets: green (easy) -> red (heavy). */
 .weight-badge { display: inline-block; min-width: 2rem; text-align: center; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; color: #fff; }
 .weight-1 { background: #2e9e5b; }
 .weight-2 { background: #86b300; }
@@ -261,7 +219,6 @@ input, select, textarea {
 .weight-4 { background: #e0701a; }
 .weight-5 { background: #cf3b2e; }
 
-/* ---- Players -------------------------------------------------------------- */
 .players {
     margin-top: 0.6rem;
     padding: 0.6rem 0.75rem;
@@ -276,7 +233,6 @@ input, select, textarea {
 .player-reserve { opacity: 0.7; font-style: italic; }
 .reserve-tag { color: var(--text-muted); font-size: 0.8rem; }
 
-/* ---- Add-game gate & form ------------------------------------------------- */
 .gate-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
 .btn-big { padding: 0.85rem 1.2rem; font-size: 1.05rem; }
 .field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
@@ -291,85 +247,56 @@ input, select, textarea {
 .thumb-none-box { display: inline-flex; align-items: center; justify-content: center; height: 150px; width: 100px; border: 1px dashed var(--border); border-radius: 6px; color: var(--text-muted); }
 .bgg-thumb { max-height: 200px; border-radius: 6px; display: block; }
 
-/* ---- BGG results list ----------------------------------------------------- */
 .bgg-list { list-style: none; margin: 0; padding: 0; }
 .bgg-list li a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
 .bgg-list li a:hover { background: var(--surface-2); text-decoration: none; }
 .bgg-list img { width: 48px; height: 48px; object-fit: contain; }
 .bgg-year { color: var(--text-muted); }
 
-/* ---- Signup button + player delete ---------------------------------------- */
 .signup-btn { margin-top: 0.5rem; }
 .player { display: inline-flex; align-items: center; gap: 0.35rem; }
 .player-del { color: var(--error); font-weight: 700; text-decoration: none; line-height: 1; padding: 0 0.15rem; }
 .player-del:hover { text-decoration: none; transform: scale(1.2); }
 
-/* ---- Polls ---------------------------------------------------------------- */
 .poll-card { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 0.75rem; background: #eef3fc; }
 .tpl-dark .poll-card { background: #1b2436; }
 .poll-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
-/* NOT var(--primary): that is exactly what .btn-primary uses, and a tag sitting
-   right next to real buttons in the same colour reads as one of them. Same fix,
-   same colours, as the classic theme's tag — a caption colour no button uses. */
-.poll-tag { margin-left: auto; background: black; color: #cfcfcf; font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; } /* auto margin -> right-hand end of .poll-head */
-/* Second row: every button the poll offers, delete first. Separate from
-   .poll-head so the tag never shares a line with the buttons. */
+
+.poll-tag { margin-left: auto; background: black; color: #cfcfcf; font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+
 .poll-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0 0 0.5rem; }
 .poll-by { font-size: 0.92rem; }
 .poll-options { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
 .poll-option { position: relative; overflow: hidden; display: flex; align-items: center; gap: 0.6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.6rem 0.45rem; }
-/* Vote progress towards the candidate's required player count. Sits flush
-   across the bottom of the whole row; the parent's overflow:hidden is what
-   trims its ends to the rounded corners. */
+
 .poll-opt-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--border); }
 .poll-opt-bar > span { display: block; height: 100%; background: var(--primary); transition: width 0.2s ease; }
-.poll-opt-bar.is-full > span { background: var(--ok); }   /* threshold met */
+.poll-opt-bar.is-full > span { background: var(--ok); }
 .poll-opt-thumb { height: 50px; width: 50px; object-fit: contain; }
-/* Name + its details form one growing column; votes and the vote button sit
-   to the right of it. */
+
 .poll-opt-main { flex: 1; min-width: 0; }
 .poll-opt-name { font-weight: 600; }
 .poll-opt-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--text-muted); }
 .poll-opt-meta .weight-badge { min-width: 1.7rem; padding: 0 0.3rem; font-size: 0.72rem; }
 .poll-opt-votes { color: var(--text-muted); font-size: 0.88rem; white-space: nowrap; }
 
-/* Poll build screen */
 .poll-candidate-list { list-style: none; margin: 0.3rem 0 1rem; padding: 0; }
 .poll-candidate-list li { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
 .poll-candidate-list .cand-name { flex: 1; font-weight: 600; }
 .poll-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .gate-poll { margin-top: 0.75rem; }
 
-/* ---- Timeline ------------------------------------------------------------- */
 html { scroll-behavior: smooth; }
-/* The timeline renders OUTSIDE the .content column (via the footer's
-   after_content slot), so it is naturally full page width — just pad it. */
+
 .timeline { margin: 1rem 0 2.5rem; padding: 0 1rem; }
 .timeline-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
 .tl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.tl-inner { --tl-pad: 1.6rem; position: relative; min-width: 700px; padding: 0 var(--tl-pad) 0.5rem; } /* side padding: the edge hour labels are centred on their tick (translateX(-50%)), so without it the last label overflows a few px and forces a useless scrollbar */
+.tl-inner { --tl-pad: 1.6rem; position: relative; min-width: 700px; padding: 0 var(--tl-pad) 0.5rem; }
 
-/* ---- Hour stripes ---------------------------------------------------------
-   Alternating vertical bands, one per hour, so a block's start and length can
-   be read off the chart instead of counted against the labels.
-
-   Inset by the SAME padding .tl-inner uses, because an absolutely positioned
-   child resolves against the padding box while the hour labels and the game
-   blocks are positioned inside the content box — without matching the two the
-   stripes would sit a padding-width out of step with everything they are meant
-   to line up with. Hence the shared --tl-pad.
-
-   Deliberately a translucent black rather than a named colour: every theme
-   inherits this file, and a tint that just darkens whatever is underneath works
-   on parchment, graphite and cork alike without nine overrides. A theme that
-   wants something else can still restyle .tl-band. */
 .tl-bands { position: absolute; top: 0; bottom: 0; left: var(--tl-pad); right: var(--tl-pad); z-index: 0; }
 .tl-band  { position: absolute; top: 0; bottom: 0; }
 .tl-band:nth-child(odd) { background: rgba(0, 0, 0, 0.065); }
 
-/* The content sits above the stripes. .tl-table-no is otherwise static, and a
-   static box with a background paints BELOW positioned siblings — so without
-   this its bar would disappear behind the band layer. */
 .tl-hours, .tl-lane, .tl-table-no { position: relative; z-index: 1; }
 
 .tl-hours { position: relative; height: 1.6rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; }
@@ -387,7 +314,6 @@ html { scroll-behavior: smooth; }
 .tl-count-full { color: #ffd5d0; font-weight: 700; }
 .tl-game { }
 
-/* ---- Game actions / edit-delete / archived / discussions ------------------ */
 .game-name-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .game-actions { display: inline-flex; gap: 0.3rem; }
 .game-archived { background: #fbe9e7; border-color: #e6b0aa; opacity: 0.75; }
@@ -395,21 +321,14 @@ html { scroll-behavior: smooth; }
 .game-archived .game-name { text-decoration: line-through; }
 
 .delgame-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-/* Poll forms: the "add a game" call to action sits on its own line, with
-   save + cancel on the line below it. */
+
 .poll-form-add { margin: 1rem 0 0.6rem; }
 .poll-form-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
 
-/* One row per language under each custom-message label: a short language code
-   in a fixed-width gutter, then the input, so the boxes line up whatever the
-   code lengths are. */
 .msg-lang-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; }
 .msg-lang-code { flex: 0 0 2.4rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; }
 .msg-lang-row input { flex: 1; min-width: 0; }
 
-/* ---- Mailing list signup box ----------------------------------------------
-   Rendered into the footer's $after_content slot, below the timeline, so it is
-   outside the width-capped .content column and needs its own centring. */
 .mailing-box { max-width: 640px; margin: 1.5rem auto 2rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
 .mailing-box h2 { margin: 0 0 0.3rem; font-size: 1.1rem; }
 .mailing-box .muted { margin: 0 0 0.7rem; font-size: 0.9rem; }
@@ -419,7 +338,7 @@ html { scroll-behavior: smooth; }
 .mailing-consent { margin-top: 0.6rem; font-size: 0.85rem; }
 .mailing-consent label { display: flex; gap: 0.45rem; align-items: flex-start; }
 .mailing-captcha { margin-top: 0.6rem; }
-/* Visually hidden but still read aloud — the placeholder is not a label. */
+
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 .discussion { margin-top: 0.6rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
@@ -429,7 +348,6 @@ html { scroll-behavior: smooth; }
 .comment-add summary { cursor: pointer; color: var(--primary); font-size: 0.9rem; }
 .comment-add form { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
-/* ---- User panel ----------------------------------------------------------- */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
 @media (max-width: 520px) { .stats-grid { grid-template-columns: 1fr; } }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
@@ -441,96 +359,67 @@ html { scroll-behavior: smooth; }
 .profile-card h3 { margin-top: 0; font-size: 1rem; }
 .reset-sub { font-size: 1rem; }
 
-/* ---- Messaging envelope --------------------------------------------------- */
 .msg-icon { text-decoration: none; color: var(--primary); font-size: 1rem; line-height: 1; padding: 0 0.25rem; }
 .msg-icon:hover { color: var(--primary-hover, var(--primary)); filter: brightness(0.9); }
 .game-name-row .msg-icon { margin-left: 0.25rem; }
-/* .msg-icon-all marks the envelope that mails EVERYONE (a whole game or poll),
-   as opposed to a single player/proposer. Same look as .msg-icon for now —
-   style it here to tell the two apart at a glance. */
-.msg-icon-all { /* intentionally empty: styling hook */ }
 
-/* ---- Gate button hierarchy -------------------------------------------------- */
-.btn-secondary { background: #7d92ac; color: #fff; border-color: #7d92ac; }   /* toned-down cousin of --primary */
+.msg-icon-all {  }
+
+.btn-secondary { background: #7d92ac; color: #fff; border-color: #7d92ac; }
 .btn-secondary:hover { background: #7d92ac; color: #fff; border-color: #7d92ac; filter: brightness(0.95); text-decoration: none; }
 .gate-poll { margin-top: 0.6rem; }
 .gate-poll .btn { display: block; text-align: center; margin-top: 0; padding: 0.7rem 1.1rem; font-size: 0.98rem; }
 .gate-manual { margin-top: 0.6rem; text-align: center; }
 .btn-small-gate { margin-top: 0; padding: 0.45rem 0.9rem; font-size: 0.85rem; }
 
-/* ---- Polls on the timeline --------------------------------------------------- *
- * Provisional blocks (default 2h — the winner's real length is unknown):
- * ------------------------------------------------------------------------------ */
 .tl-game.tl-poll { background: #eef3fc; color: var(--text); border: 1px dashed var(--primary); }
 .tl-game.tl-poll .tl-sub { color: var(--text-muted); }
 .tpl-dark .tl-game.tl-poll { background: #1b2436; color: var(--text); }
 
-/* ---- Rules / knows-rules colour coding --------------------------------------- */
 .rules-good { color: #2e9e5b; }
 .rules-mid  { color: #b58900; }
 .rules-bad  { color: #cf3b2e; }
 
-/* ---- Discussion zebra --------------------------------------------------------- */
-/* Alternating comment backgrounds: subtle, but enough to separate rows. */
 .comment-list li:nth-child(even) { background: rgba(0, 0, 0, 0.045); }
 .tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
 
-/* ---- Small annotations --------------------------------------------------------- */
-.field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; } /* sits BELOW its input (a note above the field breaks row alignment in horizontal form layouts) */
+.field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; }
 .poll-deadline { font-size: 0.85rem; color: var(--text-muted); margin: 0.35rem 0; }
 
-/* ---- "Just interacted" highlight ------------------------------------------------ */
 .game-card.active, .poll-card.active { box-shadow: 0 0 0 3px rgba(43, 108, 196, 0.35); }
 
-/* ---- Soft-deleted games sink to the end -------------------------------------- */
 .game-list > .game-archived { order: 99; }
 
-/* Admin-only "@" on players whose signup is bound to an account--------------- */
 .p-acct { font-size: 0.7em; color: var(--text-muted); margin-left: 0.15rem; cursor: help; vertical-align: super; }
 
-/* "signed up by X" — tiny line under a player whose entry was created by a DIFFERENT logged-in account*/
 .p-signedby { display: block; font-size: 0.62rem; line-height: 1.2; color: var(--text-muted); }
 
-/* Topbar theme/language pickers (guests) */
-/* Guest theme/language pickers now live in the footer (were in the top bar),
-   pushed to the bottom-right corner. */
 .sitefooter { margin-top: 2rem; padding: 1rem 0; border-top: 1px solid var(--border); }
 .footer-prefs { display: flex; gap: 1rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 .footer-prefs-item { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.8rem; color: var(--text-muted); }
 .footer-prefs select { font-size: 0.8rem; padding: 0.15rem 0.25rem; }
 
-/* Header nav icons: inline SVG, monochrome (currentColor), vertically centred
-   next to any text. One size for the whole set. */
 .nav-ic { display: inline-flex; align-items: center; }
 .nav-svg { width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
 .topnav a { display: inline-flex; align-items: center; gap: 0.3rem; }
-.topnav .nav-icononly .nav-svg { width: 1.2em; height: 1.2em; }   /* a touch larger with no text beside it */
+.topnav .nav-icononly .nav-svg { width: 1.2em; height: 1.2em; }
 
-/* 1px breathing gap between back-to-back timeline blocks: */
 .tl-game { border-right: 1px solid var(--surface); }
 
-/* ---- Card visual round (light + dark; classic has its own card) -------------- */
 .game-thumb { display: flex; flex-direction: column; gap: 0.45rem; align-items: center; width: 15%; min-width:100px; }
 .game-thumb .game-actions { display: flex; flex-direction: column; gap: 0.3rem; width: 90px; }
 .game-thumb .game-actions .btn { margin-top: 0; text-align: center; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
 
-/* Rules-knowledge dot next to each player (colour from .rules-good/mid/bad). */
 .p-knows { font-size: 1em; margin-left: 0.3rem; vertical-align: middle; cursor: help; }
 
-/* Signup: the main call to action  */
 .signup-btn {
     background: #2e9e5b; color: #fff;
     padding: 0.5rem 1.1rem; font-size: 0.95rem;
     margin-top: 0.6rem;
 }
-/* Restating the background here is what stops .btn-small:hover (equal
-   specificity, defined earlier) from repainting this grey on hover — the exact
-   bug already fixed once for .btn-danger. Without it the button loses its green
-   entirely on hover, which on the dark theme left it almost the same colour as
-   the page background. */
+
 .signup-btn:hover { background: #2e9e5b; filter: brightness(0.93); text-decoration: none; }
 
-/* ---- Table names (optional labels + the tiny rename controls) ------------ */
 .table-block { position: relative; }
 .table-name { font-size: 0.85em; font-weight: normal; color: var(--text-muted); margin-left: 0.4rem; }
 .table-rename-btn {
@@ -545,7 +434,6 @@ html { scroll-behavior: smooth; }
 .add-table-form input[type="text"] { max-width: 220px; }
 .add-table-form>* {margin-top:0}
 
-/* ---- Admin: users tab additions ------------------------------------------ */
 .badge-blocked {
     display: inline-block; padding: 0.05rem 0.4rem; margin-left: 0.3rem;
     font-size: 0.75em; border-radius: 3px;
@@ -562,8 +450,6 @@ html { scroll-behavior: smooth; }
 .bgg_logo{display:block;text-align:center;padding:20px 10px;}
 .bgg_logo img{width:60%;max-width:300px;height:auto;}
 
-/* Header preference pickers. Compact by design — the header is chrome, so the
-   labels are visually hidden (still read aloud) and only the selects show. */
 .topbar-prefs { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.6rem; }
 .topbar-prefs-item { display: inline-flex; align-items: center; }
 .topbar-prefs select {
@@ -572,23 +458,12 @@ html { scroll-behavior: smooth; }
     margin: 0;
 }
 
-/* ===========================================================================
- *  Mobile refinements, in the base sheet so every theme inherits them.
- * ======================================================================== */
 @media (max-width: 700px) {
-    /* ---- Day tabs -------------------------------------------------------
-       The three lines must read name > date > hours. They already do at
-       desktop sizes, but themes override .day-tab's size freely and the hours
-       line is the one most likely to end up competing, so the order is stated
-       explicitly here rather than left to whatever each theme happens to set. */
+
     .day-tab       { font-size: 0.95rem; }
     .day-tab-date  { font-size: 0.80rem; }
     .day-tab-hours { font-size: 0.68rem; }
 
-    /* Three or four days no longer fit across a phone, and wrapping to a
-       second row costs vertical space and breaks the strip's read. Scroll
-       horizontally instead: one row, always. flex-wrap must be nowrap AND the
-       tabs must not shrink, or flex compresses them instead of overflowing. */
     .day-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -598,17 +473,12 @@ html { scroll-behavior: smooth; }
     }
     .day-tab { flex: 0 0 auto; }
 
-    /* ---- Poll options ---------------------------------------------------
-       Give the candidate's title the full width by dropping the vote control
-       onto its own row beneath the vote count. Both shapes are covered: the
-       plain link when you have not voted, and the little form when you have. */
     .poll-option { flex-wrap: wrap; row-gap: 0.3rem; }
     .poll-option > .btn,
     .poll-option > form.inline { flex: 1 0 100%; margin-top: 0.1rem; }
     .poll-option > form.inline .btn { width: 100%; }
 
-    /* Header switchers drop onto their own line rather than squeezing the nav
-       into unreadability on a narrow screen. */
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
     .topbar-prefs { margin-left: 0; }
 }
+

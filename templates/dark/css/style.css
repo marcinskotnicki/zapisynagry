@@ -16,7 +16,6 @@
 .msg-ok    { background: #14301f; }
 .msg-error { background: #3a1714; }
 
-/* ---- Dark layout: two games per row ----------------------------------------- */
 .tpl-dark .game-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -38,21 +37,12 @@
 
 .tpl-dark .players .signup-btn { display: block; width: fit-content; margin-left: auto; }
 
-/* Scoped: this was a bare `input, select, textarea` rule, which applied to
-   EVERY theme rather than just this one — only the active sheet is ever
-   loaded, so it caused no visible bug, but it broke the file's own convention
-   and would bite the moment two sheets were loaded together. */
 .tpl-dark input, .tpl-dark select, .tpl-dark textarea {
     background: rgba(0, 0, 0, 0.4);
     color: var(--text);
     border: 1px solid var(--border);
 }
 
-/* The OPEN dropdown is painted by the OS, not by the rule above: the control
-   was dark but its list stayed light-on-light and near-unreadable. Styling
-   <option> is the only lever available, and it is honoured on Windows/Linux
-   browsers; macOS ignores it and keeps its own legible system list, which is a
-   graceful fallback rather than a break. */
 .tpl-dark select option {
     background: #1e2128;
     color: var(--text);
@@ -62,3 +52,4 @@
     background: var(--primary);
     color: var(--primary-text);
 }
+
