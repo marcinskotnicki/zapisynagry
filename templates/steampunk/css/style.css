@@ -110,6 +110,9 @@ body.tpl-steampunk {
 .tpl-steampunk .btn, .tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
     font-family: var(--font-sk);
 }
+.tpl-steampunk .btn.game-manual{
+    margin:5px;
+}
 .tpl-steampunk .event-header { text-align: center; }
 .tpl-steampunk .event-header h1 {
     color: var(--brass-lit);
