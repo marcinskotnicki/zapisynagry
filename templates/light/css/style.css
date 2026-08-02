@@ -363,7 +363,7 @@ html { scroll-behavior: smooth; }
    inherits this file, and a tint that just darkens whatever is underneath works
    on parchment, graphite and cork alike without nine overrides. A theme that
    wants something else can still restyle .tl-band. */
-.tl-bands { position: absolute; top: 0; bottom: 0.5rem; left: var(--tl-pad); right: var(--tl-pad); z-index: 0; }
+.tl-bands { position: absolute; top: 0; bottom: 0; left: var(--tl-pad); right: var(--tl-pad); z-index: 0; }
 .tl-band  { position: absolute; top: 0; bottom: 0; }
 .tl-band:nth-child(odd) { background: rgba(0, 0, 0, 0.065); }
 
