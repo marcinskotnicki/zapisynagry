@@ -57,7 +57,7 @@ unset($__msgKey, $__lang);
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'send_emails', 'allow_polls', 'allow_discussions',
-    'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links',
+    'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'show_venue_name', 'mailing_list', 'antibot_honeypot',
     'switcher_show_user_template', 'switcher_show_user_language',

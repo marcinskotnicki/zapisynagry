@@ -93,7 +93,13 @@ function update_download($url, $dest) {
  * valid from PHP 7.1, so it is safe against this app's 7.4 floor.
  * @return void
  */
-function update_rcopy($src, $dst, ?array &$failed = null) {
+// How many changed-file lines the report prints before summarising the rest.
+// A first run touches the whole tree; without a cap the schema results end up
+// scrolled off the bottom of the page.
+const UPDATE_LIST_LIMIT = 40;
+
+function update_rcopy($src, $dst, ?array &$failed = null, ?array &$changed = null) {
+    // ---- Directory: make it if needed, then recurse. ----
     if (is_dir($src)) {
         if (!is_dir($dst) && !@mkdir($dst, 0775, true) && !is_dir($dst)) {
             if ($failed !== null) $failed[] = $dst;
@@ -101,27 +107,48 @@ function update_rcopy($src, $dst, ?array &$failed = null) {
         }
         foreach (scandir($src) as $i) {
             if ($i === '.' || $i === '..') continue;
-            update_rcopy($src . '/' . $i, $dst . '/' . $i, $failed);
+            update_rcopy($src . '/' . $i, $dst . '/' . $i, $failed, $changed);
         }
-    } else {
-        // The @ suppresses the warning, NOT the failure — the return value is
-        // what matters and it used to be discarded entirely. A file that
-        // failed to copy (locked by opcache, a transient permission problem, a
-        // full disk) was skipped silently and the update still reported
-        // success. That shipped a half-updated tree once: a template was
-        // written but the inc/ file defining the function it calls was not, so
-        // every page fataled.
-        if (!@copy($src, $dst)) {
-            if ($failed !== null) $failed[] = $dst;
-            return;
-        }
-        // Byte-for-byte check. copy() can return true having written a short
-        // file if the disk filled mid-write, and a truncated PHP file is worse
-        // than a missing one — it parses far enough to break confusingly.
-        if (filesize($src) !== @filesize($dst) && $failed !== null) {
-            $failed[] = $dst;
-        }
+        return;
     }
+
+    /* ---- File: skip it when it is already identical. --------------------
+     * The release is a full tree, so a blind copy cannot tell an updated file
+     * from an unchanged one. Comparing first can, and it is cheap: the size
+     * check rejects almost every differing file outright, so only same-size
+     * files are ever hashed.
+     *
+     * Two payoffs. The admin gets a real list of what moved instead of just
+     * "done"; and an untouched file is never rewritten, which on a routine
+     * update where three files changed means three writes instead of ~170 —
+     * far less disk churn and far less opcache invalidation. */
+    $isNew = !is_file($dst);
+    if (!$isNew
+        && filesize($src) === @filesize($dst)
+        && @md5_file($src) === @md5_file($dst)) {
+        return;                                  // byte-identical: nothing to do
+    }
+
+    // The @ suppresses the warning, NOT the failure — the return value is what
+    // matters and it used to be discarded entirely. A file that failed to copy
+    // (locked by opcache, a transient permission problem, a full disk) was
+    // skipped silently and the update still reported success. That shipped a
+    // half-updated tree once: a template was written but the inc/ file defining
+    // the function it calls was not, so every page fataled.
+    if (!@copy($src, $dst)) {
+        if ($failed !== null) $failed[] = $dst;
+        return;
+    }
+    // Byte-for-byte check. copy() can return true having written a short file
+    // if the disk filled mid-write, and a truncated PHP file is worse than a
+    // missing one — it parses far enough to break confusingly.
+    if (filesize($src) !== @filesize($dst)) {
+        if ($failed !== null) $failed[] = $dst;
+        return;
+    }
+    // Only recorded once the write is known good, so the list is what actually
+    // landed rather than what was attempted.
+    if ($changed !== null) $changed[] = ($isNew ? '+' : '~') . $dst;
 }
 
 /**
@@ -283,10 +310,11 @@ function update_run($root) {
     // shouldn't deploy (docs, tests).
     $skip = array_merge(update_protected_paths(), update_skipped_paths());
     $failed = [];
+    $changed = [];
     foreach (scandir($src) as $item) {
         if ($item === '.' || $item === '..') continue;
         if (in_array($item, $skip, true)) continue;
-        update_rcopy($src . '/' . $item, $root . '/' . $item, $failed);
+        update_rcopy($src . '/' . $item, $root . '/' . $item, $failed, $changed);
     }
 
     // STOP HERE if anything failed to land. A partially-overlaid tree is the
@@ -307,7 +335,30 @@ function update_run($root) {
     }
 
     update_rrmdir($tmp);                             // clean up the extraction dir
-    $results[] = t('update_files_ok');
+    /* List what actually moved. "Nothing changed" is a genuinely useful answer
+     * — it tells an admin the update ran and the install was already current,
+     * rather than leaving them to wonder whether it did anything.
+     *
+     * Capped: a first-run or a big release can touch every file in the tree,
+     * and a 170-line wall of paths buries the schema results underneath it.
+     * The count is always exact even when the list is trimmed. */
+    if (!$changed) {
+        $results[] = t('update_files_current');
+    } else {
+        $results[] = t('update_files_ok');
+        $rel = array_map(function ($f) use ($root) {
+            // Each entry is prefixed + (new) or ~ (modified) by update_rcopy.
+            $mark = $f[0];
+            return $mark . ' ' . ltrim(str_replace($root, '', substr($f, 1)), '/');
+        }, $changed);
+        sort($rel);
+        $show = array_slice($rel, 0, UPDATE_LIST_LIMIT);
+        foreach ($show as $line) $results[] = $line;
+        if (count($rel) > UPDATE_LIST_LIMIT) {
+            $results[] = t('update_files_more', count($rel) - UPDATE_LIST_LIMIT);
+        }
+        $results[] = t('update_files_count', count($rel));
+    }
 
     // ---- 2. Reconcile the schema -------------------------------------------
     // Build a throwaway DB from the (now updated) database.sql and diff it.

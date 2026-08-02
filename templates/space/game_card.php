@@ -92,6 +92,13 @@
                 <p class="game-brings"><span class="sp-key"><?= e(t('game_brings')) ?></span> <strong><?= e($g['brings_name']) ?></strong></p>
             <?php endif; ?>
             <p class="game-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></p>
+            <?php // Rules / manual link, right after the rules line it belongs with.
+                  // manual_link() returns null when the admin has the feature off, so
+                  // this disappears everywhere at once without touching stored data. ?>
+            <?php if (($mlink = manual_link($g)) !== null): ?>
+                <a class="btn btn-small game-manual" href="<?= e($mlink) ?>" target="_blank" rel="noopener noreferrer"
+                   title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
+            <?php endif; ?>
             <?php if (!empty($g['comment'])): ?>
                 <p class="game-comment"><?= nl2br(e($g['comment'])) ?></p>
             <?php endif; ?>

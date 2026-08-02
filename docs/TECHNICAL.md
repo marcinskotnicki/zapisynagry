@@ -440,6 +440,28 @@ the same commit (see §6, and `tests/test_elvish.php` for the pattern). Assets
 belong in `templates/<name>/img/` — prefer SVG, which diffs like code and stays
 crisp at any size.
 
+**Add a field that appears on a game card.** It is never one file. The rules /
+manual link touched: `database.sql` (a column on BOTH `games` and `poll_games`
+— a winning candidate becomes a game, so a field it lacks is lost at the moment
+it starts mattering), the option seed and `$OPTION_TOGGLES`, a helper in
+`inc/events.php`, four controllers (`add_game`, `edit_game`, `add_poll_game`,
+`add_poll`), two forms, **eight** `game_card.php` forks and **three**
+`poll_card.php` forks, plus both language files. Grep for an existing field with
+the same shape and follow it rather than inventing a parallel path — that
+feature mirrors `games.link` / `allow_custom_game_links` / `game_link_sanitize()`
+throughout, including reusing that sanitiser.
+
+**A user-supplied URL is validated twice.** `game_link_sanitize()` on the way
+in, so a `javascript:` or `data:` value never reaches the database, and the
+`manual_link()` / `game_link()` helper on the way out, so a row written by hand
+or by an older version still cannot emit one into an `href`. Render such links
+with `target="_blank" rel="noopener noreferrer"`.
+
+**When adding a column to an INSERT, count the placeholders.** Adding the column
+name without a matching `?` breaks every insert on that table, and PHP will not
+warn you — it fails at runtime. Both `add_poll.php` and `add_poll_game.php` were
+caught this way during the manual-link work.
+
 **Add a translation key.** Both files, same commit.
 
 ---

@@ -135,6 +135,17 @@
                 <span class="sc-cell sc-cell-wide sc-cell-rules rules-<?= rules_tone($g['explain_rules']) ?>">
                     <span class="sc-val"><?= e(explain_rules_label($g['explain_rules'])) ?></span>
                 </span>
+                <?php // Rules / manual link, as its own cell right after the rules
+                      // one so it joins the same run. manual_link() returns null
+                      // when the admin has the feature off, so it disappears
+                      // everywhere at once without touching stored data. ?>
+                <?php if (($mlink = manual_link($g)) !== null): ?>
+                    <a class="sc-cell sc-cell-manual game-manual" href="<?= e($mlink) ?>"
+                       target="_blank" rel="noopener noreferrer"
+                       title="<?= e(t('game_manual_title')) ?>">
+                        <span class="sc-val"><?= e(t('game_manual_btn')) ?></span>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <?php if (!empty($g['comment'])): ?>

@@ -341,6 +341,7 @@ $toggle = function($key) {
         $toggle('allow_user_language');         // accounts may pick a language (user panel)
         $toggle('allow_guest_language');        // guests may pick a language (topbar)
         $toggle('allow_custom_game_links');
+        $toggle('allow_manual_links');
         ?>
     </fieldset>
 

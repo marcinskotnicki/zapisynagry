@@ -62,6 +62,7 @@ function game_form_defaults($table, $day) {
         'bgg_id'         => '',
         'language'       => '',
         'link'           => '',     // manual games only: optional external URL
+        'manual_link'    => '',     // optional rules/manual URL (any game, BGG or not)
         'source'         => 'manual',
     ];
 }
@@ -96,6 +97,9 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'thumbnail'      => trim($_POST['thumbnail'] ?? ''),
         'language'       => trim($_POST['language'] ?? ''),
         'link'           => game_link_sanitize($_POST['link'] ?? ''),
+        // Same sanitiser as the custom link: forces http(s) and validates,
+        // so a javascript: or data: value can never reach an href.
+        'manual_link'    => game_link_sanitize($_POST['manual_link'] ?? ''),
     ];
     if (!is_valid_time($form['start_time'])) {
         // Bad/blank time -> fall back to the table's next slot rather than reject.
@@ -135,8 +139,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run(
                 'INSERT INTO games
                  (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-                  thumbnail,bgg_id,language,link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                  thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [
                     $table['id'], $event['id'], $day['id'], $form['name'],
                     $form['length_minutes'], $form['weight'], $form['max_players'], $form['start_time'],
@@ -144,6 +148,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     $form['bgg_id'] ?: null,
                     $form['language'] !== '' ? $form['language'] : null,
                     $form['link'] !== '' ? $form['link'] : null,
+                    $form['manual_link'] !== '' ? $form['manual_link'] : null,
                     $form['brings_name'] !== '' ? $form['brings_name'] : null,
                     $form['brings_email'] !== '' ? $form['brings_email'] : null,
                     $uid, $form['explain_rules'], $form['require_email'],

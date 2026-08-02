@@ -95,6 +95,13 @@
                 <div class="gc-band gc-row"><?= e(t('cl_version')) ?>: <strong><?= e($g['language']) ?></strong></div>
             <?php endif; ?>
             <div class="gc-band gc-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></div>
+            <?php // Rules / manual link, right after the rules line it belongs with.
+                  // manual_link() returns null when the admin has the feature off, so
+                  // this disappears everywhere at once without touching stored data. ?>
+            <?php if (($mlink = manual_link($g)) !== null): ?>
+                <a class="btn btn-small game-manual" href="<?= e($mlink) ?>" target="_blank" rel="noopener noreferrer"
+                   title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
+            <?php endif; ?>
 
             <?php if (!empty($g['comment'])): ?>
                 <div class="gc-band gc-comment"><?= e(t('cl_comment')) ?>:<br><?= nl2br(e($g['comment'])) ?></div>

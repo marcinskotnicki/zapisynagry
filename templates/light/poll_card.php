@@ -125,6 +125,14 @@ $canVote = !$readonly && can_signup();
                         <?php if (!empty($c['language'])): ?>
                             <span class="poll-opt-lang"><?= e($c['language']) ?></span>
                         <?php endif; ?>
+                        <?php // The candidate's own rules link, if it has one. Uses the
+                              // same helper as a game card, so the admin toggle governs
+                              // both in one place. ?>
+                        <?php if (($cmlink = manual_link($c)) !== null): ?>
+                            <a class="poll-opt-manual game-manual" href="<?= e($cmlink) ?>"
+                               target="_blank" rel="noopener noreferrer"
+                               title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
+                        <?php endif; ?>
                     </p>
                 </div>
                 <span class="poll-opt-votes"><?= e(t('poll_votes', (int)$c['votes'], (int)$c['required_players'])) ?></span>

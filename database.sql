@@ -77,6 +77,11 @@ INSERT INTO options (key, value) VALUES
     ('login_days',            '365'),  -- how long logins persist (days); 0 = browser session only
     ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
+    -- allow_manual_links: 1 = the person bringing a game may attach a rules /
+    -- manual URL (a PDF, a video) which shows as a button on the card. Off
+    -- turns the field and the button off everywhere; existing values are kept
+    -- in the database but never rendered, so it is reversible.
+    ('allow_manual_links',    '1'),
     ('site_icon',             ''),     -- '' = no site icon; otherwise a version stamp (files live in /icons)
     ('game_languages',        'PL
 EN
@@ -293,6 +298,7 @@ CREATE TABLE games (
     bgg_id           INTEGER,                     -- NULL if not from BGG
     language         TEXT,                        -- edition/language of the copy (e.g. 'PL'); free text
     link             TEXT,                        -- custom external URL for non-BGG games (BGG games link by bgg_id)
+    manual_link      TEXT,                        -- optional rules/manual URL (PDF, video) shown as a button on the card
     brings_name      TEXT,                        -- who brings the game (shown)
     brings_email     TEXT,                        -- stored, NEVER shown publicly
     brings_user_id   INTEGER,                     -- for "games brought" stats
@@ -446,6 +452,7 @@ CREATE TABLE poll_games (
     bgg_id           INTEGER,
     language         TEXT,                        -- edition/language of the copy (mirrors games.language)
     required_players INTEGER NOT NULL DEFAULT 1, -- votes >= this => option wins
+    manual_link      TEXT,                        -- mirrors games.manual_link
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE
 );

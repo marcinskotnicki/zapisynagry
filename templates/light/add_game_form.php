@@ -175,6 +175,19 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
         <?php endif; ?>
 
+        <?php // Rules / manual link. Unlike the custom link above this is offered
+              // for EVERY game, BGG or not: a BGG page tells you what the game is,
+              // it does not hand you a rules PDF or a how-to-play video, and the
+              // person bringing the copy is the one who has those. ?>
+        <?php if (opt_bool('allow_manual_links')): ?>
+            <div class="field">
+                <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
+                <input type="url" id="manual_link" name="manual_link"
+                       value="<?= e($game['manual_link'] ?? '') ?>" placeholder="https://">
+                <p class="field-note"><?= e(t('f_manual_link_hint')) ?></p>
+            </div>
+        <?php endif; ?>
+
         <?php // Custom link: manual games only (BGG games link via bgg_id) and only
               // while the admin allows it. Bare domains get https:// on save. ?>
         <?php if (!$isBgg && opt_bool('allow_custom_game_links')): ?>

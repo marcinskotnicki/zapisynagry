@@ -55,6 +55,15 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
                 <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
                 <input type="number" id="max_players" name="max_players" min="1" value="<?= e($cand['max_players']) ?>">
             </div>
+            <?php // Same rules/manual link a full game can carry, so a candidate
+                  // that wins the poll arrives with its rules already attached. ?>
+            <?php if (opt_bool('allow_manual_links')): ?>
+                <div class="field">
+                    <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
+                    <input type="url" id="manual_link" name="manual_link"
+                           value="<?= e($cand['manual_link'] ?? '') ?>" placeholder="https://">
+                </div>
+            <?php endif; ?>
             <div class="field">
                 <label for="required_players"><?= e(t('poll_required')) ?></label>
                 <input type="number" id="required_players" name="required_players" min="1" value="<?= e($cand['required_players']) ?>">

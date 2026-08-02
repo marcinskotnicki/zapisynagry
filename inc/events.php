@@ -395,6 +395,29 @@ function game_link_sanitize($raw) {
  * @param array $g  A games row.
  * @return string|null
  */
+/**
+ * The rules / manual URL attached to a game or poll candidate, or null.
+ *
+ * Separate from game_link(): that one points at the GAME (its BGG page or a
+ * custom page), this one points at how to PLAY it — a rules PDF, a how-to-play
+ * video. A game can legitimately have both, and they are different buttons.
+ *
+ * Gated on its own option so an admin can switch off user-supplied links
+ * without losing what is already stored — turning it back on restores the
+ * buttons. Re-validates the stored value on the way out rather than trusting
+ * the database: a row written before a sanitiser existed, or by hand, must not
+ * be able to emit a javascript: URL into an href.
+ *
+ * @param array $row  A games or poll_games row.
+ * @return string|null
+ */
+function manual_link($row) {
+    if (!opt_bool('allow_manual_links')) return null;
+    $raw = trim((string)($row['manual_link'] ?? ''));
+    if ($raw === '') return null;
+    return preg_match('#^https?://#i', $raw) ? $raw : null;
+}
+
 function game_link($g) {
     if (!empty($g['bgg_id'])) {
         return 'https://boardgamegeek.com/boardgame/' . (int)$g['bgg_id'];

@@ -107,6 +107,14 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
                         <span class="weight-badge weight-<?= weight_bucket($c['weight']) ?>"><?= e(number_format((float)$c['weight'], 1, ',', '')) ?></span>
                         <?php if ((int)$c['length_minutes'] > 0): ?><span class="sc-val"><?= (int)$c['length_minutes'] ?>&#8242;</span><?php endif; ?>
                         <span class="poll-opt-votes"><?= e(t('poll_votes', $votes, $need)) ?></span>
+                        <?php // The candidate's own rules link, if it has one. Uses the
+                              // same helper as a game card, so the admin toggle governs
+                              // both in one place. ?>
+                        <?php if (($cmlink = manual_link($c)) !== null): ?>
+                            <a class="poll-opt-manual game-manual" href="<?= e($cmlink) ?>"
+                               target="_blank" rel="noopener noreferrer"
+                               title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
+                        <?php endif; ?>
                     </p>
                     <?php // The gauge: a ruled bar with its own scale, the way a
                           // track on these boards carries tick marks. ?>
