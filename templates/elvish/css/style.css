@@ -88,6 +88,8 @@ body.tpl-elvish {
 }
 .tpl-elvish .content { max-width: var(--maxw); }
 
+.tpl-elvish .game-main{text-align:center;}
+
 /* ---- Lettering ------------------------------------------------------------
    Everything is the one family; the hierarchy comes from spacing and gilt.
    Small-caps + wide tracking is the Art Nouveau label voice. */

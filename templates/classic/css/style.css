@@ -282,6 +282,21 @@
     margin:0px auto;
 }
 
+.tpl-classic .btn-small.game-manual, .tpl-classic .btn-small.game-manual:hover{
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    background: #555;
+}
+.tpl-classic .btn-small.game-manual:hover{
+    filter: brightness(1.15);
+}
+
 @media (min-width: 701px) {
     .tpl-classic .game-list>article{
         width:550px;
