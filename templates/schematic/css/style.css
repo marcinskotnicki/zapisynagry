@@ -528,11 +528,12 @@ body.tpl-schematic {
 }
 .tpl-schematic .btn:hover { background: var(--ink); color: var(--paper-2); }
 .tpl-schematic .btn-primary {
-    background: var(--chan);
-    border-color: var(--chan);
+    background: var(--ink);
+    border-color: var(--ink);
     color: var(--paper-2);
 }
-.tpl-schematic .btn-primary:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tpl-schematic .btn-primary.add-game-btn, .tpl-schematic .add-table-form .btn-primary{background: var(--chan); border-color: var(--chan); color: #fff;}
+.tpl-schematic .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
 .tpl-schematic .btn-danger,
 .tpl-schematic .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
 .tpl-schematic .msg-icon { color: var(--chan); }

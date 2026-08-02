@@ -418,10 +418,11 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .btn:hover { background: var(--ink); color: var(--paper-2); }
 .tpl-schematic-compact .btn-primary {
-    background: var(--chan);
-    border-color: var(--chan);
+    background: var(--ink);
+    border-color: var(--ink);
     color: var(--paper-2);
 }
+.tpl-schematic-compact .btn-primary.add-game-btn, .tpl-schematic-compact .add-table-form .btn-primary{background: var(--chan); border-color: var(--chan); color: #fff;}
 .tpl-schematic-compact .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
 .tpl-schematic-compact .btn-danger,
 .tpl-schematic-compact .btn-danger:hover { background: #b03060; border-color: #b03060; color: #fff; }
@@ -615,6 +616,7 @@ body.tpl-schematic-compact {
 }
 
 .tpl-schematic-compact .table-name {
+
     color: var(--rule);
 }
 
