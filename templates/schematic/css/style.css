@@ -473,7 +473,7 @@ body.tpl-schematic {
 /* The seats band does NOT grow. It used to be flex:1, which stretched it
    across the card and shoved the signup button to the far right, away from the
    thing it acts on. */
-.tpl-schematic .sc-roster .sc-seats { flex: 0 1 auto; min-width: 0; margin-left: 9px; }
+.tpl-schematic .sc-roster .sc-seats { flex: 0 1 auto; min-width: 0; margin-left: 10px; }
 .tpl-schematic .sc-roster .sc-track { margin-bottom: 0; }
 .tpl-schematic .sc-roster .sc-signup { flex: 0 0 auto; margin-left: calc(9px + 0.5rem); }
 
@@ -500,7 +500,17 @@ body.tpl-schematic {
 
 /* The arrow off the readout, feeding into the band. It belongs to THIS box —
    drawn in the readout's own colour and attached to its edge — so it reads as
-   the square pointing, rather than as a separate notch cut in the band. */
+   the square pointing, rather than as a separate notch cut in the band.
+
+   OUTLINED, so the box's 1px rule carries on around the point instead of
+   stopping dead at a borderless triangle. A border cannot be applied to a
+   CSS triangle (the triangle IS a border), so it takes two stacked shapes:
+   ::before is one pixel larger in the rule colour, ::after sits on top in the
+   fill colour, and the sliver of ::before left showing along each slant is the
+   outline. ::after is also pulled one pixel left so it covers the box's own
+   right-hand border line — without that the outline reads as a straight rule
+   with a triangle stuck to it, rather than as one continuous shape. */
+.tpl-schematic .sc-count::before,
 .tpl-schematic .sc-count::after {
     content: "";
     position: absolute;
@@ -508,10 +518,20 @@ body.tpl-schematic {
     top: 50%;
     transform: translateY(-50%);
     width: 0; height: 0;
-    border: 9px solid transparent;
+    border-style: solid;
     border-right: 0;
-    border-left-color: var(--paper-2);
     z-index: 1;
+}
+.tpl-schematic .sc-count::before {
+    border-width: 10px;
+    border-right-width: 0;
+    border-left-color: var(--rule);
+}
+.tpl-schematic .sc-count::after {
+    margin-left: -1px;
+    border-width: 9px;
+    border-right-width: 0;
+    border-left-color: var(--paper-2);
 }
 
 /* ---- The seats band -------------------------------------------------------
@@ -523,7 +543,7 @@ body.tpl-schematic {
 .tpl-schematic .sc-seats {
     position: relative;
     background: var(--paper-3);
-    padding: 0.25rem 0.4rem;
+    padding: 0.45rem 0.75rem;
     /* NO BORDER. A border traces the element's own box, not its clip-path or a
        pseudo-element, so it drew straight lines across the diagonals instead of
        following them. The darker ground alone separates the band.
@@ -892,6 +912,7 @@ body.tpl-schematic {
     .tpl-schematic .sc-roster { flex-direction: column; align-items: stretch; }
     .tpl-schematic .sc-count { width: 100%; height: auto; padding-bottom: 0.5rem; }
     /* Stacked, the arrows would point sideways at nothing. */
+    .tpl-schematic .sc-count::before,
     .tpl-schematic .sc-count::after,
     .tpl-schematic .sc-seats::after { content: none; }
     .tpl-schematic .sc-roster .sc-seats { margin-left: 0; padding: 0.35rem 0.4rem; }
