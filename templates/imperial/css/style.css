@@ -434,6 +434,9 @@ body.tpl-imperial {
     text-transform: uppercase;
     border-radius: 0;
 }
+.tpl-imperial .btn.game-manual{
+    display:block;
+}
 .tpl-imperial .btn:hover { background: var(--iron); color: var(--vellum-lit); }
 .tpl-imperial .btn-primary {
     background: var(--imperial);
