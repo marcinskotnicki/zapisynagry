@@ -365,7 +365,7 @@ html { scroll-behavior: smooth; }
    wants something else can still restyle .tl-band. */
 .tl-bands { position: absolute; top: 0; bottom: 0.5rem; left: var(--tl-pad); right: var(--tl-pad); z-index: 0; }
 .tl-band  { position: absolute; top: 0; bottom: 0; }
-.tl-band:nth-child(odd) { background: rgba(0, 0, 0, 0.045); }
+.tl-band:nth-child(odd) { background: rgba(0, 0, 0, 0.065); }
 
 /* The content sits above the stripes. .tl-table-no is otherwise static, and a
    static box with a background paints BELOW positioned siblings — so without
