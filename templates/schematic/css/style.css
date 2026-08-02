@@ -528,6 +528,7 @@ body.tpl-schematic {
     border-left-color: var(--rule);
 }
 .tpl-schematic .sc-count::after {
+    border-color: transparent;
     margin-left: -1px;
     border-width: 9px;
     border-right-width: 0;
