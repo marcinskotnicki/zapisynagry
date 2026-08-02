@@ -418,8 +418,8 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .btn:hover { background: var(--ink); color: var(--paper-2); }
 .tpl-schematic-compact .btn-primary {
-    background: var(--ink);
-    border-color: var(--ink);
+    background: var(--chan);
+    border-color: var(--chan);
     color: var(--paper-2);
 }
 .tpl-schematic-compact .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: #fff; }
