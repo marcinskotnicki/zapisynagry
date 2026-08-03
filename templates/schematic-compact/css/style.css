@@ -37,15 +37,10 @@
 
 body.tpl-schematic-compact {
     background-color: var(--board);
-    /*background-image: url(../img/rosette.svg), url(../img/grid.svg), radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);*/
     background-image: url(../img/grid.svg), radial-gradient(ellipse at 50% 0%, rgba(143, 160, 179, .10), transparent 60%);
-    /*background-repeat: no-repeat, repeat, no-repeat;*/
     background-repeat:  repeat, no-repeat;
-    /*background-size: 1220px 1220px, 160px 160px, 100% 100%;*/
     background-size: 160px 160px, 100% 100%;
-    /*background-position: left -500px top -400px, top left, top center;*/
     background-position: top left, top center;
-    /*background-attachment: fixed, fixed, fixed;*/
     background-attachment: fixed, fixed;
     color: var(--paper);
     font-family: var(--font-sc);
