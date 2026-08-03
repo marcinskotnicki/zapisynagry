@@ -650,8 +650,8 @@ body.tpl-schematic-compact {
     .tpl-schematic-compact .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 
     body.tpl-schematic-compact {
-        background-size: 620px 620px, 160px 160px, 100% 100%;
-        background-position: left -160px top -140px, top left, top center;
+        background-size:  160px 160px, 100% 100%;
+        background-position:  top left, top center;
     }
 }
 
