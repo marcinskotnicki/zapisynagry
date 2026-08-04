@@ -12,6 +12,7 @@
         initDoubleSubmitGuard();
         initChat();
         initNavBurger();
+        initTabScroll();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -449,6 +450,37 @@
                 burger.setAttribute('aria-expanded', 'false');
             }
         });
+    }
+
+    // 10. Scroll affordance for the tab strips (day tabs, event tabs).
+    // CSS cannot ask whether an element overflows, so the arrows are toggled
+    // from here — they appear only when there is really something to scroll to,
+    // and each one hides again once that end is reached.
+    function initTabScroll() {
+        var wraps = document.querySelectorAll('.tab-scroll');
+        if (!wraps.length) return;
+
+        for (var i = 0; i < wraps.length; i++) {
+            (function (wrap) {
+                var strip = wrap.querySelector('.day-tabs, .event-tabs');
+                if (!strip) return;
+
+                function sync() {
+                    // A 2px tolerance: fractional layout widths mean scrollLeft
+                    // rarely lands exactly on the maximum, which would otherwise
+                    // leave the right arrow lit at the very end.
+                    var max = strip.scrollWidth - strip.clientWidth;
+                    wrap.classList.toggle('can-scroll-left', strip.scrollLeft > 2);
+                    wrap.classList.toggle('can-scroll-right', strip.scrollLeft < max - 2);
+                }
+
+                strip.addEventListener('scroll', sync);
+                // The day tabs WRAP on desktop and only scroll on mobile, so the
+                // answer changes with the viewport, not just with the content.
+                window.addEventListener('resize', sync);
+                sync();
+            })(wraps[i]);
+        }
     }
 
 })();

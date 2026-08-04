@@ -831,3 +831,45 @@ body.chat-open .chat-toggle-close { display: inline; }
     /* The preference selects join the panel rather than crowding the bar. */
     .topbar-prefs { order: 4; flex: 1 0 100%; margin: 0.4rem 0 0; }
 }
+
+/* ---- Scroll affordance for the tab strips ----------------------------------
+ * Both the day tabs and the event tabs can overflow sideways. Without a cue
+ * there is nothing telling anyone the row continues past the edge — especially
+ * on a phone, where there is no scrollbar to notice.
+ *
+ * The arrows are on the WRAPPER, not the scroller: the <nav> is the scrolling
+ * box, so anything positioned inside it scrolls away with the tabs it is meant
+ * to point past.
+ *
+ * The classes come from JS (initTabScroll), because CSS cannot ask whether an
+ * element overflows — so the cue appears ONLY when there is really something to
+ * scroll to, and disappears again at each end.
+ * -------------------------------------------------------------------------- */
+.tab-scroll { position: relative; }
+.tab-scroll::before,
+.tab-scroll::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.2rem;
+    pointer-events: none;   /* never swallow a tap meant for a tab underneath */
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    /* A fade plus a chevron: the gradient says "more content", the arrow says
+       which way. currentColor keeps both legible on every theme without any
+       theme needing its own rule. */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.6rem 0.6rem;
+}
+.tab-scroll::after {
+    right: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
+}
+.tab-scroll::before {
+    left: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 5l-7 7 7 7'/%3E%3C/svg%3E");
+}
+.tab-scroll.can-scroll-right::after,
+.tab-scroll.can-scroll-left::before { opacity: 1; }

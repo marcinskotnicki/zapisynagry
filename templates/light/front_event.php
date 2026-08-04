@@ -55,6 +55,7 @@ if ($tokenQS === '' && public_archives_enabled()
           // .event-tabs / .event-tab stay ALONGSIDE them, carrying only what
           // differs: horizontal scrolling instead of wrapping, since there can
           // be many more events than days. ?>
+    <div class="tab-scroll">
     <nav class="day-tabs event-tabs" aria-label="<?= e(t('event_switch')) ?>">
         <?php foreach ($event_tabs as $et): ?>
             <?php $isHere = (int)$et['id'] === (int)$event['id']; ?>
@@ -69,6 +70,7 @@ if ($tokenQS === '' && public_archives_enabled()
             </a>
         <?php endforeach; ?>
     </nav>
+    </div>
 <?php endif; ?>
 <div class="event-header">
     <h1><?= e($event['name']) ?></h1>
@@ -86,6 +88,10 @@ if ($tokenQS === '' && public_archives_enabled()
 </div>
 
 <?php if ((int)$num_days > 1): // multi-day events get a tab per day ?>
+    <?php // Wrapper exists ONLY so the scroll arrow has something to anchor to:
+          // the <nav> itself is the scrolling box, so anything positioned
+          // inside it scrolls away with the tabs. See initTabScroll(). ?>
+    <div class="tab-scroll">
     <nav class="day-tabs">
         <?php foreach ($days as $d): ?>
             <?php $i = (int)$d['day_index']; // 1-based day index, used for the active class + link ?>
@@ -99,6 +105,7 @@ if ($tokenQS === '' && public_archives_enabled()
             </a>
         <?php endforeach; ?>
     </nav>
+    </div>
 <?php endif; ?>
 
 <div class="tables">
