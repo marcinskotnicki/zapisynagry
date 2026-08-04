@@ -21,6 +21,7 @@ body {
     color: var(--text);
     font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
     line-height: 1.5;
+    overflow-x:hidden;
 }
 
 a { color: var(--primary); text-decoration: none; }
