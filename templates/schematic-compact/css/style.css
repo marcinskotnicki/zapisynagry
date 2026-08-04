@@ -165,15 +165,10 @@ body.tpl-schematic-compact {
         width: 1px;
         background: rgba(185, 178, 161, .45);
     }
-    .tpl-schematic-compact .sc-strip{
-        width: calc(50% - 0.44rem);
+
     }
-    .tpl-schematic-compact .sc-strip:only-child{
-        width: 100%
-    }
-    .tpl-schematic-compact .sc-strip:nth-child(even):before,.tpl-schematic-compact .sc-strip:nth-child(even):after{
-        display:none;
-    }
+
+
     .tpl-schematic-compact .sc-actions{flex-basis:auto;}
 
     .tpl-schematic-compact .game-list > .sc-strip::before {
@@ -197,6 +192,18 @@ body.tpl-schematic-compact {
         width: 23px;
         height: 1px;
         background: rgba(185, 178, 161, .55);
+    }
+}
+
+@media (min-width: 901px) {
+    .tpl-schematic-compact .sc-strip{
+        width: calc(50% - 0.44rem);
+    }
+    .tpl-schematic-compact .sc-strip:only-child{
+        width: 100%
+    }
+    .tpl-schematic-compact .sc-strip:nth-child(even):before,.tpl-schematic-compact .sc-strip:nth-child(even):after{
+        display:none;
     }
 }
 
@@ -260,7 +267,7 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .game-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--chan); }
 .tpl-schematic-compact .game-name a:hover { color: var(--chan); }
-.tpl-schematic-compact .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 0 auto; }
+.tpl-schematic-compact .sc-actions { display: inline-flex; gap: 0.25rem; flex: 0 1 auto; }
 .tpl-schematic-compact .sc-note { color: var(--ink-2); margin: 0.3rem 0; }
 
 .tpl-schematic-compact .sc-cells {
