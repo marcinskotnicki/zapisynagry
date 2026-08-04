@@ -804,6 +804,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     .cal-ev { font-size: 0.65rem; padding: 0.05rem 0.15rem; }
     .cal th { font-size: 0.65rem; }
     .cal-title { min-width: 0; font-size: 1rem; }
+    .game-card{flex-direction:column;}
 }
 
 /* ---- Mobile navigation (hamburger) -----------------------------------------
