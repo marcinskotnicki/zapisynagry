@@ -630,6 +630,12 @@ pair; state both together. There is now a test that COMPUTES the contrast for
 every theme rather than trusting a visual check, since three themes were wrong
 at once and only two were noticed.
 
+**A `@media` query adds NO specificity.** An override placed in an earlier
+media block loses to a later base rule of equal specificity and silently does
+nothing — the mobile event-tab font size was written that way and never
+applied. Put responsive overrides AFTER the rule they override, or give them
+more specificity.
+
 **Add a translation key.** Both files, same commit.
 
 ---

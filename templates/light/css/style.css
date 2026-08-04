@@ -639,7 +639,17 @@ body.chat-open .chat-toggle-close { display: inline; }
 /* Must not shrink, or flex squeezes the tabs to fit instead of overflowing —
  * the same trap the day tabs hit on mobile. */
 .event-tab { flex: 0 0 auto; }
-.event-tab-name { white-space: nowrap; }
+/* Smaller than the DATE beneath it, deliberately inverting the usual
+   name-over-detail hierarchy: on a switcher the date is what someone is
+   actually picking by. The name inherits .day-tab's 1.05rem otherwise, which
+   made it the loudest thing on the strip. */
+.event-tab-name { white-space: nowrap; font-size: 0.78rem; }
+/* Must sit AFTER the base rule above, not in the earlier mobile block: a media
+   query adds no specificity, so an override placed higher in the file just
+   loses to it and silently does nothing. */
+@media (max-width: 700px) {
+    .event-tab-name { font-size: 0.72rem; }   /* stays under the date's 0.80 */
+}
 .event-tabs .day-tab-date { white-space: nowrap; }
 
 .pager { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; }
@@ -754,4 +764,70 @@ body.chat-open .chat-toggle-close { display: inline; }
     .cal-ev { font-size: 0.65rem; padding: 0.05rem 0.15rem; }
     .cal th { font-size: 0.65rem; }
     .cal-title { min-width: 0; font-size: 1rem; }
+}
+
+/* ---- Mobile navigation (hamburger) -----------------------------------------
+ * Desktop is unchanged: the burger is hidden and .topnav is the same inline row
+ * it always was. Only below the breakpoint does the nav collapse into a panel.
+ * -------------------------------------------------------------------------- */
+.nav-burger { display: none; }
+
+@media (max-width: 700px) {
+    .nav-burger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 34px;
+        padding: 0;
+        cursor: pointer;
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        /* Ordered after the nav so it sits on the RIGHT of the bar, where a
+           thumb reaches, while the nav panel it opens drops below everything. */
+        order: 2;
+    }
+    /* The three bars, drawn from one element: the middle is the box itself and
+       the outer two are its before/after, so there is no extra markup. */
+    .nav-burger-bars,
+    .nav-burger-bars::before,
+    .nav-burger-bars::after {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: currentColor;
+        border-radius: 2px;
+    }
+    .nav-burger-bars { position: relative; }
+    .nav-burger-bars::before,
+    .nav-burger-bars::after { content: ""; position: absolute; left: 0; }
+    .nav-burger-bars::before { top: -6px; }
+    .nav-burger-bars::after  { top: 6px; }
+
+    /* The panel. Full width on its own row, so the links get real tap targets
+       instead of being squeezed alongside the brand. */
+    .topbar-inner { flex-wrap: wrap; }
+    .topnav {
+        display: none;
+        order: 3;
+        flex: 1 0 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        margin-top: 0.4rem;
+        border-top: 1px solid var(--border);
+    }
+    .topnav.is-open { display: flex; }
+    .topnav a {
+        padding: 0.6rem 0.2rem;
+        border-bottom: 1px solid var(--border);
+    }
+    /* Icon-only mode would give a column of bare glyphs with no labels here,
+       which is unreadable as a menu — show the icon inline and let the text
+       carry the meaning. */
+    .topnav a.nav-icononly { text-align: left; }
+    /* The preference selects join the panel rather than crowding the bar. */
+    .topbar-prefs { order: 4; flex: 1 0 100%; margin: 0.4rem 0 0; }
 }

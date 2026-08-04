@@ -11,6 +11,7 @@
         initBggSearchGuard();
         initDoubleSubmitGuard();
         initChat();
+        initNavBurger();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -415,6 +416,39 @@
                     })['catch'](function () { showError(fmt(L.chatFailed, '')); });
             });
         }
+    }
+
+    // 9. Mobile nav toggle. The panel is plain CSS below the breakpoint; this
+    // only flips the class and keeps aria-expanded honest.
+    function initNavBurger() {
+        var burger = document.getElementById('nav-burger');
+        var nav    = document.getElementById('topnav');
+        if (!burger || !nav) return;
+
+        burger.addEventListener('click', function () {
+            var open = nav.classList.toggle('is-open');
+            burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        // Close on Escape: a panel that covers the page needs a way out that
+        // isn't hunting for the button again.
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'Escape') return;
+            if (!nav.classList.contains('is-open')) return;
+            nav.classList.remove('is-open');
+            burger.setAttribute('aria-expanded', 'false');
+            burger.focus();
+        });
+
+        // Resizing past the breakpoint leaves the class set but the panel
+        // styled as a normal inline row; clearing it keeps aria-expanded from
+        // claiming "open" for a menu that no longer exists.
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 700 && nav.classList.contains('is-open')) {
+                nav.classList.remove('is-open');
+                burger.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 
 })();

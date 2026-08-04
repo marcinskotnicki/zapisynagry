@@ -151,7 +151,20 @@ $hdrLangPick = function_exists('switcher_visible')
         <?php else: ?>
             <span class="brand-spacer"></span>
         <?php endif; ?>
-        <nav class="topnav"><?= $topnav ?></nav>
+        <?php // Hamburger. Only shown on narrow screens (CSS), and only when
+              // there is actually a nav to toggle — with no links it would be a
+              // button that opens nothing. Rendered as a real <button> with
+              // aria-expanded so it announces its state; the panel it controls
+              // is the same <nav>, which stays in the DOM either way so nothing
+              // depends on JS having run. ?>
+        <?php if ($topnav !== ''): ?>
+            <button type="button" class="nav-burger" id="nav-burger"
+                    aria-expanded="false" aria-controls="topnav"
+                    aria-label="<?= e(t('nav_menu')) ?>" title="<?= e(t('nav_menu')) ?>">
+                <span class="nav-burger-bars" aria-hidden="true"></span>
+            </button>
+        <?php endif; ?>
+        <nav class="topnav" id="topnav"><?= $topnav ?></nav>
         <?php if ($hdrTplPick || $hdrLangPick): ?>
             <form class="topbar-prefs" method="post" action="prefs.php">
                 <?= csrf_field() ?>

@@ -251,6 +251,7 @@ return [
     'weekday_short_3' => 'śr', 'weekday_short_4' => 'cz', 'weekday_short_5' => 'pt',
     'weekday_short_6' => 'sb',
     'calendar_title'      => 'Kalendarz',
+    'nav_menu'            => 'Menu',
     'calendar_nav'        => 'Zmień miesiąc',
     'calendar_prev_year'  => 'Poprzedni rok',
     'calendar_prev_month' => 'Poprzedni miesiąc',

@@ -259,6 +259,7 @@ return [
     'weekday_short_3' => 'Wed', 'weekday_short_4' => 'Thu', 'weekday_short_5' => 'Fri',
     'weekday_short_6' => 'Sat',
     'calendar_title'      => 'Calendar',
+    'nav_menu'            => 'Menu',
     'calendar_nav'        => 'Change month',
     'calendar_prev_year'  => 'Previous year',
     'calendar_prev_month' => 'Previous month',
