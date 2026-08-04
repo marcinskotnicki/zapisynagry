@@ -28,7 +28,9 @@
 @media (max-width: 860px) {
     .tpl-dark .game-list { grid-template-columns: 1fr; }
 }
-
+@media (max-width: 700px) {
+   .game-thumb img {width:65%;}
+}
 .tpl-dark .game-name a { color: var(--text); }
 
 .tpl-dark .game-card.active, .tpl-dark .poll-card.active { box-shadow: 0 0 0 3px rgba(224, 82, 72, 0.4); }
