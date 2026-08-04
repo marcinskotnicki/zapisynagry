@@ -206,6 +206,7 @@
 .tpl-classic .gc-players .msg-icon { color: var(--gc-red); }
 
 .tpl-classic .content     { max-width: none; width:100%;}
+.tpl-classic .content .admin    { max-width: 1200px; margin:0px auto; }
 .tpl-classic .topbar-inner { max-width: none; }
 
 .tpl-classic .gc-rules.rules-good { color: var(--gc-green); }
