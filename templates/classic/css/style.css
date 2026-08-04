@@ -209,6 +209,7 @@
 .tpl-classic .content .admin    { max-width: 1200px; margin:0px auto; }
 .tpl-classic .topbar-inner { max-width: none; }
 
+
 .tpl-classic .gc-rules.rules-good { color: var(--gc-green); }
 .tpl-classic .gc-rules.rules-mid  { color: #e0c341; }
 .tpl-classic .gc-rules.rules-bad  { color: #ff6b5e; }
