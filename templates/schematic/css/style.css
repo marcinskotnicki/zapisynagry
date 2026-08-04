@@ -54,7 +54,7 @@ body.tpl-schematic {
 .tpl-schematic .admin .tab {
     color: var(--paper)
 }
-.tpl-schematic .admin .tab-active {
+.tpl-schematic .admin .tab-active, .tpl-schematic .admin .tab:hover {
     color: var(--text);
 }
 .tpl-schematic .content { max-width: var(--maxw); }
