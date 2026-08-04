@@ -136,7 +136,8 @@ function events_upcoming() {
                 (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
                 (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
            FROM events e
-          WHERE (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) >= ?
+          WHERE e.is_archived = 0
+            AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) >= ?
           ORDER BY date_from ASC, e.id ASC", [$cutoff]);
 }
 

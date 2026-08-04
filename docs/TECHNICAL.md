@@ -609,6 +609,18 @@ knowing when writing fixtures: a test that moved a game onto a table and then
 deleted that table destroyed the game too, and took the rest of the suite's
 data with it. Move rows off a table before removing it.
 
+**`hidden` loses to any author `display` rule.** The attribute is only a
+User-Agent default of `display: none`, so an element styled `display: flex`
+ignores it entirely. The chat panel shipped permanently open for exactly this
+reason — the JS was toggling the attribute correctly the whole time. Any
+element that carries `hidden` AND has its own `display` needs an explicit
+`[hidden] { display: none; }` companion rule.
+
+**`overflow-x: auto` turns on the OTHER axis too.** Per spec, when one axis is
+set to anything but `visible`, the other computes `visible` to `auto` — so a
+horizontally-scrolling strip silently grows a vertical scrollbar the moment its
+content is a pixel too tall. Pair it with `overflow-y: hidden`.
+
 **Add a translation key.** Both files, same commit.
 
 ---

@@ -546,6 +546,13 @@ body.chat-open .chat-toggle-close { display: inline; }
     border-right: 1px solid var(--border);
     box-shadow: 2px 0 14px rgba(0, 0, 0, .35);
 }
+/* MUST come after the rule above. `hidden` is only a User-Agent default of
+   `display: none`, so ANY author `display` declaration beats it — the panel
+   above sets `display: flex`, which meant the chat was permanently open and
+   the close button appeared to do nothing (the JS was correctly toggling the
+   attribute; the CSS was ignoring it). Specificity (0,2,0) vs (0,1,0), so no
+   !important needed. */
+.chat-panel[hidden] { display: none; }
 .chat-head { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
 .chat-title { margin: 0; font-size: 1rem; }
 
@@ -611,6 +618,12 @@ body.chat-open .chat-toggle-close { display: inline; }
 .event-tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
+    /* Required, not belt-and-braces: per spec, when one axis is set to a value
+       other than `visible` the OTHER axis computes `visible` to `auto` — so
+       `overflow-x: auto` alone silently makes overflow-y `auto` too, and any
+       tab a pixel taller than the strip produces a vertical scrollbar. Some
+       themes give their day tabs enough padding to trigger exactly that. */
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
 }
 /* Must not shrink, or flex squeezes the tabs to fit instead of overflowing —
