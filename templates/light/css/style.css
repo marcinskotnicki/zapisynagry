@@ -485,6 +485,12 @@ html { scroll-behavior: smooth; }
     .day-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
+        /* Same pin as .event-tabs: setting one axis to a value other than
+           `visible` makes the OTHER compute `visible` to `auto`, so overflow-x
+           alone silently allows a vertical scrollbar the moment a tab is a
+           pixel taller than the row. Not currently visible anywhere, but these
+           two strips behave alike and a theme's padding could trigger it. */
+        overflow-y: hidden;
         justify-content: flex-start;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
@@ -495,9 +501,6 @@ html { scroll-behavior: smooth; }
     .poll-option > .btn,
     .poll-option > form.inline { flex: 1 0 100%; margin-top: 0.1rem; }
     .poll-option > form.inline .btn { width: 100%; }
-
-    .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
-    .topbar-prefs { margin-left: 0; }
 
     .brand-logo img { max-height: 40px; width: auto; max-width: 70px; }
 }
@@ -785,9 +788,6 @@ body.chat-open .chat-toggle-close { display: inline; }
         border: 1px solid var(--border);
         border-radius: var(--radius);
         color: var(--text);
-        /* Ordered after the nav so it sits on the RIGHT of the bar, where a
-           thumb reaches, while the nav panel it opens drops below everything. */
-        order: 2;
     }
     /* The three bars, drawn from one element: the middle is the box itself and
        the outer two are its before/after, so there is no extra markup. */
@@ -808,10 +808,39 @@ body.chat-open .chat-toggle-close { display: inline; }
 
     /* The panel. Full width on its own row, so the links get real tap targets
        instead of being squeezed alongside the brand. */
-    .topbar-inner { flex-wrap: wrap; }
+    /* The bar itself stays a single line: brand, switchers, burger. Wrapping
+       is still ENABLED because the nav panel below needs to drop onto its own
+       row when open — so the three inline items are made shrinkable instead,
+       which is what actually keeps them from wrapping. */
+    .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
+
+    /* Brand shrinks rather than shoving the switchers onto a second row.
+       min-width:0 is the part that matters: a flex item will not shrink below
+       its content's intrinsic width without it, whatever flex-shrink says. */
+    .brand, .brand-logo { order: 1; flex: 0 1 auto; min-width: 0; overflow: hidden; }
+    .brand { text-overflow: ellipsis; white-space: nowrap; }
+    .brand-spacer { order: 1; flex: 0 1 auto; }
+
+    /* Switchers sit inline next to the brand, and wrap INTERNALLY (two selects
+       stacking) before the header row itself gives way. */
+    .topbar-prefs {
+        order: 2;
+        flex: 0 1 auto;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0 0 0 auto;
+        row-gap: 0.25rem;
+    }
+    .topbar-prefs select { min-width: 0; max-width: 8rem; }
+
+    /* The burger never shrinks — it is the control that reveals everything
+       else, so it must stay a full tap target at any width. */
+    .nav-burger { order: 3; flex: 0 0 auto; margin-left: 0.4rem; }
+
     .topnav {
         display: none;
-        order: 3;
+        order: 4;
         flex: 1 0 100%;
         flex-direction: column;
         align-items: stretch;
@@ -828,8 +857,7 @@ body.chat-open .chat-toggle-close { display: inline; }
        which is unreadable as a menu — show the icon inline and let the text
        carry the meaning. */
     .topnav a.nav-icononly { text-align: left; }
-    /* The preference selects join the panel rather than crowding the bar. */
-    .topbar-prefs { order: 4; flex: 1 0 100%; margin: 0.4rem 0 0; }
+
 }
 
 /* ---- Scroll affordance for the tab strips ----------------------------------

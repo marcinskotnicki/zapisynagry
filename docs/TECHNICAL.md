@@ -636,6 +636,11 @@ nothing — the mobile event-tab font size was written that way and never
 applied. Put responsive overrides AFTER the rule they override, or give them
 more specificity.
 
+**`flex-shrink` alone does not shrink a flex item.** An item will not go below
+its content's intrinsic width without `min-width: 0` — so a long venue name kept
+shoving the header switchers onto a second row despite `flex: 0 1 auto`. Pair
+the two whenever something must give way.
+
 **Add a translation key.** Both files, same commit.
 
 ---
