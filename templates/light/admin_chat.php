@@ -16,7 +16,7 @@
 <?php else: ?>
     <p class="muted"><?= e(t('chat_admin_count', $total)) ?></p>
 
-    <table class="table">
+    <table class="grid">
         <thead>
             <tr>
                 <th><?= e(t('chat_admin_when')) ?></th>
@@ -28,7 +28,13 @@
         <tbody>
             <?php foreach ($messages as $m): ?>
                 <tr>
-                    <td class="chat-admin-when"><?= e(chat_format_time($m['created_at'])) ?></td>
+                    <?php // Date bold, time light: at a glance the eye needs to group
+                          // by day first, and "05.08 00:13" read as one blur. ?>
+                    <?php $when = chat_time_parts($m['created_at']); ?>
+                    <td class="chat-admin-when">
+                        <strong class="chat-when-date"><?= e($when['date']) ?></strong>
+                        <span class="chat-when-time"><?= e($when['time']) ?></span>
+                    </td>
                     <td>
                         <?= e($m['name']) ?>
                         <?php // The role is frozen at post time, so an old line keeps the

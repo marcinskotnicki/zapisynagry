@@ -404,6 +404,10 @@
         function coolOff() {
             var ms = window.APP_CHAT.sendDelay;
             if (!sendBtn || !ms) return;
+            // Drive the CSS countdown from the admin's actual setting, so the
+            // bar finishes exactly when the button comes back rather than at
+            // some fixed guess.
+            sendBtn.style.setProperty('--chat-cooloff', (ms / 1000) + 's');
             sendBtn.disabled = true;
             if (coolTimer) window.clearTimeout(coolTimer);
             coolTimer = window.setTimeout(function () {

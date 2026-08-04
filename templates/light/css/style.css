@@ -521,8 +521,6 @@ body.chat-open .chat-toggle-close { display: inline; }
     box-shadow: 2px 0 14px rgba(0, 0, 0, .35);
 }
 
-
-
 .chat-panel {
     transform: translateX(-100%);
     visibility: hidden;
@@ -536,9 +534,6 @@ body.chat-open .chat-toggle-close { display: inline; }
 
 .chat-toggle { transition: left 0.22s ease; }
 
-@media (prefers-reduced-motion: reduce) {
-    .chat-panel, .chat-panel.is-open, .chat-toggle { transition: none; }
-}
 .chat-head { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
 .chat-title { margin: 0; font-size: 1rem; }
 
@@ -568,7 +563,42 @@ body.chat-open .chat-toggle-close { display: inline; }
 .chat-name { width: 100%; box-sizing: border-box; }
 .chat-send-row { display: flex; gap: 0.4rem; }
 .chat-input { flex: 1 1 auto; min-width: 0; }
-.chat-send { flex: 0 0 auto; }
+.chat-send { flex: 0 0 auto; position: relative; overflow: hidden; }
+.chat-send[disabled] { opacity: 1; filter: none; }
+.chat-send[disabled]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.85;
+    transform-origin: left center;
+    animation: chat-cooloff var(--chat-cooloff, 2s) linear forwards;
+}
+@keyframes chat-cooloff { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+.chat-admin-when { white-space: nowrap; }
+.chat-when-date { display: inline-block; margin-right: 0.35rem; }
+.chat-when-time { color: var(--text-muted); }
+.chat-admin-badge {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.02rem 0.3rem;
+    margin-left: 0.3rem;
+}
+.chat-admin-purge { margin-top: 1.2rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-panel, .chat-panel.is-open, .chat-toggle { transition: none; }
+
+    .chat-send[disabled]::after { animation: none; opacity: 0.4; }
+}
 .chat-error { margin: 0; color: var(--error); font-size: 0.82rem; }
 
 .event-tabs {

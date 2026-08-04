@@ -282,6 +282,37 @@ function chat_row_public($row) {
 }
 
 /**
+ * The same instant split into its date and time halves, for places that want to
+ * style them differently. Shares chat_local_time() with chat_format_time() so
+ * the two can never disagree about the timezone.
+ *
+ * @param string $utc
+ * @return array ['date' => 'dd.mm', 'time' => 'HH:MM']
+ */
+function chat_time_parts($utc) {
+    $dt = chat_local_time($utc);
+    if ($dt === null) return ['date' => (string)$utc, 'time' => ''];
+    return ['date' => $dt->format('d.m'), 'time' => $dt->format('H:i')];
+}
+
+/**
+ * created_at (UTC) as a DateTime in the venue's configured timezone, or null
+ * if it cannot be parsed.
+ *
+ * @param string $utc
+ * @return DateTime|null
+ */
+function chat_local_time($utc) {
+    try {
+        $dt = new DateTime((string)$utc, new DateTimeZone('UTC'));
+        $dt->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        return $dt;
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
+/**
  * created_at is stored UTC (SQLite datetime('now')); show it in the event's
  * configured timezone, which is what every other timestamp in the app does.
  *
@@ -289,11 +320,6 @@ function chat_row_public($row) {
  * @return string
  */
 function chat_format_time($utc) {
-    try {
-        $dt = new DateTime((string)$utc, new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone(date_default_timezone_get()));
-        return $dt->format('d.m H:i');
-    } catch (Throwable $e) {
-        return (string)$utc;
-    }
+    $dt = chat_local_time($utc);
+    return $dt === null ? (string)$utc : $dt->format('d.m H:i');
 }
