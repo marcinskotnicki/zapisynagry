@@ -522,6 +522,93 @@ thumbnail shipped in the repo actually work. It validates each file with
 game card is worse than a missing sample), skips anything already registered,
 and is non-fatal — a usable install without its sample images beats no install.
 
+**The chat is the app's only JSON endpoint, and its only untrusted-HTML risk.**
+Two rules hold it together. Every exit path in `chat.php` goes through
+`chat_json()` — a client mid-poll that receives an HTML error page can report
+nothing useful. And `renderMessage()` in scripts.js builds each line with
+`createElement`/`textContent` and never touches `innerHTML`, because every
+message is visitor input; the server sends messages as raw text and does not
+pre-escape them, so the escaping happens exactly once, at the point of
+rendering. There is a test asserting `innerHTML` never appears in the chat
+client.
+
+Chat messages are also reduced to plain text on the way IN, by
+`chat_plain_text()` — deliberately not `strip_tags()`, which scans from a "<"
+to the next ">" and drops everything between, turning "I <3 board games" into
+"I " and "unclosed <tag" into "unclosed". Eating the rest of someone's sentence
+because they typed a less-than sign is a worse bug than the markup it removes.
+Stripping runs BEFORE validation so a message made only of tags is refused as
+empty rather than stored blank, and the length limit is measured on what
+survives.
+
+`fetch` is deliberately NOT CSRF-checked while `post` is: CSRF protects against
+a third party causing a state CHANGE, a read of already-public messages is not
+one, and requiring a token would break the poll the moment a session expired.
+
+**Trimming is chunked, and the direction of the error matters.** `chat_trim()`
+does nothing until the log is a full chunk (10) OVER the cap, then deletes down
+to it — one DELETE per ~10 posts instead of one on every post once full. The log
+therefore sits between max and max+9. Overshooting slightly is the right error;
+trimming a chunk BELOW the cap would store less than the admin configured. Every
+chat option is clamped again at READ time (`inc/chat.php`), not only on save, so
+a value written straight into the options table cannot empty the log or turn
+every open panel into a request loop.
+
+**`public_archives` changes an INVARIANT, not just a view.** With it on,
+creating an event no longer archives the previous one, so the app can hold
+SEVERAL non-archived events at once — something it never did before.
+`current_event()` already tolerated that ("if several somehow exist we take the
+newest"), which is why the change is safe; that comment describes a real case
+now rather than a hypothetical one. It ships OFF so an upgrade changes nothing.
+
+**`current_event()` means two different things depending on the flag.** Feature
+off: the newest live event by id, as always (at most one exists). Feature on:
+the SOONEST still-open event by its first day — a club publishing three months
+of dates at once cares about the next session, not the one typed most recently,
+and those clubs do not necessarily enter dates in order. Events with no days
+sort LAST (SQLite would put NULLs first), so a draft cannot hijack the front
+page. The honest limit: "earliest still open" only equals "next upcoming" while
+finished events actually get archived — a club that never archives will keep
+seeing a past event, which is what `auto_archive_days` is for.
+
+**Three ways to reach an event, and they do not mean the same thing.**
+`?event=<id>` renders it with editability following the event's OWN
+`is_archived` flag — that is the point of the feature, a past event that was
+never archived stays open. `?e=<token>` is ALWAYS read-only regardless of that
+flag: the token is handed out so someone can look without an account, and must
+not silently become an edit link if an admin later reopens the event. No
+parameter means the current event, as before. Anything building an in-page link
+must carry the identifier forward (`$tokenQS` in front_event.php) or changing
+day bounces the visitor back to the live event.
+
+**A helper the HEADER calls must live in `inc/helpers.php`, not
+`inc/events.php`.** The header asks `public_archives_enabled()` on every page to
+decide whether to show the Archive link, but `events.php` is only loaded by
+controllers that need event data — so `login.php` and `register.php` fataled
+with "undefined function" until it moved. Bootstrap loads helpers.php always.
+
+**Reuse a control's classes rather than inventing parallel ones.** The event
+switcher renders as `class="day-tabs event-tabs"` / `class="day-tab event-tab"`
+and reuses `.day-tab-active` and `.day-tab-date` too. Eight of the ten themes
+restyle the day tabs heavily; a fresh set of class names would have left the
+switcher as a stray grey box on cork, parchment and graphite until every theme
+was updated by hand. The `.event-*` rules carry ONLY the real difference —
+horizontal scrolling instead of wrapping, because there can be far more events
+than days — and a test keeps that override small, since a growing one would
+mean the shared styling is being fought rather than reused.
+
+**Sort listings on the data, not the id.** The archive list orders by the
+event's first day (`date_from DESC`), because an admin can create events out of
+chronological order and the list is for readers, not for the insert history. The
+front-page tabs use the LAST day instead, so a run that started before yesterday
+but ends in the future still counts as current — two different questions, two
+different columns.
+
+**Deleting a `game_tables` row cascades its games AND polls away.** Worth
+knowing when writing fixtures: a test that moved a game onto a table and then
+deleted that table destroyed the game too, and took the rest of the suite's
+data with it. Move rows off a table before removing it.
+
 **Add a translation key.** Both files, same commit.
 
 ---

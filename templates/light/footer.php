@@ -72,6 +72,19 @@ if (function_exists('switcher_visible')) {
 <img src="img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
 </div>
 <?php
+// The chat panel, when switched on. Rendered here rather than in each page
+// controller so it is present site-wide from one place; it starts closed and
+// costs a hidden <aside> until the visitor opens it.
+if (chat_enabled()):
+    tpl_render('chat_panel', [
+        'csrf'       => csrf_field(),
+        'antibot'    => antibot_field(),
+        'logged_in'  => is_logged_in(),
+        'guest_name' => is_logged_in() ? '' : guest_identity()['name'],
+    ]);
+endif;
+?>
+<?php
 // Load the shared script bundle if it exists. We check existence so a brand-new
 // install (or a build where js/ isn't present yet) doesn't emit a 404 for it.
 // The ?v=<mtime> suffix busts the browser cache whenever scripts.js changes.

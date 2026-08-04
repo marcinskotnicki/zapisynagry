@@ -220,6 +220,44 @@ $toggle = function($key) {
         </div>
     </fieldset>
 
+    <?php // Archives. Grouped because switching public_archives on changes how
+          // EVENTS behave (new ones no longer archive the old), not just what
+          // is visible — that belongs next to its own settings, not buried in
+          // the general toggles list. ?>
+    <fieldset>
+        <legend><?= e(t('opt_group_archive')) ?></legend>
+        <?php
+        $toggle('public_archives');
+        $text('archive_per_page', 'number');   // events per page on the public list
+        $text('admin_per_page', 'number');     // rows per page on admin lists
+        $text('auto_archive_days', 'number');  // 0 = never auto-archive
+        ?>
+    </fieldset>
+
+    <?php // Chat gets its own section: five settings that only make sense
+          // together, and that an admin looking for "the chat" should find in
+          // one place rather than spread across Settings and Toggles. ?>
+    <fieldset>
+        <legend><?= e(t('opt_group_chat')) ?></legend>
+        <?php $toggle('chat_enabled'); ?>
+        <div class="field">
+            <label for="chat_scope"><?= e(t('opt_chat_scope')) ?></label>
+            <select id="chat_scope" name="chat_scope">
+                <?php foreach (['event', 'global'] as $scopeOpt): ?>
+                    <option value="<?= e($scopeOpt) ?>"<?= opt('chat_scope') === $scopeOpt ? ' selected' : '' ?>>
+                        <?= e(t('opt_chat_scope_' . $scopeOpt)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_chat_scope_note')) ?></p>
+        </div>
+        <?php
+        $text('chat_max_messages', 'number');      // hard cap; oldest trimmed past this
+        $text('chat_initial_messages', 'number');  // shown when the panel opens
+        $text('chat_refresh_seconds', 'number');   // poll interval while open
+        ?>
+    </fieldset>
+
     <fieldset>
         <legend><?= e(t('opt_group_texts')) ?></legend>
         <?php

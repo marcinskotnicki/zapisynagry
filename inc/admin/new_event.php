@@ -89,8 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $now = gmdate('Y-m-d H:i:s');
             db()->beginTransaction();
             try {
-                // Archive whatever is currently live (at most one row).
-                db_run('UPDATE events SET is_archived = 1, archived_at = ? WHERE is_archived = 0', [$now]);
+                // Archive whatever is currently live (at most one row) — UNLESS
+                // public archives are on, where past events stay open on
+                // purpose so they can still be edited and signed up for. With
+                // the feature on, archiving becomes a manual (or time-based)
+                // decision made from the Archive tab instead.
+                if (!public_archives_enabled()) {
+                    db_run('UPDATE events SET is_archived = 1, archived_at = ? WHERE is_archived = 0', [$now]);
+                }
 
                 // Unguessable share token for the read-only archive link later.
                 $token = bin2hex(random_bytes(16));
@@ -106,6 +112,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($days as $idx => $row) {
                     $stmt->execute([$eventId, $idx + 1, $row['date'], $row['start'], $row['end']]);
                 }
+
+                // Chat scoped to the event? Then a new event starts a new
+                // conversation. Inside the transaction with the event itself:
+                // if creating the event rolls back, the old chat must come back
+                // with it, or an admin whose event creation FAILED would still
+                // have lost the log.
+                if (opt('chat_scope') === 'event') {
+                    chat_wipe();
+                }
+
                 db()->commit();
             } catch (Throwable $ex) {
                 if (db()->inTransaction()) db()->rollBack();

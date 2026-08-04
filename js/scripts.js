@@ -10,6 +10,7 @@
         initPollDeadlinePreview();
         initBggSearchGuard();
         initDoubleSubmitGuard();
+        initChat();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -224,6 +225,196 @@
                 }
             }
         });
+    }
+
+    // 8. Chat panel: open/close, poll for new messages, post, load earlier.
+    // Messages are built with createElement/textContent, never innerHTML —
+    // every line is untrusted visitor input.
+    function initChat() {
+        var toggle = document.getElementById('chat-toggle');
+        var panel  = document.getElementById('chat-panel');
+        if (!toggle || !panel || !window.APP_CHAT) return;
+
+        var list    = document.getElementById('chat-messages');
+        var form    = document.getElementById('chat-form');
+        var earlier = document.getElementById('chat-earlier');
+        var errBox  = document.getElementById('chat-error');
+        var input   = document.getElementById('chat-message');
+        var nameIn  = document.getElementById('chat-name');
+        var L       = window.APP_LANG || {};
+
+        var lastId   = 0;
+        var oldestId = 0;
+        var timer    = null;
+        var loaded   = false;
+
+        function fmt(tpl, fallback) { return tpl || fallback; }
+
+        function renderMessage(m, prepend) {
+            var line = document.createElement('p');
+            line.className = 'chat-msg' + (m.admin ? ' chat-msg-admin' : (m.user ? ' chat-msg-user' : ''));
+            line.setAttribute('data-id', m.id);
+
+            var who = document.createElement('span');
+            who.className = 'chat-msg-name';
+            who.textContent = m.name;
+
+            var when = document.createElement('span');
+            when.className = 'chat-msg-time';
+            when.textContent = ' (' + m.at + '): ';
+
+            var body = document.createElement('span');
+            body.className = 'chat-msg-body';
+            body.textContent = m.message;
+
+            line.appendChild(who);
+            line.appendChild(when);
+            line.appendChild(body);
+
+            if (prepend) { list.insertBefore(line, list.firstChild); }
+            else { list.appendChild(line); }
+        }
+
+        function atBottom() {
+            var log = document.getElementById('chat-log');
+            return log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+        }
+        function scrollDown() {
+            var log = document.getElementById('chat-log');
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showError(msg) {
+            if (!errBox) return;
+            errBox.textContent = msg;
+            errBox.hidden = !msg;
+        }
+
+        function apply(data, prepend) {
+            if (!data || !data.ok) return;
+            var msgs = data.messages || [];
+            if (prepend) {
+                // Reverse so repeated insertBefore keeps their original order.
+                for (var i = msgs.length - 1; i >= 0; i--) renderMessage(msgs[i], true);
+            } else {
+                for (var j = 0; j < msgs.length; j++) renderMessage(msgs[j], false);
+            }
+            if (msgs.length) {
+                if (!oldestId || msgs[0].id < oldestId) oldestId = msgs[0].id;
+                var newest = msgs[msgs.length - 1].id;
+                if (newest > lastId) lastId = newest;
+            }
+            if (typeof data.lastId === 'number' && data.lastId > lastId) lastId = data.lastId;
+            if (earlier) earlier.hidden = !data.more;
+        }
+
+        function load() {
+            var wasDown = atBottom();
+            fetch('chat.php?action=fetch', { credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    apply(d, false);
+                    loaded = true;
+                    if (!(d.messages || []).length && L.chatEmpty) {
+                        var p = document.createElement('p');
+                        p.className = 'chat-empty';
+                        p.textContent = L.chatEmpty;
+                        list.appendChild(p);
+                    }
+                    scrollDown();
+                })['catch'](function () { showError(fmt(L.chatFailed, '')); });
+        }
+
+        function poll() {
+            if (!loaded) return;
+            var wasDown = atBottom();
+            fetch('chat.php?action=fetch&after=' + encodeURIComponent(lastId),
+                  { credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var before = lastId;
+                    apply(d, false);
+                    // Only auto-scroll if they were already at the bottom —
+                    // yanking the view while someone reads back is worse than
+                    // making them scroll.
+                    if (lastId > before && wasDown) scrollDown();
+                })['catch'](function () { /* transient: the next tick retries */ });
+        }
+
+        function start() {
+            stop();
+            timer = window.setInterval(poll, window.APP_CHAT.refresh);
+        }
+        function stop() {
+            if (timer) { window.clearInterval(timer); timer = null; }
+        }
+
+        toggle.addEventListener('click', function () {
+            var open = panel.hasAttribute('hidden');
+            if (open) {
+                panel.removeAttribute('hidden');
+                document.body.classList.add('chat-open');
+                toggle.setAttribute('aria-expanded', 'true');
+                if (!loaded) load(); else scrollDown();
+                start();
+            } else {
+                panel.setAttribute('hidden', '');
+                document.body.classList.remove('chat-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                // Polling stops with the panel: an idle background tab should
+                // not keep hitting the server every few seconds.
+                stop();
+            }
+        });
+
+        if (earlier) {
+            earlier.addEventListener('click', function () {
+                if (!oldestId) return;
+                var log = document.getElementById('chat-log');
+                var before = log.scrollHeight;
+                fetch('chat.php?action=older&before=' + encodeURIComponent(oldestId),
+                      { credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        apply(d, true);
+                        // Hold the reading position: without this, inserting
+                        // above jumps the view to a different message.
+                        log.scrollTop = log.scrollHeight - before;
+                    })['catch'](function () { showError(fmt(L.chatFailed, '')); });
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function (ev) {
+                ev.preventDefault();
+                showError('');
+                var body = (input.value || '').trim();
+                if (!body) return;
+                var fd = new FormData(form);
+                fetch('chat.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (d && d.ok) {
+                            input.value = '';
+                            // Poll immediately rather than rendering the reply
+                            // locally: one code path builds the list, so a
+                            // message can never appear twice or out of order.
+                            poll();
+                            scrollDown();
+                            // The anti-bot timestamp is single-use per render;
+                            // refresh it so a second message isn't rejected.
+                            var ts = form.querySelector('input[name="af_ts"]');
+                            if (ts) ts.value = Math.floor(Date.now() / 1000);
+                        } else {
+                            var code = d && d.error;
+                            showError(code === 'name'  ? fmt(L.chatErrName, '')
+                                    : code === 'empty' ? fmt(L.chatErrEmpty, '')
+                                    : code === 'long'  ? fmt(L.chatErrLong, '')
+                                    : fmt(L.chatFailed, ''));
+                        }
+                    })['catch'](function () { showError(fmt(L.chatFailed, '')); });
+            });
+        }
     }
 
 })();

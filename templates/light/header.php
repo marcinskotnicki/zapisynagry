@@ -56,7 +56,22 @@ $page_title = $page_title ?? t('app_name');
                 t('weekday_0'), t('weekday_1'), t('weekday_2'), t('weekday_3'),
                 t('weekday_4'), t('weekday_5'), t('weekday_6'),
             ],
+            // Chat panel strings. Always sent (they are a handful of bytes) so
+            // the block stays one shape whether or not the chat is on.
+            'chatEmpty'   => t('chat_empty'),
+            'chatFailed'  => t('chat_failed'),
+            'chatErrName' => t('chat_err_name'),
+            'chatErrEmpty'=> t('chat_err_empty'),
+            'chatErrLong' => t('chat_err_long'),
         ], JSON_UNESCAPED_UNICODE) ?>;
+        <?php // Chat runtime config. Absent entirely when the chat is off, so
+              // scripts.js has one unambiguous signal to check rather than
+              // having to infer it from a flag AND the panel's presence. ?>
+        <?php if (chat_enabled()): ?>
+        window.APP_CHAT = <?= json_encode([
+            'refresh' => chat_refresh_seconds() * 1000,
+        ], JSON_UNESCAPED_UNICODE) ?>;
+        <?php endif; ?>
     </script>
 </head>
 <body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?> layout-<?= opt('home_layout') === 'timeline_first' ? 'timeline-first' : 'tables-first' ?>">
@@ -76,6 +91,10 @@ ob_start();
     // Home, except on the home page. nav_link() applies the icon/text option.
     if ($here !== 'index.php') {
         echo nav_link('index.php', 'home', t('nav_home'));
+    }
+    // Public archive list, when the feature is on and we're not already on it.
+    if (public_archives_enabled() && $here !== 'archive.php') {
+        echo nav_link('archive.php', 'archive', t('archive_title'));
     }
     if (is_admin() && $here !== 'admin.php') {          // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'));

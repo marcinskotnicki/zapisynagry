@@ -125,10 +125,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }   // end: actions targeting an existing user
 }
 
-// User list, alphabetised by display name (case-insensitive).
-$users = db_all('SELECT id, email, display_name, is_admin, is_blocked, created_at FROM users ORDER BY display_name COLLATE NOCASE');
+// User list, alphabetised by display name (case-insensitive), paginated —
+// a club that has been running for years accumulates accounts, and this was
+// fetching all of them on every view of the tab.
+$perPage = max(1, min(500, opt_int('admin_per_page')));
+$total   = (int)db_val('SELECT COUNT(*) FROM users');
+$pages   = max(1, (int)ceil($total / $perPage));
+$page    = max(1, min($pages, (int)($_GET['page'] ?? 1)));
+$users   = db_all(
+    'SELECT id, email, display_name, is_admin, is_blocked, created_at
+       FROM users ORDER BY display_name COLLATE NOCASE LIMIT ? OFFSET ?',
+    [$perPage, ($page - 1) * $perPage]);
 
 $tab_body = tpl_capture('admin_users', [
     'csrf'  => csrf_field(),
     'users' => $users,
+    'page'  => $page,
+    'pages' => $pages,
 ]);

@@ -12,8 +12,36 @@
  *  Runs in admin.php's scope: sets $tab_body.
  * ============================================================================= */
 
-$events = db_all('SELECT id, name, num_days, is_archived, access_token, created_at, archived_at
-                  FROM events ORDER BY id DESC');
+require_once __DIR__ . '/../events.php';   // events_page(), events_count()
+
+// Archive / un-archive a single event. Only offered when public archives are
+// on: with the feature off, archiving is automatic on new-event creation and a
+// manual button here would fight that behaviour rather than complement it.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && public_archives_enabled()) {
+    csrf_check();
+    $act = $_POST['action'] ?? '';
+    $id  = (int)($_POST['event'] ?? 0);
+    if ($id > 0 && ($act === 'archive' || $act === 'unarchive')) {
+        if ($act === 'archive') {
+            db_run('UPDATE events SET is_archived = 1, archived_at = ? WHERE id = ?',
+                   [gmdate('Y-m-d H:i:s'), $id]);
+        } else {
+            // archived_at cleared too, so "archived on" never shows a date for
+            // an event that is currently open.
+            db_run('UPDATE events SET is_archived = 0, archived_at = NULL WHERE id = ?', [$id]);
+        }
+        log_action('event_' . $act, 'event #' . $id);
+        $flash = t('saved_ok');
+    }
+}
+
+// Paginated: an established club accumulates events indefinitely, and this tab
+// was fetching every one of them on every view.
+$perPage = max(1, min(500, opt_int('admin_per_page')));
+$total   = events_count();
+$pages   = max(1, (int)ceil($total / $perPage));
+$page    = max(1, min($pages, (int)($_GET['page'] ?? 1)));
+$events  = events_page($perPage, ($page - 1) * $perPage);
 
 // Build an absolute base URL so the links are copy-pasteable as-is. We derive
 // scheme/host/dir from the current request rather than hard-coding a domain.
@@ -23,6 +51,10 @@ $dir    = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/');   // the folder a
 $base   = $scheme . '://' . $host . $dir . '/index.php?e=';      // template appends the token
 
 $tab_body = tpl_capture('admin_archive', [
-    'events' => $events,
-    'base'   => $base,
+    'events'      => $events,
+    'base'        => $base,
+    'csrf'        => csrf_field(),
+    'can_toggle'  => public_archives_enabled(),
+    'page'        => $page,
+    'pages'       => $pages,
 ]);

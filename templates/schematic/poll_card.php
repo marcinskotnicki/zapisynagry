@@ -64,6 +64,9 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
                     <?php if ($canEditPoll): ?>
                         <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
                         <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+                        <?php if (is_admin()): // move this poll to another table on the same day ?>
+                            <a class="btn btn-small" href="move_item.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('move_btn')) ?></a>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?php if ($canEnd): ?>
                         <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>

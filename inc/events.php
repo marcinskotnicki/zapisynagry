@@ -23,14 +23,149 @@
  *  per-event access_token, so archive links can be shared without exposing ids.
  * --------------------------------------------------------------------------- */
 function event_resolve() {
+    // Public archives on: an explicit ?event=<id> may name ANY event, and
+    // whether it is editable follows its own archived flag rather than the way
+    // it was reached. That is the whole point of the feature — a past event
+    // that was never archived stays live and editable.
+    if (public_archives_enabled()) {
+        $id = (int)($_GET['event'] ?? 0);
+        if ($id > 0) {
+            $ev = db_one('SELECT * FROM events WHERE id = ?', [$id]);
+            if ($ev) {
+                return ['event' => $ev, 'readonly' => (int)$ev['is_archived'] === 1];
+            }
+        }
+    }
+
     $token = $_GET['e'] ?? '';
     if ($token !== '') {
-        // Archive view: look the event up by its share token; render read-only.
+        // Share-token view. Always read-only regardless of the event's own
+        // flag: the token is handed out precisely so someone can LOOK without
+        // an account, and it must not become an edit link if an admin later
+        // un-archives that event.
         $ev = db_one('SELECT * FROM events WHERE access_token = ?', [$token]);
         return ['event' => $ev, 'readonly' => true];
     }
     // Default: the live event, fully interactive.
     return ['event' => current_event(), 'readonly' => false];
+}
+
+
+/**
+ * An event's first and last day dates, as ['from' => 'YYYY-MM-DD', 'to' => ...].
+ * Either may be null when an event has no days yet.
+ *
+ * @param int $eventId
+ * @return array
+ */
+function event_date_range($eventId) {
+    $r = db_one('SELECT MIN(day_date) AS f, MAX(day_date) AS t FROM event_days WHERE event_id = ?',
+                [(int)$eventId]);
+    return ['from' => $r['f'] ?? null, 'to' => $r['t'] ?? null];
+}
+
+/**
+ * A human label for an event's dates: one date, or "from – to" for a
+ * multi-day event. Empty string when the event has no days.
+ *
+ * @param array $ev  An event row already carrying date_from/date_to, or an id.
+ * @return string
+ */
+function event_date_label($ev) {
+    $from = $ev['date_from'] ?? null;
+    $to   = $ev['date_to']   ?? null;
+    if ($from === null) {
+        $r = event_date_range($ev['id'] ?? 0);
+        $from = $r['from'];
+        $to   = $r['to'];
+    }
+    if (!$from) return '';
+    $fmt = function ($d) { return date('d.m.Y', strtotime($d)); };
+    return ($to && $to !== $from) ? $fmt($from) . ' – ' . $fmt($to) : $fmt($from);
+}
+
+/**
+ * A page of events for a listing, newest first by their FIRST day.
+ *
+ * Sorted on the event's own dates rather than its id, because an admin can
+ * create events out of chronological order and the list is for readers, not
+ * for the insert history. Events with no days at all sort last — they are
+ * drafts and have no date to place them by.
+ *
+ * @param int  $limit
+ * @param int  $offset
+ * @param bool $archivedOnly  Restrict to archived events.
+ * @return array  Event rows with date_from / date_to attached.
+ */
+function events_page($limit, $offset = 0, $archivedOnly = false) {
+    $where = $archivedOnly ? 'WHERE e.is_archived = 1' : '';
+    return db_all(
+        "SELECT e.*,
+                (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
+                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
+           FROM events e
+           $where
+          ORDER BY date_from IS NULL, date_from DESC, e.id DESC
+          LIMIT ? OFFSET ?", [(int)$limit, max(0, (int)$offset)]);
+}
+
+/**
+ * How many events a listing would page through.
+ * @param bool $archivedOnly
+ * @return int
+ */
+function events_count($archivedOnly = false) {
+    $where = $archivedOnly ? 'WHERE is_archived = 1' : '';
+    return (int)db_val("SELECT COUNT(*) FROM events $where");
+}
+
+/**
+ * Events worth offering as tabs on the front page: anything whose LAST day is
+ * yesterday or later, soonest first.
+ *
+ * Yesterday rather than today so an event that ran last night is still one
+ * click away the next morning — people sign up for the next session while
+ * still talking about the last one.
+ *
+ * @return array  Event rows with date_from / date_to attached.
+ */
+function events_upcoming() {
+    $cutoff = date('Y-m-d', strtotime('-1 day'));
+    return db_all(
+        "SELECT e.*,
+                (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
+                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
+           FROM events e
+          WHERE (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) >= ?
+          ORDER BY date_from ASC, e.id ASC", [$cutoff]);
+}
+
+/**
+ * Archive events whose last day ended more than 'auto_archive_days' ago.
+ *
+ * Only meaningful with public archives on — without it, creating an event
+ * already archives the previous one. Zero means never. Called from the front
+ * page alongside the poll sweep (the app has no scheduler).
+ *
+ * @return int  Events archived.
+ */
+function events_auto_archive() {
+    if (!public_archives_enabled()) return 0;
+    $days = opt_int('auto_archive_days');
+    if ($days <= 0) return 0;
+
+    $cutoff = date('Y-m-d', strtotime('-' . $days . ' day'));
+    $due = db_all(
+        "SELECT e.id FROM events e
+          WHERE e.is_archived = 0
+            AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) IS NOT NULL
+            AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) < ?", [$cutoff]);
+    if (!$due) return 0;
+    $now = gmdate('Y-m-d H:i:s');
+    foreach ($due as $r) {
+        db_run('UPDATE events SET is_archived = 1, archived_at = ? WHERE id = ?', [$now, (int)$r['id']]);
+    }
+    return count($due);
 }
 
 /**

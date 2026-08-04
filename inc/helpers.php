@@ -282,11 +282,52 @@ function email_required_for_poll($poll) {
  *
  * @return array|null  The event row, or null before the first event is created.
  */
+/**
+ * Is the public archive feature switched on?
+ *
+ * Lives HERE rather than in inc/events.php because the header asks it on every
+ * page to decide whether to show the Archive link — and events.php is only
+ * loaded by the controllers that need event data, so login.php and register.php
+ * would fatal on it. (They did, until this moved.)
+ *
+ * @return bool
+ */
+function public_archives_enabled() {
+    return opt_bool('public_archives');
+}
+
 function current_event() {
     // $cache starts at false ("not looked up yet"); null is a *valid* cached
     // result (no event), so we can't use null as the sentinel.
     static $cache = false;
     if ($cache !== false) return $cache;
+
+    if (public_archives_enabled()) {
+        /* Clubs using this feature publish months of dates at once, so "the
+         * event that matters" is the SOONEST one still open, not the one added
+         * most recently. Ordered by the event's first day, not by id — a club
+         * entering three months of dates will not necessarily enter them in
+         * order.
+         *
+         * Events with no days yet sort LAST: a draft with no dates should never
+         * hijack the front page ahead of a real one.
+         *
+         * NOTE this is "earliest still open", which is only the same thing as
+         * "next upcoming" while finished events actually get archived. A club
+         * that never archives will keep seeing a past event here — which is
+         * what 'auto_archive_days' is for. */
+        $cache = db_one(
+            "SELECT e.*,
+                    (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from
+               FROM events e
+              WHERE e.is_archived = 0
+              ORDER BY date_from IS NULL, date_from ASC, e.id ASC
+              LIMIT 1");
+        return $cache;
+    }
+
+    // Feature off: unchanged. At most one event is live at a time here, because
+    // creating one archives the previous.
     $cache = db_one('SELECT * FROM events WHERE is_archived = 0 ORDER BY id DESC LIMIT 1');
     return $cache;
 }

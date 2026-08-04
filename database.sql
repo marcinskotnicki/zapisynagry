@@ -95,6 +95,25 @@ INSERT INTO options (key, value) VALUES
     -- which is the right default: seeding a literal URL here would be
     -- wrong for anyone who entered their own repo during install.
     ('github_url',            ''),
+    -- Chat (shoutbox). Off by default: it is an unmoderated public text field,
+    -- so it should be a deliberate choice rather than something a new install
+    -- discovers it is already running.
+    ('chat_enabled',          '0'),
+    -- 'event' = wipe the log whenever a new event is created (the chat is
+    -- about tonight); 'global' = keep it across events, trimmed only by size.
+    ('chat_scope',            'event'),
+    ('chat_max_messages',     '500'),   -- hard cap; oldest trimmed past this
+    ('chat_initial_messages', '20'),    -- how many the panel shows on open
+    ('chat_refresh_seconds',  '10'),    -- poll interval while the panel is open
+    -- Public archives. Off by default: switching it on changes how EVENTS
+    -- behave (creating a new one no longer archives the old), so it must be a
+    -- deliberate choice rather than a surprise on upgrade.
+    ('public_archives',       '0'),
+    ('archive_per_page',      '20'),   -- events per page on the public list
+    ('admin_per_page',        '50'),   -- rows per page on admin lists
+    -- 0 = never auto-archive. Otherwise an event is archived this many days
+    -- after its LAST day ends. Only consulted when public_archives is on.
+    ('auto_archive_days',     '0'),
     ('site_icon',             ''),     -- '' = no site icon; otherwise a version stamp (files live in /icons)
     ('game_languages',        'PL
 EN
@@ -362,6 +381,27 @@ CREATE TABLE mail_subscribers (
 );
 -- One subscription per address per event; re-subscribing must not duplicate.
 CREATE UNIQUE INDEX idx_mailsub_event_email ON mail_subscribers (event_id, email);
+--  chat_messages — the shoutbox. One row per posted line.
+--
+--  user_id is nullable and ON DELETE SET NULL: a guest has none, and deleting
+--  an account must not erase what they said. The display name is stored
+--  ALONGSIDE it rather than joined at read time, so a message keeps the name it
+--  was posted under even if the account is later renamed or removed — which is
+--  what makes an old conversation still make sense.
+--
+--  is_admin is frozen at post time for the same reason: it colours the name in
+--  the panel, and re-deriving it later would silently restyle history when
+--  someone's role changes.
+CREATE TABLE chat_messages (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER,
+    name       TEXT NOT NULL,
+    is_admin   INTEGER NOT NULL DEFAULT 0,
+    message    TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 CREATE INDEX idx_mailsub_token ON mail_subscribers (token);
 
 
@@ -542,6 +582,9 @@ CREATE TABLE logs (
 -- -----------------------------------------------------------------------------
 --  Helpful indexes for the hot read paths (front page render, timeline, stats).
 -- -----------------------------------------------------------------------------
+-- Chat reads are always ordered by id: newest N for the initial load,
+-- "anything above id X" for the poll, "below id X" for load-earlier.
+CREATE INDEX idx_chat_id           ON chat_messages(id);
 CREATE INDEX idx_tables_day        ON game_tables(day_id);
 CREATE INDEX idx_games_table       ON games(table_id);
 CREATE INDEX idx_games_day         ON games(day_id);

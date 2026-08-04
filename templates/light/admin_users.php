@@ -109,4 +109,16 @@
     <?php endforeach; ?>
     </tbody>
 </table>
+
+<?php if ($pages > 1): ?>
+    <nav class="pager">
+        <?php if ($page > 1): ?>
+            <a class="btn btn-small" href="admin.php?tab=users&amp;page=<?= $page - 1 ?>"><?= e(t('pager_prev')) ?></a>
+        <?php endif; ?>
+        <span class="pager-pos"><?= e(t('pager_position', $page, $pages)) ?></span>
+        <?php if ($page < $pages): ?>
+            <a class="btn btn-small" href="admin.php?tab=users&amp;page=<?= $page + 1 ?>"><?= e(t('pager_next')) ?></a>
+        <?php endif; ?>
+    </nav>
+<?php endif; ?>
 <?php endif; ?>

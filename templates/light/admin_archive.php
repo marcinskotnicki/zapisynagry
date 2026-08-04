@@ -21,6 +21,7 @@
             <th><?= e(t('archive_status')) ?></th>
             <th><?= e(t('archive_created')) ?></th>
             <th><?= e(t('archive_link')) ?></th>
+            <?php if ($can_toggle): ?><th><?= e(t('archive_action')) ?></th><?php endif; ?>
         </tr>
     </thead>
     <tbody>
@@ -40,8 +41,37 @@
                     <?= e(t('copy')) ?>
                 </button>
             </td>
+            <?php if ($can_toggle): ?>
+                <td>
+                    <?php // One button per row, showing the action rather than the
+                          // state — the Status column already says which it is. ?>
+                    <form method="post" action="admin.php?tab=archive&amp;page=<?= (int)$page ?>" class="inline">
+                        <?= $csrf ?>
+                        <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
+                        <input type="hidden" name="action"
+                               value="<?= (int)$ev['is_archived'] === 1 ? 'unarchive' : 'archive' ?>">
+                        <button class="btn btn-small">
+                            <?= (int)$ev['is_archived'] === 1
+                                    ? e(t('archive_unarchive'))
+                                    : e(t('archive_archive')) ?>
+                        </button>
+                    </form>
+                </td>
+            <?php endif; ?>
         </tr>
     <?php endforeach; ?>
     </tbody>
 </table>
+
+<?php if ($pages > 1): ?>
+    <nav class="pager">
+        <?php if ($page > 1): ?>
+            <a class="btn btn-small" href="admin.php?tab=archive&amp;page=<?= $page - 1 ?>"><?= e(t('pager_prev')) ?></a>
+        <?php endif; ?>
+        <span class="pager-pos"><?= e(t('pager_position', $page, $pages)) ?></span>
+        <?php if ($page < $pages): ?>
+            <a class="btn btn-small" href="admin.php?tab=archive&amp;page=<?= $page + 1 ?>"><?= e(t('pager_next')) ?></a>
+        <?php endif; ?>
+    </nav>
+<?php endif; ?>
 <?php endif; ?>

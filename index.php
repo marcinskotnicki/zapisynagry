@@ -18,15 +18,22 @@ require __DIR__ . '/inc/polls.php';    // poll_resolve_expired() below (events.p
 require __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards
 require __DIR__ . '/inc/notify.php';   // a deadline resolution sends the conclusion email
 
-// Decide which event to show: live (interactive) or an archived one (read-only).
-$resolved = event_resolve();
-$event    = $resolved['event'];
-$readonly = $resolved['readonly'];
-
 // POOR MAN'S CRON: shared hosting has no scheduler, so expired poll deadlines
 // are settled here, on ordinary visits to the front page (cheap no-op when
 // nothing is due). See poll_resolve_expired() in inc/polls.php.
 poll_resolve_expired();
+
+// Same poor-man's-cron slot: retire events whose last day is far enough past,
+// when the admin has asked for that. A cheap no-op unless both public archives
+// and a non-zero auto_archive_days are set. Runs BEFORE the event is resolved
+// so a just-retired event renders read-only on this very request rather than
+// staying editable until the next one.
+events_auto_archive();
+
+// Decide which event to show: live (interactive) or an archived one (read-only).
+$resolved = event_resolve();
+$event    = $resolved['event'];
+$readonly = $resolved['readonly'];
 
 // No event at all yet -> the simple placeholder (prompt admin to create one).
 if (!$event) {
@@ -127,7 +134,13 @@ if (!$readonly && mailing_enabled()) {
 }
 
 tpl_render('header', ['page_title' => $event['name']]);
+// Event switcher tabs: every event whose LAST day is yesterday or later,
+// soonest first. Only assembled when the feature is on, so the usual
+// single-event install pays nothing for it.
+$eventTabs = public_archives_enabled() ? events_upcoming() : [];
+
 tpl_render('front_event', [
+    'event_tabs'  => $eventTabs,
     'event'       => $event,
     'readonly'    => $readonly,
     'days'        => $days,

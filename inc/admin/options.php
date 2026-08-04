@@ -42,6 +42,8 @@ $OPTION_VALUES = [
     'switcher_pos_template', 'switcher_pos_language',  // header|footer|both|none; validated below
     'home_layout',  // tables_first|timeline_first; validated below
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
+    'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
+    'archive_per_page', 'admin_per_page', 'auto_archive_days',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -63,6 +65,7 @@ $OPTION_TOGGLES = [
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'show_venue_name', 'mailing_list', 'antibot_honeypot',
+    'chat_enabled', 'public_archives',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 
@@ -76,6 +79,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'email_smtp_port':
             case 'poll_default_deadline_hours':
             case 'login_days':
+            case 'archive_per_page':
+            case 'admin_per_page':
+            case 'auto_archive_days':
+                // Clamped again where they are USED, so a value written
+                // straight into the options table cannot produce a zero-row
+                // page or an unbounded query.
+                $val = (string)max(0, (int)$val);
+                break;
+            case 'chat_max_messages':
+            case 'chat_initial_messages':
+            case 'chat_refresh_seconds':
+                // Coerced here, then clamped again at READ time by the helpers
+                // in inc/chat.php — a value that predates this validation, or
+                // one written straight into the table, must not be able to make
+                // the panel hammer the server or dump the whole log.
+                $val = (string)max(0, (int)$val);
+                break;
+            case 'chat_scope':
+                if (!in_array($val, ['event', 'global'], true)) continue 2;
+                break;
             case 'antibot_delay_form':
             case 'antibot_delay_click':
                 $val = (string)max(0, (int)$val);          // non-negative integers only

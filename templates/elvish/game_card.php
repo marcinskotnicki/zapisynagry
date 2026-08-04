@@ -70,6 +70,12 @@
                 <?php if ($canButtons): ?>
                     <span class="game-actions">
                         <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
+                        <?php // Admin-only: move this game to another table on the same day.
+                              // Guarded again server-side in move_item.php — hiding a button
+                              // is a UI courtesy, not a permission check. ?>
+                        <?php if (is_admin()): ?>
+                            <a class="btn btn-small" href="move_item.php?game=<?= (int)$g['id'] ?>"><?= e(t('move_btn')) ?></a>
+                        <?php endif; ?>
                         <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
                     </span>
                 <?php endif; ?>
