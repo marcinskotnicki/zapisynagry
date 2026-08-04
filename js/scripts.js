@@ -292,7 +292,12 @@
             errBox.hidden = !msg;
         }
 
-        function apply(data, prepend) {
+        // $historic says whether this response can speak about what came BEFORE
+        // what is on screen. The initial load and "load earlier" can; a poll
+        // cannot — it only ever reports what arrived since, and a quiet poll
+        // returns nothing at all, which would otherwise read as "no history"
+        // and hide the button every few seconds.
+        function apply(data, prepend, historic) {
             if (!data || !data.ok) return;
             var msgs = data.messages || [];
             if (prepend) {
@@ -307,7 +312,7 @@
                 if (newest > lastId) lastId = newest;
             }
             if (typeof data.lastId === 'number' && data.lastId > lastId) lastId = data.lastId;
-            if (earlier) earlier.hidden = !data.more;
+            if (earlier && historic) earlier.hidden = !data.more;
         }
 
         function load() {
@@ -315,7 +320,7 @@
             fetch('chat.php?action=fetch', { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
-                    apply(d, false);
+                    apply(d, false, true);
                     loaded = true;
                     if (!(d.messages || []).length && L.chatEmpty) {
                         var p = document.createElement('p');
@@ -335,7 +340,7 @@
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
                     var before = lastId;
-                    apply(d, false);
+                    apply(d, false, false);
                     // Only auto-scroll if they were already at the bottom —
                     // yanking the view while someone reads back is worse than
                     // making them scroll.
@@ -351,16 +356,21 @@
             if (timer) { window.clearInterval(timer); timer = null; }
         }
 
+        // Hand over from the `hidden` attribute to a class. The attribute is the
+        // no-JS fallback and maps to `display: none`, which cannot be animated;
+        // from here the panel is driven by .is-open so it can slide.
+        panel.removeAttribute('hidden');
+
         toggle.addEventListener('click', function () {
-            var open = panel.hasAttribute('hidden');
-            if (open) {
-                panel.removeAttribute('hidden');
+            var opening = !panel.classList.contains('is-open');
+            if (opening) {
+                panel.classList.add('is-open');
                 document.body.classList.add('chat-open');
                 toggle.setAttribute('aria-expanded', 'true');
                 if (!loaded) load(); else scrollDown();
                 start();
             } else {
-                panel.setAttribute('hidden', '');
+                panel.classList.remove('is-open');
                 document.body.classList.remove('chat-open');
                 toggle.setAttribute('aria-expanded', 'false');
                 // Polling stops with the panel: an idle background tab should
@@ -378,7 +388,7 @@
                       { credentials: 'same-origin' })
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
-                        apply(d, true);
+                        apply(d, true, true);
                         // Hold the reading position: without this, inserting
                         // above jumps the view to a different message.
                         log.scrollTop = log.scrollHeight - before;

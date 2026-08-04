@@ -26,6 +26,27 @@ $text = function($key, $type = 'text') {
     echo '<div class="field"><label for="' . e($key) . '">' . e(t('opt_' . $key)) . '</label>';
     echo '<input type="' . e($type) . '" id="' . e($key) . '" name="' . e($key) . '" value="' . e(opt($key)) . '"></div>';
 };
+
+// A credential. Renders EMPTY, always — the stored value is never written into
+// the HTML, because `value="..."` is readable from View Source no matter what
+// `type` the input has. Blank on submit means "unchanged"; the checkbox is the
+// only way to actually clear it, so an admin saving the form for some other
+// reason cannot wipe a key by accident.
+$secret = function($key) {
+    $isSet = opt($key) !== '';
+    echo '<div class="field"><label for="' . e($key) . '">' . e(t('opt_' . $key)) . '</label>';
+    // autocomplete="new-password" stops a browser helpfully pasting the
+    // admin's own saved credentials into a field meant for a service key.
+    echo '<input type="password" id="' . e($key) . '" name="' . e($key)
+       . '" value="" autocomplete="new-password">';
+    echo '<p class="field-note">' . e(t('opt_secret_note')) . ' '
+       . e($isSet ? t('opt_secret_is_set') : t('opt_secret_not_set')) . '</p>';
+    if ($isSet) {
+        echo '<label class="checkbox"><input type="checkbox" name="' . e($key) . '__clear" value="1"> '
+           . e(t('opt_secret_clear')) . '</label>';
+    }
+    echo '</div>';
+};
 // Multi-line textarea row: for options where each LINE is one entry (e.g.
 // the game-language choices). Prefilled from opt($key), saved verbatim.
 $textarea = function($key, $rows = 4) {
@@ -52,14 +73,14 @@ $toggle = function($key) {
         $text('venue_name');
         $text('email_address');
         $text('email_login');
-        $text('email_password', 'password');
+        $secret('email_password');
         $text('email_smtp_server');
         $text('email_smtp_port', 'number');
         $text('max_tables', 'number');           // 0 = unlimited
-        $text('bgg_api_code');
+        $secret('bgg_api_code');
         $text('site_url');                       // used for the link at the foot of emails
         $text('captcha_site_key');
-        $text('captcha_secret_key');
+        $secret('captcha_secret_key');
         ?>
         <div class="field">
             <label for="captcha_version"><?= e(t('opt_captcha_version')) ?></label>
@@ -250,6 +271,14 @@ $toggle = function($key) {
                 <?php endforeach; ?>
             </select>
             <p class="field-note"><?= e(t('opt_chat_scope_note')) ?></p>
+            <?php // Only shown when it can actually bite: with public archives
+                  // on, several events are live at once, so creating any one of
+                  // them wipes a log that belongs to all of them. With the
+                  // feature off there is only ever one live event and
+                  // per-event scope does exactly what it says. ?>
+            <?php if (public_archives_enabled() && opt('chat_scope') === 'event'): ?>
+                <p class="field-warn"><?= e(t('opt_chat_scope_warning')) ?></p>
+            <?php endif; ?>
         </div>
         <?php
         $text('chat_max_messages', 'number');      // hard cap; oldest trimmed past this

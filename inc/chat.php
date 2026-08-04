@@ -172,6 +172,26 @@ function chat_plain_text($s) {
 }
 
 /**
+ * Does this chat line carry anything at all?
+ *
+ * Deliberately looser than text_has_content(), which demands a letter or digit
+ * and so rejects ":)", "?!", "^^" and even a lone emoji — all perfectly real
+ * things to say in a shoutbox. That stricter rule exists to keep junk out of
+ * LISTINGS, where a punctuation-only game or table name is meaningless and
+ * sticks around; a chat line is casual and ephemeral, so the only thing worth
+ * refusing is a message with no visible characters whatsoever.
+ *
+ * Whitespace here includes Unicode blanks, so a line of non-breaking spaces
+ * cannot be passed off as content.
+ *
+ * @param string $s  Already-trimmed text.
+ * @return bool
+ */
+function chat_has_content($s) {
+    return preg_replace('/[\s\p{Z}\x{FEFF}]+/u', '', (string)$s) !== '';
+}
+
+/**
  * Post a message. Returns the new row, or a string error code.
  *
  * Validation mirrors the rest of the app's free-text rules (text_has_content /
@@ -194,6 +214,8 @@ function chat_post($name, $message) {
         $name    = chat_plain_text($name);
         $isAdmin = 0;
         $userId  = null;
+        // The NAME keeps the strict rule: it is shown beside every line the
+        // person posts, so it is closer to a listing entry than to a remark.
         if (!text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) return 'name';
     }
 
@@ -201,7 +223,7 @@ function chat_post($name, $message) {
     // Length is checked AFTER stripping, so markup cannot pad a message over
     // the limit and get it rejected for text the visitor never sees.
     $message = chat_plain_text($message);
-    if (!text_has_content($message)) return 'empty';
+    if (!chat_has_content($message)) return 'empty';
     if (text_too_long($message, CHAT_BODY_MAX)) return 'long';
 
     db_run('INSERT INTO chat_messages (user_id, name, is_admin, message) VALUES (?,?,?,?)',

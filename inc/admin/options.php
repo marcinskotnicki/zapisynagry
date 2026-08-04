@@ -23,12 +23,22 @@ require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the 
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
+// Credentials. These are NEVER rendered back into the form — several clubs run
+// on subdomains of one host and share a BGG key, and a value echoed into
+// `value="..."` is readable by anyone who can open the page or View Source
+// (type="password" only masks it on screen, it does not remove it from the
+// HTML). Submitting the field empty therefore means "leave it alone" rather
+// than "clear it", so saving the form for any other reason cannot wipe them.
+// Clearing is possible, but has to be asked for explicitly — see the
+// '<key>__clear' checkbox below.
+$OPTION_SECRETS = ['email_password', 'bgg_api_code', 'captcha_secret_key'];
+
 $OPTION_VALUES = [
-    'venue_name', 'email_address', 'email_login', 'email_password',
-    'email_smtp_server', 'email_smtp_port', 'max_tables', 'bgg_api_code',
+    'venue_name', 'email_address', 'email_login',
+    'email_smtp_server', 'email_smtp_port', 'max_tables',
     'overnight_grace_hours',
     'site_url',
-    'captcha_site_key', 'captcha_secret_key', 'captcha_version', 'captcha_v3_threshold',
+    'captcha_site_key', 'captcha_version', 'captcha_v3_threshold',
     'timeline_extension',
     'game_languages',
     'poll_default_deadline_hours', 'login_days',
@@ -71,6 +81,17 @@ $OPTION_TOGGLES = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- Plain value fields ---
+    // Credentials first, by their own rule: blank means "unchanged".
+    foreach ($OPTION_SECRETS as $key) {
+        if (!empty($_POST[$key . '__clear'])) {
+            opt_set($key, '');            // explicitly asked for, so honour it
+            continue;
+        }
+        $secretVal = trim($_POST[$key] ?? '');
+        if ($secretVal !== '') opt_set($key, $secretVal);
+        // Empty and no clear box ticked -> leave the stored value untouched.
+    }
+
     foreach ($OPTION_VALUES as $key) {
         $val = trim($_POST[$key] ?? '');
         switch ($key) {                       // coerce / validate the few constrained fields

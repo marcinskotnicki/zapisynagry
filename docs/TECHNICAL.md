@@ -120,15 +120,16 @@ plain-requires the same file later you get *cannot redeclare*. This is why
 | `auth.php` | Sessions, login, CSRF, access checks. | `auth_login`, `auth_logout`, `current_user`, `is_admin`, `require_admin`, `csrf_field`, `csrf_check`, `csrf_rotate` |
 | `lang.php` | Translation loading and lookup. | `lang_load`, `t`, `lang_current` |
 | `template.php` | Theme resolution and view rendering. | `tpl_init`, `tpl_file`, `tpl_render`, `tpl_capture`, `nav_link`, `current_page` |
-| `events.php` | Front-end data and scheduling rules. | `event_days`, `event_tables_full`, `timeline_build`, `day_rel_min`, `start_within_event_hours`, `weight_bucket`, `promote_reserves` |
+| `events.php` | Front-end data and scheduling rules. | `event_days`, `event_tables_full`, `timeline_build`, `day_rel_min`, `start_within_event_hours`, `weight_bucket`, `promote_reserves`, `events_page`, `events_upcoming`, `events_auto_archive`, `calendar_weeks` |
 | `polls.php` | Vote tallying and poll resolution. | `poll_check_resolve`, `poll_pick_winner`, `poll_force_resolve`, `poll_resolve_expired`, `poll_deadline_from_hours` |
 | `verify.php` | Guest edit/delete permission. | `verify_can_show_buttons`, `verify_decision`, `verify_passes`, `verify_send_code` |
 | `mail.php` | Outgoing mail (PHPMailer or `mail()`). | `send_mail`, `mail_body_with_footer` |
 | `notify.php` | Event-driven notifications. | `notify_enabled`, `notify_signup`, `notify_poll_concluded`, … |
 | `mailing.php` | The per-event mailing list. | `mailing_subscribe`, `mailing_unsubscribe`, `mailing_audience`, `mailing_notify_new_item` |
+| `chat.php` | The shoutbox. | `chat_enabled`, `chat_post`, `chat_recent`, `chat_since`, `chat_trim`, `chat_plain_text` |
 | `bgg.php` | BoardGameGeek XML API v2. | `bgg_configured`, `bgg_search`, `bgg_thing` |
 | `captcha.php` | reCAPTCHA v2/v3 on public forms. | `captcha_required`, `captcha_html`, `captcha_verify` |
-| `update.php` | The self-updater. | `update_run`, `update_tables`, `update_indexes`, `update_columns` |
+| `update.php` | The self-updater. | `update_run`, `update_tables`, `update_indexes`, `update_columns`, `update_repo_url` |
 
 **Database access.** Four helpers only — `db_run` (write), `db_one` (a row),
 `db_all` (rows), `db_val` (a single scalar). There is no `db_col`. All take
@@ -156,6 +157,7 @@ polls, poll_games, poll_votes
 comments, poll_comments
 mail_subscribers         per-event mailing list
 predefined_thumbnails, verification_codes, logs
+chat_messages            the shoutbox log (see §9)
 ```
 
 Notes that catch people out:
@@ -242,6 +244,14 @@ theme suite greps its own stylesheet for `#` literals containing letters past
 job rather than an `.htaccess` change — under `/add_game/18` the browser resolves
 those against `/add_game/`.
 
+**Prefer reusing a control's existing classes over defining parallel ones.**
+The event switcher on the front page renders as
+`class="day-tabs event-tabs"` / `class="day-tab event-tab"`, reusing
+`.day-tab-active` and `.day-tab-date` too, so every theme's existing day-tab
+styling applies to it automatically. Its own `.event-*` rules add only what
+genuinely differs (horizontal-only scrolling, since a row of events can run
+much longer than a row of days).
+
 ---
 
 ## 7. Translations
@@ -308,6 +318,75 @@ removal.
 
 **Input validation.** "No apostrophes" means rejecting entries made *only* of
 punctuation — `text_has_content()`. Titles like *Tzolk'in* must pass.
+
+**Predefined thumbnails.** The admin panel lists images from the
+`predefined_thumbnails` table, never by scanning `/thumbnails` on disk — a file
+placed there over FTP, or shipped with a release, is invisible in the panel and
+unusable as a game's fallback image until a row points at it. `install.php`
+scans the folder once at install time and registers whatever it finds.
+
+**`chat_scope` interacts with `public_archives`.** Per-event scope wipes the
+whole log when any event is created, which is safe while only one event can be
+live — but with public archives on, several are, so it clears a chat belonging
+to all of them. The Options screen shows a `.field-warn` notice in exactly that
+combination.
+
+**"Load earlier" visibility.** Only the initial load and the "load earlier"
+response may set it — a poll returns just what arrived since, so a quiet one
+reports `more: false` about its own (empty) result set while saying nothing
+about history. `apply()` takes a `historic` flag for exactly this; passing the
+wrong value at a call site hides the button every few seconds on a busy log.
+
+**Chat panel visibility.** The `hidden` attribute on the panel is a no-JS
+fallback only — it maps to `display: none`, which cannot be animated.
+`scripts.js` strips it on init and drives the panel with an `.is-open` class
+that transitions `transform`, so state must be read from the class, not the
+attribute. `visibility` is delayed by the slide duration on the way out so the
+panel does not vanish mid-movement.
+
+**Chat message validation is looser than the rest of the app.**
+`chat_has_content()` accepts anything with a visible character, so ":)", "?!"
+and a lone emoji all post — `text_has_content()` (letter or digit required) is
+right for LISTINGS, where a punctuation-only name is meaningless and persists,
+but wrong for a casual line. The guest NAME field still uses the strict rule,
+since it sits beside every message the person posts.
+
+**Chat.** `chat.php` is the app's only JSON endpoint; every exit path goes
+through `chat_json()` so a client mid-poll never receives page chrome. Messages
+are reduced to plain text on the way in by `chat_plain_text()` — not
+`strip_tags()`, which scans from a `<` to the next `>` and drops everything
+between, turning `I <3 games` into `I `. The client renders every line with
+`textContent`/`createElement`, never `innerHTML`; the server sends raw,
+unescaped text, so escaping happens exactly once, at render time.
+`chat_trim()` waits until the log is a full chunk (`CHAT_TRIM_CHUNK`) over the
+cap before deleting, trading one DELETE per ~10 posts for the log sitting
+between `max` and `max+9` instead of exactly at `max`. `fetch` is not
+CSRF-checked (reading already-public messages is not a state change); `post`
+is.
+
+**Public archives.** With the `public_archives` option on, `current_event()`
+returns the SOONEST still-open event by its first day rather than the newest by
+id — clubs using this feature publish months of dates at once and don't
+necessarily enter them in chronological order. The option also lifts an
+invariant: creating a new event no longer archives the previous one, so several
+non-archived events can exist at once (with it off, there is always at most
+one). An event can be reached three ways that do not mean the same thing:
+`?event=<id>` follows that event's own `is_archived` flag; `?e=<token>` is
+always read-only regardless of that flag; no parameter means the current
+event. `public_archives_enabled()` lives in `inc/helpers.php` rather than
+`inc/events.php` because the header calls it on every page and only
+`helpers.php` is always bootstrapped.
+
+**Listing sort order.** The public archive list orders by an event's FIRST day
+(a reader scans newest-to-oldest); the front-page event-switcher tabs order by
+its LAST day (so a run spanning yesterday-to-tomorrow still counts as current).
+Same underlying dates, two different questions — don't reuse one query for
+both.
+
+**`game_tables` cascades.** Deleting a table row deletes its games and polls
+too (`ON DELETE CASCADE`). Move rows off a table before removing it, including
+in test fixtures — deleting a table out from under a game silently destroys the
+game as well.
 
 ---
 
@@ -459,191 +538,48 @@ with `target="_blank" rel="noopener noreferrer"`.
 
 **When adding a column to an INSERT, count the placeholders.** Adding the column
 name without a matching `?` breaks every insert on that table, and PHP will not
-warn you — it fails at runtime. Both `add_poll.php` and `add_poll_game.php` were
-caught this way during the manual-link work.
+warn you — it fails at runtime.
 
-**A visual reorder does not need duplicated markup.** home_layout (swap tables
-vs. timeline) is a body class plus `main { display: flex; flex-direction:
-column; }` and two `order` overrides — the HTML is rendered exactly once, in
-exactly one order, always. Needed the timeline's two loose sibling `<section>`s
-(the timeline itself and the mailing-form box) wrapped in one `.after-content`
-div first, so "timeline + its signup box" moves as a single flex item instead
-of splitting apart under independent order values.
-
-**A file that "runs in the caller's scope" can usually still be `require`d
-directly inside a test**, once the test has its own bootstrapped DB and
-options (`tg_setup()` already provides both). Confirmed before reaching for
-anything hackier — regex-extracting one function's source and `eval`-ing it
-was the fallback plan, not needed here. What genuinely cannot be simulated:
-`is_uploaded_file()`, which only returns true for a file that arrived through a
-real multipart POST in the current request — not fakeable via a populated
-`$_FILES` array, in this process or a child one. The pre-existing site-icon
-upload (same shape) has no test coverage of its upload path for that reason;
-the site-logo feature follows the same boundary rather than pretending
-otherwise — the processing function itself (pure, GD-only) is fully covered,
-the surrounding option/header/delete logic is fully covered, only the literal
-multipart-arrival step is not.
-
-**A real bug, found by building something that sits next to it.** The site
-icon's admin section was nested inside `if (empty($thumbs)): ... else: [here]
-endif;` — so it only rendered when at least one predefined thumbnail already
-existed, which has nothing to do with whether a favicon exists. Zero test
-coverage meant it shipped and stayed that way. Caught while adding the site
-logo section right beside it, which inherited the same placement and the same
-bug. Fixed by moving both fieldsets outside that conditional; pinned with a
-fixture that deliberately has zero thumbnails uploaded, and verified by
-briefly re-nesting the bug to confirm the test actually catches it.
-
-**"Disable X" usually means two things, and the create path is the easy half.**
-`allow_polls` already blocked CREATING a poll, and had since it shipped — but
-`event_tables_full()` still loaded every poll already in flight, so an admin
-who switched polls off kept seeing them on the page and in the timeline. Check
-both the write path AND the read path when adding or auditing a feature toggle.
-Hiding is the right behaviour here rather than deleting: the rows stay, and
-turning the option back on restores them untouched.
-
-**Don't seed a "sensible default" into the database when install.php already
-asked the admin.** `github_url` (override the update source, for a fork)
-defaults to EMPTY meaning "inherit config.php's GITHUB_* constants". Seeding
-the upstream URL literally would silently be wrong for anyone who entered
-their own coordinates during install — and would point their updater at
-somebody else's repository. The admin FIELD is pre-filled with the effective
-value so a fresh install still shows where it updates from; empty stays
-storable because empty is a meaningful answer, not a failed save.
-
-**The thumbnails folder is not the source of truth — the database is.** The
-admin panel lists predefined thumbnails from `predefined_thumbnails`, never by
-scanning `/thumbnails`. An image that arrives with the release, or over FTP, is
-on disk and web-servable but invisible in the panel and unusable as a game's
-fallback image until a row points at it. `install.php` step 4b scans the folder
-once at install time and registers whatever it finds, which is what makes a
-thumbnail shipped in the repo actually work. It validates each file with
-`getimagesize()` rather than trusting the extension (a broken `<img>` in every
-game card is worse than a missing sample), skips anything already registered,
-and is non-fatal — a usable install without its sample images beats no install.
-
-**The chat is the app's only JSON endpoint, and its only untrusted-HTML risk.**
-Two rules hold it together. Every exit path in `chat.php` goes through
-`chat_json()` — a client mid-poll that receives an HTML error page can report
-nothing useful. And `renderMessage()` in scripts.js builds each line with
-`createElement`/`textContent` and never touches `innerHTML`, because every
-message is visitor input; the server sends messages as raw text and does not
-pre-escape them, so the escaping happens exactly once, at the point of
-rendering. There is a test asserting `innerHTML` never appears in the chat
-client.
-
-Chat messages are also reduced to plain text on the way IN, by
-`chat_plain_text()` — deliberately not `strip_tags()`, which scans from a "<"
-to the next ">" and drops everything between, turning "I <3 board games" into
-"I " and "unclosed <tag" into "unclosed". Eating the rest of someone's sentence
-because they typed a less-than sign is a worse bug than the markup it removes.
-Stripping runs BEFORE validation so a message made only of tags is refused as
-empty rather than stored blank, and the length limit is measured on what
-survives.
-
-`fetch` is deliberately NOT CSRF-checked while `post` is: CSRF protects against
-a third party causing a state CHANGE, a read of already-public messages is not
-one, and requiring a token would break the poll the moment a session expired.
-
-**Trimming is chunked, and the direction of the error matters.** `chat_trim()`
-does nothing until the log is a full chunk (10) OVER the cap, then deletes down
-to it — one DELETE per ~10 posts instead of one on every post once full. The log
-therefore sits between max and max+9. Overshooting slightly is the right error;
-trimming a chunk BELOW the cap would store less than the admin configured. Every
-chat option is clamped again at READ time (`inc/chat.php`), not only on save, so
-a value written straight into the options table cannot empty the log or turn
-every open panel into a request loop.
-
-**`public_archives` changes an INVARIANT, not just a view.** With it on,
-creating an event no longer archives the previous one, so the app can hold
-SEVERAL non-archived events at once — something it never did before.
-`current_event()` already tolerated that ("if several somehow exist we take the
-newest"), which is why the change is safe; that comment describes a real case
-now rather than a hypothetical one. It ships OFF so an upgrade changes nothing.
-
-**`current_event()` means two different things depending on the flag.** Feature
-off: the newest live event by id, as always (at most one exists). Feature on:
-the SOONEST still-open event by its first day — a club publishing three months
-of dates at once cares about the next session, not the one typed most recently,
-and those clubs do not necessarily enter dates in order. Events with no days
-sort LAST (SQLite would put NULLs first), so a draft cannot hijack the front
-page. The honest limit: "earliest still open" only equals "next upcoming" while
-finished events actually get archived — a club that never archives will keep
-seeing a past event, which is what `auto_archive_days` is for.
-
-**Three ways to reach an event, and they do not mean the same thing.**
-`?event=<id>` renders it with editability following the event's OWN
-`is_archived` flag — that is the point of the feature, a past event that was
-never archived stays open. `?e=<token>` is ALWAYS read-only regardless of that
-flag: the token is handed out so someone can look without an account, and must
-not silently become an edit link if an admin later reopens the event. No
-parameter means the current event, as before. Anything building an in-page link
-must carry the identifier forward (`$tokenQS` in front_event.php) or changing
-day bounces the visitor back to the live event.
-
-**A helper the HEADER calls must live in `inc/helpers.php`, not
-`inc/events.php`.** The header asks `public_archives_enabled()` on every page to
-decide whether to show the Archive link, but `events.php` is only loaded by
-controllers that need event data — so `login.php` and `register.php` fataled
-with "undefined function" until it moved. Bootstrap loads helpers.php always.
-
-**Reuse a control's classes rather than inventing parallel ones.** The event
-switcher renders as `class="day-tabs event-tabs"` / `class="day-tab event-tab"`
-and reuses `.day-tab-active` and `.day-tab-date` too. Eight of the ten themes
-restyle the day tabs heavily; a fresh set of class names would have left the
-switcher as a stray grey box on cork, parchment and graphite until every theme
-was updated by hand. The `.event-*` rules carry ONLY the real difference —
-horizontal scrolling instead of wrapping, because there can be far more events
-than days — and a test keeps that override small, since a growing one would
-mean the shared styling is being fought rather than reused.
-
-**Sort listings on the data, not the id.** The archive list orders by the
-event's first day (`date_from DESC`), because an admin can create events out of
-chronological order and the list is for readers, not for the insert history. The
-front-page tabs use the LAST day instead, so a run that started before yesterday
-but ends in the future still counts as current — two different questions, two
-different columns.
-
-**Deleting a `game_tables` row cascades its games AND polls away.** Worth
-knowing when writing fixtures: a test that moved a game onto a table and then
-deleted that table destroyed the game too, and took the rest of the suite's
-data with it. Move rows off a table before removing it.
-
-**`hidden` loses to any author `display` rule.** The attribute is only a
-User-Agent default of `display: none`, so an element styled `display: flex`
-ignores it entirely. The chat panel shipped permanently open for exactly this
-reason — the JS was toggling the attribute correctly the whole time. Any
-element that carries `hidden` AND has its own `display` needs an explicit
-`[hidden] { display: none; }` companion rule.
-
-**`overflow-x: auto` turns on the OTHER axis too.** Per spec, when one axis is
-set to anything but `visible`, the other computes `visible` to `auto` — so a
-horizontally-scrolling strip silently grows a vertical scrollbar the moment its
-content is a pixel too tall. Pair it with `overflow-y: hidden`.
-
-**A panel on `--surface` must state `color: var(--text)`.** Themes set
-`body { color: ... }` for text on the PAGE background, which on a dark theme is
-light — so any light-surfaced panel that inherits it gets light-on-light. The
-chat shipped that way in imperial, schematic and schematic-compact at contrast
-1.00 (literally the same colour). `--surface` and `--text` are the designed
-pair; state both together. There is now a test that COMPUTES the contrast for
-every theme rather than trusting a visual check, since three themes were wrong
-at once and only two were noticed.
-
-**A `@media` query adds NO specificity.** An override placed in an earlier
-media block loses to a later base rule of equal specificity and silently does
-nothing — the mobile event-tab font size was written that way and never
-applied. Put responsive overrides AFTER the rule they override, or give them
-more specificity.
-
-**`flex-shrink` alone does not shrink a flex item.** An item will not go below
-its content's intrinsic width without `min-width: 0` — so a long venue name kept
-shoving the header switchers onto a second row despite `flex: 0 1 auto`. Pair
-the two whenever something must give way.
+**Add a credential setting.** Put the key in `$OPTION_SECRETS` (not
+`$OPTION_VALUES`) in `inc/admin/options.php`, and render it with the `$secret()`
+helper rather than `$text()`. The value is never written back into the form —
+`value="..."` is readable from View Source whatever the input's `type`, and
+several clubs share one host. A blank submission means "unchanged", so saving
+the form for any other reason cannot wipe it; clearing requires the
+`<key>__clear` checkbox. Nothing else changes: the feature reads the option
+normally.
 
 **Add a translation key.** Both files, same commit.
 
----
+**Add a layout toggle that only reorders existing content.** Do it with a body
+class plus CSS (`order` on a flex container), not by rendering the markup
+twice — see `home_layout`: `main { display: flex; flex-direction: column; }`,
+with the toggle class flipping `order` on the two top-level pieces. If the
+toggled region is built from more than one element, wrap it in a single
+container first, or the pieces move independently instead of as a unit.
+
+**Add an admin override for something that already has a config-file
+default.** Default the option to an empty string meaning "inherit the config
+constant", not to a literal copy of the constant's current value — otherwise an
+admin who customised the constant during install would have their choice
+silently overridden by the seed. Pre-fill the admin FIELD with the *resolved*
+value (constant or override, whichever applies) so a fresh install still shows
+what it's actually using. See `github_url` / `update_repo_url()`.
+
+**Adding or auditing a feature toggle.** Check both the write path (does it
+stop new ones being created?) and the read path (does it stop existing ones
+from being *shown*?) — a toggle that only guards creation still displays
+everything already in the database. Prefer hiding to deleting: turning the
+option back on should restore exactly what was there before.
+
+**Testing a file written to run inside a caller's scope.** It can often still
+be `require`d directly inside a test once the test has its own bootstrapped DB
+and options (`tg_setup()` provides both) — try that before reaching for
+anything hackier. The one thing that genuinely cannot be simulated this way, or
+any other: `is_uploaded_file()`, which only returns true for a file that
+arrived through a real multipart POST in the current request. The processing
+function itself can still be unit-tested directly; only the "did this arrive
+via POST" branch is untestable outside a real HTTP client.
 
 ## 13. Traps
 
@@ -665,3 +601,28 @@ Each of these has bitten at least once.
   — same specificity, defined earlier — repainted red buttons grey. A variant
   must restate every property the base's hover sets.
 - **Relative URLs.** Every asset path assumes the page lives at `/`.
+- **`hidden` loses to any author `display` rule.** The attribute is only a
+  User-Agent default of `display: none` — an element with its own `display`
+  ignores it entirely. Anything that carries `hidden` and also has a `display`
+  rule needs an explicit `[hidden] { display: none; }` companion.
+- **Never leave a scrolling strip `justify-content: center`.** Overflow spills
+  equally to both sides but `scrollLeft` cannot go below 0, so whatever
+  overflows to the LEFT is permanently unreachable. Use `justify-content: safe
+  center`, which centres only while the content fits, and pair it with a
+  narrow-screen `flex-start` fallback for browsers that drop the `safe`
+  keyword as invalid.
+- **`overflow-x: auto` turns on the other axis too.** Per spec, setting one axis
+  to anything but `visible` computes the other from `visible` to `auto` — a
+  horizontally-scrolling strip can silently grow a vertical scrollbar the
+  moment its content is a pixel too tall. Pair it with `overflow-y: hidden`.
+- **A panel using `--surface` should state `color: var(--text)` explicitly**
+  rather than inherit it. Themes set `body { color }` for text on the page
+  background, which is a light colour on a dark theme — a light-surfaced panel
+  that inherits that instead of stating its own colour can end up with text
+  the same colour as its background.
+- **A `@media` query adds no specificity.** An override written in an earlier
+  media block loses to a later base rule of equal specificity and silently does
+  nothing. Put responsive overrides after the rule they override, not before.
+- **`flex-shrink` alone will not shrink an item below its content's intrinsic
+  width.** Pair it with `min-width: 0` wherever something must actually give
+  way to a sibling.
