@@ -498,6 +498,11 @@ html { scroll-behavior: smooth; }
 
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
     .topbar-prefs { margin-left: 0; }
+
+    .content{
+        padding-left:5px;
+        padding-right:5px;
+    }
 }
 
 /* ---- Chat (shoutbox) -------------------------------------------------------

@@ -234,6 +234,8 @@
         padding-left: 0.6rem;
     }
     .tpl-classic .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
+
+     .tpl-classic .content     { max-width: 100%; }
 }
 
 .tpl-classic .p-signedby { color: #666; }
@@ -263,6 +265,7 @@
     .tpl-classic .game-list>article{
         width:550px;
     }
+
 }
 
 .tpl-classic .msg-icon-all {
