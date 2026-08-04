@@ -10,7 +10,10 @@
  * ============================================================================= */
 ?>
 <div class="card archive-page">
-    <h1><?= e(t('archive_title')) ?></h1>
+    <div class="archive-head">
+        <h1><?= e(t('archive_title')) ?></h1>
+        <a class="btn btn-small" href="calendar.php"><?= e(t('archive_to_calendar')) ?></a>
+    </div>
 
     <?php if (!$events): ?>
         <p class="muted"><?= e(t('archive_empty')) ?></p>

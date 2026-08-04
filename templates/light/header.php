@@ -96,6 +96,9 @@ ob_start();
     if (public_archives_enabled() && $here !== 'archive.php') {
         echo nav_link('archive.php', 'archive', t('archive_title'));
     }
+    if (public_archives_enabled() && $here !== 'calendar.php') {
+        echo nav_link('calendar.php', 'calendar', t('calendar_title'));
+    }
     if (is_admin() && $here !== 'admin.php') {          // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'));
     }

@@ -621,6 +621,15 @@ set to anything but `visible`, the other computes `visible` to `auto` — so a
 horizontally-scrolling strip silently grows a vertical scrollbar the moment its
 content is a pixel too tall. Pair it with `overflow-y: hidden`.
 
+**A panel on `--surface` must state `color: var(--text)`.** Themes set
+`body { color: ... }` for text on the PAGE background, which on a dark theme is
+light — so any light-surfaced panel that inherits it gets light-on-light. The
+chat shipped that way in imperial, schematic and schematic-compact at contrast
+1.00 (literally the same colour). `--surface` and `--text` are the designed
+pair; state both together. There is now a test that COMPUTES the contrast for
+every theme rather than trusting a visual check, since three themes were wrong
+at once and only two were noticed.
+
 **Add a translation key.** Both files, same commit.
 
 ---

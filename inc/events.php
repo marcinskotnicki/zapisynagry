@@ -142,6 +142,90 @@ function events_upcoming() {
 }
 
 /**
+ * Every event day falling inside a calendar month, keyed by 'YYYY-MM-DD'.
+ *
+ * Returns a map of date => list of ['id','name'] so the calendar can mark a
+ * cell and link it without a query per day. A multi-day event appears under
+ * EVERY day it covers, which is what a calendar reader expects — an event
+ * running Fri-Sun should be visible on all three.
+ *
+ * Archived events are included: the calendar lives in the archive section and
+ * looking back at what happened is its whole purpose.
+ *
+ * @param int $year
+ * @param int $month  1-12
+ * @return array<string, array<int, array>>
+ */
+function events_by_day($year, $month) {
+    $first = sprintf('%04d-%02d-01', $year, $month);
+    $last  = date('Y-m-t', strtotime($first));
+    $rows  = db_all(
+        "SELECT d.day_date, e.id, e.name
+           FROM event_days d
+           JOIN events e ON e.id = d.event_id
+          WHERE d.day_date BETWEEN ? AND ?
+          ORDER BY d.day_date, e.id", [$first, $last]);
+    $out = [];
+    foreach ($rows as $r) {
+        $out[$r['day_date']][] = ['id' => (int)$r['id'], 'name' => $r['name']];
+    }
+    return $out;
+}
+
+/**
+ * The grid a month calendar needs: whole weeks, Monday-first, including the
+ * trailing days of the previous month and the leading days of the next so the
+ * table is always rectangular.
+ *
+ * Monday-first because the app's audience is Polish and a week starting Sunday
+ * would read wrong; the weekday labels come from the same assumption.
+ *
+ * @param int $year
+ * @param int $month  1-12
+ * @return array  Weeks, each a list of ['date','day','current'].
+ */
+function calendar_weeks($year, $month) {
+    $firstTs = mktime(0, 0, 0, $month, 1, $year);
+    // 'N' is 1 (Mon) .. 7 (Sun); shift so Monday starts the row.
+    $lead    = (int)date('N', $firstTs) - 1;
+    $days    = (int)date('t', $firstTs);
+    $cells   = [];
+
+    for ($i = $lead; $i > 0; $i--) {
+        $ts = mktime(0, 0, 0, $month, 1 - $i, $year);
+        $cells[] = ['date' => date('Y-m-d', $ts), 'day' => (int)date('j', $ts), 'current' => false];
+    }
+    for ($d = 1; $d <= $days; $d++) {
+        $ts = mktime(0, 0, 0, $month, $d, $year);
+        $cells[] = ['date' => date('Y-m-d', $ts), 'day' => $d, 'current' => true];
+    }
+    // Pad to a whole number of weeks.
+    while (count($cells) % 7 !== 0) {
+        $ts = mktime(0, 0, 0, $month, ++$days, $year);
+        $cells[] = ['date' => date('Y-m-d', $ts), 'day' => (int)date('j', $ts), 'current' => false];
+    }
+    return array_chunk($cells, 7);
+}
+
+/**
+ * Clamp a year/month pair, rolling the month into the year when it goes out of
+ * range. Lets the navigation just do month +/- 1 without special-casing
+ * December and January.
+ *
+ * @return array [year, month]
+ */
+function calendar_normalise($year, $month) {
+    $year  = (int)$year;
+    $month = (int)$month;
+    while ($month > 12) { $month -= 12; $year++; }
+    while ($month < 1)  { $month += 12; $year--; }
+    // A sane window: far enough either way for any real club, tight enough that
+    // a hand-edited URL cannot walk the calendar into year 900000.
+    $year = max(1970, min(2200, $year));
+    return [$year, $month];
+}
+
+/**
  * Archive events whose last day ended more than 'auto_archive_days' ago.
  *
  * Only meaningful with public archives on — without it, creating an event

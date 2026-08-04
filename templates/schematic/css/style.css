@@ -768,3 +768,17 @@ body.tpl-schematic {
     .tpl-schematic .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
 }
 
+.tpl-schematic .chat-toggle {
+    background: var(--chan);
+    color: #fff;
+}
+.tpl-schematic .chat-panel {
+    border-right: 1px solid var(--rule);
+}
+.tpl-schematic .chat-head {
+    background: var(--paper-3);
+    border-bottom: 1px solid var(--rule);
+}
+.tpl-schematic .chat-msg-time { color: var(--ink-2); }
+.tpl-schematic .chat-msg-user .chat-msg-name { color: var(--ch4); }
+.tpl-schematic .chat-msg-admin .chat-msg-name { color: var(--ch1); }

@@ -660,3 +660,17 @@ body.tpl-schematic-compact {
     }
 }
 
+.tpl-schematic-compact .chat-toggle {
+    background: var(--chan);
+    color: #fff;
+}
+.tpl-schematic-compact .chat-panel {
+    border-right: 1px solid var(--rule);
+}
+.tpl-schematic-compact .chat-head {
+    background: var(--paper-3);
+    border-bottom: 1px solid var(--rule);
+}
+.tpl-schematic-compact .chat-msg-time { color: var(--ink-2); }
+.tpl-schematic-compact .chat-msg-user .chat-msg-name { color: var(--ch4); }
+.tpl-schematic-compact .chat-msg-admin .chat-msg-name { color: var(--ch1); }

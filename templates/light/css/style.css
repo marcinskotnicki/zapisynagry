@@ -498,11 +498,6 @@ html { scroll-behavior: smooth; }
 
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
     .topbar-prefs { margin-left: 0; }
-
-    .content{
-        padding-left:5px;
-        padding-right:5px;
-    }
 }
 
 /* ---- Chat (shoutbox) -------------------------------------------------------
@@ -548,6 +543,14 @@ body.chat-open .chat-toggle-close { display: inline; }
     display: flex;
     flex-direction: column;
     background: var(--surface);
+    /* MUST be stated, not inherited. Themes set `body { color: ... }` for text
+       on the PAGE background, which on a dark theme is a light colour — while
+       the panel sits on --surface, which is usually light. Inheriting gave
+       light-on-light: imperial, schematic and schematic-compact all rendered
+       chat text at contrast 1.00 (literally the same colour as the panel).
+       --surface and --text are the designed pair, so pinning it here fixes
+       every theme at once, including any added later. */
+    color: var(--text);
     border-right: 1px solid var(--border);
     box-shadow: 2px 0 14px rgba(0, 0, 0, .35);
 }
@@ -641,16 +644,38 @@ body.chat-open .chat-toggle-close { display: inline; }
 .pager-pos { color: var(--text-muted); font-size: 0.85rem; }
 
 .archive-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+/* MOBILE FIRST: a wrapping flex row, which is what a narrow screen wants — the
+   name takes the line and the date follows underneath. The table layout is
+   added back at the breakpoint below. */
 .archive-item {
     display: flex;
     align-items: baseline;
     gap: 0.6rem;
     flex-wrap: wrap;
-    padding: 0.4rem 0;
+    padding: 0.5rem 0;
     border-bottom: 1px solid var(--border);
 }
+.archive-item:first-child { border-top: 1px solid var(--border); }
 .archive-name { font-weight: 700; }
 .archive-date { color: var(--text-muted); font-size: 0.9rem; }
+
+@media (min-width: 701px) {
+    /* On a wide screen the list reads as a table: a fixed name column so every
+       date starts at the same x, and the badge pinned right. Grid rather than a
+       real <table> because the markup is a semantic list of links — turning it
+       into table markup for a purely visual alignment would be worse for
+       anyone using a screen reader. */
+    .archive-item {
+        display: grid;
+        grid-template-columns: minmax(0, 28rem) 12rem 1fr;
+        align-items: baseline;
+        gap: 0 1rem;
+    }
+    /* The name can be long; truncate rather than pushing the date column out of
+       alignment, which is the whole point of the fixed column. */
+    .archive-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .archive-badge { justify-self: start; }
+}
 .archive-badge {
     font-size: 0.72rem;
     text-transform: uppercase;
@@ -661,3 +686,70 @@ body.chat-open .chat-toggle-close { display: inline; }
     padding: 0.05rem 0.35rem;
 }
 .archive-item-closed .archive-name { font-weight: 400; }
+/* The archive is a listing, so it should use the full content column like the
+   event page does, rather than sitting in a narrower card. */
+.card.archive-page { width: auto; max-width: none; }
+
+/* ---- Calendar month view ---------------------------------------------------
+ * A real table, because this IS tabular data — days indexed by weekday. Colours
+ * all come from the theme variables so every theme inherits something coherent
+ * without its own calendar rules.
+ * -------------------------------------------------------------------------- */
+.archive-head { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.archive-head h1 { margin: 0; flex: 1 1 auto; }
+
+.cal-bar { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
+.cal-title { margin: 0; font-size: 1.15rem; text-align: center; flex: 0 1 auto; min-width: 12rem; }
+
+.cal { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cal th {
+    padding: 0.4rem 0.3rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+.cal-cell {
+    /* Fixed height so every week is the same depth whether or not it has
+       events — a calendar whose rows jump about is hard to scan. */
+    height: 5.5rem;
+    vertical-align: top;
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+.cal-day { display: block; font-size: 0.8rem; color: var(--text-muted); }
+/* Days spilling in from the neighbouring months: present for a rectangular
+   grid, but dimmed so the month in focus reads as a block. */
+.cal-outside { background: var(--surface-2); }
+.cal-outside .cal-day { opacity: 0.5; }
+.cal-today .cal-day { font-weight: 700; color: var(--primary); }
+.cal-has { background: var(--surface-2); }
+.cal-ev {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    margin-top: 0.15rem;
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: var(--primary-text);
+    text-decoration: none;
+    /* One line per event, clipped: a long name must not stretch the cell and
+       throw the whole grid out. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cal-ev:hover { text-decoration: none; filter: brightness(1.1); }
+.cal-foot { margin-top: 1rem; }
+
+@media (max-width: 700px) {
+    /* Narrow screens: shorter cells and smaller type, so a week still fits
+       across without a horizontal scrollbar. */
+    .cal-cell { height: 4rem; padding: 0.15rem; }
+    .cal-ev { font-size: 0.65rem; padding: 0.05rem 0.15rem; }
+    .cal th { font-size: 0.65rem; }
+    .cal-title { min-width: 0; font-size: 1rem; }
+}
