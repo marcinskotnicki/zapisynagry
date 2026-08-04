@@ -617,9 +617,13 @@ Each of these has bitten at least once.
   must restate every property the base's hover sets.
 - **Relative URLs.** Every asset path assumes the page lives at `/`.
 - **`hidden` loses to any author `display` rule.** The attribute is only a
-  User-Agent default of `display: none` — an element with its own `display`
-  ignores it entirely. Anything that carries `hidden` and also has a `display`
-  rule needs an explicit `[hidden] { display: none; }` companion.
+  User-Agent default of `display: none`, so an element with its own `display`
+  ignores it entirely. Light's base sheet therefore carries a blanket
+  `[hidden] { display: none !important; }`; the `!important` is deliberate,
+  since it has to beat an author rule of any specificity in any theme. Note
+  that jsdom does NOT reproduce this — it applies the UA rule at author level
+  and reports such elements as correctly hidden, so a DOM test will pass while
+  a real browser shows the element.
 - **Never leave a scrolling strip `justify-content: center`.** Overflow spills
   equally to both sides but `scrollLeft` cannot go below 0, so whatever
   overflows to the LEFT is permanently unreachable. Use `justify-content: safe

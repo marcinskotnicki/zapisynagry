@@ -47,6 +47,8 @@ main { display: flex; flex-direction: column; }
 body.layout-timeline-first .content       { order: 2; }
 body.layout-timeline-first .after-content { order: 1; }
 
+[hidden] { display: none !important; }
+
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -70,6 +72,7 @@ input, select, textarea {
     color: var(--text);
     font-size: 1rem;
 }
+input[type="checkbox"]{width:auto;}
 .field-check label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
 .field-check input { width: auto; }
 
@@ -514,7 +517,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     box-shadow: 2px 0 14px rgba(0, 0, 0, .35);
 }
 
-.chat-panel[hidden] { display: none; }
+
 
 .chat-panel {
     transform: translateX(-100%);
