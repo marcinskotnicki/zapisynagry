@@ -69,7 +69,8 @@ $page_title = $page_title ?? t('app_name');
               // having to infer it from a flag AND the panel's presence. ?>
         <?php if (chat_enabled()): ?>
         window.APP_CHAT = <?= json_encode([
-            'refresh' => chat_refresh_seconds() * 1000,
+            'refresh'   => chat_refresh_seconds() * 1000,
+            'sendDelay' => chat_send_delay() * 1000,
         ], JSON_UNESCAPED_UNICODE) ?>;
         <?php endif; ?>
     </script>

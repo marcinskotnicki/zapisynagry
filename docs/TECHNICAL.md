@@ -564,6 +564,20 @@ the form for any other reason cannot wipe it; clearing requires the
 `<key>__clear` checkbox. Nothing else changes: the feature reads the option
 normally.
 
+**Add an admin tab.** Append the key to `$TABS` in `admin.php`, add it to
+`$tabs` in `templates/light/admin_shell.php` (that array's order is the nav
+order), create `inc/admin/<key>.php` which sets `$tab_body`, and add a
+`tab_<key>` label to both language files. For a tab that belongs to an optional
+feature, gate the `$TABS` entry as well as the nav entry — leaving it in the
+whitelist means the URL still renders the screen when the feature is off.
+
+**Careful with partial POSTs to the Options form in tests.** The save loop
+writes EVERY key it knows about, so a POST carrying one field blanks the value
+options and unticks the toggles it did not carry. Restore what the rest of the
+test depends on, or set it explicitly at the start of the next section — an
+empty `admin_per_page` clamps to one row per page and makes unrelated
+assertions fail for reasons that look nothing like the cause.
+
 **Add a translation key.** Both files, same commit.
 
 **Add a layout toggle that only reorders existing content.** Do it with a body
@@ -612,9 +626,14 @@ Each of these has bitten at least once.
   later `opt()` in that same request sees unless the cache is reloaded.
 - **Stray files in the web root** are publicly reachable and will fatal. Nothing
   belongs in `/` but page controllers.
-- **CSS specificity.** `.btn-danger` once had no `:hover`, so `.btn-small:hover`
-  — same specificity, defined earlier — repainted red buttons grey. A variant
-  must restate every property the base's hover sets.
+- **CSS specificity: a SIZE modifier can eat a COLOUR modifier.** `.btn-small`
+  sets its own background and sits after `.btn-primary` in the file, so at equal
+  specificity it won and repainted every small primary button grey — invisible
+  in themes that override `.btn-primary` with a theme-scoped rule, obvious in
+  the ones that don't. Combinations get their own rule
+  (`.btn-small.btn-primary`) rather than reordering, which would break plain
+  small buttons. The same applies to `:hover`: a variant must restate every
+  property the base's hover sets, or `.btn-small:hover` repaints it.
 - **Relative URLs.** Every asset path assumes the page lives at `/`.
 - **`hidden` loses to any author `display` rule.** The attribute is only a
   User-Agent default of `display: none`, so an element with its own `display`

@@ -284,6 +284,7 @@ $toggle = function($key) {
         $text('chat_max_messages', 'number');      // hard cap; oldest trimmed past this
         $text('chat_initial_messages', 'number');  // shown when the panel opens
         $text('chat_refresh_seconds', 'number');   // poll interval while open
+        $text('chat_send_delay', 'number');        // pause after sending
         ?>
     </fieldset>
 

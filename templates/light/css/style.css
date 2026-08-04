@@ -147,6 +147,10 @@ input[type="checkbox"]{width:auto;}
 
 .btn-small { margin-top: 0; padding: 0.35rem 0.7rem; font-size: 0.85rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 .btn-small:hover { background: var(--border); text-decoration: none; }
+.btn-small.btn-primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+.btn-small.btn-primary:hover { background: var(--primary); color: var(--primary-text); border-color: var(--primary); filter: brightness(0.95); }
+.btn-small.btn-danger { background: var(--error); color: #fff; border-color: var(--error); }
+.btn-small.btn-danger:hover { background: var(--error); color: #fff; border-color: var(--error); filter: brightness(0.9); }
 .btn-danger { background: var(--error); color: #fff; border-color: var(--error); }
 
 .btn-danger:hover { background: var(--error); border-color: var(--error); color: #fff; filter: brightness(0.9); text-decoration: none; }

@@ -105,6 +105,10 @@ INSERT INTO options (key, value) VALUES
     ('chat_max_messages',     '500'),   -- hard cap; oldest trimmed past this
     ('chat_initial_messages', '20'),    -- how many the panel shows on open
     ('chat_refresh_seconds',  '10'),    -- poll interval while the panel is open
+    -- Seconds the send button stays disabled after a post. Aimed at someone
+    -- hammering the button because their message has not appeared yet, not
+    -- at bots; 0 disables the wait entirely.
+    ('chat_send_delay',       '2'),
     -- Public archives. Off by default: switching it on changes how EVENTS
     -- behave (creating a new one no longer archives the old), so it must be a
     -- deliberate choice rather than a surprise on upgrade.

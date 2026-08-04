@@ -57,6 +57,17 @@ function chat_refresh_seconds() {
 }
 
 /**
+ * Seconds the send button stays disabled after posting. Capped rather than
+ * trusted: a large value read straight from the table would leave the button
+ * dead for minutes with no way back short of a reload.
+ *
+ * @return int
+ */
+function chat_send_delay() {
+    return max(0, min(60, opt_int('chat_send_delay')));
+}
+
+/**
  * Newest $limit messages, oldest-first (ready to append to the panel).
  *
  * Ordered DESC in the subquery to use the index and take the NEWEST rows, then

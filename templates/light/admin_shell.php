@@ -25,6 +25,12 @@ $tabs = [
     'archive'    => 'tab_archive',
     'update'     => 'tab_update',
 ];
+// Same condition as admin.php's whitelist: no tab for a feature that is off.
+if (chat_enabled()) {
+    $tabs = array_slice($tabs, 0, 5, true)
+          + ['chat' => 'tab_chat']
+          + array_slice($tabs, 5, null, true);
+}
 ?>
 <div class="admin">
     <h1><?= e(t('admin_panel')) ?></h1>

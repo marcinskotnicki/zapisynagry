@@ -19,6 +19,11 @@ $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (u
 
 // Whitelist of tabs => controller file. The whitelist also blocks path tricks.
 $TABS = ['options', 'new_event', 'thumbnails', 'users', 'mailing', 'logs', 'archive', 'update'];
+// The chat tab exists only while the feature does. Removed from the whitelist
+// rather than merely hidden in the nav, so ?tab=chat on a site with the chat
+// switched off falls through to the default rather than rendering a moderation
+// screen for a feature that is not running.
+if (chat_enabled()) $TABS[] = 'chat';
 
 $tab = $_GET['tab'] ?? 'options';
 if (!in_array($tab, $TABS, true)) $tab = 'options';   // unknown tab -> safe default

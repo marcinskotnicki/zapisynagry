@@ -396,12 +396,31 @@
             });
         }
 
+        // Brief cool-off after sending. This is about someone hammering the
+        // button because their message has not shown up yet, not about bots —
+        // the server-side anti-bot check is the real gate.
+        var sendBtn  = form ? form.querySelector('.chat-send') : null;
+        var coolTimer = null;
+        function coolOff() {
+            var ms = window.APP_CHAT.sendDelay;
+            if (!sendBtn || !ms) return;
+            sendBtn.disabled = true;
+            if (coolTimer) window.clearTimeout(coolTimer);
+            coolTimer = window.setTimeout(function () {
+                sendBtn.disabled = false;
+                coolTimer = null;
+            }, ms);
+        }
+
         if (form) {
             form.addEventListener('submit', function (ev) {
                 ev.preventDefault();
                 showError('');
                 var body = (input.value || '').trim();
+                // Nothing was sent, so nothing to wait for — starting the
+                // cool-off here would punish a stray click on an empty box.
                 if (!body) return;
+                coolOff();
                 var fd = new FormData(form);
                 fetch('chat.php', { method: 'POST', body: fd, credentials: 'same-origin' })
                     .then(function (r) { return r.json(); })
@@ -419,12 +438,25 @@
                             if (ts) ts.value = Math.floor(Date.now() / 1000);
                         } else {
                             var code = d && d.error;
+                            // Refused: release the button at once so they can
+                            // correct it, rather than sitting out a wait for a
+                            // message that never posted.
+                            if (sendBtn) {
+                                if (coolTimer) { window.clearTimeout(coolTimer); coolTimer = null; }
+                                sendBtn.disabled = false;
+                            }
                             showError(code === 'name'  ? fmt(L.chatErrName, '')
                                     : code === 'empty' ? fmt(L.chatErrEmpty, '')
                                     : code === 'long'  ? fmt(L.chatErrLong, '')
                                     : fmt(L.chatFailed, ''));
                         }
-                    })['catch'](function () { showError(fmt(L.chatFailed, '')); });
+                    })['catch'](function () {
+                        if (sendBtn) {
+                            if (coolTimer) { window.clearTimeout(coolTimer); coolTimer = null; }
+                            sendBtn.disabled = false;
+                        }
+                        showError(fmt(L.chatFailed, ''));
+                    });
             });
         }
     }

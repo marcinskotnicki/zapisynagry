@@ -53,6 +53,7 @@ $OPTION_VALUES = [
     'home_layout',  // tables_first|timeline_first; validated below
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
+    'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
@@ -111,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'chat_max_messages':
             case 'chat_initial_messages':
             case 'chat_refresh_seconds':
+            case 'chat_send_delay':
                 // Coerced here, then clamped again at READ time by the helpers
                 // in inc/chat.php — a value that predates this validation, or
                 // one written straight into the table, must not be able to make
