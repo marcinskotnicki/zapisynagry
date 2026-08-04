@@ -514,6 +514,7 @@ html { scroll-behavior: smooth; }
     .poll-option > form.inline .btn { width: 100%; }
 
     .brand-logo img { max-height: 40px; width: auto; max-width: 70px; }
+
 }
 
 /* ---- Chat (shoutbox) -------------------------------------------------------
@@ -649,6 +650,8 @@ body.chat-open .chat-toggle-close { display: inline; }
     body{
         overflow-x:hidden;
     }
+    .main{width:100%;}
+    .content {padding:0;width:100%}
 }
 
 /* ---- Event switcher tabs + pagers ------------------------------------------
