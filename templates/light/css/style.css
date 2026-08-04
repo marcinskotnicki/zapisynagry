@@ -41,7 +41,7 @@ a:hover { text-decoration: underline; }
  * stored file is already downscaled at upload (logo_process(), max 800px
  * longest edge), so this is purely display sizing, not doing real work. */
 .brand-logo { display: inline-flex; align-items: center; }
-.brand-logo img { display: block; height: 28px; width: auto; max-width: 220px; }
+.brand-logo img { display: block; max-height: 70px; width: auto; max-width: 220px; }
 .topnav a { margin-left: 1rem; font-size: 0.8rem; }
 
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
@@ -498,6 +498,8 @@ html { scroll-behavior: smooth; }
 
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
     .topbar-prefs { margin-left: 0; }
+
+    .brand-logo img { max-height: 40px; width: auto; max-width: 70px; }
 }
 
 /* ---- Chat (shoutbox) -------------------------------------------------------
