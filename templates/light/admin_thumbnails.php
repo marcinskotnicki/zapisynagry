@@ -42,6 +42,15 @@
         </figure>
     <?php endforeach; ?>
 </div>
+<?php endif; ?>
+
+<?php // Both sections below are UNCONDITIONAL — deliberately outside the
+      // empty($thumbs) branch above. They were originally written nested
+      // inside that branch's `else`, which meant the site icon upload was
+      // unreachable whenever zero predefined thumbnails existed: a favicon
+      // has nothing to do with whether any thumbnails have been uploaded.
+      // Caught while adding the logo section right beside it, which
+      // inherited the same placement and the same bug. ?>
 <fieldset class="icon-section">
 <legend><?= e(t('icon_section')) ?></legend>
 <p class="muted"><?= e(t('icon_hint')) ?></p>
@@ -70,4 +79,33 @@
 <button type="submit" class="btn btn-primary"><?= e(t('icon_upload')) ?></button>
 </form>
 </fieldset>
+
+<?php // Site logo: shown instead of the venue-name TEXT in the header, only
+      // when show_venue_name is also on — see header.php. Same shape as the
+      // icon section above (preview + delete, or an upload form). ?>
+<fieldset class="logo-section">
+<legend><?= e(t('logo_section')) ?></legend>
+<p class="muted"><?= e(t('logo_hint')) ?></p>
+
+<?php if (opt('site_logo') !== ''): ?>
+<p>
+<img src="logo/logo.png?v=<?= e(opt('site_logo')) ?>" alt="" style="max-height:60px">
+</p>
+<form method="post" action="admin.php?tab=thumbnails" class="inline">
+<?= $csrf ?>
+<input type="hidden" name="action" value="logo_delete">
+<button class="btn btn-small btn-danger"><?= e(t('logo_delete')) ?></button>
+</form>
+<?php else: ?>
+<p class="muted"><?= e(t('logo_none')) ?></p>
 <?php endif; ?>
+
+<form method="post" action="admin.php?tab=thumbnails" enctype="multipart/form-data" class="icon-upload">
+<?= $csrf ?>
+<input type="hidden" name="action" value="logo_upload">
+<div class="field">
+<input type="file" name="logo" accept="image/*" required>
+</div>
+<button type="submit" class="btn btn-primary"><?= e(t('logo_upload')) ?></button>
+</form>
+</fieldset>

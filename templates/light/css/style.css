@@ -36,9 +36,27 @@ a:hover { text-decoration: underline; }
     justify-content: space-between;
 }
 .brand { font-weight: 700; font-size: 0.8rem; color: var(--text); }
+/* Site logo, shown instead of the brand text. Height-capped and width:auto so
+ * any uploaded aspect ratio fits the slim topbar without stretching; the
+ * stored file is already downscaled at upload (logo_process(), max 800px
+ * longest edge), so this is purely display sizing, not doing real work. */
+.brand-logo { display: inline-flex; align-items: center; }
+.brand-logo img { display: block; height: 28px; width: auto; max-width: 220px; }
 .topnav a { margin-left: 1rem; font-size: 0.8rem; }
 
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
+
+/* home_layout: tables/timeline order swap. main becomes a column flex
+ * container so the two top-level pieces (.content, and .after-content when
+ * the day has a timeline) can be reordered by a body class alone — no
+ * template re-render, no duplicated markup. Default order is unchanged
+ * (source order already puts tables first); only the timeline-first body
+ * class overrides it. Safe on every OTHER page too: with a single child
+ * (.content, no .after-content), a column flex container is visually a
+ * no-op — same stacking as plain block flow. */
+main { display: flex; flex-direction: column; }
+body.layout-timeline-first .content       { order: 2; }
+body.layout-timeline-first .after-content { order: 1; }
 
 .card {
     background: var(--surface);

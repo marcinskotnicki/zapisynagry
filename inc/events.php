@@ -91,7 +91,14 @@ function event_tables_full($dayId) {
         }
 
         // --- Polls on this table (loaded with candidates + vote tallies). ---
-        $polls = db_all('SELECT * FROM polls WHERE table_id = ? ORDER BY start_time, id', [$tbl['id']]);
+        // Skipped entirely when polls are switched off: the option already
+        // blocks CREATING one, but without this an admin who turns the feature
+        // off still sees every poll already in flight, which is not "disabled"
+        // in any sense a visitor would recognise. Nothing is deleted — the rows
+        // stay put and reappear if the option is turned back on.
+        $polls = opt_bool('allow_polls')
+            ? db_all('SELECT * FROM polls WHERE table_id = ? ORDER BY start_time, id', [$tbl['id']])
+            : [];
         foreach ($polls as $p) {
             $items[] = ['type' => 'poll', 'start' => $p['start_time'], 'data' => poll_full($p)];
         }

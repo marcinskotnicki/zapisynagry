@@ -103,6 +103,16 @@ $toggle = function($key) {
             </label>
             <p class="field-note"><?= e(t('opt_antibot_honeypot_note')) ?></p>
         </div>
+        <div class="field">
+            <label for="home_layout"><?= e(t('opt_home_layout')) ?></label>
+            <select id="home_layout" name="home_layout">
+                <?php foreach (['tables_first', 'timeline_first'] as $layoutOpt): ?>
+                    <option value="<?= e($layoutOpt) ?>"<?= opt('home_layout') === $layoutOpt ? ' selected' : '' ?>>
+                        <?= e(t('opt_home_layout_' . $layoutOpt)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
         <?php
         // Where the theme / language switchers appear, and whether logged-in
         // users see them in the page chrome at all. Separate from the allow_*
@@ -197,6 +207,17 @@ $toggle = function($key) {
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
         $text('login_days', 'number');                    // persistent-login lifetime; 0 = session only
         ?>
+        <?php // Update source. Pre-filled with the EFFECTIVE repo URL, which is
+              // config.php's GITHUB_* coords until an admin overrides it here —
+              // so a fresh install shows where it actually updates from rather
+              // than an empty box, and a fork can be pointed elsewhere without
+              // editing config.php by hand. Stored empty = keep inheriting. ?>
+        <div class="field">
+            <label for="github_url"><?= e(t('opt_github_url')) ?></label>
+            <input type="url" id="github_url" name="github_url"
+                   value="<?= e(opt('github_url') !== '' ? opt('github_url') : update_repo_url()) ?>">
+            <p class="field-note"><?= e(t('opt_github_url_note')) ?></p>
+        </div>
     </fieldset>
 
     <fieldset>

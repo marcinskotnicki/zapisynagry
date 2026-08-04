@@ -82,6 +82,19 @@ INSERT INTO options (key, value) VALUES
     -- turns the field and the button off everywhere; existing values are kept
     -- in the database but never rendered, so it is reversible.
     ('allow_manual_links',    '1'),
+    -- home_layout: 'tables_first' (default) | 'timeline_first'. Purely a
+    -- visual order swap (flex 'order' in CSS) — the tables list and the
+    -- timeline are always both rendered; this never removes either.
+    ('home_layout',           'tables_first'),
+    -- site_logo: version stamp, '' = no logo uploaded (same convention as
+    -- site_icon). header.php shows logo.png INSTEAD of the venue-name text
+    -- when both this is non-empty AND show_venue_name is on.
+    ('site_logo',             ''),
+    -- github_url: overrides the GITHUB_* coords config.php was installed
+    -- with, for a fork. EMPTY means "use whatever install.php configured",
+    -- which is the right default: seeding a literal URL here would be
+    -- wrong for anyone who entered their own repo during install.
+    ('github_url',            ''),
     ('site_icon',             ''),     -- '' = no site icon; otherwise a version stamp (files live in /icons)
     ('game_languages',        'PL
 EN

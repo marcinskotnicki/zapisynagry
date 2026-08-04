@@ -19,6 +19,64 @@
 $THUMB_DIR = $APP_ROOT . '/thumbnails';   // where processed images live (web-served)
 $MAX_EDGE  = 600;                         // longest-edge cap, in px
 $ICON_DIR  = $APP_ROOT . '/icons';        // favicon + home-screen icons (web-served)
+$LOGO_DIR  = $APP_ROOT . '/logo';         // site logo (web-served)
+
+/**
+ * Process an uploaded SITE LOGO into a single logo.png, preserving aspect
+ * ratio and transparency.
+ *
+ * Deliberately its own function rather than reusing thumb_process() or
+ * icon_process(): thumb_process flattens to JPG (fine for a game cover,
+ * wrong for a logo that likely wants a transparent background against
+ * whichever theme is active), and icon_process centre-crops to a square
+ * (fine for a favicon, wrong for a logo which is very often wider than it
+ * is tall). This one keeps the source's own aspect ratio, downscale-only,
+ * and writes PNG so alpha survives.
+ *
+ * A fixed filename (not a random one like thumb_process's): there is only
+ * ever ONE logo, so nothing needs a unique name, and the caller busts the
+ * browser cache with a ?v= version stamp instead — the same convention
+ * already used for the site icon.
+ *
+ * @param string $tmpPath  The uploaded temp file.
+ * @param string $destDir  Absolute /logo dir.
+ * @param int    $maxEdge  Longest-edge cap (never upscales smaller images).
+ * @return bool            True on success.
+ */
+function logo_process($tmpPath, $destDir, $maxEdge = 800) {
+    $info = @getimagesize($tmpPath);
+    if (!$info) return false;
+    [$w, $h] = $info;
+
+    switch ($info[2]) {
+        case IMAGETYPE_JPEG: $src = @imagecreatefromjpeg($tmpPath); break;
+        case IMAGETYPE_PNG:  $src = @imagecreatefrompng($tmpPath);  break;
+        case IMAGETYPE_GIF:  $src = @imagecreatefromgif($tmpPath);  break;
+        case IMAGETYPE_WEBP: $src = function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($tmpPath) : false; break;
+        default: return false;
+    }
+    if (!$src) return false;
+
+    $scale = min(1.0, $maxEdge / max($w, $h));
+    $nw = max(1, (int)round($w * $scale));
+    $nh = max(1, (int)round($h * $scale));
+
+    // Transparent canvas, unlike thumb_process's white-filled one — a logo
+    // needs to sit on whatever background the active theme has.
+    $dst = imagecreatetruecolor($nw, $nh);
+    imagealphablending($dst, false);
+    imagesavealpha($dst, true);
+    $clear = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+    imagefill($dst, 0, 0, $clear);
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+
+    if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
+    $ok = imagepng($dst, $destDir . '/logo.png');
+
+    imagedestroy($src);
+    imagedestroy($dst);
+    return $ok;
+}
 
 /**
  * Convert + resize one uploaded image into a JPG under $destDir.
@@ -174,6 +232,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         opt_set('site_icon', '');
         log_action('icon_delete', 'Site icon removed');
         $flash = t('icon_deleted');
+
+    } elseif ($action === 'logo_upload') {
+        // Same convention as the site icon: a version stamp in the option
+        // busts the browser cache after a replacement upload.
+        $f = $_FILES['logo'] ?? null;
+        if ($f && ($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK
+               && is_uploaded_file($f['tmp_name'])
+               && logo_process($f['tmp_name'], $LOGO_DIR)) {
+            opt_set('site_logo', (string)time());
+            log_action('logo_upload', 'Site logo updated');
+            $flash = t('logo_saved');
+        } else {
+            $flash = t('logo_invalid');
+        }
+
+    } elseif ($action === 'logo_delete') {
+        $file = $LOGO_DIR . '/logo.png';
+        if (is_file($file)) @unlink($file);
+        opt_set('site_logo', '');
+        log_action('logo_delete', 'Site logo removed');
+        $flash = t('logo_deleted');
 
     } elseif ($action === 'delete') {
         $id  = (int)($_POST['id'] ?? 0);

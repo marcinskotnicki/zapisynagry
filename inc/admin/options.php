@@ -19,6 +19,7 @@
 // require_once here — it's this tab's own dependency.
 require_once __DIR__ . '/../captcha.php';
 require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in the form's note
+require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the update-source field
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -39,6 +40,8 @@ $OPTION_VALUES = [
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
     'antibot_delay_form', 'antibot_delay_click',   // seconds; 0 = off; validated below
     'switcher_pos_template', 'switcher_pos_language',  // header|footer|both|none; validated below
+    'home_layout',  // tables_first|timeline_first; validated below
+    'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -113,6 +116,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Anything else would fall through to "not this slot" in
                 // switcher_visible() and the switcher would silently vanish.
                 if (!in_array($val, ['header', 'footer', 'both', 'none'], true)) continue 2;
+                break;
+            case 'home_layout':
+                // Anything else would fall through to the CSS default (tables
+                // first) anyway, but reject it so the stored value always says
+                // what it means rather than quietly meaning "something else".
+                if (!in_array($val, ['tables_first', 'timeline_first'], true)) continue 2;
+                break;
+            case 'github_url':
+                // Empty is meaningful: it means "inherit whatever install.php
+                // configured", so it must be storable. Anything non-empty has
+                // to be a real http(s) URL — the updater fetches it, and a
+                // malformed value would break self-updating with a download
+                // error rather than anything that points at the cause.
+                $val = trim($val);
+                if ($val !== '' && !preg_match('#^https?://#i', $val)) continue 2;
+                if ($val !== '' && !filter_var($val, FILTER_VALIDATE_URL)) continue 2;
+                $val = rtrim($val, '/');
                 break;
             case 'email_subject_prefix':
                 // Anything else would silently fall through to the venue branch

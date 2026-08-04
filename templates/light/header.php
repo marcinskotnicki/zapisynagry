@@ -59,7 +59,7 @@ $page_title = $page_title ?? t('app_name');
         ], JSON_UNESCAPED_UNICODE) ?>;
     </script>
 </head>
-<body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?>">
+<body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?> layout-<?= opt('home_layout') === 'timeline_first' ? 'timeline-first' : 'tables-first' ?>">
 <?php
 // Build the nav BEFORE deciding whether to draw the bar at all. With the venue
 // name hidden AND accounts set to guest-only, a visitor's top bar can come out
@@ -114,8 +114,17 @@ $hdrLangPick = function_exists('switcher_visible')
     <div class="topbar-inner">
         <?php // Brand (venue name) top-left, unless the admin hid it (when the
               // venue and event names are the same, showing both is redundant).
-              // An empty spacer keeps the nav right-aligned via space-between. ?>
-        <?php if ($showName): ?>
+              // An empty spacer keeps the nav right-aligned via space-between.
+              // If a logo is uploaded AND the venue name would otherwise show,
+              // the logo REPLACES the text — same slot, same link, same "hide
+              // it all" toggle. No logo -> unchanged text behaviour, exactly as
+              // before this feature existed. ?>
+        <?php $logoV = opt('site_logo'); ?>
+        <?php if ($showName && $logoV !== ''): ?>
+            <a class="brand brand-logo" href="index.php">
+                <img src="logo/logo.png?v=<?= e($logoV) ?>" alt="<?= e(opt('venue_name') ?: t('app_name')) ?>">
+            </a>
+        <?php elseif ($showName): ?>
             <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
         <?php else: ?>
             <span class="brand-spacer"></span>

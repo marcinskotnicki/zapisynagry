@@ -462,6 +462,66 @@ name without a matching `?` breaks every insert on that table, and PHP will not
 warn you — it fails at runtime. Both `add_poll.php` and `add_poll_game.php` were
 caught this way during the manual-link work.
 
+**A visual reorder does not need duplicated markup.** home_layout (swap tables
+vs. timeline) is a body class plus `main { display: flex; flex-direction:
+column; }` and two `order` overrides — the HTML is rendered exactly once, in
+exactly one order, always. Needed the timeline's two loose sibling `<section>`s
+(the timeline itself and the mailing-form box) wrapped in one `.after-content`
+div first, so "timeline + its signup box" moves as a single flex item instead
+of splitting apart under independent order values.
+
+**A file that "runs in the caller's scope" can usually still be `require`d
+directly inside a test**, once the test has its own bootstrapped DB and
+options (`tg_setup()` already provides both). Confirmed before reaching for
+anything hackier — regex-extracting one function's source and `eval`-ing it
+was the fallback plan, not needed here. What genuinely cannot be simulated:
+`is_uploaded_file()`, which only returns true for a file that arrived through a
+real multipart POST in the current request — not fakeable via a populated
+`$_FILES` array, in this process or a child one. The pre-existing site-icon
+upload (same shape) has no test coverage of its upload path for that reason;
+the site-logo feature follows the same boundary rather than pretending
+otherwise — the processing function itself (pure, GD-only) is fully covered,
+the surrounding option/header/delete logic is fully covered, only the literal
+multipart-arrival step is not.
+
+**A real bug, found by building something that sits next to it.** The site
+icon's admin section was nested inside `if (empty($thumbs)): ... else: [here]
+endif;` — so it only rendered when at least one predefined thumbnail already
+existed, which has nothing to do with whether a favicon exists. Zero test
+coverage meant it shipped and stayed that way. Caught while adding the site
+logo section right beside it, which inherited the same placement and the same
+bug. Fixed by moving both fieldsets outside that conditional; pinned with a
+fixture that deliberately has zero thumbnails uploaded, and verified by
+briefly re-nesting the bug to confirm the test actually catches it.
+
+**"Disable X" usually means two things, and the create path is the easy half.**
+`allow_polls` already blocked CREATING a poll, and had since it shipped — but
+`event_tables_full()` still loaded every poll already in flight, so an admin
+who switched polls off kept seeing them on the page and in the timeline. Check
+both the write path AND the read path when adding or auditing a feature toggle.
+Hiding is the right behaviour here rather than deleting: the rows stay, and
+turning the option back on restores them untouched.
+
+**Don't seed a "sensible default" into the database when install.php already
+asked the admin.** `github_url` (override the update source, for a fork)
+defaults to EMPTY meaning "inherit config.php's GITHUB_* constants". Seeding
+the upstream URL literally would silently be wrong for anyone who entered
+their own coordinates during install — and would point their updater at
+somebody else's repository. The admin FIELD is pre-filled with the effective
+value so a fresh install still shows where it updates from; empty stays
+storable because empty is a meaningful answer, not a failed save.
+
+**The thumbnails folder is not the source of truth — the database is.** The
+admin panel lists predefined thumbnails from `predefined_thumbnails`, never by
+scanning `/thumbnails`. An image that arrives with the release, or over FTP, is
+on disk and web-servable but invisible in the panel and unusable as a game's
+fallback image until a row points at it. `install.php` step 4b scans the folder
+once at install time and registers whatever it finds, which is what makes a
+thumbnail shipped in the repo actually work. It validates each file with
+`getimagesize()` rather than trusting the extension (a broken `<img>` in every
+game card is worse than a missing sample), skips anything already registered,
+and is non-fatal — a usable install without its sample images beats no install.
+
 **Add a translation key.** Both files, same commit.
 
 ---

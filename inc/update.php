@@ -36,7 +36,7 @@
  * @return string[]
  */
 function update_protected_paths() {
-    return ['config.php', 'data', 'thumbnails', 'icons', 'install.php'];
+    return ['config.php', 'data', 'thumbnails', 'icons', 'logo', 'install.php'];
 }
 
 /**
@@ -251,6 +251,39 @@ function update_columns($pdo, $table) {
 }
 
 /**
+ * The GitHub repository this install updates itself from, as a base URL with
+ * no trailing slash, e.g. "https://github.com/someone/zapisynagry".
+ *
+ * The 'github_url' option wins when set to an http(s) URL; otherwise the
+ * GITHUB_USER/GITHUB_REPO constants config.php was installed with.
+ *
+ * Empty-means-inherit, rather than seeding a literal default into the
+ * database: install.php lets the admin enter their own coordinates, so a
+ * hardcoded seed would silently be wrong for anyone who did — and would then
+ * point their updater at the wrong repository.
+ *
+ * @return string
+ */
+function update_repo_url() {
+    $custom = trim((string)opt('github_url'));
+    if ($custom !== '' && preg_match('#^https?://#i', $custom)) {
+        return rtrim($custom, '/');
+    }
+    return 'https://github.com/' . GITHUB_USER . '/' . GITHUB_REPO;
+}
+
+/**
+ * The "download this branch as a zip" URL the updater actually fetches.
+ * The branch still comes from config.php: a fork changes WHERE the code lives
+ * far more often than it changes which branch is the released one.
+ *
+ * @return string
+ */
+function update_zip_url() {
+    return update_repo_url() . '/archive/refs/heads/' . GITHUB_BRANCH . '.zip';
+}
+
+/**
  * Run the whole update. $root is the app root directory.
  * Returns translated result lines for display (one per action + a final "done").
  *
@@ -261,9 +294,7 @@ function update_run($root) {
     $results = [];
 
     // ---- 1. Download + overlay files ---------------------------------------
-    // Build the GitHub "download this branch as zip" URL from the config coords.
-    $url = 'https://github.com/' . GITHUB_USER . '/' . GITHUB_REPO
-         . '/archive/refs/heads/' . GITHUB_BRANCH . '.zip';
+    $url = update_zip_url();
     // Random temp names so concurrent/retried updates can't collide.
     $zip = $root . '/_update_' . bin2hex(random_bytes(4)) . '.zip';
     if (!update_download($url, $zip)) {

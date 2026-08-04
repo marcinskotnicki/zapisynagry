@@ -292,6 +292,47 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     @chmod($dbFile, 0664);
     $log("Built the database", 'ok');
 
+    // ---- 4b. Register any thumbnails that shipped with the release ----------
+    // The admin panel lists predefined thumbnails from the DATABASE, never by
+    // scanning the folder — so an image that arrives with the release (or that
+    // someone drops in over FTP) exists on disk and is web-servable, but is
+    // invisible in the panel and unusable as a fallback until a row points at
+    // it. Registering them here is what makes a shipped default actually work.
+    //
+    // Idempotent by filename: the table was just created empty, but this same
+    // logic must stay safe if it is ever reused on a non-empty install.
+    try {
+        $thumbDir = $ROOT . '/thumbnails';
+        $seen = [];
+        foreach ($pdo->query('SELECT filename FROM predefined_thumbnails') as $r) {
+            $seen[$r['filename']] = true;
+        }
+        $ins = $pdo->prepare('INSERT INTO predefined_thumbnails (filename) VALUES (?)');
+        $found = 0;
+        foreach (is_dir($thumbDir) ? scandir($thumbDir) : [] as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $abs = $thumbDir . '/' . $item;
+            if (!is_file($abs)) continue;
+            // Must be a real, readable image — getimagesize() rejects a stray
+            // .htaccess, a README, or a truncated file, any of which would
+            // otherwise become a broken <img> in the panel and in game cards.
+            if (@getimagesize($abs) === false) continue;
+            $rel = 'thumbnails/' . $item;   // same shape thumb_process() returns
+            if (isset($seen[$rel])) continue;
+            $ins->execute([$rel]);
+            $seen[$rel] = true;
+            $found++;
+        }
+        if ($found) $log("Registered $found bundled thumbnail(s)", 'ok');
+    } catch (Throwable $ex) {
+        // Non-fatal on purpose: a usable install without its bundled sample
+        // images beats no install at all. The admin can upload them by hand.
+        // Message says "skipped" in its own text because $log() only renders a
+        // status marker for 'ok' — any other class shows an empty column, which
+        // would read as ambiguous rather than as a warning.
+        $log('Skipped bundled thumbnails (' . e($ex->getMessage()) . ') — you can upload them from the admin panel');
+    }
+
     // ---- 5. First admin account + venue name -------------------------------
     try {
         $stmt = $pdo->prepare('INSERT INTO users (email, password_hash, display_name, is_admin) VALUES (?,?,?,1)');

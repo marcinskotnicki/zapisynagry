@@ -13,7 +13,13 @@
  * ============================================================================= */
 ?>
 </div>
-<?= $after_content ?? '' ?>
+<?php // Wrapped in its own element so it is ONE flex item alongside .content —
+      // needed for the home_layout order swap (see .content/.after-content in
+      // style.css). Guarded on non-empty so a page with no timeline (anything
+      // but index.php) never emits a stray empty div. ?>
+<?php if (!empty($after_content)): ?>
+    <div class="after-content"><?= $after_content ?></div>
+<?php endif; ?>
 </main>
 <?php
 // The preference pickers. WHETHER they may switch, WHERE the switcher sits,
