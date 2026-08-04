@@ -335,6 +335,7 @@ body.tpl-corkboard {
 @media (max-width: 1120px) {
     .tpl-corkboard .game-card, .tpl-corkboard .poll-card{min-width:90%;max-width:100%;margin-left:0;margin-right:0;}
 }
+
 @media (max-width: 700px) {
     .tpl-corkboard .game-thumb img { padding: 5px 5px 16px; }
     .tpl-corkboard .game-thumb:has(img)::before { width: 40px; height: 13px; }
@@ -344,25 +345,12 @@ body.tpl-corkboard {
     .tpl-corkboard .game-thumb{flex-direction:row;width:100%;justify-content:center;}
     .tpl-corkboard .game-thumb img{width:35%;}
     .tpl-corkboard .timeline {margin:0;width:100%;}
-}
-
-@media (max-width: 700px) {
     .tpl-corkboard .day-tabs {
         flex-wrap: wrap;
         overflow-x: visible;
         justify-content: center;
     }
-}
 
-
-/* Centering a strip that can also SCROLL makes its leading edge unreachable:
-   overflow spills equally both ways, but scrollLeft cannot go below 0, so the
-   first tabs sit permanently off-screen to the left with no way back.
-   `safe center` is the fix — it centers while everything fits and falls back to
-   start-alignment the moment it would overflow.
-   The media query above it is the fallback for browsers that do not know the
-   `safe` keyword: they drop that declaration as invalid and keep this one. */
-@media (max-width: 700px) {
     .tpl-corkboard .day-tabs { justify-content: flex-start; }
 }
 .tpl-corkboard .day-tabs { justify-content: safe center; }

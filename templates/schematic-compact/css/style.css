@@ -166,7 +166,6 @@ body.tpl-schematic-compact {
         background: rgba(185, 178, 161, .45);
     }
 
-
     .tpl-schematic-compact .sc-actions{flex-basis:auto;}
 
     .tpl-schematic-compact .game-list > .sc-strip::before {

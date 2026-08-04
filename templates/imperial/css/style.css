@@ -518,6 +518,10 @@ body.tpl-imperial {
     outline-offset: 2px;
 }
 
+@media (min-width: 701px) {
+    .tpl-imperial .game-list > article { width: 580px; }
+}
+
 @media (max-width: 700px) {
     .tpl-imperial .game-card { flex-direction: column; width: 100%; }
     .tpl-imperial .gc-players {
@@ -527,20 +531,7 @@ body.tpl-imperial {
     .tpl-imperial .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
     .tpl-imperial .im-seal { right: 4px; top: 1.6rem; margin-top: 30px;}
     .tpl-imperial .event-header h1 { font-size: 1.6rem; letter-spacing: 0.14em; }
-}
-@media (min-width: 701px) {
-    .tpl-imperial .game-list > article { width: 580px; }
-}
 
-
-/* Centering a strip that can also SCROLL makes its leading edge unreachable:
-   overflow spills equally both ways, but scrollLeft cannot go below 0, so the
-   first tabs sit permanently off-screen to the left with no way back.
-   `safe center` is the fix — it centers while everything fits and falls back to
-   start-alignment the moment it would overflow.
-   The media query above it is the fallback for browsers that do not know the
-   `safe` keyword: they drop that declaration as invalid and keep this one. */
-@media (max-width: 700px) {
     .tpl-imperial .day-tabs { justify-content: flex-start; }
 }
 .tpl-imperial .day-tabs { justify-content: safe center; }

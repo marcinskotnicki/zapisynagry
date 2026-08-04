@@ -209,7 +209,6 @@
 .tpl-classic .content .admin    { max-width: 1200px; margin:0px auto; }
 .tpl-classic .topbar-inner { max-width: none; }
 
-
 .tpl-classic .gc-rules.rules-good { color: var(--gc-green); }
 .tpl-classic .gc-rules.rules-mid  { color: #e0c341; }
 .tpl-classic .gc-rules.rules-bad  { color: #ff6b5e; }
@@ -224,19 +223,6 @@
 
 .tpl-classic .gc-info .comment-list li:nth-child(even),
 .tpl-classic .poll-card .comment-list li:nth-child(even) { background: #181818; }
-
-@media (max-width: 700px) {
-    .tpl-classic .game-list>article{
-        width:100%;
-    }
-    .tpl-classic .game-card { flex-direction: column; width:100%}
-    .tpl-classic .gc-players {
-        margin-left: 0; margin-top: 0.5rem;
-        width: 100%; box-sizing: border-box; min-width: 0;
-        padding-left: 0.6rem;
-    }
-    .tpl-classic .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
-}
 
 .tpl-classic .p-signedby { color: #666; }
 
@@ -300,9 +286,18 @@
     width:auto;
 }
 
-
-
 @media (max-width: 700px) {
+    .tpl-classic .game-list>article{
+        width:100%;
+    }
+    .tpl-classic .game-card { flex-direction: column; width:100%}
+    .tpl-classic .gc-players {
+        margin-left: 0; margin-top: 0.5rem;
+        width: 100%; box-sizing: border-box; min-width: 0;
+        padding-left: 0.6rem;
+    }
+    .tpl-classic .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
+
     .tpl-classic .day-tabs { justify-content: flex-start; }
 }
 .tpl-classic .day-tabs { justify-content: safe center; }

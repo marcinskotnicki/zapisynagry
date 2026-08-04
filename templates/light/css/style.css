@@ -36,24 +36,13 @@ a:hover { text-decoration: underline; }
     justify-content: space-between;
 }
 .brand { font-weight: 700; font-size: 0.8rem; color: var(--text); }
-/* Site logo, shown instead of the brand text. Height-capped and width:auto so
- * any uploaded aspect ratio fits the slim topbar without stretching; the
- * stored file is already downscaled at upload (logo_process(), max 800px
- * longest edge), so this is purely display sizing, not doing real work. */
+
 .brand-logo { display: inline-flex; align-items: center; }
 .brand-logo img { display: block; max-height: 70px; width: auto; max-width: 220px; }
 .topnav a { margin-left: 1rem; font-size: 0.8rem; }
 
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
 
-/* home_layout: tables/timeline order swap. main becomes a column flex
- * container so the two top-level pieces (.content, and .after-content when
- * the day has a timeline) can be reordered by a body class alone — no
- * template re-render, no duplicated markup. Default order is unchanged
- * (source order already puts tables first); only the timeline-first body
- * class overrides it. Safe on every OTHER page too: with a single child
- * (.content, no .after-content), a column flex container is visually a
- * no-op — same stacking as plain block flow. */
 main { display: flex; flex-direction: column; }
 body.layout-timeline-first .content       { order: 2; }
 body.layout-timeline-first .after-content { order: 1; }
@@ -402,9 +391,7 @@ html { scroll-behavior: smooth; }
 .tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
 
 .field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; }
-/* Louder than .field-note: this one is warning about a setting that will
-   destroy data, so it must not read as more grey small print. Border rather
-   than a filled background, so it stays legible on the dark themes too. */
+
 .field-warn {
     font-size: 0.82rem;
     color: var(--error);
@@ -487,44 +474,6 @@ html { scroll-behavior: smooth; }
     margin: 0;
 }
 
-@media (max-width: 700px) {
-
-    .day-tab       { font-size: 0.95rem; }
-    .day-tab-date  { font-size: 0.80rem; }
-    .day-tab-hours { font-size: 0.68rem; }
-
-    .day-tabs {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        /* Same pin as .event-tabs: setting one axis to a value other than
-           `visible` makes the OTHER compute `visible` to `auto`, so overflow-x
-           alone silently allows a vertical scrollbar the moment a tab is a
-           pixel taller than the row. Not currently visible anywhere, but these
-           two strips behave alike and a theme's padding could trigger it. */
-        overflow-y: hidden;
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-    }
-    .day-tab { flex: 0 0 auto; }
-
-    .poll-option { flex-wrap: wrap; row-gap: 0.3rem; }
-    .poll-option > .btn,
-    .poll-option > form.inline { flex: 1 0 100%; margin-top: 0.1rem; }
-    .poll-option > form.inline .btn { width: 100%; }
-
-    .brand-logo img { max-height: 40px; width: auto; max-width: 70px; }
-
-}
-
-/* ---- Chat (shoutbox) -------------------------------------------------------
- * Slide-out panel on the left. Fixed-position and outside the page flow, so it
- * never reflows the content behind it — opening the chat must not move the
- * thing someone was reading.
- *
- * Colours come from the theme variables throughout, so all ten themes inherit
- * something coherent without needing their own chat rules.
- * -------------------------------------------------------------------------- */
 .chat-toggle {
     position: fixed;
     left: 0;
@@ -543,8 +492,7 @@ html { scroll-behavior: smooth; }
     line-height: 1;
 }
 .chat-toggle-close { display: none; }
-/* The toggle rides the panel's edge when open, so one control does both jobs
-   without the icon ever sitting on top of the panel it opened. */
+
 body.chat-open .chat-toggle { left: 500px; }
 body.chat-open .chat-toggle-open  { display: none; }
 body.chat-open .chat-toggle-close { display: inline; }
@@ -560,30 +508,14 @@ body.chat-open .chat-toggle-close { display: inline; }
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    /* MUST be stated, not inherited. Themes set `body { color: ... }` for text
-       on the PAGE background, which on a dark theme is a light colour — while
-       the panel sits on --surface, which is usually light. Inheriting gave
-       light-on-light: imperial, schematic and schematic-compact all rendered
-       chat text at contrast 1.00 (literally the same colour as the panel).
-       --surface and --text are the designed pair, so pinning it here fixes
-       every theme at once, including any added later. */
+
     color: var(--text);
     border-right: 1px solid var(--border);
     box-shadow: 2px 0 14px rgba(0, 0, 0, .35);
 }
-/* NO-JS FALLBACK ONLY. `hidden` is merely a User-Agent default of
-   `display: none`, so any author `display` declaration beats it — hence the
-   explicit rule. scripts.js strips the attribute on init and drives the panel
-   with .is-open from then on, because `display` cannot be animated and this
-   rule would kill the slide. Without JS the panel simply stays shut, which is
-   correct: the toggle needs JS anyway. */
+
 .chat-panel[hidden] { display: none; }
 
-/* Closed state once JS is in charge. Slid out rather than removed, so the
-   transform can animate; `visibility` still goes hidden so a closed panel is
-   not focusable or read aloud, and its transition is DELAYED by the slide
-   duration on the way out (and zero on the way in) so it does not blink away
-   before the movement finishes. */
 .chat-panel {
     transform: translateX(-100%);
     visibility: hidden;
@@ -594,8 +526,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     visibility: visible;
     transition: transform 0.22s ease, visibility 0s linear 0s;
 }
-/* The toggle rides the panel edge, so it has to move at the same rate or the
-   two visibly disagree mid-slide. */
+
 .chat-toggle { transition: left 0.22s ease; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -604,8 +535,6 @@ body.chat-open .chat-toggle-close { display: inline; }
 .chat-head { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
 .chat-title { margin: 0; font-size: 1rem; }
 
-/* The log takes all remaining height; only it scrolls, so the composer stays
-   put while messages move. */
 .chat-log {
     flex: 1 1 auto;
     overflow-y: auto;
@@ -615,8 +544,7 @@ body.chat-open .chat-toggle-close { display: inline; }
 .chat-earlier { display: block; margin: 0 auto 0.6rem; }
 .chat-msg { margin: 0 0 0.35rem; font-size: 0.88rem; line-height: 1.35; word-wrap: break-word; overflow-wrap: anywhere; }
 .chat-msg-name { font-weight: 700; }
-/* Three tiers, as specified: guest, registered, admin. Registered and admin
-   take the theme's own accent colours rather than invented ones. */
+
 .chat-msg-user  .chat-msg-name { color: var(--primary); }
 .chat-msg-admin .chat-msg-name { color: var(--error); }
 .chat-msg-time { color: var(--text-muted); font-size: 0.8rem; }
@@ -636,69 +564,25 @@ body.chat-open .chat-toggle-close { display: inline; }
 .chat-send { flex: 0 0 auto; }
 .chat-error { margin: 0; color: var(--error); font-size: 0.82rem; }
 
-@media (max-width: 700px) {
-    /* Full screen on a phone: a 500px drawer would be most of the viewport
-       anyway, and a partly-covered page behind it is just noise. */
-    .chat-panel { width: 100%; }
-    /* The toggle moves to the RIGHT edge when open, per the spec — at the left
-       it would sit on top of the panel's own content. */
-    body.chat-open .chat-toggle {
-        left: auto;
-        right: 0;
-        border-radius: 6px 0 0 6px;
-    }
-    body{
-        overflow-x:hidden;
-    }
-    .main{width:100%;}
-    .content {padding:0;width:100%}
-}
-
-/* ---- Event switcher tabs + pagers ------------------------------------------
- * The switcher REUSES the day-tab classes (.day-tabs / .day-tab /
- * .day-tab-active / .day-tab-date) so it inherits whatever each theme already
- * does with them — eight of the ten restyle those heavily, and a separate set
- * of class names would have left the switcher looking foreign on every one of
- * them until each was updated by hand.
- *
- * What follows is ONLY what genuinely differs from a day tab: a row of events
- * can be much longer than a row of days, so it scrolls sideways instead of
- * wrapping onto extra lines.
- * -------------------------------------------------------------------------- */
 .event-tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
-    /* Required, not belt-and-braces: per spec, when one axis is set to a value
-       other than `visible` the OTHER axis computes `visible` to `auto` — so
-       `overflow-x: auto` alone silently makes overflow-y `auto` too, and any
-       tab a pixel taller than the strip produces a vertical scrollbar. Some
-       themes give their day tabs enough padding to trigger exactly that. */
+
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
 }
-/* Must not shrink, or flex squeezes the tabs to fit instead of overflowing —
- * the same trap the day tabs hit on mobile. */
+
 .event-tab { flex: 0 0 auto; }
-/* Smaller than the DATE beneath it, deliberately inverting the usual
-   name-over-detail hierarchy: on a switcher the date is what someone is
-   actually picking by. The name inherits .day-tab's 1.05rem otherwise, which
-   made it the loudest thing on the strip. */
+
 .event-tab-name { white-space: nowrap; font-size: 0.78rem; }
-/* Must sit AFTER the base rule above, not in the earlier mobile block: a media
-   query adds no specificity, so an override placed higher in the file just
-   loses to it and silently does nothing. */
-@media (max-width: 700px) {
-    .event-tab-name { font-size: 0.72rem; }   /* stays under the date's 0.80 */
-}
+
 .event-tabs .day-tab-date { white-space: nowrap; }
 
 .pager { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; }
 .pager-pos { color: var(--text-muted); font-size: 0.85rem; }
 
 .archive-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
-/* MOBILE FIRST: a wrapping flex row, which is what a narrow screen wants — the
-   name takes the line and the date follows underneath. The table layout is
-   added back at the breakpoint below. */
+
 .archive-item {
     display: flex;
     align-items: baseline;
@@ -712,19 +596,14 @@ body.chat-open .chat-toggle-close { display: inline; }
 .archive-date { color: var(--text-muted); font-size: 0.9rem; }
 
 @media (min-width: 701px) {
-    /* On a wide screen the list reads as a table: a fixed name column so every
-       date starts at the same x, and the badge pinned right. Grid rather than a
-       real <table> because the markup is a semantic list of links — turning it
-       into table markup for a purely visual alignment would be worse for
-       anyone using a screen reader. */
+
     .archive-item {
         display: grid;
         grid-template-columns: minmax(0, 28rem) 12rem 1fr;
         align-items: baseline;
         gap: 0 1rem;
     }
-    /* The name can be long; truncate rather than pushing the date column out of
-       alignment, which is the whole point of the fixed column. */
+
     .archive-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .archive-badge { justify-self: start; }
 }
@@ -738,15 +617,9 @@ body.chat-open .chat-toggle-close { display: inline; }
     padding: 0.05rem 0.35rem;
 }
 .archive-item-closed .archive-name { font-weight: 400; }
-/* The archive is a listing, so it should use the full content column like the
-   event page does, rather than sitting in a narrower card. */
+
 .card.archive-page { width: auto; max-width: none; }
 
-/* ---- Calendar month view ---------------------------------------------------
- * A real table, because this IS tabular data — days indexed by weekday. Colours
- * all come from the theme variables so every theme inherits something coherent
- * without its own calendar rules.
- * -------------------------------------------------------------------------- */
 .archive-head { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .archive-head h1 { margin: 0; flex: 1 1 auto; }
 
@@ -763,8 +636,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     border-bottom: 1px solid var(--border);
 }
 .cal-cell {
-    /* Fixed height so every week is the same depth whether or not it has
-       events — a calendar whose rows jump about is hard to scan. */
+
     height: 5.5rem;
     vertical-align: top;
     padding: 0.3rem;
@@ -772,8 +644,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     overflow: hidden;
 }
 .cal-day { display: block; font-size: 0.8rem; color: var(--text-muted); }
-/* Days spilling in from the neighbouring months: present for a rectangular
-   grid, but dimmed so the month in focus reads as a block. */
+
 .cal-outside { background: var(--surface-2); }
 .cal-outside .cal-day { opacity: 0.5; }
 .cal-today .cal-day { font-weight: 700; color: var(--primary); }
@@ -788,8 +659,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     background: var(--primary);
     color: var(--primary-text);
     text-decoration: none;
-    /* One line per event, clipped: a long name must not stretch the cell and
-       throw the whole grid out. */
+
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -797,9 +667,42 @@ body.chat-open .chat-toggle-close { display: inline; }
 .cal-ev:hover { text-decoration: none; filter: brightness(1.1); }
 .cal-foot { margin-top: 1rem; }
 
+.nav-burger { display: none; }
+
 @media (max-width: 700px) {
-    /* Narrow screens: shorter cells and smaller type, so a week still fits
-       across without a horizontal scrollbar. */
+    .day-tab       { font-size: 0.95rem; }
+    .day-tab-date  { font-size: 0.80rem; }
+    .day-tab-hours { font-size: 0.68rem; }
+
+    .day-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .day-tab { flex: 0 0 auto; }
+
+    .poll-option { flex-wrap: wrap; row-gap: 0.3rem; }
+    .poll-option > .btn,
+    .poll-option > form.inline { flex: 1 0 100%; margin-top: 0.1rem; }
+    .poll-option > form.inline .btn { width: 100%; }
+
+    .brand-logo img { max-height: 40px; width: auto; max-width: 70px; }
+    .chat-panel { width: 100%; }
+
+    body.chat-open .chat-toggle {
+        left: auto;
+        right: 0;
+        border-radius: 6px 0 0 6px;
+    }
+    body{
+        overflow-x:hidden;
+    }
+    .main{width:100%;}
+    .content {padding:0;width:100%}
+    .event-tab-name { font-size: 0.72rem; }
     .cal-cell { height: 4rem; padding: 0.15rem; }
     .cal-ev { font-size: 0.65rem; padding: 0.05rem 0.15rem; }
     .cal th { font-size: 0.65rem; }
@@ -807,15 +710,7 @@ body.chat-open .chat-toggle-close { display: inline; }
     .game-card{flex-direction:column;}
     .game-card .game-thumb{width:100%;}
     .game-card .game-thumb img{width:70%;}
-}
 
-/* ---- Mobile navigation (hamburger) -----------------------------------------
- * Desktop is unchanged: the burger is hidden and .topnav is the same inline row
- * it always was. Only below the breakpoint does the nav collapse into a panel.
- * -------------------------------------------------------------------------- */
-.nav-burger { display: none; }
-
-@media (max-width: 700px) {
     .nav-burger {
         display: inline-flex;
         align-items: center;
@@ -829,8 +724,7 @@ body.chat-open .chat-toggle-close { display: inline; }
         border-radius: var(--radius);
         color: var(--text);
     }
-    /* The three bars, drawn from one element: the middle is the box itself and
-       the outer two are its before/after, so there is no extra markup. */
+
     .nav-burger-bars,
     .nav-burger-bars::before,
     .nav-burger-bars::after {
@@ -846,23 +740,12 @@ body.chat-open .chat-toggle-close { display: inline; }
     .nav-burger-bars::before { top: -6px; }
     .nav-burger-bars::after  { top: 6px; }
 
-    /* The panel. Full width on its own row, so the links get real tap targets
-       instead of being squeezed alongside the brand. */
-    /* The bar itself stays a single line: brand, switchers, burger. Wrapping
-       is still ENABLED because the nav panel below needs to drop onto its own
-       row when open — so the three inline items are made shrinkable instead,
-       which is what actually keeps them from wrapping. */
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
 
-    /* Brand shrinks rather than shoving the switchers onto a second row.
-       min-width:0 is the part that matters: a flex item will not shrink below
-       its content's intrinsic width without it, whatever flex-shrink says. */
     .brand, .brand-logo { order: 1; flex: 0 1 auto; min-width: 0; overflow: hidden; }
     .brand { text-overflow: ellipsis; white-space: nowrap; }
     .brand-spacer { order: 1; flex: 0 1 auto; }
 
-    /* Switchers sit inline next to the brand, and wrap INTERNALLY (two selects
-       stacking) before the header row itself gives way. */
     .topbar-prefs {
         order: 2;
         flex: 0 1 auto;
@@ -874,8 +757,6 @@ body.chat-open .chat-toggle-close { display: inline; }
     }
     .topbar-prefs select { min-width: 0; max-width: 8rem; }
 
-    /* The burger never shrinks — it is the control that reveals everything
-       else, so it must stay a full tap target at any width. */
     .nav-burger { order: 3; flex: 0 0 auto; margin-left: 0.4rem; }
 
     .topnav {
@@ -893,26 +774,11 @@ body.chat-open .chat-toggle-close { display: inline; }
         padding: 0.6rem 0.2rem;
         border-bottom: 1px solid var(--border);
     }
-    /* Icon-only mode would give a column of bare glyphs with no labels here,
-       which is unreadable as a menu — show the icon inline and let the text
-       carry the meaning. */
+
     .topnav a.nav-icononly { text-align: left; }
 
 }
 
-/* ---- Scroll affordance for the tab strips ----------------------------------
- * Both the day tabs and the event tabs can overflow sideways. Without a cue
- * there is nothing telling anyone the row continues past the edge — especially
- * on a phone, where there is no scrollbar to notice.
- *
- * The arrows are on the WRAPPER, not the scroller: the <nav> is the scrolling
- * box, so anything positioned inside it scrolls away with the tabs it is meant
- * to point past.
- *
- * The classes come from JS (initTabScroll), because CSS cannot ask whether an
- * element overflows — so the cue appears ONLY when there is really something to
- * scroll to, and disappears again at each end.
- * -------------------------------------------------------------------------- */
 .tab-scroll { position: relative; }
 .tab-scroll::before,
 .tab-scroll::after {
@@ -921,12 +787,10 @@ body.chat-open .chat-toggle-close { display: inline; }
     top: 0;
     bottom: 0;
     width: 2.2rem;
-    pointer-events: none;   /* never swallow a tap meant for a tab underneath */
+    pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s ease;
-    /* A fade plus a chevron: the gradient says "more content", the arrow says
-       which way. currentColor keeps both legible on every theme without any
-       theme needing its own rule. */
+
     background-repeat: no-repeat;
     background-position: center;
     background-size: 0.6rem 0.6rem;

@@ -177,10 +177,25 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Nine themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard**, **elvish**, **space**, **steampunk**, **imperial**
-and **schematic**. They're discovered by directory glob, so creating a folder
-registers one — there is no list to update.
+Ten themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+**classic**, **corkboard**, **elvish**, **space**, **steampunk**, **imperial**,
+**schematic** and **schematic-compact**. They're discovered by directory glob,
+so creating a folder registers one — there is no list to update.
+
+**One `@media` block per condition per file.** Duplicates are legal but make
+the cascade hard to follow, and a media query adds no specificity — so which of
+two equal-specificity rules wins depends purely on source order. When merging
+blocks, keep the LAST block's position and prepend the earlier ones' contents,
+which preserves relative order; merging into an earlier position moves rules
+before base rules they were meant to override.
+
+**House style: CSS files carry no comments.** They are served to every visitor,
+so anything explaining a rule is dead weight on the wire and readable by anyone.
+Explanation belongs in PHP, which is not served — comment there generously, and
+describe how something WORKS rather than what changed about it. JavaScript is
+also served, so keep its comments to brief labels. This applies when editing an
+existing stylesheet too: strip any comments in the file you touch rather than
+adding to them.
 
 `tpl_file()` resolves a name against the active theme first, then falls back to
 light. So a theme only needs the files it wants to change: `dark/` is a

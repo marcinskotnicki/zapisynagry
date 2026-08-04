@@ -534,6 +534,10 @@ body.tpl-steampunk {
     outline-offset: 2px;
 }
 
+@media (min-width: 701px) {
+    .tpl-steampunk .game-list > article { width: 550px; }
+}
+
 @media (max-width: 700px) {
     .tpl-steampunk .game-card { flex-direction: column; width: 100%; }
     .tpl-steampunk .gc-players {
@@ -542,20 +546,7 @@ body.tpl-steampunk {
     }
     .tpl-steampunk .gc-info { width: 100%; flex-basis: auto; box-sizing: border-box; }
     .tpl-steampunk .event-header h1 { font-size: 1.6rem; }
-}
-@media (min-width: 701px) {
-    .tpl-steampunk .game-list > article { width: 550px; }
-}
 
-
-/* Centering a strip that can also SCROLL makes its leading edge unreachable:
-   overflow spills equally both ways, but scrollLeft cannot go below 0, so the
-   first tabs sit permanently off-screen to the left with no way back.
-   `safe center` is the fix — it centers while everything fits and falls back to
-   start-alignment the moment it would overflow.
-   The media query above it is the fallback for browsers that do not know the
-   `safe` keyword: they drop that declaration as invalid and keep this one. */
-@media (max-width: 700px) {
     .tpl-steampunk .day-tabs { justify-content: flex-start; }
 }
 .tpl-steampunk .day-tabs { justify-content: safe center; }
