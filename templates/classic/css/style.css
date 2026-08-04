@@ -205,7 +205,7 @@
 .tpl-classic .gc-info .msg-icon { color: #ffb3ab; }
 .tpl-classic .gc-players .msg-icon { color: var(--gc-red); }
 
-.tpl-classic .content     { max-width: none; }
+.tpl-classic .content     { max-width: none; width:100%;}
 .tpl-classic .topbar-inner { max-width: none; }
 
 .tpl-classic .gc-rules.rules-good { color: var(--gc-green); }
