@@ -865,6 +865,10 @@ body.chat-open .chat-toggle-close { display: inline; }
 .opt-group-note { font-weight: 400; font-size: 0.82rem; color: var(--text-muted); }
 .opt-group-body { padding: 0.9rem; }
 
+.archive-actions a, .archive-actions button{
+    margin:2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .chat-panel, .chat-panel.is-open, .chat-toggle { transition: none; }
 
