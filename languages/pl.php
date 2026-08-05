@@ -368,7 +368,7 @@ return [
     'opt_group_archive_note'         => '— dotyczy tylko włączonego archiwum',
     'opt_group_chat_note'            => '— dotyczy tylko włączonego czatu',
     'opt_public_archives'            => 'Publiczne archiwum wydarzeń',
-    'opt_public_archives_note'       => 'Dodaje stronę Archiwum z listą wszystkich wydarzeń oraz zakładki wydarzeń na stronie głównej. Gdy ta opcja jest włączona, utworzenie nowego wydarzenia nie archiwizuje poprzedniego — dawne wydarzenia pozostają otwarte do edycji, dopóki nie zarchiwizujesz ich ręcznie.',
+    'opt_public_archives_note'       => 'Dodaje stronę Archiwum z listą wszystkich wydarzeń oraz zakładki wydarzeń na stronie głównej. Pozwala też prowadzić kilka wydarzeń jednocześnie: gdy ta opcja jest włączona, utworzenie nowego wydarzenia nie archiwizuje poprzedniego, a dawne wydarzenia pozostają otwarte do edycji, dopóki nie zarchiwizujesz ich ręcznie. Przy wyłączonej opcji aplikacja utrzymuje jedno bieżące wydarzenie i archiwizuje poprzednie automatycznie przy tworzeniu nowego.',
     'opt_archive_per_page'           => 'Wydarzeń na stronę (publiczne archiwum)',
     'opt_admin_per_page'             => 'Wierszy na stronę (listy w panelu)',
     'opt_auto_archive_days'          => 'Automatyczna archiwizacja po (dniach, 0 = nigdy)',

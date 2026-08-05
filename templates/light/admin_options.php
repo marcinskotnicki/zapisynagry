@@ -142,7 +142,15 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('allow_polls');
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
         $toggle('allow_discussions');
-        $toggle('public_archives');
+        ?>
+        <?php // This one changes an INVARIANT, not just a view: with it off the
+              // app holds exactly one live event and creating a new one archives
+              // the previous automatically. Worth saying on the screen, because
+              // an admin who wants two events at once has no way to guess that
+              // this is the setting that allows it. ?>
+        <?php $toggle('public_archives'); ?>
+        <p class="field-note"><?= e(t('opt_public_archives_note')) ?></p>
+        <?php
         $toggle('chat_enabled');
         $toggle('mailing_list');
         $toggle('send_emails');       // master switch for notifications

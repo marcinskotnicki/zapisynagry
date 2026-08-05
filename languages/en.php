@@ -376,7 +376,7 @@ return [
     'opt_group_archive_note'         => '— only applies when the archive is enabled',
     'opt_group_chat_note'            => '— only applies when the chat is enabled',
     'opt_public_archives'            => 'Public archive of events',
-    'opt_public_archives_note'       => 'Adds an Archive page listing every event, and event tabs on the home page. While this is on, creating a new event no longer archives the previous one — past events stay open for edits until you archive them yourself.',
+    'opt_public_archives_note'       => 'Adds an Archive page listing every event, and event tabs on the home page. It also lets several events run at the same time: while this is on, creating a new event no longer archives the previous one, and past events stay open for edits until you archive them yourself. With it off, the app keeps a single live event and archives the previous one automatically whenever you create a new one.',
     'opt_archive_per_page'           => 'Events per page (public archive)',
     'opt_admin_per_page'             => 'Rows per page (admin lists)',
     'opt_auto_archive_days'          => 'Auto-archive events after (days, 0 = never)',
