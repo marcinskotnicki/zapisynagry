@@ -57,10 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'demote':
-                // Don't let the last USABLE admin be demoted into a lockout
-                // (blocked admins can't reach the panel, so they don't count).
+                // Two guards, matching 'block' above. Demoting YOURSELF is
+                // refused outright: with a second admin present the last-admin
+                // check below would allow it, and you would drop out of the
+                // panel mid-click and need someone else to let you back in.
+                // Removing another admin's rights is still fine.
+                $me = current_user();
                 $admins = (int)db_val('SELECT COUNT(*) FROM users WHERE is_admin = 1 AND is_blocked = 0');
-                if ((int)$target['is_admin'] === 1 && (int)$target['is_blocked'] === 0 && $admins <= 1) {
+                if ($me && (int)$me['id'] === $userId) {
+                    $flash = t('users_cannot_demote_self');
+                } elseif ((int)$target['is_admin'] === 1 && (int)$target['is_blocked'] === 0 && $admins <= 1) {
+                    // Still needed: the last usable admin may be someone else.
                     $flash = t('users_last_admin');
                 } else {
                     db_run('UPDATE users SET is_admin = 0 WHERE id = ?', [$userId]);
@@ -137,8 +144,11 @@ $users   = db_all(
        FROM users ORDER BY display_name COLLATE NOCASE LIMIT ? OFFSET ?',
     [$perPage, ($page - 1) * $perPage]);
 
+$me = current_user();
 $tab_body = tpl_capture('admin_users', [
     'csrf'  => csrf_field(),
+    // So the template can withhold the self-targeting controls.
+    'me_id' => $me ? (int)$me['id'] : 0,
     'users' => $users,
     'page'  => $page,
     'pages' => $pages,
