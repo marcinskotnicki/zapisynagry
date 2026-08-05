@@ -175,8 +175,14 @@ input[type="checkbox"]{width:auto;}
 
 .log-filter { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
 .log-filter select { width: auto; min-width: 14rem; }
-.link-cell > .link-cell-inner { display: flex; gap: 0.4rem; align-items: center; }
 .link-cell input { font-size: 0.8rem; }
+
+.archive-status { font-weight: 700; }
+.archive-row-current > td { background: rgba(21, 127, 59, 0.16); }
+.archive-row-deleted > td { background: rgba(192, 57, 43, 0.16); }
+.archive-row-deleted .archive-name,
+.archive-row-deleted td:first-child { opacity: 0.75; }
+.link-cell .copy-btn { margin-top: 0.3rem; }
 
 .event-header{
     padding-bottom:10px;

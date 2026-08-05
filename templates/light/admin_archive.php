@@ -27,31 +27,28 @@
     <tbody>
     <?php foreach ($events as $ev): ?>
         <?php $link = $base . urlencode($ev['access_token']); // full shareable URL for this event ?>
-        <tr<?= (int)$ev['is_deleted'] === 1 ? ' class="archive-row-deleted"' : '' ?>>
+        <?php
+        // Deleted outranks archived: a deleted event is always archived too, so
+        // reporting "archived" would hide the state that actually matters.
+        $state = (int)$ev['is_deleted'] === 1 ? 'deleted'
+               : ((int)$ev['is_archived'] === 0 ? 'current' : 'archived');
+        $stateLabel = $state === 'deleted' ? t('archive_deleted')
+                    : ($state === 'current' ? t('archive_current') : t('archive_archived'));
+        ?>
+        <tr class="archive-row archive-row-<?= e($state) ?>">
             <td><?= e($ev['name']) ?></td>
-            <td>
-                <?php // Deleted outranks archived in the label: a deleted event is
-                      // always archived too, so showing "archived" would hide the
-                      // state that actually matters. ?>
-                <?= (int)$ev['is_deleted'] === 1
-                        ? e(t('archive_deleted'))
-                        : ((int)$ev['is_archived'] === 0
-                            ? e(t('archive_current'))
-                            : e(t('archive_archived'))) ?>
-            </td>
+            <td class="archive-status archive-status-<?= e($state) ?>"><?= e($stateLabel) ?></td>
             <td class="nowrap"><?= e($ev['created_at']) ?></td>
             <td class="link-cell">
-                <?php // The flex row goes on an inner div, never on the <td>:
-                      // display:flex replaces display:table-cell, which drops the
-                      // cell out of the row's height calculation — it then sizes
-                      // to its own content and its bottom border lands above the
-                      // neighbouring cells', breaking the row lines. ?>
-                <div class="link-cell-inner">
-                    <input type="text" readonly value="<?= e($link) ?>" id="lnk<?= (int)$ev['id'] ?>">
-                    <button type="button" class="btn btn-small copy-btn" data-copy-target="lnk<?= (int)$ev['id'] ?>">
-                        <?= e(t('copy')) ?>
-                    </button>
-                </div>
+                <?php // Input then button on the line below. No flex anywhere near
+                      // the cell: display:flex on a <td> replaces display:table-cell
+                      // and drops it out of the row's height calculation, which is
+                      // what was breaking the row borders here. The input already
+                      // fills the cell, so the button wraps on its own. ?>
+                <input type="text" readonly value="<?= e($link) ?>" id="lnk<?= (int)$ev['id'] ?>">
+                <button type="button" class="btn btn-small copy-btn" data-copy-target="lnk<?= (int)$ev['id'] ?>">
+                    <?= e(t('copy')) ?>
+                </button>
             </td>
             <td class="archive-actions">
                 <?php $isDeleted = (int)$ev['is_deleted'] === 1; ?>
