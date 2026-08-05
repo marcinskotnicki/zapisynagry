@@ -165,7 +165,7 @@ function events_by_day($year, $month) {
     $first = sprintf('%04d-%02d-01', $year, $month);
     $last  = date('Y-m-t', strtotime($first));
     $rows  = db_all(
-        "SELECT d.day_date, e.id, e.name
+        "SELECT d.day_date, d.day_index, e.id, e.name
            FROM event_days d
            JOIN events e ON e.id = d.event_id
           WHERE d.day_date BETWEEN ? AND ?
@@ -173,7 +173,16 @@ function events_by_day($year, $month) {
           ORDER BY d.day_date, e.id", [$first, $last]);
     $out = [];
     foreach ($rows as $r) {
-        $out[$r['day_date']][] = ['id' => (int)$r['id'], 'name' => $r['name']];
+        // day_index comes from the row the cell was built from, so a click on
+        // the 14th lands on the 14th rather than on the event's first day.
+        // Taken from the joined row rather than derived from the date, so a
+        // legacy event whose indexes are not yet in date order still links to
+        // the right one.
+        $out[$r['day_date']][] = [
+            'id'   => (int)$r['id'],
+            'name' => $r['name'],
+            'day'  => (int)$r['day_index'],
+        ];
     }
     return $out;
 }

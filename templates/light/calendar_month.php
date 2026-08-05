@@ -56,7 +56,7 @@
                                   // two clubs sharing a date is normal, and one
                                   // link would hide the other. ?>
                             <?php foreach ($evs as $ev): ?>
-                                <a class="cal-ev" href="index.php?event=<?= (int)$ev['id'] ?>"
+                                <a class="cal-ev" href="index.php?event=<?= (int)$ev['id'] ?>&amp;day=<?= (int)$ev['day'] ?>"
                                    title="<?= e($ev['name']) ?>"><?= e($ev['name']) ?></a>
                             <?php endforeach; ?>
                         </td>
