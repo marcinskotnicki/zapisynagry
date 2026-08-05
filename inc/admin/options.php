@@ -89,8 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             continue;
         }
         $secretVal = trim($_POST[$key] ?? '');
-        if ($secretVal !== '') opt_set($key, $secretVal);
-        // Empty and no clear box ticked -> leave the stored value untouched.
+        // Blank OR the asterisk placeholder the form shows for a stored value
+        // means "unchanged". The placeholder is a real input value rather than
+        // an HTML placeholder attribute, so it comes back on every save; without
+        // this it would overwrite the credential with a row of stars.
+        //
+        // The cost is that a secret consisting only of '*' cannot be set. For an
+        // API key or SMTP password that is not a real value, and silently
+        // wiping a working credential would be far worse.
+        if ($secretVal !== '' && !preg_match('/^\*+$/', $secretVal)) {
+            opt_set($key, $secretVal);
+        }
+        // Otherwise leave the stored value untouched.
     }
 
     foreach ($OPTION_VALUES as $key) {

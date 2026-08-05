@@ -557,10 +557,18 @@ warn you — it fails at runtime.
 
 **Add a credential setting.** Put the key in `$OPTION_SECRETS` (not
 `$OPTION_VALUES`) in `inc/admin/options.php`, and render it with the `$secret()`
-helper rather than `$text()`. The value is never written back into the form —
-`value="..."` is readable from View Source whatever the input's `type`, and
-several clubs share one host. A blank submission means "unchanged", so saving
-the form for any other reason cannot wipe it; clearing requires the
+helper rather than `$text()`. The real value is never written back into the form
+— `value="..."` is readable from View Source whatever the input's `type`, and
+several clubs share one host. The field shows a row of stars when something is
+stored (blank when nothing is), so "set, hidden" looks different from "not set".
+
+That placeholder is a real input value, not an HTML `placeholder` attribute, so
+it is submitted on every save: the controller treats BOTH an empty value and an
+all-asterisk one as "unchanged". Without that, saving the page for any unrelated
+reason would replace every credential with a row of stars. A value that merely
+contains an asterisk still saves; only an all-asterisk one is ignored, which
+means a secret consisting solely of `*` cannot be set — not a real key, and far
+better than silently wiping a working one. Clearing requires the
 `<key>__clear` checkbox. Nothing else changes: the feature reads the option
 normally.
 
@@ -577,6 +585,16 @@ options and unticks the toggles it did not carry. Restore what the rest of the
 test depends on, or set it explicitly at the start of the next section — an
 empty `admin_per_page` clamps to one row per page and makes unrelated
 assertions fail for reasons that look nothing like the cause.
+
+**Add an admin option.** Whitelist the key in `inc/admin/options.php`
+(`$OPTION_VALUES`, `$OPTION_TOGGLES` or `$OPTION_SECRETS`), seed it in
+`database.sql`, add an `opt_<key>` label to both language files, and render a
+field for it in one of the nine accordion groups in
+`templates/light/admin_options.php`. All four are required: a key that is
+whitelisted but not rendered gets BLANKED on every save, because the save loop
+treats an absent field as an empty value (or an unticked toggle). A test
+compares the controller's lists against the rendered form and fails naming any
+key that is missing.
 
 **Add a translation key.** Both files, same commit.
 

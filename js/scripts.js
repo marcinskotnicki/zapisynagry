@@ -13,6 +13,8 @@
         initChat();
         initNavBurger();
         initTabScroll();
+        initOptionGroups();
+        initSecretFields();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -526,6 +528,36 @@
                 window.addEventListener('resize', sync);
                 sync();
             })(wraps[i]);
+        }
+    }
+
+    // 11. Options accordion: only one group open at a time.
+    // <details name="..."> already does this natively in current browsers; this
+    // is the fallback for ones that ignore the attribute, and is a no-op where
+    // the browser has already closed the siblings itself.
+    function initOptionGroups() {
+        var groups = document.querySelectorAll('details.opt-group[name]');
+        if (groups.length < 2) return;
+
+        for (var i = 0; i < groups.length; i++) {
+            groups[i].addEventListener('toggle', function () {
+                if (!this.open) return;
+                for (var j = 0; j < groups.length; j++) {
+                    if (groups[j] !== this && groups[j].open) groups[j].open = false;
+                }
+            });
+        }
+    }
+
+    // 12. Credential fields show a row of stars when a value is stored. Select
+    // it on focus so typing replaces it, instead of making the admin delete the
+    // stars by hand first.
+    function initSecretFields() {
+        var fields = document.querySelectorAll('input.secret-field');
+        for (var i = 0; i < fields.length; i++) {
+            fields[i].addEventListener('focus', function () {
+                if (/^\*+$/.test(this.value)) this.select();
+            });
         }
     }
 
