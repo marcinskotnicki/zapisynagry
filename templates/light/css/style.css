@@ -847,12 +847,13 @@ body.chat-open .chat-toggle-close { display: inline; }
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
+    background: var(--surface-2);
 }
 .opt-group-head::-webkit-details-marker { display: none; }
 .opt-group-head::before { content: "\25B8"; display: inline-block; transition: transform 0.15s ease; }
 .opt-group[open] > .opt-group-head::before { transform: rotate(90deg); }
 .opt-group[open] > .opt-group-head { border-bottom: 1px solid var(--border); }
-.opt-group-head:hover { background: var(--surface-2); }
+.opt-group-head:hover { background: var(--border); }
 .opt-group-note { font-weight: 400; font-size: 0.82rem; color: var(--text-muted); }
 .opt-group-body { padding: 0.9rem; }
 
