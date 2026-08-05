@@ -139,6 +139,18 @@ bound parameters; never interpolate into SQL.
 
 ## 5. Data model
 
+**Connection settings (`inc/db.php`).** One shared PDO handle per request, with
+three per-connection PRAGMAs: `foreign_keys = ON` (without it the ON DELETE
+CASCADE rules do nothing), `journal_mode = WAL`, and `busy_timeout = 5000`.
+WAL matters because in SQLite's default journal mode a committing writer takes
+an EXCLUSIVE lock that REFUSES readers — with the chat polling in the
+background and sign-ups arriving mid-event, that reaches a visitor as "database
+is locked". Under WAL a reader never waits for a writer. Both WAL and the
+timeout are wrapped in try/catch: WAL needs sidecar files (`-wal`, `-shm`) next
+to the database, which a few network filesystems refuse, and a host that says
+no should keep serving on the old journal rather than fatal on every page. The
+sidecar files live in `data/`, which the updater protects as a whole directory.
+
 `database.sql` is the **single source of truth** for both a fresh install and
 migrations. It is executed verbatim on install, and diffed against the live
 database on update.

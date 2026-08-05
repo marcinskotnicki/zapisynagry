@@ -10,7 +10,13 @@
  *  and reusing it avoids per-query connection overhead and guarantees that the
  *  `PRAGMA foreign_keys = ON` (set once, below) applies to every query in the
  *  request. SQLite enforces foreign keys *per connection*, so a second handle
- *  would silently lose cascade behaviour.
+ *  would silently lose cascade behaviour. The same is true of the WAL and
+ *  busy-timeout settings below.
+ *
+ *  CONCURRENCY: the connection runs in WAL mode with a busy timeout, so readers
+ *  are never blocked by a writer and a brief write collision waits instead of
+ *  erroring. Both are set per connection and both degrade gracefully if the
+ *  host refuses them — see the comments at each.
  *
  *  HOW TO USE (the four helpers at the bottom cover ~all call sites):
  *    db_run($sql, $params)  -> PDOStatement   (INSERT/UPDATE/DELETE, or when you
@@ -47,6 +53,34 @@ function db() {
     // SQLite needs foreign-key enforcement switched on per connection. Without
     // this, the ON DELETE CASCADE rules in database.sql would do nothing.
     $pdo->exec('PRAGMA foreign_keys = ON;');
+
+    // Write-ahead logging. In SQLite's DEFAULT journal mode a write blocks
+    // readers as well as other writers, so a burst of sign-ups while the chat
+    // is polling can collide and surface as "database is locked". Under WAL a
+    // reader never waits for a writer, which is the shape of traffic this app
+    // actually has.
+    //
+    // Wrapped because it can legitimately fail: WAL needs to create sidecar
+    // files next to the database, which some network filesystems (a few shared
+    // hosts mount NFS) do not support. Failing to switch is not fatal — the
+    // database still works exactly as it did before — so a host that refuses
+    // it should keep running rather than break on every page.
+    try {
+        $pdo->exec('PRAGMA journal_mode = WAL;');
+    } catch (Throwable $e) {
+        // Left on the default journal; nothing else changes.
+    }
+
+    // Wait rather than fail instantly when another request holds the write
+    // lock. Without this a collision throws immediately; five seconds is far
+    // longer than any query here takes, so a brief overlap resolves itself
+    // instead of reaching the visitor as an error.
+    try {
+        $pdo->exec('PRAGMA busy_timeout = 5000;');
+    } catch (Throwable $e) {
+        // Older builds may not accept it; the default (fail fast) still works.
+    }
+
     return $pdo;
 }
 

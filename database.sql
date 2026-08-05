@@ -113,7 +113,10 @@ INSERT INTO options (key, value) VALUES
     ('chat_scope',            'event'),
     ('chat_max_messages',     '500'),   -- hard cap; oldest trimmed past this
     ('chat_initial_messages', '20'),    -- how many the panel shows on open
-    ('chat_refresh_seconds',  '10'),    -- poll interval while the panel is open
+    -- Poll interval while the panel is open. 30s keeps the load light on
+    -- shared hosting and is fine for a room-sized conversation; an admin can
+    -- lower it where a busier club wants livelier updates.
+    ('chat_refresh_seconds',  '30'),
     -- Seconds the send button stays disabled after a post. Aimed at someone
     -- hammering the button because their message has not appeared yet, not
     -- at bots; 0 disables the wait entirely.
