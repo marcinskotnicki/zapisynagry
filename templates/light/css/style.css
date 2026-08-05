@@ -483,6 +483,22 @@ html { scroll-behavior: smooth; }
 
 .event-rename { margin-bottom: 1.5rem; max-width: 420px; }
 
+.footer-pages {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    padding: 0.8rem 1rem 0;
+    font-size: 0.9rem;
+}
+#footer_custom {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0.8rem 1rem 1.2rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
 .bgg_logo{display:block;text-align:center;padding:20px 10px;}
 .bgg_logo img{width:60%;max-width:300px;height:auto;}
 

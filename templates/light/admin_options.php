@@ -244,6 +244,16 @@ $groupEnd = function () { echo '</div></details>'; };
             <p class="field-note"><?= e(t('opt_day_tab_format_note')) ?></p>
         </div>
 
+        <?php // Rendered UNESCAPED at the bottom of every page — the point is to
+              // allow markup for copyright lines, sponsor logos and links.
+              // Safe because only an admin can reach this form, and anyone who
+              // can edit it can already change every other setting here. ?>
+        <div class="field">
+            <label for="footer_custom_text"><?= e(t('opt_footer_custom_text')) ?></label>
+            <textarea id="footer_custom_text" name="footer_custom_text" rows="4"><?= e(opt('footer_custom_text')) ?></textarea>
+            <p class="field-note"><?= e(t('opt_footer_custom_text_note')) ?></p>
+        </div>
+
         <?php // Hide the top-left venue name — used when the venue and event
               // names are the same, and when a site logo replaces it. ?>
         <div class="field field-check">

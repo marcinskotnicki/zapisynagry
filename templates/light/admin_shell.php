@@ -19,6 +19,7 @@ $tabs = [
     'options'    => 'tab_options',
     'new_event'  => 'tab_new_event',
     'thumbnails' => 'tab_thumbnails',
+    'texts'      => 'tab_texts',
     'users'      => 'tab_users',
     'mailing'    => 'tab_mailing',
     'logs'       => 'tab_logs',

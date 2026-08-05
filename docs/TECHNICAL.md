@@ -662,6 +662,14 @@ Both buttons post the SAME form with a different `action`; a nested `<form>`
 would be invalid HTML and the browser would drop it. A POST with no action at
 all still means save.
 
+**Two places render admin HTML unescaped, on purpose.** The
+`footer_custom_text` option and a `custom_pages.body` are printed as written:
+only an admin can set either, formatting is the point, and anyone who can edit
+them can already change every other setting. The boundary is the page TITLE —
+it is a link label and a `<title>`, so it is escaped everywhere it appears.
+Keep that split: the title is the field an admin would never think of as code,
+which makes it the one that would inject it.
+
 **Add a translation key.** Both files, same commit.
 
 **Add a layout toggle that only reorders existing content.** Do it with a body

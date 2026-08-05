@@ -18,7 +18,7 @@ require_admin();                       // everything here is admin-only
 $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (uploads, updater)
 
 // Whitelist of tabs => controller file. The whitelist also blocks path tricks.
-$TABS = ['options', 'new_event', 'thumbnails', 'users', 'mailing', 'logs', 'archive', 'update'];
+$TABS = ['options', 'new_event', 'thumbnails', 'texts', 'users', 'mailing', 'logs', 'archive', 'update'];
 // The chat tab exists only while the feature does. Removed from the whitelist
 // rather than merely hidden in the nav, so ?tab=chat on a site with the chat
 // switched off falls through to the default rather than rendering a moderation

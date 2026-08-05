@@ -68,9 +68,29 @@ if (function_exists('switcher_visible')) {
     </form>
 </footer>
 <?php endif; ?>
+<?php // Footer menu of admin-written pages, above the BGG logo. Nothing is
+      // emitted when no pages exist, so the default install is unchanged.
+      // Titles are ESCAPED: they are link text, and unlike the page bodies they
+      // are not meant to carry markup. ?>
+<?php if (function_exists('custom_pages') && ($footerPages = custom_pages())): ?>
+    <nav class="footer-pages">
+        <?php foreach ($footerPages as $fp): ?>
+            <a href="page.php?id=<?= (int)$fp['id'] ?>"><?= e($fp['title']) ?></a>
+        <?php endforeach; ?>
+    </nav>
+<?php endif; ?>
 <div class="bgg_logo">
 <img src="img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
 </div>
+<?php // Admin's own HTML, at the very bottom. Deliberately NOT escaped: only an
+      // admin can set this option, and its purpose is copyright lines, sponsor
+      // logos and links, which need markup. Anyone who can edit it can already
+      // change every other setting on the site.
+      //
+      // Guarded on non-empty so the default install emits no stray element. ?>
+<?php if (trim((string)opt('footer_custom_text')) !== ''): ?>
+    <div id="footer_custom"><?= opt('footer_custom_text') ?></div>
+<?php endif; ?>
 <?php
 // The chat panel, when switched on. Rendered here rather than in each page
 // controller so it is present site-wide from one place; it starts closed and

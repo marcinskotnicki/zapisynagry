@@ -91,6 +91,10 @@ INSERT INTO options (key, value) VALUES
     ('use_day_names',         '0'),
     -- What a day tab shows, and in what order. See day_tab_parts().
     ('day_tab_format',        'num_date_hours'),
+    -- Free HTML dropped at the very bottom of every page (copyright lines,
+    -- parent-club or sponsor links). Rendered UNESCAPED on purpose: only an
+    -- admin can set it, and the whole point is to allow markup.
+    ('footer_custom_text',    ''),
     -- site_logo: version stamp, '' = no logo uploaded (same convention as
     -- site_icon). header.php shows logo.png INSTEAD of the venue-name text
     -- when both this is non-empty AND show_venue_name is on.
@@ -419,6 +423,22 @@ CREATE TABLE chat_messages (
     message    TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+--  custom_pages — admin-written pages linked from a menu in the footer.
+--
+--  body is stored and rendered as raw HTML: only an admin can write it, and the
+--  point is to allow formatting and links. The TITLE is escaped wherever it is
+--  shown, because it is used as link text and in <title>.
+--
+--  Ordered by sort_order then id, so the admin can arrange the footer menu and
+--  new pages simply land at the end.
+CREATE TABLE custom_pages (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    body       TEXT NOT NULL DEFAULT '',
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX idx_mailsub_token ON mail_subscribers (token);

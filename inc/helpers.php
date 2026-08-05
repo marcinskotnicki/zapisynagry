@@ -283,6 +283,30 @@ function email_required_for_poll($poll) {
  * @return array|null  The event row, or null before the first event is created.
  */
 /**
+ * The admin-written footer pages, in menu order.
+ *
+ * Cached per request: the footer renders on every page, and this would
+ * otherwise be a query on each one.
+ *
+ * @return array
+ */
+function custom_pages() {
+    static $cache = null;
+    if ($cache === null) {
+        $cache = db_all('SELECT id, title FROM custom_pages ORDER BY sort_order, id');
+    }
+    return $cache;
+}
+
+/**
+ * One page by id, or null.
+ * @return array|null
+ */
+function custom_page($id) {
+    return db_one('SELECT * FROM custom_pages WHERE id = ?', [(int)$id]);
+}
+
+/**
  * Is the public archive feature switched on?
  *
  * Lives HERE rather than in inc/events.php because the header asks it on every
