@@ -907,3 +907,43 @@ body.chat-open .chat-toggle-close { display: inline; }
 
     .opt-group-head::before { transition: none; }
 }
+
+trix-toolbar, trix-editor {
+    color-scheme: light;
+    color: #16181d;
+}
+trix-editor {
+    background: #ffffff;
+    border: 1px solid #c8ccd4;
+    border-radius: 6px;
+    min-height: 18rem;
+    padding: 0.6rem 0.7rem;
+}
+trix-editor:empty:not(:focus)::before { color: #6b7280; }
+trix-editor a { color: #1d4ed8; }
+trix-toolbar .trix-button {
+    background: #f4f5f7;
+    color: #16181d;
+    border-bottom: 1px solid #c8ccd4;
+}
+trix-toolbar .trix-button:not(:first-child) { border-left: 1px solid #c8ccd4; }
+trix-toolbar .trix-button:not(:disabled):hover { background: #e4e6ea; }
+trix-toolbar .trix-button.trix-active { background: #d3d7de; }
+trix-toolbar .trix-button--icon::before { opacity: 0.85; }
+trix-toolbar .trix-button--icon:disabled::before { opacity: 0.25; }
+trix-toolbar .trix-dialog {
+    background: #ffffff;
+    color: #16181d;
+    border: 1px solid #c8ccd4;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .18);
+}
+trix-toolbar .trix-input--dialog {
+    background: #ffffff;
+    color: #16181d;
+    border: 1px solid #c8ccd4;
+}
+trix-toolbar .trix-button--dialog {
+    background: #f4f5f7;
+    color: #16181d;
+    border: 1px solid #c8ccd4;
+}
