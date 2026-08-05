@@ -86,6 +86,11 @@ INSERT INTO options (key, value) VALUES
     -- visual order swap (flex 'order' in CSS) — the tables list and the
     -- timeline are always both rendered; this never removes either.
     ('home_layout',           'tables_first'),
+    -- Optional per-day labels ("Tournament", "Family day"). Off by default:
+    -- most events have nothing useful to call their days.
+    ('use_day_names',         '0'),
+    -- What a day tab shows, and in what order. See day_tab_parts().
+    ('day_tab_format',        'num_date_hours'),
     -- site_logo: version stamp, '' = no logo uploaded (same convention as
     -- site_icon). header.php shows logo.png INSTEAD of the venue-name text
     -- when both this is non-empty AND show_venue_name is on.
@@ -294,6 +299,7 @@ CREATE TABLE event_days (
     event_id   INTEGER NOT NULL,
     day_index  INTEGER NOT NULL,                 -- 1, 2, 3 ...
     day_date   TEXT,                             -- 'YYYY-MM-DD'
+    day_name   TEXT,                             -- optional label, shown when 'use_day_names' is on
     start_time TEXT NOT NULL,                    -- 'HH:MM'
     end_time   TEXT NOT NULL,                    -- 'HH:MM'
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE

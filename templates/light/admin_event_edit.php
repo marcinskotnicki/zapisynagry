@@ -42,6 +42,7 @@
                 <th><?= e(t('events_day_no')) ?></th>
                 <th><?= e(t('events_day_date')) ?></th>
                 <th><?= e(t('events_day_hours')) ?></th>
+                <?php if (day_names_enabled()): ?><th><?= e(t('newevent_day_name')) ?></th><?php endif; ?>
                 <th><?= e(t('events_day_contents')) ?></th>
                 <th></th>
             </tr>
@@ -49,6 +50,45 @@
         <tbody>
             <?php foreach ($days as $d): ?>
                 <?php $info = $day_info[(int)$d['id']] ?? ['tables' => 0, 'games' => 0, 'players' => 0]; ?>
+                <?php $editing = (int)$edit_day === (int)$d['id']; ?>
+                <?php if ($editing): ?>
+                    <?php // The row turns into a form in place, so the day being
+                          // changed stays next to its neighbours for comparison. ?>
+                    <tr>
+                        <td><?= (int)$d['day_index'] ?></td>
+                        <td colspan="4">
+                            <form method="post" action="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>" class="day-edit-form">
+                                <?= $csrf ?>
+                                <input type="hidden" name="event" value="<?= (int)$event['id'] ?>">
+                                <input type="hidden" name="action" value="day_update">
+                                <input type="hidden" name="day" value="<?= (int)$d['id'] ?>">
+                                <div class="field">
+                                    <label for="ed_date"><?= e(t('events_day_date')) ?></label>
+                                    <input type="date" id="ed_date" name="day_date" value="<?= e($d['day_date']) ?>" required>
+                                </div>
+                                <div class="field">
+                                    <label for="ed_start"><?= e(t('newevent_start')) ?></label>
+                                    <input type="time" id="ed_start" name="day_start" value="<?= e($d['start_time']) ?>" required>
+                                </div>
+                                <div class="field">
+                                    <label for="ed_end"><?= e(t('newevent_end')) ?></label>
+                                    <input type="time" id="ed_end" name="day_end" value="<?= e($d['end_time']) ?>" required>
+                                </div>
+                                <?php if (day_names_enabled()): ?>
+                                    <div class="field">
+                                        <label for="ed_name"><?= e(t('newevent_day_name')) ?></label>
+                                        <input type="text" id="ed_name" name="day_name" maxlength="100"
+                                               value="<?= e($d['day_name'] ?? '') ?>"
+                                               placeholder="<?= e(t('newevent_day_name_ph')) ?>">
+                                    </div>
+                                <?php endif; ?>
+                                <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
+                                <a class="btn btn-small" href="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>"><?= e(t('cancel')) ?></a>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php continue; ?>
+                <?php endif; ?>
                 <tr>
                     <td><?= (int)$d['day_index'] ?></td>
                     <td class="nowrap"><?= e($d['day_date']) ?></td>
@@ -56,8 +96,12 @@
                     <?php // Shown BEFORE the delete button, because removing a day
                           // takes its tables, games and sign-ups with it and an
                           // admin should see the cost before clicking. ?>
+                    <?php if (day_names_enabled()): ?>
+                        <td><?= e($d['day_name'] ?? '') ?></td>
+                    <?php endif; ?>
                     <td><?= e(t('events_day_summary', $info['tables'], $info['games'], $info['players'])) ?></td>
                     <td>
+                        <a class="btn btn-small" href="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>&amp;day=<?= (int)$d['id'] ?>"><?= e(t('events_day_edit')) ?></a>
                         <?php if (count($days) > 1): ?>
                             <form method="post" action="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>" class="inline"
                                   onsubmit="return confirm('<?= e(t('events_day_delete_confirm', $d['day_date'], $info['games'], $info['players'])) ?>');">

@@ -29,6 +29,10 @@ $name     = opt('default_event_name');
 $num_days = 1;
 $days     = [];   // list of ['date'=>, 'start'=>, 'end'=>] for screen 2 prefill
 
+// day_names_enabled() / day_tab_formats() live here; this tab does not otherwise
+// need event data, so the dependency is stated explicitly.
+require_once __DIR__ . '/../events.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postStage = $_POST['stage'] ?? '';
 
@@ -49,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'date'  => '',
                 'start' => opt('default_start_time'),
                 'end'   => opt('default_end_time'),
+                'name'  => '',
             ];
         }
 
@@ -58,13 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $inDates  = $_POST['day_date']  ?? [];
         $inStarts = $_POST['day_start'] ?? [];
         $inEnds   = $_POST['day_end']   ?? [];
+        // Optional labels, only collected when the feature is on.
+        $inNames  = $_POST['day_name']  ?? [];
 
         $ok = true;
         for ($i = 0; $i < $num_days; $i++) {
             $d = trim($inDates[$i]  ?? '');
             $s = trim($inStarts[$i] ?? '');
             $e = trim($inEnds[$i]   ?? '');
-            $days[] = ['date' => $d, 'start' => $s, 'end' => $e];   // keep for re-render on error
+            $nm = day_names_enabled() ? trim((string)($inNames[$i] ?? '')) : '';
+            $days[] = ['date' => $d, 'start' => $s, 'end' => $e, 'name' => $nm];   // keep for re-render on error
             // NB: end EARLIER than start is deliberately allowed — it means the
             // day runs past midnight (18:00 -> 03:00); day_rel_min() gives all
             // ordering/plotting that interpretation. So: no end>start check.
@@ -100,11 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Insert the days (1-based day_index).
                 $stmt = db()->prepare(
-                    'INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time)
-                     VALUES (?,?,?,?,?)'
+                    'INSERT INTO event_days (event_id, day_index, day_date, day_name, start_time, end_time)
+                     VALUES (?,?,?,?,?,?)'
                 );
                 foreach ($days as $idx => $row) {
-                    $stmt->execute([$eventId, $idx + 1, $row['date'], $row['start'], $row['end']]);
+                    // Stored as NULL rather than '' when unnamed, so "no label"
+                    // is one value in the column instead of two.
+                    $nm = trim((string)($row['name'] ?? ''));
+                    $stmt->execute([$eventId, $idx + 1, $row['date'],
+                                    $nm === '' ? null : $nm, $row['start'], $row['end']]);
                 }
 
                 // Chat scoped to the event? Then a new event starts a new

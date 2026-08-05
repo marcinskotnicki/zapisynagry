@@ -656,6 +656,94 @@ function day_hours_label($dayRow) {
     return t('day_hours', $from, $to);
 }
 
+/** The tab layouts an admin can choose between, in the order they are offered. */
+function day_tab_formats() {
+    return ['num_date_hours', 'num_weekday_date_hours', 'weekday_date_hours_name',
+            'name', 'date', 'date_hours'];
+}
+
+/**
+ * Are optional per-day labels switched on?
+ * @return bool
+ */
+function day_names_enabled() {
+    return opt_bool('use_day_names');
+}
+
+/**
+ * A day's weekday name in the current language, or '' without a date.
+ *
+ * @param array $dayRow
+ * @return string
+ */
+function day_weekday_label($dayRow) {
+    $date = trim((string)($dayRow['day_date'] ?? ''));
+    if ($date === '') return '';
+    $ts = strtotime($date);
+    return $ts === false ? '' : t('weekday_' . (int)date('w', $ts));
+}
+
+/**
+ * The pieces of one day tab, in display order, for the configured format.
+ *
+ * Returns a list of ['class' => ..., 'text' => ...]. Building it here rather
+ * than branching inside the template keeps the six layouts in one readable
+ * place, and lets them be tested without rendering a page.
+ *
+ * Empty pieces are dropped, so a format that asks for a name on an event that
+ * has none simply shows less rather than an empty line. If a format would
+ * leave NOTHING, the day number is used — a blank tab would be unclickable in
+ * practice.
+ *
+ * @param array  $dayRow
+ * @param string $format  One of day_tab_formats(); anything else falls back.
+ * @return array
+ */
+function day_tab_parts($dayRow, $format = null) {
+    $format = $format ?? opt('day_tab_format');
+    if (!in_array($format, day_tab_formats(), true)) $format = 'num_date_hours';
+
+    $num     = t('day_n', (int)($dayRow['day_index'] ?? 1));
+    $date    = trim((string)($dayRow['day_date'] ?? ''));
+    $hours   = day_hours_label($dayRow);
+    $weekday = day_weekday_label($dayRow);
+    // The label is only ever shown when the feature is on, so switching it off
+    // hides existing names without deleting them.
+    $name    = day_names_enabled() ? trim((string)($dayRow['day_name'] ?? '')) : '';
+
+    $order = [];
+    switch ($format) {
+        case 'num_weekday_date_hours':
+            $order = [['num', $num], ['weekday', $weekday], ['date', $date], ['hours', $hours]];
+            break;
+        case 'weekday_date_hours_name':
+            $order = [['weekday', $weekday], ['date', $date], ['hours', $hours], ['name', $name]];
+            break;
+        case 'name':
+            $order = [['name', $name]];
+            break;
+        case 'date':
+            $order = [['date', $date]];
+            break;
+        case 'date_hours':
+            $order = [['date', $date], ['hours', $hours]];
+            break;
+        default:   // num_date_hours — the original layout
+            $order = [['num', $num], ['date', $date], ['hours', $hours]];
+            break;
+    }
+
+    $parts = [];
+    foreach ($order as $o) {
+        if (trim((string)$o[1]) === '') continue;
+        $parts[] = ['class' => 'day-tab-' . $o[0], 'text' => $o[1]];
+    }
+    // Never render an empty tab: "name only" on an unnamed day would otherwise
+    // produce a control with no label at all.
+    if (!$parts) $parts[] = ['class' => 'day-tab-num', 'text' => $num];
+    return $parts;
+}
+
 /**
  * Minutes since midnight -> 'HH:MM'. Negative input is floored to 0.
  * NOTE: does NOT wrap past 24h (90 min past midnight -> '25:00'); the timeline

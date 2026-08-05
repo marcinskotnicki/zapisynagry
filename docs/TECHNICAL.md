@@ -398,6 +398,21 @@ its LAST day (so a run spanning yesterday-to-tomorrow still counts as current).
 Same underlying dates, two different questions — don't reuse one query for
 both.
 
+**Day tab layout is data, not branching.** `day_tab_parts()` in
+`inc/events.php` returns the pieces of one tab in display order for the
+configured `day_tab_format`, so the six layouts live in one testable place
+rather than as conditionals in the template. Empty pieces are dropped and a
+layout that would render nothing falls back to the day number, so "name only"
+on an unnamed day is still a clickable tab. The chosen format is also emitted
+as a `fmt-<format>` class on the tab container, because the same piece needs
+different sizes in different layouts — the day number is the largest thing in
+the default layout and the smallest in the weekday one.
+
+`use_day_names` gates the optional `event_days.day_name` label. Switching it off
+HIDES existing names rather than deleting them, and the day-edit form only
+writes that column while the feature is on — otherwise saving a day's times
+with the feature off would blank its label.
+
 **`event_days.day_index` must stay contiguous 1..num_days.** It is the identity
 the front end uses (`?day=N`) and `index.php` clamps it to `events.num_days`, so
 a gap left by a removed day makes that slot unreachable and pushes the last day

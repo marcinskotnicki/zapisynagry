@@ -210,6 +210,13 @@ input[type="checkbox"]{width:auto;}
 .day-tab-active { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -2px; font-weight: 600; }
 
 .day-tab-date { display: block; font-size: 0.85rem; color: var(--text-muted); }
+.day-tab-num { display: block; font-size: 1.05rem; }
+.day-tab-weekday { display: block; font-size: 1.05rem; }
+.day-tab-name { display: block; font-size: 0.85rem; }
+.fmt-num_weekday_date_hours .day-tab-num { font-size: 0.7rem; color: var(--text-muted); }
+.fmt-name .day-tab-name { font-size: 1.05rem; }
+.fmt-date .day-tab-date,
+.fmt-date_hours .day-tab-date { font-size: 1.05rem; color: var(--text); }
 
 .table-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
 .table-title { font-size: 1rem; color: var(--text-muted); margin: 0 0 0.75rem; }

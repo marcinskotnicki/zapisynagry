@@ -81,6 +81,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = t('days_add_failed');
         }
 
+    } elseif ($id > 0 && $act === 'day_update') {
+        $dayId = (int)($_POST['day'] ?? 0);
+        // Checked against THIS event, so a posted id cannot edit another's day.
+        $own = $dayId > 0
+            ? db_one('SELECT id FROM event_days WHERE id = ? AND event_id = ?', [$dayId, $id])
+            : null;
+        $newDate  = trim((string)($_POST['day_date'] ?? ''));
+        $newStart = trim((string)($_POST['day_start'] ?? ''));
+        $newEnd   = trim((string)($_POST['day_end'] ?? ''));
+        $newName  = trim((string)($_POST['day_name'] ?? ''));
+        // A second day on the same date would give the event two identical tabs.
+        $clash = $own ? (int)db_val(
+            'SELECT COUNT(*) FROM event_days WHERE event_id = ? AND day_date = ? AND id <> ?',
+            [$id, $newDate, $dayId]) : 0;
+
+        if ($own && is_valid_date($newDate) && is_valid_time($newStart)
+            && is_valid_time($newEnd) && $clash === 0) {
+            // Names are only writable while the feature is on, so an admin who
+            // switched it off cannot blank existing labels by saving a day.
+            if (day_names_enabled()) {
+                db_run('UPDATE event_days SET day_date = ?, start_time = ?, end_time = ?, day_name = ?
+                         WHERE id = ?',
+                       [$newDate, $newStart, $newEnd, $newName === '' ? null : $newName, $dayId]);
+            } else {
+                db_run('UPDATE event_days SET day_date = ?, start_time = ?, end_time = ? WHERE id = ?',
+                       [$newDate, $newStart, $newEnd, $dayId]);
+            }
+            // The date may have moved the day past its neighbours.
+            event_days_renumber($id);
+            log_action('event_day_edit', 'event #' . $id . ' day #' . $dayId);
+            $flash = t('days_updated');
+        } else {
+            $flash = t('days_update_failed');
+        }
+
     } elseif ($id > 0 && $act === 'day_delete') {
         $dayId = (int)($_POST['day'] ?? 0);
         // Checked against THIS event, so a posted id cannot reach another
@@ -136,6 +171,8 @@ if ($editId > 0) {
         foreach ($editDays as $ed) $dayInfo[(int)$ed['id']] = event_day_contents((int)$ed['id']);
         $tab_body = tpl_capture('admin_event_edit', [
             'csrf'       => csrf_field(),
+            // ?day=<id> turns that one row into an edit form in place.
+            'edit_day'   => (int)($_GET['day'] ?? 0),
             'event'      => $editEvent,
             'days'       => $editDays,
             'day_info'   => $dayInfo,

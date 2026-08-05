@@ -85,6 +85,17 @@ $dayLabel = function($i) {
                         <label><?= e(t('newevent_end')) ?></label>
                         <input type="time" name="day_end[]" value="<?= e($row['end']) ?>" required>
                     </div>
+                    <?php // Optional label for this day, offered only while the
+                          // feature is on. Never required: an event where only
+                          // some days are named is a normal thing to want. ?>
+                    <?php if (day_names_enabled()): ?>
+                        <div class="field">
+                            <label><?= e(t('newevent_day_name')) ?></label>
+                            <input type="text" name="day_name[]" maxlength="100"
+                                   value="<?= e($row['name'] ?? '') ?>"
+                                   placeholder="<?= e(t('newevent_day_name_ph')) ?>">
+                        </div>
+                    <?php endif; ?>
                 </div>
             </fieldset>
         <?php endforeach; ?>

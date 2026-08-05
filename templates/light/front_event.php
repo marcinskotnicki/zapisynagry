@@ -92,16 +92,22 @@ if ($tokenQS === '' && public_archives_enabled()
           // the <nav> itself is the scrolling box, so anything positioned
           // inside it scrolls away with the tabs. See initTabScroll(). ?>
     <div class="tab-scroll">
-    <nav class="day-tabs">
+    <?php // The chosen layout rides on the container so CSS can size the same
+          // piece differently per format — the day number is the largest thing
+          // in the default layout and the smallest in the weekday one. ?>
+    <nav class="day-tabs fmt-<?= e(opt('day_tab_format')) ?>">
         <?php foreach ($days as $d): ?>
             <?php $i = (int)$d['day_index']; // 1-based day index, used for the active class + link ?>
             <a class="day-tab<?= $i === (int)$active_day ? ' day-tab-active' : '' ?>"
                href="index.php?day=<?= $i ?><?= $tokenQS ?>">
-                <?= e(t('day_n', $i)) ?>
-                <?php if (!empty($d['day_date'])): ?><span class="day-tab-date"><?= e($d['day_date']) ?></span><?php endif; ?>
-                <?php // Per tab rather than once for the event: days routinely run
-                      // different hours from one another. ?>
-                <?php if (($dHrs = day_hours_label($d)) !== ''): ?><span class="day-tab-hours"><?= e($dHrs) ?></span><?php endif; ?>
+                <?php // Which pieces appear, and in what order, is the admin's
+                      // 'day_tab_format' choice — assembled by day_tab_parts()
+                      // so the six layouts live in one place rather than as
+                      // branches here. Empty pieces are already dropped, and the
+                      // day number is used if a layout would leave nothing. ?>
+                <?php foreach (day_tab_parts($d) as $part): ?>
+                    <span class="<?= e($part['class']) ?>"><?= e($part['text']) ?></span>
+                <?php endforeach; ?>
             </a>
         <?php endforeach; ?>
     </nav>

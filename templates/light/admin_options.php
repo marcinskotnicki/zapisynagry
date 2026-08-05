@@ -229,6 +229,21 @@ $groupEnd = function () { echo '</div></details>'; };
                 <?php endforeach; ?>
             </select>
         </div>
+        <?php // Optional per-day labels. Off by default; switching it off later
+              // hides existing names without deleting them, so it is safe to try. ?>
+        <?php $toggle('use_day_names'); ?>
+        <div class="field">
+            <label for="day_tab_format"><?= e(t('opt_day_tab_format')) ?></label>
+            <select id="day_tab_format" name="day_tab_format">
+                <?php foreach (day_tab_formats() as $fmt): ?>
+                    <option value="<?= e($fmt) ?>"<?= opt('day_tab_format') === $fmt ? ' selected' : '' ?>>
+                        <?= e(t('opt_day_tab_format_' . $fmt)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_day_tab_format_note')) ?></p>
+        </div>
+
         <?php // Hide the top-left venue name — used when the venue and event
               // names are the same, and when a site logo replaces it. ?>
         <div class="field field-check">

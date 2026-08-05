@@ -20,6 +20,7 @@
 require_once __DIR__ . '/../captcha.php';
 require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in the form's note
 require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the update-source field
+require_once __DIR__ . '/../events.php';    // day_tab_formats(), for the tab-layout picker
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -52,6 +53,7 @@ $OPTION_VALUES = [
     'switcher_pos_template', 'switcher_pos_language',  // header|footer|both|none; validated below
     'home_layout',  // tables_first|timeline_first; validated below
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
+    'day_tab_format',   // one of day_tab_formats(); validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days',
@@ -76,7 +78,7 @@ $OPTION_TOGGLES = [
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'show_venue_name', 'mailing_list', 'antibot_honeypot',
-    'chat_enabled', 'public_archives',
+    'chat_enabled', 'public_archives', 'use_day_names',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 
@@ -223,6 +225,12 @@ function option_sanitize($key, $val) {
             // one written straight into the table, must not be able to make
             // the panel hammer the server or dump the whole log.
             $val = (string)max(0, (int)$val);
+            break;
+        case 'day_tab_format':
+            // Anything else would fall through to the default layout inside
+            // day_tab_parts() anyway; reject it so the stored value always
+            // names a real layout.
+            if (!in_array($val, day_tab_formats(), true)) return null;
             break;
         case 'chat_scope':
             if (!in_array($val, ['event', 'global'], true)) return null;
