@@ -26,6 +26,7 @@
 </form>
 
 <h3><?= e(t('thumb_existing')) ?></h3>
+<p class="muted"><?= e(t('thumb_purpose')) ?></p>
 <?php if (empty($thumbs)): ?>
     <p class="muted"><?= e(t('thumb_none')) ?></p>
 <?php else: ?>
@@ -51,6 +52,10 @@
       // has nothing to do with whether any thumbnails have been uploaded.
       // Caught while adding the logo section right beside it, which
       // inherited the same placement and the same bug. ?>
+<?php // Icon and logo sit side by side: both are one-image-each settings about
+      // the site rather than the games, so pairing them keeps them out of the
+      // way of the thumbnail list above. They stack again on a narrow screen. ?>
+<div class="site-images">
 <fieldset class="icon-section">
 <legend><?= e(t('icon_section')) ?></legend>
 <p class="muted"><?= e(t('icon_hint')) ?></p>
@@ -109,3 +114,5 @@
 <button type="submit" class="btn btn-primary"><?= e(t('logo_upload')) ?></button>
 </form>
 </fieldset>
+</div>
+

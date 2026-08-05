@@ -18,15 +18,20 @@ require_admin();                       // everything here is admin-only
 $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (uploads, updater)
 
 // Whitelist of tabs => controller file. The whitelist also blocks path tricks.
-$TABS = ['options', 'new_event', 'thumbnails', 'texts', 'users', 'mailing', 'logs', 'archive', 'update'];
+// Order is the order they appear, and the FIRST is the default landing tab —
+// events, because that is what an admin opens the panel to look at. Update is
+// deliberately last: it is the one that changes code rather than content.
+$TABS = ['archive', 'new_event', 'thumbnails', 'options', 'logs',
+         'texts', 'users', 'mailing'];
 // The chat tab exists only while the feature does. Removed from the whitelist
 // rather than merely hidden in the nav, so ?tab=chat on a site with the chat
 // switched off falls through to the default rather than rendering a moderation
 // screen for a feature that is not running.
 if (chat_enabled()) $TABS[] = 'chat';
+$TABS[] = 'update';   // appended after the optional tabs so it stays last
 
-$tab = $_GET['tab'] ?? 'options';
-if (!in_array($tab, $TABS, true)) $tab = 'options';   // unknown tab -> safe default
+$tab = $_GET['tab'] ?? $TABS[0];
+if (!in_array($tab, $TABS, true)) $tab = $TABS[0];   // unknown tab -> the default one
 
 $flash    = null;   // success/info banner (a tab controller may set this)
 $tab_body = '';     // rendered HTML for the active tab (the controller MUST set this)

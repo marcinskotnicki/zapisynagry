@@ -479,6 +479,14 @@ html { scroll-behavior: smooth; }
 }
 .users-create { margin-bottom: 1.5rem; max-width: 420px; }
 
+.site-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+.site-images > fieldset { margin: 0; }
+
 .icon-section { margin-bottom: 1.5rem; }
 .icon-section img { vertical-align: middle; margin-right: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
 .icon-upload { margin-top: 0.75rem; }
@@ -741,6 +749,8 @@ body.chat-open .chat-toggle-close { display: inline; }
 .nav-burger { display: none; }
 
 @media (max-width: 700px) {
+    .site-images { grid-template-columns: 1fr; gap: 1.2rem; margin-top: 1.8rem; }
+
     .day-tab       { font-size: 0.95rem; }
     .day-tab-date  { font-size: 0.80rem; }
     .day-tab-hours { font-size: 0.68rem; }

@@ -16,21 +16,23 @@
 // Tab key => language key for the label. The array ORDER defines the nav order.
 // (Keep in sync with admin.php's $TABS whitelist.)
 $tabs = [
-    'options'    => 'tab_options',
+    'archive'    => 'tab_archive',
     'new_event'  => 'tab_new_event',
     'thumbnails' => 'tab_thumbnails',
+    'options'    => 'tab_options',
+    'logs'       => 'tab_logs',
     'texts'      => 'tab_texts',
     'users'      => 'tab_users',
     'mailing'    => 'tab_mailing',
-    'logs'       => 'tab_logs',
-    'archive'    => 'tab_archive',
     'update'     => 'tab_update',
 ];
 // Same condition as admin.php's whitelist: no tab for a feature that is off.
 if (chat_enabled()) {
-    $tabs = array_slice($tabs, 0, 5, true)
+    // Inserted before Update, which stays last.
+    $pos  = array_search('update', array_keys($tabs), true);
+    $tabs = array_slice($tabs, 0, $pos, true)
           + ['chat' => 'tab_chat']
-          + array_slice($tabs, 5, null, true);
+          + array_slice($tabs, $pos, null, true);
 }
 ?>
 <div class="admin">
