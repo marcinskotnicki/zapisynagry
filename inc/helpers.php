@@ -320,7 +320,7 @@ function current_event() {
             "SELECT e.*,
                     (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from
                FROM events e
-              WHERE e.is_archived = 0
+              WHERE e.is_archived = 0 AND e.is_deleted = 0
               ORDER BY date_from IS NULL, date_from ASC, e.id ASC
               LIMIT 1");
         return $cache;
@@ -328,7 +328,7 @@ function current_event() {
 
     // Feature off: unchanged. At most one event is live at a time here, because
     // creating one archives the previous.
-    $cache = db_one('SELECT * FROM events WHERE is_archived = 0 ORDER BY id DESC LIMIT 1');
+    $cache = db_one('SELECT * FROM events WHERE is_archived = 0 AND is_deleted = 0 ORDER BY id DESC LIMIT 1');
     return $cache;
 }
 

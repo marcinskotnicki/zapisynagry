@@ -265,14 +265,23 @@ CREATE TABLE password_resets (
 --  are archived (kept viewable via access_token). Creating a new event archives
 --  the previous one.
 -- =============================================================================
+--  is_deleted = hidden from the whole front end, recoverable from the admin
+--  Archive tab. Deleting ALWAYS sets is_archived = 1 as well, which is what
+--  makes this safe to add: every controller already refuses to edit an
+--  archived event, so a deleted one inherits those guards without fourteen
+--  separate permission checks having to learn about the new flag.
+--  A hard "delete permanently" removes the row and cascades days, tables,
+--  games, players, comments and polls with it.
 CREATE TABLE events (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     name         TEXT NOT NULL,
     num_days     INTEGER NOT NULL DEFAULT 1,
     is_archived  INTEGER NOT NULL DEFAULT 0,     -- 0 = current, 1 = archived
+    is_deleted   INTEGER NOT NULL DEFAULT 0,     -- 1 = hidden everywhere but the Archive tab
     access_token TEXT NOT NULL UNIQUE,           -- unguessable; used for archive links
     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-    archived_at  TEXT                            -- set when archived
+    archived_at  TEXT,                           -- set when archived
+    deleted_at   TEXT                            -- set when deleted
 );
 
 

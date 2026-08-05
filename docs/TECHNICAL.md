@@ -398,6 +398,38 @@ its LAST day (so a run spanning yesterday-to-tomorrow still counts as current).
 Same underlying dates, two different questions — don't reuse one query for
 both.
 
+**`event_days.day_index` must stay contiguous 1..num_days.** It is the identity
+the front end uses (`?day=N`) and `index.php` clamps it to `events.num_days`, so
+a gap left by a removed day makes that slot unreachable and pushes the last day
+past the clamp. `event_days_renumber()` rebuilds the indexes in DATE order and
+syncs `num_days`; call it after any change to an event's days.
+`event_days()` also ORDERS BY date, so an event whose days were entered out of
+order still reads correctly on the front page before any renumber has run.
+
+**Event administration lives in the Events tab** (`inc/admin/archive.php`,
+labelled `tab_archive`). `?event=<id>` switches that tab to a single-event
+screen for renaming and managing days. Only archive/unarchive are gated on the
+`public_archives` option — with it off, archiving happens automatically on
+event creation and a manual button would fight that. Renaming, day management
+and deletion are ordinary administration and work on every install. Renaming is
+BY ID: the version that lived on the New event tab updated
+`WHERE is_archived = 0`, which renamed every live event at once once public
+archives made several possible.
+
+**Deleting an event is soft, and deliberately also archives it.**
+`events.is_deleted = 1` hides an event from the entire front end — home page,
+`?event=`, the share token, the public archive list, the calendar, the switcher
+tabs and `current_event()`. It is visible only in the admin Archive tab, where
+it can be restored or purged. Deletion sets `is_archived = 1` at the same time,
+which is the point: roughly fourteen controllers already refuse to edit an
+archived event, so a deleted one inherits every one of those guards without
+each having to learn about the new flag. Restoring clears only `is_deleted`, so
+the event returns ARCHIVED rather than reappearing live. Un-archiving a deleted
+event is refused — restore it first. "Delete permanently" is offered only for
+an already-deleted event, so destruction always takes two deliberate steps, and
+the row's foreign keys cascade days, tables, games, players and comments with
+it. When adding any new query that lists events, filter `is_deleted = 0`.
+
 **`game_tables` cascades.** Deleting a table row deletes its games and polls
 too (`ON DELETE CASCADE`). Move rows off a table before removing it, including
 in test fixtures — deleting a table out from under a game silently destroys the

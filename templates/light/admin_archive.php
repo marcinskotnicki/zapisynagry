@@ -21,18 +21,23 @@
             <th><?= e(t('archive_status')) ?></th>
             <th><?= e(t('archive_created')) ?></th>
             <th><?= e(t('archive_link')) ?></th>
-            <?php if ($can_toggle): ?><th><?= e(t('archive_action')) ?></th><?php endif; ?>
+            <th><?= e(t('archive_action')) ?></th>
         </tr>
     </thead>
     <tbody>
     <?php foreach ($events as $ev): ?>
         <?php $link = $base . urlencode($ev['access_token']); // full shareable URL for this event ?>
-        <tr>
+        <tr<?= (int)$ev['is_deleted'] === 1 ? ' class="archive-row-deleted"' : '' ?>>
             <td><?= e($ev['name']) ?></td>
             <td>
-                <?= (int)$ev['is_archived'] === 0
-                        ? e(t('archive_current'))
-                        : e(t('archive_archived')) ?>
+                <?php // Deleted outranks archived in the label: a deleted event is
+                      // always archived too, so showing "archived" would hide the
+                      // state that actually matters. ?>
+                <?= (int)$ev['is_deleted'] === 1
+                        ? e(t('archive_deleted'))
+                        : ((int)$ev['is_archived'] === 0
+                            ? e(t('archive_current'))
+                            : e(t('archive_archived'))) ?>
             </td>
             <td class="nowrap"><?= e($ev['created_at']) ?></td>
             <td class="link-cell">
@@ -41,23 +46,54 @@
                     <?= e(t('copy')) ?>
                 </button>
             </td>
-            <?php if ($can_toggle): ?>
-                <td>
-                    <?php // One button per row, showing the action rather than the
-                          // state — the Status column already says which it is. ?>
+            <td class="archive-actions">
+                <?php $isDeleted = (int)$ev['is_deleted'] === 1; ?>
+                <?php if (!$isDeleted): ?>
+                    <?php // Renaming and day management are ordinary event admin, so
+                          // they are offered whether or not public archives are on —
+                          // unlike archive/unarchive below, which only make sense when
+                          // archiving is not already automatic. ?>
+                    <a class="btn btn-small" href="admin.php?tab=archive&amp;event=<?= (int)$ev['id'] ?>"><?= e(t('events_edit')) ?></a>
+                    <?php if ($can_toggle): ?>
+                        <?php // One button per row, showing the action rather than the
+                              // state — the Status column already says which it is. ?>
+                        <form method="post" action="admin.php?tab=archive&amp;page=<?= (int)$page ?>" class="inline">
+                            <?= $csrf ?>
+                            <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
+                            <input type="hidden" name="action"
+                                   value="<?= (int)$ev['is_archived'] === 1 ? 'unarchive' : 'archive' ?>">
+                            <button class="btn btn-small">
+                                <?= (int)$ev['is_archived'] === 1
+                                        ? e(t('archive_unarchive'))
+                                        : e(t('archive_archive')) ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                    <form method="post" action="admin.php?tab=archive&amp;page=<?= (int)$page ?>" class="inline"
+                          onsubmit="return confirm('<?= e(t('archive_delete_confirm')) ?>');">
+                        <?= $csrf ?>
+                        <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
+                        <input type="hidden" name="action" value="delete">
+                        <button class="btn btn-small btn-danger"><?= e(t('archive_delete')) ?></button>
+                    </form>
+                <?php else: ?>
+                    <?php // A deleted event offers only the two ways out of that
+                          // state: bring it back, or destroy it for good. ?>
                     <form method="post" action="admin.php?tab=archive&amp;page=<?= (int)$page ?>" class="inline">
                         <?= $csrf ?>
                         <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
-                        <input type="hidden" name="action"
-                               value="<?= (int)$ev['is_archived'] === 1 ? 'unarchive' : 'archive' ?>">
-                        <button class="btn btn-small">
-                            <?= (int)$ev['is_archived'] === 1
-                                    ? e(t('archive_unarchive'))
-                                    : e(t('archive_archive')) ?>
-                        </button>
+                        <input type="hidden" name="action" value="restore">
+                        <button class="btn btn-small"><?= e(t('archive_restore')) ?></button>
                     </form>
-                </td>
-            <?php endif; ?>
+                    <form method="post" action="admin.php?tab=archive&amp;page=<?= (int)$page ?>" class="inline"
+                          onsubmit="return confirm('<?= e(t('archive_purge_confirm')) ?>');">
+                        <?= $csrf ?>
+                        <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
+                        <input type="hidden" name="action" value="purge">
+                        <button class="btn btn-small btn-danger"><?= e(t('archive_purge')) ?></button>
+                    </form>
+                <?php endif; ?>
+            </td>
         </tr>
     <?php endforeach; ?>
     </tbody>

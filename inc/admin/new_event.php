@@ -32,17 +32,11 @@ $days     = [];   // list of ['date'=>, 'start'=>, 'end'=>] for screen 2 prefill
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postStage = $_POST['stage'] ?? '';
 
-    if ($postStage === 'rename') {
-        // Rename the LIVE event in place (no archiving, days untouched).
-        $newName = trim($_POST['current_name'] ?? '');
-        if ($newName !== '') {
-            db_run('UPDATE events SET name = ? WHERE is_archived = 0', [$newName]);
-            log_action('event_rename', $newName);
-            $flash = t('newevent_renamed');
-        }
-        // Fall through to render screen 1 (with the fresh name shown).
-
-    } else {
+    // Renaming moved to the Events tab, where it works on ANY event by id. The
+    // version that lived here updated `WHERE is_archived = 0`, which renamed
+    // every live event at once — harmless when only one could be live, wrong
+    // now that public archives allow several.
+    {
     // Name falls back to the configured default; day count is clamped 1..MAX.
     $name      = trim($_POST['name'] ?? '') ?: opt('default_event_name');
     $num_days  = max(1, min(MAX_EVENT_DAYS, (int)($_POST['num_days'] ?? 1)));

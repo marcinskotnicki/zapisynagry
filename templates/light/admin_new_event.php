@@ -35,19 +35,11 @@ $dayLabel = function($i) {
 <?php endif; ?>
 
 <?php if (($stage ?? 'start') === 'start'): ?>
-    <?php if (!empty($current)): // a live event exists -> offer an in-place rename ?>
-        <fieldset class="event-rename">
-            <legend><?= e(t('newevent_current')) ?></legend>
-            <form method="post" action="admin.php?tab=new_event">
-                <?= $csrf ?>
-                <input type="hidden" name="stage" value="rename">
-                <div class="field">
-                    <label for="cur_name"><?= e(t('newevent_name')) ?></label>
-                    <input type="text" id="cur_name" name="current_name" value="<?= e($current['name']) ?>" required>
-                </div>
-                <button type="submit" class="btn"><?= e(t('newevent_rename')) ?></button>
-            </form>
-        </fieldset>
+    <?php if (!empty($current)): // point at the tab that now owns renaming ?>
+        <p class="muted">
+            <?= e(t('newevent_current')) ?>: <strong><?= e($current['name']) ?></strong>
+            — <a href="admin.php?tab=archive&amp;event=<?= (int)$current['id'] ?>"><?= e(t('newevent_rename')) ?></a>
+        </p>
     <?php endif; ?>
 
     <?php // Screen 1: name + number of days. ?>

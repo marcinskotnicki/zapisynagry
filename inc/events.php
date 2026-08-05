@@ -30,7 +30,7 @@ function event_resolve() {
     if (public_archives_enabled()) {
         $id = (int)($_GET['event'] ?? 0);
         if ($id > 0) {
-            $ev = db_one('SELECT * FROM events WHERE id = ?', [$id]);
+            $ev = db_one('SELECT * FROM events WHERE id = ? AND is_deleted = 0', [$id]);
             if ($ev) {
                 return ['event' => $ev, 'readonly' => (int)$ev['is_archived'] === 1];
             }
@@ -43,7 +43,7 @@ function event_resolve() {
         // flag: the token is handed out precisely so someone can LOOK without
         // an account, and it must not become an edit link if an admin later
         // un-archives that event.
-        $ev = db_one('SELECT * FROM events WHERE access_token = ?', [$token]);
+        $ev = db_one('SELECT * FROM events WHERE access_token = ? AND is_deleted = 0', [$token]);
         return ['event' => $ev, 'readonly' => true];
     }
     // Default: the live event, fully interactive.
@@ -97,8 +97,11 @@ function event_date_label($ev) {
  * @param bool $archivedOnly  Restrict to archived events.
  * @return array  Event rows with date_from / date_to attached.
  */
-function events_page($limit, $offset = 0, $archivedOnly = false) {
-    $where = $archivedOnly ? 'WHERE e.is_archived = 1' : '';
+function events_page($limit, $offset = 0, $archivedOnly = false, $includeDeleted = false) {
+    // Deleted events are hidden from every listing except the admin Archive
+    // tab, which is the only place they can be restored from.
+    $where = $archivedOnly ? 'WHERE e.is_archived = 1' : 'WHERE 1=1';
+    if (!$includeDeleted) $where .= ' AND e.is_deleted = 0';
     return db_all(
         "SELECT e.*,
                 (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
@@ -114,8 +117,9 @@ function events_page($limit, $offset = 0, $archivedOnly = false) {
  * @param bool $archivedOnly
  * @return int
  */
-function events_count($archivedOnly = false) {
-    $where = $archivedOnly ? 'WHERE is_archived = 1' : '';
+function events_count($archivedOnly = false, $includeDeleted = false) {
+    $where = $archivedOnly ? 'WHERE is_archived = 1' : 'WHERE 1=1';
+    if (!$includeDeleted) $where .= ' AND is_deleted = 0';
     return (int)db_val("SELECT COUNT(*) FROM events $where");
 }
 
@@ -137,6 +141,7 @@ function events_upcoming() {
                 (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
            FROM events e
           WHERE e.is_archived = 0
+            AND e.is_deleted = 0
             AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) >= ?
           ORDER BY date_from ASC, e.id ASC", [$cutoff]);
 }
@@ -164,6 +169,7 @@ function events_by_day($year, $month) {
            FROM event_days d
            JOIN events e ON e.id = d.event_id
           WHERE d.day_date BETWEEN ? AND ?
+            AND e.is_deleted = 0
           ORDER BY d.day_date, e.id", [$first, $last]);
     $out = [];
     foreach ($rows as $r) {
@@ -243,6 +249,7 @@ function events_auto_archive() {
     $due = db_all(
         "SELECT e.id FROM events e
           WHERE e.is_archived = 0
+            AND e.is_deleted = 0
             AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) IS NOT NULL
             AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) < ?", [$cutoff]);
     if (!$due) return 0;
@@ -258,7 +265,100 @@ function events_auto_archive() {
  * @return array
  */
 function event_days($eventId) {
-    return db_all('SELECT * FROM event_days WHERE event_id = ? ORDER BY day_index', [$eventId]);
+    // Ordered by DATE, not by day_index: an admin who adds a day after the fact
+    // gets it in the right place on the front page without the stored indexes
+    // having to be rewritten first. event_days_renumber() then brings the
+    // indexes back in line whenever the day list actually changes, so the two
+    // orders agree from that point on.
+    return db_all('SELECT * FROM event_days WHERE event_id = ? ORDER BY day_date, day_index',
+                  [$eventId]);
+}
+
+/**
+ * Renumber an event's days 1..N in date order and sync events.num_days.
+ *
+ * day_index is the identity the front end uses (?day=N) and index.php clamps it
+ * to num_days, so the indexes MUST stay contiguous — a gap left by a deleted
+ * day would make that day's slot unreachable and push the last day past the
+ * clamp.
+ *
+ * @param int $eventId
+ * @return int  The new number of days.
+ */
+function event_days_renumber($eventId) {
+    $rows = db_all('SELECT id FROM event_days WHERE event_id = ? ORDER BY day_date, day_index',
+                   [(int)$eventId]);
+    $i = 0;
+    foreach ($rows as $r) {
+        $i++;
+        db_run('UPDATE event_days SET day_index = ? WHERE id = ?', [$i, (int)$r['id']]);
+    }
+    // num_days drives the clamp, so it has to move with the actual count.
+    db_run('UPDATE events SET num_days = ? WHERE id = ?', [max(1, $i), (int)$eventId]);
+    return $i;
+}
+
+/**
+ * Add a day to an existing event.
+ *
+ * @return bool  False if the date is missing or already used by this event.
+ */
+function event_day_add($eventId, $date, $start, $end) {
+    $eventId = (int)$eventId;
+    $date    = trim((string)$date);
+    if ($date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return false;
+    // Two days on one date would give the event two identical tabs.
+    $clash = db_val('SELECT COUNT(*) FROM event_days WHERE event_id = ? AND day_date = ?',
+                    [$eventId, $date]);
+    if ((int)$clash > 0) return false;
+
+    $start = preg_match('/^\d{1,2}:\d{2}$/', (string)$start) ? $start : opt('default_start_time');
+    $end   = preg_match('/^\d{1,2}:\d{2}$/', (string)$end)   ? $end   : opt('default_end_time');
+
+    // Appended with a temporary index; renumber puts it in date order.
+    $next = (int)db_val('SELECT COALESCE(MAX(day_index), 0) + 1 FROM event_days WHERE event_id = ?',
+                        [$eventId]);
+    db_run('INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time)
+            VALUES (?,?,?,?,?)', [$eventId, $next, $date, $start, $end]);
+    event_days_renumber($eventId);
+    return true;
+}
+
+/**
+ * Remove a day, with everything scheduled on it.
+ *
+ * Refuses to remove the LAST day: an event with no days has no page to show and
+ * no way back through this screen, so deleting the event itself is the right
+ * action at that point.
+ *
+ * @return bool
+ */
+function event_day_delete($dayId) {
+    $day = db_one('SELECT * FROM event_days WHERE id = ?', [(int)$dayId]);
+    if (!$day) return false;
+    $left = (int)db_val('SELECT COUNT(*) FROM event_days WHERE event_id = ?', [$day['event_id']]);
+    if ($left <= 1) return false;
+
+    // game_tables cascades to games, players and comments from here.
+    db_run('DELETE FROM event_days WHERE id = ?', [(int)$dayId]);
+    event_days_renumber((int)$day['event_id']);
+    return true;
+}
+
+/**
+ * How much is scheduled on a day — shown before deleting it, so an admin can
+ * see what would go with it.
+ *
+ * @return array ['tables' => int, 'games' => int, 'players' => int]
+ */
+function event_day_contents($dayId) {
+    $dayId = (int)$dayId;
+    return [
+        'tables'  => (int)db_val('SELECT COUNT(*) FROM game_tables WHERE day_id = ?', [$dayId]),
+        'games'   => (int)db_val('SELECT COUNT(*) FROM games WHERE day_id = ?', [$dayId]),
+        'players' => (int)db_val(
+            'SELECT COUNT(*) FROM players p JOIN games g ON g.id = p.game_id WHERE g.day_id = ?', [$dayId]),
+    ];
 }
 
 /**
