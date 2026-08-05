@@ -704,6 +704,10 @@ Each of these has bitten at least once.
   small buttons. The same applies to `:hover`: a variant must restate every
   property the base's hover sets, or `.btn-small:hover` repaints it.
 - **Relative URLs.** Every asset path assumes the page lives at `/`.
+- **Never put `display: flex` (or block/grid) on a `<td>`.** It replaces
+  `display: table-cell`, so the cell drops out of the row's height calculation:
+  it sizes to its own content and its bottom border lands above its neighbours',
+  visibly breaking the row lines. Put the flex row on an inner `<div>` instead.
 - **`hidden` loses to any author `display` rule.** The attribute is only a
   User-Agent default of `display: none`, so an element with its own `display`
   ignores it entirely. Light's base sheet therefore carries a blanket

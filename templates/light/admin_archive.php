@@ -41,10 +41,17 @@
             </td>
             <td class="nowrap"><?= e($ev['created_at']) ?></td>
             <td class="link-cell">
-                <input type="text" readonly value="<?= e($link) ?>" id="lnk<?= (int)$ev['id'] ?>">
-                <button type="button" class="btn btn-small copy-btn" data-copy-target="lnk<?= (int)$ev['id'] ?>">
-                    <?= e(t('copy')) ?>
-                </button>
+                <?php // The flex row goes on an inner div, never on the <td>:
+                      // display:flex replaces display:table-cell, which drops the
+                      // cell out of the row's height calculation — it then sizes
+                      // to its own content and its bottom border lands above the
+                      // neighbouring cells', breaking the row lines. ?>
+                <div class="link-cell-inner">
+                    <input type="text" readonly value="<?= e($link) ?>" id="lnk<?= (int)$ev['id'] ?>">
+                    <button type="button" class="btn btn-small copy-btn" data-copy-target="lnk<?= (int)$ev['id'] ?>">
+                        <?= e(t('copy')) ?>
+                    </button>
+                </div>
             </td>
             <td class="archive-actions">
                 <?php $isDeleted = (int)$ev['is_deleted'] === 1; ?>
