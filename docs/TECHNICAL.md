@@ -596,6 +596,25 @@ treats an absent field as an empty value (or an unticked toggle). A test
 compares the controller's lists against the rendered form and fails naming any
 key that is missing.
 
+**Settings transfer (Options → Advanced).** Export writes the portable
+settings as JSON; import applies such a file. Three rules hold it together:
+
+- `option_sanitize()` in `inc/admin/options.php` is the SINGLE validation
+  implementation, used by both the save loop and the importer — a second copy
+  would drift and the import would become a quieter way to write a value the
+  form refuses.
+- `options_not_portable()` names what must never travel: the credentials in
+  `$OPTION_SECRETS`, plus `site_url`, `venue_name` and `default_event_name`.
+  Credentials are additionally protected structurally, since neither the
+  exporter nor the importer iterates `$OPTION_SECRETS` at all. `github_url` IS
+  portable — it is the same upstream everywhere unless someone forks.
+- Unknown keys are skipped rather than stored, so a newer export applied to an
+  older site cannot inject settings it does not understand.
+
+Both buttons post the SAME form with a different `action`; a nested `<form>`
+would be invalid HTML and the browser would drop it. A POST with no action at
+all still means save.
+
 **Add a translation key.** Both files, same commit.
 
 **Add a layout toggle that only reorders existing content.** Do it with a body

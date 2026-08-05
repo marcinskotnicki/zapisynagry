@@ -80,7 +80,282 @@ $OPTION_TOGGLES = [
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+/**
+ * Options that must NEVER travel between sites in a settings file.
+ *
+ * Two reasons, both of which would be a real problem in the field:
+ *   - CREDENTIALS ($OPTION_SECRETS) — several clubs run on subdomains of one
+ *     host, so a file quietly carrying an SMTP password or a BGG key from one
+ *     to another is a leak, not a convenience.
+ *   - IDENTITY — a site's own name, its public URL and the name it prefills for
+ *     new events. Copying these makes the second site claim to be the first:
+ *     emails would point at the wrong domain.
+ *
+ * Everything else is behaviour, which is exactly what an admin wants to clone.
+ * github_url is deliberately NOT here: it is the same upstream on every site
+ * unless someone forks, so copying it is right.
+ *
+ * @return string[]
+ */
+function options_not_portable() {
+    global $OPTION_SECRETS;
+    return array_merge($OPTION_SECRETS, ['site_url', 'venue_name', 'default_event_name']);
+}
+
+/**
+ * The current settings as a portable array, ready to be JSON-encoded.
+ *
+ * @return array
+ */
+function options_export_data() {
+    global $OPTION_VALUES, $OPTION_TOGGLES;
+    $skip = options_not_portable();
+    $out  = [];
+    foreach (array_merge($OPTION_VALUES, $OPTION_TOGGLES) as $key) {
+        if (in_array($key, $skip, true)) continue;
+        $out[$key] = (string)opt($key);
+    }
+    // Custom texts are per-language option keys generated at runtime, so they
+    // are not in either whitelist — but they ARE portable, and re-typing six
+    // texts in two languages on eighty sites is exactly the work this avoids.
+    foreach (custom_msg_keys() as $msgKey) {
+        foreach (lang_available() as $lc) {
+            $optKey = custom_msg_option($msgKey, $lc);
+            $out[$optKey] = (string)opt($optKey);
+        }
+    }
+    ksort($out);
+    return [
+        'format'   => 'zapisynagry-options',
+        'version'  => 1,
+        'exported' => gmdate('c'),
+        'options'  => $out,
+    ];
+}
+
+/**
+ * Apply a decoded settings file.
+ *
+ * Every value goes through option_sanitize() — the SAME validation the form
+ * uses — so a hand-edited or older file cannot write something the form would
+ * have refused. Unknown keys are ignored rather than stored, and non-portable
+ * keys are refused even if the file contains them, so an older export that
+ * still carried a password cannot overwrite this site's.
+ *
+ * @param array $data  Decoded JSON.
+ * @return array ['applied' => int, 'skipped' => int, 'error' => string|null]
+ */
+function options_import_data($data) {
+    global $OPTION_VALUES, $OPTION_TOGGLES;
+    if (!is_array($data) || ($data['format'] ?? '') !== 'zapisynagry-options'
+        || !isset($data['options']) || !is_array($data['options'])) {
+        return ['applied' => 0, 'skipped' => 0, 'error' => 'format'];
+    }
+
+    $skip     = options_not_portable();
+    $toggles  = array_flip($OPTION_TOGGLES);
+    $values   = array_flip($OPTION_VALUES);
+    $custom   = [];
+    foreach (custom_msg_keys() as $msgKey) {
+        foreach (lang_available() as $lc) $custom[custom_msg_option($msgKey, $lc)] = true;
+    }
+
+    $applied = 0;
+    $skipped = 0;
+    foreach ($data['options'] as $key => $val) {
+        if (!is_string($key) || is_array($val)) { $skipped++; continue; }
+        if (in_array($key, $skip, true)) { $skipped++; continue; }
+
+        if (isset($toggles[$key])) {
+            // Anything but an exact "1" is off, matching how the form saves.
+            opt_set($key, (string)$val === '1' ? '1' : '0');
+            $applied++;
+        } elseif (isset($values[$key])) {
+            $clean = option_sanitize($key, (string)$val);
+            if ($clean === null) { $skipped++; continue; }
+            opt_set($key, $clean);
+            $applied++;
+        } elseif (isset($custom[$key])) {
+            opt_set($key, (string)$val);
+            $applied++;
+        } else {
+            // A key this version does not know — a newer export, or junk.
+            $skipped++;
+        }
+    }
+    return ['applied' => $applied, 'skipped' => $skipped, 'error' => null];
+}
+
+/**
+ * Validate and coerce ONE option value, exactly as the Options form does.
+ *
+ * Extracted so the form and the settings IMPORT share a single implementation:
+ * an import that validated differently would be a second, quieter way to write
+ * a value the form would have refused.
+ *
+ * @param string $key
+ * @param string $val  Raw incoming value.
+ * @return string|null Sanitised value, or null if it must be rejected (the
+ *                     caller leaves the stored value alone).
+ */
+function option_sanitize($key, $val) {
+    $val = trim((string)$val);
+    switch ($key) {                       // coerce / validate the few constrained fields
+        case 'max_tables':
+        case 'timeline_extension':
+        case 'email_smtp_port':
+        case 'poll_default_deadline_hours':
+        case 'login_days':
+        case 'archive_per_page':
+        case 'admin_per_page':
+        case 'auto_archive_days':
+            // Clamped again where they are USED, so a value written
+            // straight into the options table cannot produce a zero-row
+            // page or an unbounded query.
+            $val = (string)max(0, (int)$val);
+            break;
+        case 'chat_max_messages':
+        case 'chat_initial_messages':
+        case 'chat_refresh_seconds':
+        case 'chat_send_delay':
+            // Coerced here, then clamped again at READ time by the helpers
+            // in inc/chat.php — a value that predates this validation, or
+            // one written straight into the table, must not be able to make
+            // the panel hammer the server or dump the whole log.
+            $val = (string)max(0, (int)$val);
+            break;
+        case 'chat_scope':
+            if (!in_array($val, ['event', 'global'], true)) return null;
+            break;
+        case 'antibot_delay_form':
+        case 'antibot_delay_click':
+            $val = (string)max(0, (int)$val);          // non-negative integers only
+            break;
+        case 'overnight_grace_hours':
+            // 0 = pivot exactly at opening; 12 is far more than any sane
+            // setup window and keeps the pivot from wrapping a full day.
+            $val = (string)min(12, max(0, (int)$val));
+            break;
+        case 'default_language':
+            if (!lang_exists($val)) return null;        // ignore an unknown code (skip this field)
+            break;
+        case 'default_template':
+            if (!tpl_exists($val)) return null;         // ignore an unknown theme
+            break;
+        case 'registration_mode':
+            // Whitelist: only these two modes are valid.
+            if (!in_array($val, ['registration', 'guest_only'], true)) return null;
+            break;
+        case 'verification_method':
+            // Whitelist of the verification tree's method names.
+            if (!in_array($val, ['none', 'registered', 'email_code', 'email_match'], true)) return null;
+            break;
+        case 'table_names_mode':
+            // Whitelist of the table-name permission modes.
+            if (!in_array($val, ['off', 'admin', 'add_any', 'any'], true)) return null;
+            break;
+        case 'require_email':
+            // Integer codes: 0 = never, 1 = always, 2 = proposer decides per game.
+            if (!in_array($val, ['0', '1', '2'], true)) return null;
+            break;
+        case 'header_button_style':
+            // How the top-bar nav renders: text only / icon only / both.
+            if (!in_array($val, ['text', 'icon', 'both'], true)) return null;
+            break;
+        case 'switcher_pos_template':
+        case 'switcher_pos_language':
+            // Anything else would fall through to "not this slot" in
+            // switcher_visible() and the switcher would silently vanish.
+            if (!in_array($val, ['header', 'footer', 'both', 'none'], true)) return null;
+            break;
+        case 'home_layout':
+            // Anything else would fall through to the CSS default (tables
+            // first) anyway, but reject it so the stored value always says
+            // what it means rather than quietly meaning "something else".
+            if (!in_array($val, ['tables_first', 'timeline_first'], true)) return null;
+            break;
+        case 'github_url':
+            // Empty is meaningful: it means "inherit whatever install.php
+            // configured", so it must be storable. Anything non-empty has
+            // to be a real http(s) URL — the updater fetches it, and a
+            // malformed value would break self-updating with a download
+            // error rather than anything that points at the cause.
+            $val = trim($val);
+            if ($val !== '' && !preg_match('#^https?://#i', $val)) return null;
+            if ($val !== '' && !filter_var($val, FILTER_VALIDATE_URL)) return null;
+            $val = rtrim($val, '/');
+            break;
+        case 'email_subject_prefix':
+            // Anything else would silently fall through to the venue branch
+            // in mail_subject_prefix(); reject it so the stored value always
+            // says what it means.
+            if (!in_array($val, ['venue', 'event'], true)) return null;
+            break;
+        case 'timezone':
+            // Must be a real PHP timezone: app_timezone_init() falls back to
+            // UTC on anything else, so storing junk would silently move the
+            // whole site's clock. Reject instead and keep the old value.
+            try { new DateTimeZone($val); } catch (Throwable $e) { return null; }
+            break;
+        case 'captcha_version':
+            // Which reCAPTCHA the keys belong to (types aren't interchangeable).
+            if (!in_array($val, ['v2', 'v3'], true)) return null;
+            break;
+        case 'captcha_v3_threshold':
+            // Score cutoff 0.1-1.0; anything outside that falls back to 0.5.
+            $f = (float)str_replace(',', '.', $val);      // tolerate a comma decimal
+            if ($f <= 0 || $f > 1) $f = 0.5;
+            $val = rtrim(rtrim(number_format($f, 2, '.', ''), '0'), '.');
+            break;
+    }
+    return $val;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'export') {
+    // Straight to a download, before any page output — this response is a file,
+    // not a screen, so it must not go through the admin shell.
+    $json = json_encode(options_export_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    $name = 'zapisynagry-options-' . gmdate('Ymd-His') . '.json';
+    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $name . '"');
+    header('Content-Length: ' . strlen($json));
+    log_action('options_export', 'Settings exported');
+    echo $json;
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'import') {
+    // A pasted file body OR an uploaded file. Paste is offered because it works
+    // everywhere and is the path that can actually be tested end to end;
+    // is_uploaded_file() only ever returns true for a real multipart request.
+    $raw = trim((string)($_POST['import_json'] ?? ''));
+    if ($raw === '' && !empty($_FILES['import_file']['tmp_name'])
+        && is_uploaded_file($_FILES['import_file']['tmp_name'])) {
+        $raw = (string)file_get_contents($_FILES['import_file']['tmp_name']);
+    }
+
+    if ($raw === '') {
+        $flash = t('opt_import_empty');
+    } else {
+        $decoded = json_decode($raw, true);
+        $res = options_import_data($decoded);
+        if ($res['error'] !== null) {
+            $flash = t('opt_import_bad');
+        } else {
+            // Reload so the form below renders the values just written, rather
+            // than the ones cached at the top of this request.
+            options_load();
+            log_action('options_import', $res['applied'] . ' applied, ' . $res['skipped'] . ' skipped');
+            $flash = t('opt_import_done', $res['applied'], $res['skipped']);
+        }
+    }
+}
+
+// Anything that is not an explicit export or import is a save, including a POST
+// carrying no action at all — that was the contract before those two buttons
+// existed, and keeping it means nothing else that posts here has to be updated.
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && !in_array($_POST['action'] ?? '', ['export', 'import'], true)) {
     // --- Plain value fields ---
     // Credentials first, by their own rule: blank means "unchanged".
     foreach ($OPTION_SECRETS as $key) {
@@ -104,118 +379,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     foreach ($OPTION_VALUES as $key) {
-        $val = trim($_POST[$key] ?? '');
-        switch ($key) {                       // coerce / validate the few constrained fields
-            case 'max_tables':
-            case 'timeline_extension':
-            case 'email_smtp_port':
-            case 'poll_default_deadline_hours':
-            case 'login_days':
-            case 'archive_per_page':
-            case 'admin_per_page':
-            case 'auto_archive_days':
-                // Clamped again where they are USED, so a value written
-                // straight into the options table cannot produce a zero-row
-                // page or an unbounded query.
-                $val = (string)max(0, (int)$val);
-                break;
-            case 'chat_max_messages':
-            case 'chat_initial_messages':
-            case 'chat_refresh_seconds':
-            case 'chat_send_delay':
-                // Coerced here, then clamped again at READ time by the helpers
-                // in inc/chat.php — a value that predates this validation, or
-                // one written straight into the table, must not be able to make
-                // the panel hammer the server or dump the whole log.
-                $val = (string)max(0, (int)$val);
-                break;
-            case 'chat_scope':
-                if (!in_array($val, ['event', 'global'], true)) continue 2;
-                break;
-            case 'antibot_delay_form':
-            case 'antibot_delay_click':
-                $val = (string)max(0, (int)$val);          // non-negative integers only
-                break;
-            case 'overnight_grace_hours':
-                // 0 = pivot exactly at opening; 12 is far more than any sane
-                // setup window and keeps the pivot from wrapping a full day.
-                $val = (string)min(12, max(0, (int)$val));
-                break;
-            case 'default_language':
-                if (!lang_exists($val)) continue 2;        // ignore an unknown code (skip this field)
-                break;
-            case 'default_template':
-                if (!tpl_exists($val)) continue 2;         // ignore an unknown theme
-                break;
-            case 'registration_mode':
-                // Whitelist: only these two modes are valid.
-                if (!in_array($val, ['registration', 'guest_only'], true)) continue 2;
-                break;
-            case 'verification_method':
-                // Whitelist of the verification tree's method names.
-                if (!in_array($val, ['none', 'registered', 'email_code', 'email_match'], true)) continue 2;
-                break;
-            case 'table_names_mode':
-                // Whitelist of the table-name permission modes.
-                if (!in_array($val, ['off', 'admin', 'add_any', 'any'], true)) continue 2;
-                break;
-            case 'require_email':
-                // Integer codes: 0 = never, 1 = always, 2 = proposer decides per game.
-                if (!in_array($val, ['0', '1', '2'], true)) continue 2;
-                break;
-            case 'header_button_style':
-                // How the top-bar nav renders: text only / icon only / both.
-                if (!in_array($val, ['text', 'icon', 'both'], true)) continue 2;
-                break;
-            case 'switcher_pos_template':
-            case 'switcher_pos_language':
-                // Anything else would fall through to "not this slot" in
-                // switcher_visible() and the switcher would silently vanish.
-                if (!in_array($val, ['header', 'footer', 'both', 'none'], true)) continue 2;
-                break;
-            case 'home_layout':
-                // Anything else would fall through to the CSS default (tables
-                // first) anyway, but reject it so the stored value always says
-                // what it means rather than quietly meaning "something else".
-                if (!in_array($val, ['tables_first', 'timeline_first'], true)) continue 2;
-                break;
-            case 'github_url':
-                // Empty is meaningful: it means "inherit whatever install.php
-                // configured", so it must be storable. Anything non-empty has
-                // to be a real http(s) URL — the updater fetches it, and a
-                // malformed value would break self-updating with a download
-                // error rather than anything that points at the cause.
-                $val = trim($val);
-                if ($val !== '' && !preg_match('#^https?://#i', $val)) continue 2;
-                if ($val !== '' && !filter_var($val, FILTER_VALIDATE_URL)) continue 2;
-                $val = rtrim($val, '/');
-                break;
-            case 'email_subject_prefix':
-                // Anything else would silently fall through to the venue branch
-                // in mail_subject_prefix(); reject it so the stored value always
-                // says what it means.
-                if (!in_array($val, ['venue', 'event'], true)) continue 2;
-                break;
-            case 'timezone':
-                // Must be a real PHP timezone: app_timezone_init() falls back to
-                // UTC on anything else, so storing junk would silently move the
-                // whole site's clock. Reject instead and keep the old value.
-                try { new DateTimeZone($val); } catch (Throwable $e) { continue 2; }
-                break;
-            case 'captcha_version':
-                // Which reCAPTCHA the keys belong to (types aren't interchangeable).
-                if (!in_array($val, ['v2', 'v3'], true)) continue 2;
-                break;
-            case 'captcha_v3_threshold':
-                // Score cutoff 0.1-1.0; anything outside that falls back to 0.5.
-                $f = (float)str_replace(',', '.', $val);      // tolerate a comma decimal
-                if ($f <= 0 || $f > 1) $f = 0.5;
-                $val = rtrim(rtrim(number_format($f, 2, '.', ''), '0'), '.');
-                break;
-        }
+        $val = option_sanitize($key, $_POST[$key] ?? '');
+        // null = refused by validation; leave the stored value as it was.
+        if ($val === null) continue;
         opt_set($key, $val);
-        // NB: `continue 2` above targets THIS foreach (level 2 = the switch is
-        // level 1), so an invalid constrained field is left at its old value.
     }
     // --- Toggle fields: present in POST = "1", absent = "0". ---
     foreach ($OPTION_TOGGLES as $key) {

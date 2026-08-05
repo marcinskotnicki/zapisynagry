@@ -85,7 +85,7 @@ $group = function ($titleKey, $open = false, $noteKey = null) {
 $groupEnd = function () { echo '</div></details>'; };
 ?>
 
-<form method="post" action="admin.php?tab=options" class="options-form">
+<form method="post" action="admin.php?tab=options" class="options-form" enctype="multipart/form-data">
     <?= $csrf ?>
 
     <?php /* 1. BASIC — everything a new club must set to open its doors. */ ?>
@@ -437,7 +437,33 @@ $groupEnd = function () { echo '</div></details>'; };
                    value="<?= e(opt('github_url') !== '' ? opt('github_url') : update_repo_url()) ?>">
             <p class="field-note"><?= e(t('opt_github_url_note')) ?></p>
         </div>
+
+        <?php // Settings transfer. Both buttons submit THIS form with a different
+              // action, so no nested <form> is needed — nesting is invalid HTML
+              // and browsers drop the inner one. The file input is associated
+              // with the same form for the import case. ?>
+        <hr class="opt-sep">
+        <h4 class="opt-subhead"><?= e(t('opt_transfer_title')) ?></h4>
+        <p class="field-note"><?= e(t('opt_transfer_note')) ?></p>
+        <div class="field">
+            <button type="submit" name="action" value="export" class="btn btn-small"><?= e(t('opt_export')) ?></button>
+        </div>
+        <div class="field">
+            <label for="import_file"><?= e(t('opt_import_file')) ?></label>
+            <input type="file" id="import_file" name="import_file" accept="application/json,.json">
+        </div>
+        <div class="field">
+            <label for="import_json"><?= e(t('opt_import_paste')) ?></label>
+            <textarea id="import_json" name="import_json" rows="4"></textarea>
+            <p class="field-note"><?= e(t('opt_import_paste_note')) ?></p>
+        </div>
+        <div class="field">
+            <button type="submit" name="action" value="import" class="btn btn-small btn-danger"
+                    onclick="return confirm('<?= e(t('opt_import_confirm')) ?>');"><?= e(t('opt_import')) ?></button>
+        </div>
     <?php $groupEnd(); ?>
 
-    <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>
+    <?php // The button carries the action so the controller can tell a save from
+          // an export or an import, all of which post this same form. ?>
+    <button type="submit" name="action" value="save" class="btn btn-primary"><?= e(t('save')) ?></button>
 </form>
