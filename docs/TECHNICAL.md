@@ -670,6 +670,37 @@ it is a link label and a `<title>`, so it is escaped everywhere it appears.
 Keep that split: the title is the field an admin would never think of as code,
 which makes it the one that would inject it.
 
+**The rich-text editor is Trix, vendored in `vendor/trix/`.** MIT, two files
+from the npm UMD build, updated by `npm pack trix` and copying them across (see
+`vendor/trix/README.txt`). Not a CDN: the app is FTP-deployed onto shared
+hosting with no build step, and an admin panel should not depend on a third
+party being reachable. It is loaded only on the Pages tab, since no other screen
+has a rich-text field and it is ~200KB. Trix edits a HIDDEN input and writes
+HTML into it, so storage and rendering are unchanged — the controller still
+reads `$_POST['body']`. The input must appear BEFORE the `<trix-editor>` that
+names it, because Trix resolves the id when it upgrades.
+
+**Data-protection consent.** `consent_field()` / `consent_ok()` in
+`inc/helpers.php` put the admin's `mailing_gdpr_text` beside every GUEST form
+that collects personal data (add game, add poll, sign up, vote, message,
+register). Three gates, each of which is a way it could go wrong: empty wording
+means nothing is shown or required anywhere; a signed-in visitor is never asked;
+and an agreement is remembered in a cookie so the next form starts ticked.
+
+The cookie stores a FINGERPRINT of the wording, not a bare flag — rewording the
+notice asks everyone again rather than carrying an old agreement over to new
+terms. Whether a remembered agreement actually PRE-TICKS the box is the
+`gdpr_prefill` option (default on): a strict reading of the rules wants every
+consent to be a fresh affirmative act, so that is the club's decision rather
+than a behaviour baked into the code. With it off the agreement is still
+recorded — only the tick is withheld — so switching it back on takes effect at
+once. `consent_remember()` is called only after a successful submission, so the
+cookie can never record consent for something that was refused. The checkbox's
+`required` attribute is a courtesy: every controller re-checks server-side,
+because a client can simply not send the field. Forms with intermediate submit
+buttons (the poll builder) mark those `formnovalidate`, or a required consent
+box would block adding a candidate or cancelling.
+
 **Add a translation key.** Both files, same commit.
 
 **Add a layout toggle that only reorders existing content.** Do it with a body

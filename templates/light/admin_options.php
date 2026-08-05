@@ -394,6 +394,9 @@ $groupEnd = function () { echo '</div></details>'; };
             <textarea id="mailing_gdpr_text" name="mailing_gdpr_text" rows="4"><?= e(opt('mailing_gdpr_text')) ?></textarea>
             <p class="field-note"><?= e(t('opt_mailing_gdpr_note')) ?></p>
         </div>
+        <?php // Only meaningful once wording exists, so it sits directly under it. ?>
+        <?php $toggle('gdpr_prefill'); ?>
+        <p class="field-note"><?= e(t('opt_gdpr_prefill_note')) ?></p>
     <?php $groupEnd(); ?>
 
     <?php /* 8. SECURITY */ ?>

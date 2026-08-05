@@ -85,7 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     antibot_check('form');
     $bodyText = trim($_POST['body'] ?? '');
-    if ($bodyText === '') {
+    // Data-protection consent, when the admin configured wording and the
+    // visitor is not signed in. Checked here rather than trusting the
+    // checkbox's `required` attribute, which a client can simply not send.
+    if (!consent_ok()) {
+        $error = t('gdpr_required');
+    } elseif ($bodyText === '') {
         $error = t('msg_empty');
     } elseif (!text_has_content($bodyText)) {
         $error = t('error_name_meaningless');
@@ -116,6 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             send_mail($to, $subject, $bodyText, $replyTo);
         }
         log_action('message_sent', $targetLabel);
+        // Remember the agreement so the next form starts ticked. Only after a
+        // successful submission, so the cookie can never record consent for
+        // something that was refused.
+        consent_remember();
         flash_set(t('msg_sent'));
         redirect('index.php?day=' . $activeDay . $backAnchor);
     }

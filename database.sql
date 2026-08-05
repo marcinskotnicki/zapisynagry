@@ -146,11 +146,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- registration_mode: 'registration' = accounts allowed, 'guest_only' =
     -- no accounts (the two toggles above are then irrelevant).
     ('registration_mode',            'registration'),
-    ('send_emails',                  '0'),
+    ('send_emails',                  '1'),
     -- require_email: 0 = emails never required, 1 = always required,
     -- 2 = per-game: the proposer decides via a checkbox when adding a game or
     --     poll (and must then give their OWN email too).
-    ('require_email',                '0'),
+    ('require_email',                '2'),
     -- overnight_grace_hours: times up to N hours BEFORE a day's opening hour
     -- still count as that same day (early setup); anything earlier flips to
     -- "after midnight / next morning" on overnight days. See day_rel_min().
@@ -170,6 +170,10 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- the signup box. Left empty, no checkbox is shown and none is demanded —
     -- so this doubles as the on/off switch for asking consent at all.
     ('mailing_gdpr_text',            ''),
+    -- Start the consent box ticked for someone who already agreed to this
+    -- exact wording. Convenience for regulars; switch it off for the
+    -- stricter reading, where every consent is a fresh affirmative tick.
+    ('gdpr_prefill',          '1'),
     -- antibot_delay_form / antibot_delay_click: minimum seconds between a
     -- guarded form's render and its submission (see inc/antibot.php). 0
     -- disables the check for that bucket. Ignored for logged-in users.
@@ -187,7 +191,7 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('allow_start_outside_hours',    '1'),
     -- header_button_style: how the top-bar nav links render —
     --   'text' = text only (current), 'icon' = icon only, 'both' = icon + text.
-    ('header_button_style',          'text'),
+    ('header_button_style',          'both'),
     -- show_venue_name: 1 = show the venue name top-left (current); 0 = hide it,
     -- useful when the venue and event names are the same (avoids showing both).
     ('show_venue_name',              '1'),
@@ -203,7 +207,7 @@ inna'),                                -- game-language dropdown options, ONE PE
     --   'email_match' = retype original email, case-insensitive match
     -- (Admins and the original logged-in owner always skip this. If no email
     --  was stored on the item, the action is always free regardless of method.)
-    ('verification_method',          'none'),
+    ('verification_method',          'email_code'),
     -- table_names_mode: who may set / edit the optional table names:
     --   'off'     = table names are not used at all
     --   'admin'   = only admins may set and edit them

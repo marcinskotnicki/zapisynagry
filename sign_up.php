@@ -42,7 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form['email'] = trim((string)$form['email']);
     $form['knows'] = min(2, max(0, (int)$form['knows']));   // clamp to the 0..2 codes
 
-    if ($form['name'] === '') {
+    // Data-protection consent, when the admin configured wording and the
+    // visitor is not signed in. Checked here rather than trusting the
+    // checkbox's `required` attribute, which a client can simply not send.
+    if (!consent_ok()) {
+        $error = t('gdpr_required');
+    } elseif ($form['name'] === '') {
         $error = t('error_signup_name');
     } elseif (!text_has_content($form['name'])) {
         $error = t('error_name_meaningless');
@@ -68,6 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         );
         log_action('signup', $form['name'] . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : ''));
+        // Remember the agreement so the next form starts ticked. Only after a
+        // successful submission, so the cookie can never record consent for
+        // something that was refused.
+        consent_remember();
         guest_identity_remember($form['name'], $form['email']);   // prefill next time
         notify_signup($game, $form['name']);                     // no-op unless notifications on
         redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to the card

@@ -33,7 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass1 = (string)($_POST['password']  ?? '');
     $pass2 = (string)($_POST['password2'] ?? '');
 
-    if ($form['name'] === '') {
+    // Data-protection consent, when the admin configured wording and the
+    // visitor is not signed in. Checked here rather than trusting the
+    // checkbox's `required` attribute, which a client can simply not send.
+    if (!consent_ok()) {
+        $error = t('gdpr_required');
+    } elseif ($form['name'] === '') {
         $error = t('error_signup_name');
     } elseif (!text_has_content($form['name']) || text_too_long($form['name'], TEXT_NAME_MAX)) {
         $error = t('error_name_meaningless');
@@ -54,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                [$form['email'], password_hash($pass1, PASSWORD_DEFAULT), $form['name']]);
         $newId = (int)db()->lastInsertId();
         log_action('register', $form['name'] . ' <' . $form['email'] . '>');
+        // Remember the agreement so the next form starts ticked. Only after a
+        // successful submission, so the cookie can never record consent for
+        // something that was refused.
+        consent_remember();
         // Log the fresh account straight in (same steps as auth_login).
         session_regenerate_id(true);
         $_SESSION['user_id'] = $newId;

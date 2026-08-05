@@ -77,10 +77,16 @@
                    value="<?= e($editing['title'] ?? '') ?>" required>
         </div>
         <div class="field">
-            <label for="page_body"><?= e(t('texts_page_body')) ?></label>
-            <textarea id="page_body" name="body" rows="14"><?= e($editing['body'] ?? '') ?></textarea>
-            <?php // HTML is allowed and rendered as-is on the public page — only
-                  // an admin can write it, and formatting is the point. ?>
+            <label for="page_body_editor"><?= e(t('texts_page_body')) ?></label>
+            <?php // Trix edits a HIDDEN input and writes HTML into it, so the
+                  // field the controller reads is unchanged — without JS this
+                  // degrades to nothing being editable here, which is why the
+                  // plain textarea below stays as the fallback.
+                  //
+                  // The input must come BEFORE the editor element that names it,
+                  // or Trix cannot find it at upgrade time. ?>
+            <input type="hidden" id="page_body" name="body" value="<?= e($editing['body'] ?? '') ?>">
+            <trix-editor input="page_body" id="page_body_editor" class="trix-content"></trix-editor>
             <p class="field-note"><?= e(t('texts_page_body_note')) ?></p>
         </div>
         <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>

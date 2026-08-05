@@ -108,7 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } elseif ($do === 'finish') {
         antibot_check('form');
-        if (empty($draft['games'])) {
+        // Data-protection consent, when the admin configured wording and the
+        // visitor is not signed in. Checked here rather than trusting the
+        // checkbox's `required` attribute, which a client can simply not send.
+        if (!consent_ok()) {
+            $error = t('gdpr_required');
+        } elseif (empty($draft['games'])) {
             $error = t('poll_need_game');                  // a poll needs at least one candidate
         } elseif (!start_within_event_hours($draft['start_time'], $day)) {
             $error = t('error_start_outside_hours');       // rule on + start outside the day's window
@@ -185,6 +190,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($error === null) {
                 log_action('poll_create', $draft['name'] . ' (' . count($draft['games']) . ' games)');
+                // Remember the agreement so the next form starts ticked. Only after a
+                // successful submission, so the cookie can never record consent for
+                // something that was refused.
+                consent_remember();
                 unset($_SESSION['poll_draft']);            // draft persisted -> clear it
                 // Mailing list, after the commit — see add_game.php. If the
                 // seeded votes resolve the poll below, subscribers still get a

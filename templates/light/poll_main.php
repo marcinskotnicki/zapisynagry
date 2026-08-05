@@ -137,7 +137,7 @@
                     <li>
                         <span class="cand-name"><?= e($g['name']) ?></span>
                         <span class="muted"><?= e(t('poll_req_short', (int)$g['required_players'])) ?></span>
-                        <button type="submit" name="do" value="rem:<?= (int)$idx ?>" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
+                        <button type="submit" name="do" value="rem:<?= (int)$idx ?>" formnovalidate class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -148,11 +148,14 @@
               // Save + cancel sit together underneath, the way every other form
               // on the site ends. ?>
         <p class="poll-form-add">
-            <button type="submit" name="do" value="addgame" class="btn btn-danger"><?= e(t('poll_addgame')) ?></button>
+            <button type="submit" name="do" value="addgame" formnovalidate class="btn btn-danger"><?= e(t('poll_addgame')) ?></button>
         </p>
         <p class="poll-form-actions">
+            <?php // Data-protection consent. Renders nothing for a signed-in visitor,
+                  // or when the admin has left the wording empty. ?>
+            <?= consent_field() ?>
             <button type="submit" name="do" value="finish" class="btn btn-primary"><?= e(t('poll_finish')) ?></button>
-            <button type="submit" name="do" value="cancel" class="btn"><?= e(t('cancel')) ?></button>
+            <button type="submit" name="do" value="cancel" formnovalidate class="btn"><?= e(t('cancel')) ?></button>
         </p>
     </form>
 </div>

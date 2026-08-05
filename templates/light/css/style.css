@@ -73,6 +73,8 @@ input, select, textarea {
     font-size: 1rem;
 }
 input[type="checkbox"]{width:auto;}
+.gdpr-consent { margin-top: 0.6rem; font-size: 0.9rem; }
+.gdpr-consent span { color: var(--text-muted); }
 .field-check label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
 .field-check input { width: auto; }
 

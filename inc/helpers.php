@@ -282,6 +282,112 @@ function email_required_for_poll($poll) {
  *
  * @return array|null  The event row, or null before the first event is created.
  */
+/* ---------------------------------------------------------------------------
+ *  Data-protection consent (GDPR / RODO)
+ *
+ *  One admin-written sentence, shown beside every form where a GUEST hands over
+ *  personal data. Registered users are never asked: they agreed when they made
+ *  the account.
+ *
+ *  Empty wording means the whole thing is off — no checkbox anywhere, and
+ *  nothing is required. A club that does not need it sees no change.
+ * ------------------------------------------------------------------------- */
+
+/** How long a remembered consent stays valid. */
+const CONSENT_COOKIE = 'gdpr_ok';
+const CONSENT_DAYS   = 365;
+
+/**
+ * The configured consent wording, or '' when the feature is off.
+ * @return string
+ */
+function consent_text() {
+    return trim((string)opt('mailing_gdpr_text'));
+}
+
+/**
+ * Must this visitor tick a consent box on this request?
+ *
+ * @return bool
+ */
+function consent_needed() {
+    return consent_text() !== '' && !is_logged_in();
+}
+
+/**
+ * A short fingerprint of the CURRENT wording.
+ *
+ * The remembered consent is tied to it, so rewording the notice asks everyone
+ * again rather than silently carrying an old agreement over to new terms —
+ * consent is to specific wording, not to the idea of consenting.
+ *
+ * @return string
+ */
+function consent_fingerprint() {
+    return substr(hash('sha256', consent_text()), 0, 16);
+}
+
+/**
+ * Has this visitor already agreed to THIS wording before?
+ * @return bool
+ */
+function consent_remembered() {
+    return isset($_COOKIE[CONSENT_COOKIE])
+        && hash_equals(consent_fingerprint(), (string)$_COOKIE[CONSENT_COOKIE]);
+}
+
+/**
+ * Remember the agreement, so the next form starts ticked.
+ *
+ * Called only after a form that ASKED has been accepted, so the cookie can
+ * never claim an agreement that was not actually given.
+ *
+ * @return void
+ */
+function consent_remember() {
+    if (consent_text() === '') return;
+    $params = [
+        'expires'  => time() + CONSENT_DAYS * 86400,
+        'path'     => '/',
+        'secure'   => !empty($_SERVER['HTTPS']),
+        'httponly' => false,   // no secret in it; readable is harmless
+        'samesite' => 'Lax',
+    ];
+    if (!headers_sent()) setcookie(CONSENT_COOKIE, consent_fingerprint(), $params);
+}
+
+/**
+ * Was consent given on this submission?
+ *
+ * True when the feature is off or the visitor is signed in, so callers can ask
+ * unconditionally.
+ *
+ * @return bool
+ */
+function consent_ok() {
+    if (!consent_needed()) return true;
+    return !empty($_POST['gdpr_consent']);
+}
+
+/**
+ * The checkbox itself, or '' when nothing should be asked.
+ *
+ * Pre-ticked for someone who already agreed to this same wording — the point
+ * is not to make a regular visitor re-read it at every form.
+ *
+ * @return string  HTML.
+ */
+function consent_field() {
+    if (!consent_needed()) return '';
+    // Pre-ticking is the admin's call. Note that consent is still REMEMBERED
+    // when this is off — only the tick is withheld — so turning it back on
+    // works immediately for anyone who has already agreed.
+    $checked = (opt_bool('gdpr_prefill') && consent_remembered()) ? ' checked' : '';
+    return '<div class="field field-check gdpr-consent">'
+         . '<label><input type="checkbox" name="gdpr_consent" value="1"' . $checked . ' required> '
+         . '<span>' . e(consent_text()) . '</span></label></div>';
+}
+
 /**
  * The admin-written footer pages, in menu order.
  *

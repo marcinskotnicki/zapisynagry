@@ -61,28 +61,10 @@
                 <?php endif; ?>
             </td>
             <td class="row-actions">
-                <?php // Promote / demote. The button flips on the current role, and
-                      // is withheld on your OWN row: taking your own rights away
-                      // drops you out of this panel mid-click. The controller
-                      // refuses it too — hiding a button is a courtesy, not a
-                      // guard. It also still blocks demoting the last admin. ?>
-                <?php $isSelf = $me_id > 0 && (int)$u['id'] === $me_id; ?>
-                <?php if (!$isSelf): ?>
-                    <form method="post" action="admin.php?tab=users" class="inline">
-                        <?= $csrf ?>
-                        <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                        <?php if ((int)$u['is_admin'] === 1): ?>
-                            <input type="hidden" name="action" value="demote">
-                            <button class="btn btn-small"><?= e(t('users_demote')) ?></button>
-                        <?php else: ?>
-                            <input type="hidden" name="action" value="promote">
-                            <button class="btn btn-small"><?= e(t('users_promote')) ?></button>
-                        <?php endif; ?>
-                    </form>
-                <?php else: ?>
-                    <span class="muted users-self"><?= e(t('users_you')) ?></span>
-                <?php endif; ?>
-
+                <?php // Email and password FIRST, so those two inputs start at the
+                      // same x on every row. The role and block controls vary in
+                      // width and are absent entirely on your own row, so leading
+                      // with them would stagger the columns. ?>
                 <?php // Change email (uniqueness enforced server-side). ?>
                 <form method="post" action="admin.php?tab=users" class="inline">
                     <?= $csrf ?>
@@ -101,18 +83,38 @@
                     <button class="btn btn-small"><?= e(t('users_reset_password')) ?></button>
                 </form>
 
-                <?php // Block / unblock (button + action flip on state; controller guards lockouts). ?>
-                <form method="post" action="admin.php?tab=users" class="inline">
-                    <?= $csrf ?>
-                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                    <?php if ((int)$u['is_blocked'] === 1): ?>
-                        <input type="hidden" name="action" value="unblock">
-                        <button class="btn btn-small"><?= e(t('users_unblock')) ?></button>
-                    <?php else: ?>
-                        <input type="hidden" name="action" value="block">
-                        <button class="btn btn-small btn-danger"><?= e(t('users_block')) ?></button>
-                    <?php endif; ?>
-                </form>
+                <?php // Role and block, last. Both are withheld on your OWN row:
+                      // either one would remove your own access mid-click. The
+                      // controller refuses both as well — hiding a control is a
+                      // courtesy, not a guard. ?>
+                <?php $isSelf = $me_id > 0 && (int)$u['id'] === $me_id; ?>
+                <?php if (!$isSelf): ?>
+                    <form method="post" action="admin.php?tab=users" class="inline">
+                        <?= $csrf ?>
+                        <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                        <?php if ((int)$u['is_admin'] === 1): ?>
+                            <input type="hidden" name="action" value="demote">
+                            <button class="btn btn-small"><?= e(t('users_demote')) ?></button>
+                        <?php else: ?>
+                            <input type="hidden" name="action" value="promote">
+                            <button class="btn btn-small"><?= e(t('users_promote')) ?></button>
+                        <?php endif; ?>
+                    </form>
+
+                    <form method="post" action="admin.php?tab=users" class="inline">
+                        <?= $csrf ?>
+                        <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                        <?php if ((int)$u['is_blocked'] === 1): ?>
+                            <input type="hidden" name="action" value="unblock">
+                            <button class="btn btn-small"><?= e(t('users_unblock')) ?></button>
+                        <?php else: ?>
+                            <input type="hidden" name="action" value="block">
+                            <button class="btn btn-small btn-danger"><?= e(t('users_block')) ?></button>
+                        <?php endif; ?>
+                    </form>
+                <?php else: ?>
+                    <span class="muted users-self"><?= e(t('users_you')) ?></span>
+                <?php endif; ?>
             </td>
         </tr>
     <?php endforeach; ?>

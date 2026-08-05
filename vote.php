@@ -65,7 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form['email'] = trim((string)$form['email']);
     $form['knows'] = min(2, max(0, (int)$form['knows']));
 
-    if ($form['name'] === '') {
+    // Data-protection consent, when the admin configured wording and the
+    // visitor is not signed in. Checked here rather than trusting the
+    // checkbox's `required` attribute, which a client can simply not send.
+    if (!consent_ok()) {
+        $error = t('gdpr_required');
+    } elseif ($form['name'] === '') {
         $error = t('error_signup_name');
     } elseif (email_required_for_poll($poll) && $form['email'] === '') {
         // Required globally (mode 1) or because THIS poll's proposer demands it.
@@ -87,6 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              $form['email'] !== '' ? $form['email'] : null, $form['knows'], $uid]
         );
         log_action('poll_vote', $form['name'] . ' -> ' . $cand['name']);
+        // Remember the agreement so the next form starts ticked. Only after a
+        // successful submission, so the cookie can never record consent for
+        // something that was refused.
+        consent_remember();
         guest_identity_remember($form['name'], $form['email']);   // prefill next time
 
         // Did this vote push the candidate over its threshold? If so it's now a game.

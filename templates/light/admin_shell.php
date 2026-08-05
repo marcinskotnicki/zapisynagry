@@ -51,3 +51,13 @@ if (chat_enabled()) {
         <?= $tab_body ?? '' /* trusted: built by a tab controller via tpl_capture */ ?>
     </section>
 </div>
+
+<?php // Trix, only on the Pages tab — no other admin screen needs a rich-text
+      // editor, and this is ~200KB of JS. Vendored locally (see vendor/trix)
+      // rather than pulled from a CDN: the app is FTP-deployed onto shared
+      // hosting and a club's admin panel should not depend on a third party
+      // being reachable. ?>
+<?php if (($active_tab ?? '') === 'texts'): ?>
+    <link rel="stylesheet" href="vendor/trix/trix.css">
+    <script src="vendor/trix/trix.min.js"></script>
+<?php endif; ?>

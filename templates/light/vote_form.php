@@ -47,6 +47,9 @@
             <?php endforeach; ?>
         </select>
 
+        <?php // Data-protection consent. Renders nothing for a signed-in visitor,
+              // or when the admin has left the wording empty. ?>
+        <?= consent_field() ?>
         <button type="submit" class="btn btn-primary"><?= e(t('poll_vote')) ?></button>
         <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
     </form>

@@ -110,7 +110,12 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // the proposer ticked "require email" — demanding it of others means
     // providing your own; captcha if on).
     $error = null;
-    if ($form['name'] === '') {
+    // Data-protection consent, when the admin configured wording and the
+    // visitor is not signed in. Checked here rather than trusting the
+    // checkbox's `required` attribute, which a client can simply not send.
+    if (!consent_ok()) {
+        $error = t('gdpr_required');
+    } elseif ($form['name'] === '') {
         $error = t('error_name_required');
     } elseif (!text_has_content($form['name'])) {
         $error = t('error_name_meaningless');       // e.g. just "'" or "---"
@@ -176,6 +181,10 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($error === null) {
             log_action('game_add', $form['name']);
+            // Remember the agreement so the next form starts ticked. Only after a
+            // successful submission, so the cookie can never record consent for
+            // something that was refused.
+            consent_remember();
             // Tell the event's mailing list. AFTER the commit, so a failed
             // insert can't send mail about a game that doesn't exist, and
             // outside the transaction so slow SMTP doesn't hold a write lock.
