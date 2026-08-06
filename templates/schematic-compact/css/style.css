@@ -207,6 +207,8 @@ body.tpl-schematic-compact {
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 
+.tpl-schematic-compact .game-deleted .sc-body{background: #c7b0b0;}
+
 .tpl-schematic-compact .sc-chan-1 { --chan: var(--ch1); }
 .tpl-schematic-compact .sc-chan-2 { --chan: var(--ch2); }
 .tpl-schematic-compact .sc-chan-3 { --chan: var(--ch3); }
