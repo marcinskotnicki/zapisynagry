@@ -147,6 +147,18 @@ body.tpl-elvish {
     padding: 0.5rem 0.9rem 0.9rem;
     box-shadow: 0 3px 16px rgba(0, 0, 0, .4);
 }
+.tpl-elvish .game-deleted{
+    flex: 0 1 48%;
+    min-width: 320px;
+    max-width: 620px;
+}
+
+.tpl-elvish .game-deleted .game-card,
+.tpl-elvish .game-deleted .poll-card {
+    width:100%;
+    max-width:100%;
+    min-width:100%;
+}
 .tpl-elvish .game-card.active,
 .tpl-elvish .poll-card.active { box-shadow: 0 0 0 2px rgba(201, 162, 39, .5), 0 3px 16px rgba(0, 0, 0, .4); }
 
