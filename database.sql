@@ -85,7 +85,7 @@ INSERT INTO options (key, value) VALUES
     -- home_layout: 'tables_first' (default) | 'timeline_first'. Purely a
     -- visual order swap (flex 'order' in CSS) — the tables list and the
     -- timeline are always both rendered; this never removes either.
-    ('home_layout',           'tables_first'),
+    ('home_layout',           'tables_timeline_mail'),
     -- Optional per-day labels ("Tournament", "Family day"). Off by default:
     -- most events have nothing useful to call their days.
     ('use_day_names',         '0'),

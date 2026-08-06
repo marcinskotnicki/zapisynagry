@@ -239,6 +239,12 @@ function option_sanitize($key, $val) {
             // names a real layout.
             if (!in_array($val, day_tab_formats(), true)) return null;
             break;
+        case 'home_layout':
+            // Only the four current arrangements are storable. The two legacy
+            // values still RESOLVE (see home_layout_order) so an unsaved site
+            // keeps its arrangement, but the form cannot write them back.
+            if (!in_array($val, home_layouts(), true)) return null;
+            break;
         case 'header_brand':
             if (!in_array($val, ['auto', 'both', 'none'], true)) return null;
             break;

@@ -202,15 +202,22 @@ $groupEnd = function () { echo '</div></details>'; };
                 <?php endforeach; ?>
             </select>
         </div>
+        <?php // The three home-page blocks in any of four orders. The selected
+              // entry is derived from home_layout_order() rather than compared
+              // to the stored string, so a site still on one of the two legacy
+              // values shows the arrangement it is actually using. ?>
+        <?php $curOrder = implode(',', home_layout_order()); ?>
         <div class="field">
             <label for="home_layout"><?= e(t('opt_home_layout')) ?></label>
             <select id="home_layout" name="home_layout">
-                <?php foreach (['tables_first', 'timeline_first'] as $layoutOpt): ?>
-                    <option value="<?= e($layoutOpt) ?>"<?= opt('home_layout') === $layoutOpt ? ' selected' : '' ?>>
+                <?php foreach (home_layouts() as $layoutOpt): ?>
+                    <?php $optOrder = implode(',', home_layout_order_of($layoutOpt)); ?>
+                    <option value="<?= e($layoutOpt) ?>"<?= $optOrder === $curOrder ? ' selected' : '' ?>>
                         <?= e(t('opt_home_layout_' . $layoutOpt)) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+            <p class="field-note"><?= e(t('opt_home_layout_note')) ?></p>
         </div>
         <?php // Where the theme / language switchers appear. Separate from the
               // allow_* toggles in group 6, which decide WHETHER each audience

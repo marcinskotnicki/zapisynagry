@@ -8,17 +8,22 @@
  *  RENDER VARS:
  *    $after_content (optional) — pre-rendered HTML placed AFTER the centred
  *      .content div but still inside <main>, i.e. at full page width. Used for
+ *    $mailing_block (optional) — the mailing-list signup box, kept separate
+ *      from $after_content so home_layout can order the two independently.
  *      wide sections like the timeline (index.php builds it via tpl_capture).
  *      Trusted HTML: always produce it with tpl_capture(), never from raw input.
  * ============================================================================= */
 ?>
 </div>
-<?php // Wrapped in its own element so it is ONE flex item alongside .content —
-      // needed for the home_layout order swap (see .content/.after-content in
-      // style.css). Guarded on non-empty so a page with no timeline (anything
-      // but index.php) never emits a stray empty div. ?>
+<?php // Three separate flex items alongside .content — home_layout orders them
+      // independently (see the .layout-* rules in style.css), so the signup box
+      // is no longer stuck to the timeline. Each is guarded on non-empty, so a
+      // page with no timeline (anything but index.php) emits no stray divs. ?>
 <?php if (!empty($after_content)): ?>
     <div class="after-content"><?= $after_content ?></div>
+<?php endif; ?>
+<?php if (!empty($mailing_block)): ?>
+    <div class="mailing-block"><?= $mailing_block ?></div>
 <?php endif; ?>
 </main>
 <?php

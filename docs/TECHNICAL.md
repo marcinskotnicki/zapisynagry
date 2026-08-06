@@ -724,6 +724,18 @@ box would block adding a candidate or cancelling.
 
 **Add a translation key.** Both files, same commit.
 
+**The home page is three independently ordered blocks.** `.content` (tables),
+`.after-content` (timeline) and `.mailing-block` (signup box) are separate flex
+items in `<main>`; `home_layout_order()` returns them in the configured order
+and the header emits one body class per SLOT (`layout-1-content`,
+`layout-2-mail`, …). Emitting the position rather than the layout's name keeps
+the CSS to three rules per block instead of a set per arrangement, and a fifth
+arrangement needs no new CSS. The signup box used to be concatenated onto the
+timeline's HTML string, which made it one flex item with the timeline and meant
+it could never be placed anywhere else. The two pre-split option values
+(`tables_first`, `timeline_first`) still RESOLVE so no site rearranges itself on
+update, but the form will not store them.
+
 **Add a layout toggle that only reorders existing content.** Do it with a body
 class plus CSS (`order` on a flex container), not by rendering the markup
 twice — see `home_layout`: `main { display: flex; flex-direction: column; }`,

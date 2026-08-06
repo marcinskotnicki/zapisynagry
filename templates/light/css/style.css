@@ -47,8 +47,15 @@ a:hover { text-decoration: underline; }
 .content { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1rem; }
 
 main { display: flex; flex-direction: column; }
-body.layout-timeline-first .content       { order: 2; }
-body.layout-timeline-first .after-content { order: 1; }
+body.layout-1-content .content { order: 1; }
+body.layout-2-content .content { order: 2; }
+body.layout-3-content .content { order: 3; }
+body.layout-1-timeline .after-content { order: 1; }
+body.layout-2-timeline .after-content { order: 2; }
+body.layout-3-timeline .after-content { order: 3; }
+body.layout-1-mail .mailing-block { order: 1; }
+body.layout-2-mail .mailing-block { order: 2; }
+body.layout-3-mail .mailing-block { order: 3; }
 
 [hidden] { display: none !important; }
 

@@ -282,6 +282,45 @@ function email_required_for_poll($poll) {
  *
  * @return array|null  The event row, or null before the first event is created.
  */
+/** The home-page block orders an admin can choose between. */
+function home_layouts() {
+    return ['tables_timeline_mail', 'timeline_tables_mail',
+            'timeline_mail_tables', 'tables_mail_timeline'];
+}
+
+/**
+ * The three home-page blocks in their configured order.
+ *
+ * The two older values are still understood, so a site keeps its arrangement
+ * until an admin picks one of the new ones: back when the signup box was glued
+ * to the timeline there were only two possible orders, and those are two of
+ * these four.
+ *
+ * @return string[]  Some order of 'content', 'timeline', 'mail'.
+ */
+function home_layout_order() {
+    return home_layout_order_of(opt('home_layout'));
+}
+
+/**
+ * The order a NAMED layout produces. Split out so the admin form can ask about
+ * a value other than the stored one.
+ *
+ * @param string $layout
+ * @return string[]
+ */
+function home_layout_order_of($layout) {
+    switch ($layout) {
+        case 'timeline_tables_mail': return ['timeline', 'content', 'mail'];
+        case 'tables_mail_timeline': return ['content', 'mail', 'timeline'];
+        case 'timeline_mail_tables':
+        case 'timeline_first':        // legacy: timeline + box, then tables
+            return ['timeline', 'mail', 'content'];
+        default:                      // and 'tables_first'
+            return ['content', 'timeline', 'mail'];
+    }
+}
+
 /**
  * What the header's left slot shows.
  *

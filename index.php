@@ -121,11 +121,14 @@ $renameTable  = $canEditNames ? (int)($_GET['rename_table'] ?? 0) : 0;
 $timeline     = $dayRow ? timeline_build($dayRow, $tables, opt_int('timeline_extension')) : null;
 $timelineHtml = $timeline ? tpl_capture('timeline', ['timeline' => $timeline]) : '';
 
-// Mailing-list signup box, appended AFTER the timeline into the same slot so it
-// sits below it at full page width. Hidden on an archived event: no point
-// collecting addresses for something that already happened.
+// Mailing-list signup box. Captured SEPARATELY from the timeline rather than
+// appended to it: home_layout can place the two in either order, and while they
+// shared one string the box was stuck to the timeline and travelled with it.
+// Hidden on an archived event — no point collecting addresses for something
+// that already happened.
+$mailingHtml = '';
 if (!$readonly && mailing_enabled()) {
-    $timelineHtml .= tpl_capture('mailing_form', [
+    $mailingHtml = tpl_capture('mailing_form', [
         'active_day' => $activeDay,
         'gdpr'       => mailing_gdpr_text(),
         'flash'      => flash_get(),
@@ -155,4 +158,7 @@ tpl_render('front_event', [
     'rename_table'   => $renameTable,    // table id whose inline rename form is open (0 = none)
     'csrf'        => csrf_field(),
 ]);
-tpl_render('footer', ['after_content' => $timelineHtml]);
+tpl_render('footer', [
+    'after_content' => $timelineHtml,
+    'mailing_block' => $mailingHtml,
+]);

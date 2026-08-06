@@ -75,7 +75,15 @@ $page_title = $page_title ?? t('app_name');
         <?php endif; ?>
     </script>
 </head>
-<body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?> layout-<?= opt('home_layout') === 'timeline_first' ? 'timeline-first' : 'tables-first' ?>">
+<?php // The home-page block order rides on the body as one class per slot
+      // (layout-1-content, layout-2-mail, ...). Emitting the POSITION rather
+      // than the layout's name keeps the CSS to three rules instead of one set
+      // per layout, and adding a fifth arrangement later needs no new CSS. ?>
+<?php $layoutSlots = ''; ?>
+<?php foreach (home_layout_order() as $slotNo => $slotName): ?>
+    <?php $layoutSlots .= ' layout-' . ($slotNo + 1) . '-' . $slotName; ?>
+<?php endforeach; ?>
+<body class="tpl-<?= e($GLOBALS['TEMPLATE'] ?? 'light') ?><?= e($layoutSlots) ?>">
 <?php
 // Build the nav BEFORE deciding whether to draw the bar at all. With the venue
 // name hidden AND accounts set to guest-only, a visitor's top bar can come out
