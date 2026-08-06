@@ -312,6 +312,10 @@ body.tpl-schematic-compact {
     font-variant-numeric: tabular-nums;
 }
 
+.tpl-schematic-compact .game-deleted>article{
+    width:100%;
+}
+
 .tpl-schematic-compact .sc-cell-weight { border-left-width: 4px; }
 .tpl-schematic-compact .sc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
 .tpl-schematic-compact .sc-cell-weight.weight-2 { border-left-color: #86b300; }
