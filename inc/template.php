@@ -172,24 +172,62 @@ function tpl_capture($name, array $vars = []) {
 }
 
 /**
- * URL to the active theme's stylesheet (falls back to base if the active theme
- * has no own CSS). Used in the <head>.
+ * One versioned URL for a stylesheet path.
  *
- * The `?v=<mtime>` suffix is a cache-buster: when you edit the CSS, its modified
- * time changes, the URL changes, and browsers fetch the new file instead of a
- * stale cached copy.
+ * The `?v=<mtime>` suffix is the cache-buster: edit the file, its modified time
+ * changes, the URL changes, and browsers fetch it instead of a stale copy.
  *
- * @return string  Relative URL like 'templates/dark/css/style.css?v=1718...'.
+ * @param string $rel  Path relative to the app root.
+ * @return string
+ */
+function tpl_css_stamp($rel) {
+    return $rel . '?v=' . (@filemtime(__DIR__ . '/../' . $rel) ?: 0);
+}
+
+/**
+ * Every stylesheet the page needs, base first, each independently versioned.
+ *
+ * The themes used to pull the base in with `@import` from inside their own
+ * file, which broke cache-busting in two ways at once:
+ *
+ *   - the <link> carried only the THEME's mtime, so editing the base left the
+ *     URL unchanged and the browser served both files from cache;
+ *   - and the @import URL had no version on it at all, so even a freshly
+ *     fetched theme file would reuse a cached base.
+ *
+ * Two <link>s fix both — each file gets its own stamp — and they download in
+ * parallel, where an @import cannot even start until the theme file has been
+ * fetched and parsed.
+ *
+ * Order is base then theme, matching where the @import sat (first line), so
+ * the cascade is unchanged: theme rules still win.
+ *
+ * @return string[]  Relative URLs like 'templates/dark/css/style.css?v=1718...'.
+ */
+function tpl_css_urls() {
+    $base = 'templates/' . BASE_TEMPLATE . '/css/style.css';
+    $urls = [tpl_css_stamp($base)];
+
+    $active = $GLOBALS['TEMPLATE'] ?? BASE_TEMPLATE;
+    $rel    = 'templates/' . $active . '/css/style.css';
+    // A theme with no CSS of its own, or the base itself, adds nothing.
+    if ($rel !== $base && is_file(__DIR__ . '/../' . $rel)) {
+        $urls[] = tpl_css_stamp($rel);
+    }
+    return $urls;
+}
+
+/**
+ * The active theme's stylesheet URL.
+ *
+ * Kept for callers that want a single URL; the <head> uses tpl_css_urls()
+ * instead, because a theme needs the base loaded alongside it.
+ *
+ * @return string
  */
 function tpl_css_url() {
-    $active = $GLOBALS['TEMPLATE'] ?? BASE_TEMPLATE;
-    $rel = 'templates/' . $active . '/css/style.css';
-    if (!is_file(__DIR__ . '/../' . $rel)) {
-        $rel = 'templates/' . BASE_TEMPLATE . '/css/style.css';
-    }
-    // Cache-bust with the file's mtime so theme edits show up immediately.
-    $mtime = @filemtime(__DIR__ . '/../' . $rel) ?: 0;
-    return $rel . '?v=' . $mtime;
+    $urls = tpl_css_urls();
+    return end($urls);
 }
 
 /**

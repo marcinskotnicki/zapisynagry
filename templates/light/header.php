@@ -42,7 +42,12 @@ $page_title = $page_title ?? t('app_name');
         <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=<?= e($iconV) ?>">
         <link rel="manifest" href="icons/site.webmanifest?v=<?= e($iconV) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= e(tpl_css_url()) ?>">
+    <?php // Base first, then the theme. Two links rather than an @import inside
+          // the theme file: each gets its own ?v= stamp, so editing EITHER busts
+          // the cache, and they download in parallel. ?>
+    <?php foreach (tpl_css_urls() as $cssUrl): ?>
+        <link rel="stylesheet" href="<?= e($cssUrl) ?>">
+    <?php endforeach; ?>
     <?php // The one allowed inline JS: expose chosen UI strings to client scripts. ?>
     <script>
         window.APP_LANG = <?= json_encode([

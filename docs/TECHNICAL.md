@@ -271,6 +271,16 @@ theme suite greps its own stylesheet for `#` literals containing letters past
 job rather than an `.htaccess` change — under `/add_game/18` the browser resolves
 those against `/add_game/`.
 
+**Stylesheets are linked, never `@import`-ed.** `tpl_css_urls()` returns the
+base sheet and then the active theme's, each with its own `?v=<mtime>`. The
+themes used to pull the base in with `@import` from inside their own file, which
+broke cache-busting twice: the `<link>` carried only the THEME's mtime, so
+editing the base left the URL unchanged, and the `@import` URL had no version
+at all, so even a re-fetched theme reused a cached base. Two links also download
+in parallel, where an `@import` cannot start until the theme file is fetched and
+parsed. Order is base first, matching where the `@import` sat, so theme rules
+still win.
+
 **Prefer reusing a control's existing classes over defining parallel ones.**
 The event switcher on the front page renders as
 `class="day-tabs event-tabs"` / `class="day-tab event-tab"`, reusing
