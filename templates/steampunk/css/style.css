@@ -130,6 +130,9 @@ body.tpl-steampunk {
     position: relative; z-index: 1;
     border: 1px solid var(--brass-dark);
 }
+.tpl-steampunk .game-deleted .gc-info{
+    background: linear-gradient(#522121, var(--walnut));
+}
 .tpl-steampunk .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
 .tpl-steampunk .gc-tab {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
