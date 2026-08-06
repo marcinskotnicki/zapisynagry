@@ -38,7 +38,7 @@ a:hover { text-decoration: underline; }
 .brand { font-weight: 700; font-size: 0.8rem; color: var(--text); }
 
 .brand-both { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
-.brand-both img { max-height: 32px; width: auto; flex: 0 0 auto; }
+.brand-both img { max-height: 55px; width: auto; flex: 0 0 auto; }
 .brand-both span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .brand-logo { display: inline-flex; align-items: center; }
 .brand-logo img { display: block; max-height: 70px; width: auto; max-width: 220px; }
