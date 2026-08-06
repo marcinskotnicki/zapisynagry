@@ -191,10 +191,10 @@ body.tpl-schematic-compact {
 }
 
 @media (min-width: 901px) {
-    .tpl-schematic-compact .sc-strip{
+    .tpl-schematic-compact .sc-strip, .tpl-schematic-compact .game-deleted{
         width: calc(50% - 0.44rem);
     }
-    .tpl-schematic-compact .sc-strip:only-child{
+    .tpl-schematic-compact .sc-strip:only-child, .tpl-schematic-compact .game-deleted:only-child{
         width: 100%
     }
     .tpl-schematic-compact .sc-strip:nth-child(even):before,.tpl-schematic-compact .sc-strip:nth-child(even):after{
