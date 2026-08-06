@@ -21,6 +21,7 @@ require_once __DIR__ . '/../captcha.php';
 require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in the form's note
 require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the update-source field
 require_once __DIR__ . '/../events.php';    // day_tab_formats(), for the tab-layout picker
+require_once __DIR__ . '/../htaccess.php'; // the managed HTTPS-redirect block
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -404,6 +405,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'impor
 // existed, and keeping it means nothing else that posts here has to be updated.
 if ($_SERVER['REQUEST_METHOD'] === 'POST'
     && !in_array($_POST['action'] ?? '', ['export', 'import', 'backup'], true)) {
+    // Force-HTTPS lives in .htaccess, not in the options table, so the checkbox
+    // can never disagree with what the server is actually doing. Handled here
+    // rather than in the whitelists for the same reason: there is no option to
+    // save. An absent checkbox means "off", matching every other toggle.
+    if (htaccess_writable()) {
+        $wantSsl = !empty($_POST['force_ssl']);
+        if ($wantSsl !== htaccess_ssl_enabled()) {
+            if (htaccess_ssl_set($wantSsl)) {
+                log_action('force_ssl', $wantSsl ? 'enabled' : 'disabled');
+            } else {
+                $flash = t('opt_force_ssl_failed');
+            }
+        }
+    }
+
     // --- Plain value fields ---
     // Credentials first, by their own rule: blank means "unchanged".
     foreach ($OPTION_SECRETS as $key) {

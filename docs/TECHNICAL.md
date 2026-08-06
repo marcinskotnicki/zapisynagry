@@ -665,6 +665,24 @@ treats an absent field as an empty value (or an unticked toggle). A test
 compares the controller's lists against the rendered form and fails naming any
 key that is missing.
 
+**Forced HTTPS (Options → Security).** A marker-delimited block written into
+`.htaccess` by `inc/htaccess.php`, not a PHP redirect: `.htaccess` catches every
+request including images and CSS, and this app already depends on it working
+(extensionless URLs, the `data/` deny rule), so a PHP fallback would only
+duplicate it. The state is read from the FILE, never stored as an option, so the
+checkbox cannot disagree with what the server is doing.
+
+Three deliberate choices, each about not locking anyone out: **no HSTS** (it
+would make browsers refuse the "I understand the risks" bypass, so an expired
+certificate would be unrecoverable from a browser); **302 not 301** (a permanent
+redirect is cached by the browser, so unticking the box would appear to do
+nothing); and the checkbox is only offered when the request is ALREADY https or
+the redirect is already on — switching it on from a plain-http page would take
+the site down including the panel needed to undo it. The installer applies the
+same rule: it writes the block only if the install itself arrived over https.
+The `X-Forwarded-Proto` condition is required, not optional — without it any
+host terminating TLS at a proxy redirects to itself forever.
+
 **Database backup (Options → Advanced).** `db_snapshot()` in `inc/db.php`
 writes a consistent copy via `VACUUM INTO`, NOT a file copy: under WAL the live
 file is only half the story (recent commits sit in the `-wal` sidecar), so

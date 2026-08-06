@@ -222,6 +222,9 @@ function install_strings() {
         'go_back'        => 'Wróć',
         'requirements'   => 'Wymagania nie są spełnione. Wróć i napraw je najpierw.',
         'installing'     => 'Instalowanie',
+        'log_ssl_on'     => 'Włączono wymuszanie HTTPS (.htaccess)',
+        'log_ssl_failed' => 'Nie udało się zapisać reguły HTTPS do .htaccess — możesz włączyć ją później w Ustawieniach',
+        'log_ssl_skipped' => 'Pominięto wymuszanie HTTPS — instalacja przez http. Włącz je w Ustawieniach, gdy certyfikat będzie działać',
         'complete'       => 'Instalacja zakończona.',
         'self_delete_ok' => 'Instalator usunął sam siebie.',
         'self_delete_no' => 'Nie udało się usunąć pliku install.php. Usuń go teraz ręcznie — pozostawiony jest zagrożeniem dla bezpieczeństwa.',
@@ -263,6 +266,9 @@ function install_strings() {
         'go_back'        => 'Go back',
         'requirements'   => 'Requirements are not met. Go back and fix them first.',
         'installing'     => 'Installing',
+        'log_ssl_on'     => 'Enabled forced HTTPS (.htaccess)',
+        'log_ssl_failed' => 'Could not write the HTTPS rule to .htaccess — you can switch it on later in Settings',
+        'log_ssl_skipped' => 'Skipped forced HTTPS — installing over http. Switch it on in Settings once the certificate works',
         'complete'       => 'Installation complete.',
         'self_delete_ok' => 'The installer has removed itself.',
         'self_delete_no' => 'I could not delete myself. Please delete install.php manually now — it is a security risk if left in place.',
@@ -547,6 +553,24 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         page_foot(); exit;
     }
     $log("Wrote config.php", 'ok');
+
+    // ---- 6b. Force HTTPS, but only if this very page arrived over it ---------
+    // Writing the redirect after a plain-http install would make the site
+    // unreachable the moment the installer finished, including the admin panel
+    // needed to undo it. If this request is already https, the certificate
+    // demonstrably works, so switching it on is safe.
+    require_once $ROOT . '/inc/htaccess.php';
+    if (request_is_https()) {
+        if (htaccess_ssl_set(true)) {
+            $log(il('log_ssl_on'), 'ok');
+        } else {
+            // Not fatal: the site works, it just is not forcing https yet, and
+            // the admin can switch it on later from Options -> Security.
+            $log(il('log_ssl_failed'), 'bad');
+        }
+    } else {
+        $log(il('log_ssl_skipped'), 'ok');
+    }
 
     // ---- 7. Self-destruct ---------------------------------------------------
     $selfGone = @unlink(__FILE__);

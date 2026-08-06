@@ -423,6 +423,34 @@ $groupEnd = function () { echo '</div></details>'; };
 
     <?php /* 8. SECURITY */ ?>
     <?php $group('opt_group_security'); ?>
+        <?php // Reflects the .htaccess file rather than a stored option, so it
+              // always shows what the server is really doing — editing that file
+              // over FTP is a normal thing to do on shared hosting.
+              //
+              // Offered only when the file can actually be written, and only
+              // when THIS request arrived over https: switching it on from a
+              // plain-http page would make the site immediately unreachable,
+              // including this panel. ?>
+        <?php if (!htaccess_writable()): ?>
+            <div class="field">
+                <label><?= e(t('opt_force_ssl')) ?></label>
+                <p class="field-note"><?= e(t('opt_force_ssl_readonly')) ?></p>
+            </div>
+        <?php elseif (!request_is_https() && !htaccess_ssl_enabled()): ?>
+            <div class="field">
+                <label><?= e(t('opt_force_ssl')) ?></label>
+                <p class="field-note"><?= e(t('opt_force_ssl_need_https')) ?></p>
+            </div>
+        <?php else: ?>
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="force_ssl" value="1"<?= htaccess_ssl_enabled() ? ' checked' : '' ?>>
+                    <?= e(t('opt_force_ssl')) ?>
+                </label>
+                <p class="field-note"><?= e(t('opt_force_ssl_note')) ?></p>
+            </div>
+        <?php endif; ?>
+
         <?php $toggle('use_captcha'); ?>
         <?php // A lightweight companion to captcha: reject a form that comes back
               // faster than a human plausibly could have filled it in. Each
