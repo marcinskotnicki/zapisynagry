@@ -170,6 +170,20 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('allow_custom_game_links');
         $toggle('allow_manual_links');
         ?>
+        <?php // Who decides how a game is removed. Enforced in delete_game.php as
+              // well, since a posted choice is only a form field. ?>
+        <div class="field">
+            <label for="game_deletion"><?= e(t('opt_game_deletion')) ?></label>
+            <select id="game_deletion" name="game_deletion">
+                <?php foreach (game_deletion_modes() as $gdm): ?>
+                    <option value="<?= e($gdm) ?>"<?= game_deletion_mode() === $gdm ? ' selected' : '' ?>>
+                        <?= e(t('opt_game_deletion_' . $gdm)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_game_deletion_note')) ?></p>
+        </div>
+
         <div class="field">
             <label for="table_names_mode"><?= e(t('opt_table_names_mode')) ?></label>
             <select id="table_names_mode" name="table_names_mode">
@@ -244,6 +258,22 @@ $groupEnd = function () { echo '</div></details>'; };
                 <?php endforeach; ?>
             </select>
         </div>
+        <?php // How a soft-deleted game appears. Only reachable when soft deletes
+              // happen at all, which the note spells out rather than hiding the
+              // setting — an admin who later allows them should find it where
+              // they expect. ?>
+        <div class="field">
+            <label for="deleted_games_display"><?= e(t('opt_deleted_games_display')) ?></label>
+            <select id="deleted_games_display" name="deleted_games_display">
+                <?php foreach (deleted_games_displays() as $dgd): ?>
+                    <option value="<?= e($dgd) ?>"<?= deleted_games_display() === $dgd ? ' selected' : '' ?>>
+                        <?= e(t('opt_deleted_games_display_' . $dgd)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_deleted_games_display_note')) ?></p>
+        </div>
+
         <?php // Optional per-day labels. Off by default; switching it off later
               // hides existing names without deleting them, so it is safe to try. ?>
         <?php $toggle('use_day_names'); ?>

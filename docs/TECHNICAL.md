@@ -467,6 +467,25 @@ an already-deleted event, so destruction always takes two deliberate steps, and
 the row's foreign keys cascade days, tables, games, players and comments with
 it. When adding any new query that lists events, filter `is_deleted = 0`.
 
+**Game deletion is admin-policy, enforced server-side.** `game_deletion`
+(choose / soft / hard) decides which removals exist; `delete_game.php` coerces a
+posted choice to match, because hiding a button is not a restriction. An admin
+purging an ALREADY soft-deleted game is exempt — that is the second half of a
+soft delete, not a way around the setting.
+
+**`deleted_games_display` = 'full' reuses the ACTIVE card.** Each theme's
+`game_card.php` skips its own name-only branch, and `front_event.php` wraps the
+ordinary card in `.game-deleted` and passes `readonly = true`. That keeps the
+deleted view from ever drifting from the live one and means no theme fork needs
+its own copy — but the one-line gate DOES have to exist in all eight forks, or
+the setting silently does nothing on those themes. A test checks every fork.
+
+**Removing the bringer's own sign-up is deliberately conservative.**
+`game_drop_bringer_signup()` matches by account, then by email, and by name only
+when the game has no email AND exactly one player carries that name. Two people
+at a club can share a first name, and deleting the wrong person's place is worse
+than leaving a stale one.
+
 **`game_tables` cascades.** Deleting a table row deletes its games and polls
 too (`ON DELETE CASCADE`). Move rows off a table before removing it, including
 in test fixtures — deleting a table out from under a game silently destroys the

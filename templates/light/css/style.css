@@ -357,6 +357,9 @@ html { scroll-behavior: smooth; }
 
 .game-name-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .game-actions { display: inline-flex; gap: 0.3rem; }
+.game-deleted { opacity: 0.55; }
+.game-deleted .game-card { border-style: dashed; }
+.game-deleted-note { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.3rem; }
 .game-archived { background: #fbe9e7; border-color: #e6b0aa; opacity: 0.75; }
 .tpl-dark .game-archived { background: #3a1f1c; border-color: #6b3b34; }
 .game-archived .game-name { text-decoration: line-through; }

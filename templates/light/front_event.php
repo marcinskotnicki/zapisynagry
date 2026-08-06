@@ -157,7 +157,32 @@ if ($tokenQS === '' && public_archives_enabled()
                                   // render var costs nothing. It is the table NUMBER, not
                                   // its row id, so the key matches what the visitor sees
                                   // and what the timeline can derive. ?>
-                            <?php tpl_render('game_card', ['g' => $item['data'], 'readonly' => $readonly, 'table_no' => (int)$tbl['table_number']]); ?>
+                            <?php
+                            // A soft-deleted game shown in FULL: the card itself is
+                            // the ordinary active one (so it can never drift from
+                            // the live version, and no theme fork needs its own
+                            // copy), wrapped here and forced read-only. A deleted
+                            // game cannot be signed up to, edited or commented on,
+                            // and the readonly path already suppresses all of that.
+                            $gDeleted = (int)$item['data']['is_archived'] === 1
+                                     && deleted_games_display() === 'full';
+                            ?>
+                            <?php if ($gDeleted): ?>
+                                <div class="game-deleted">
+                                    <p class="game-deleted-note">
+                                        <?= e(t('game_archived_note')) ?>
+                                        <?php // The way back is offered here rather than
+                                              // inside the card, which is read-only. ?>
+                                        <?php if (!$readonly): ?>
+                                            <a class="btn btn-small" href="bring_back.php?game=<?= (int)$item['data']['id'] ?>"><?= e(t('bringback_button')) ?></a>
+                                            <?php if (is_admin()): ?>
+                                                <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$item['data']['id'] ?>"><?= e(t('game_purge_button')) ?></a>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </p>
+                            <?php endif; ?>
+                            <?php tpl_render('game_card', ['g' => $item['data'], 'readonly' => $readonly || $gDeleted, 'table_no' => (int)$tbl['table_number']]); ?>
+                            <?php if ($gDeleted): ?></div><?php endif; ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>

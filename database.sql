@@ -229,6 +229,12 @@ inna'),                                -- game-language dropdown options, ONE PE
     --   'any'     = anyone may set and edit table names
     ('table_names_mode',             'off'),
     ('allow_polls',                  '1'),
+    -- Who decides how a game is removed: 'choose' offers both, the other two
+    -- take the decision away and always do that one.
+    ('game_deletion',         'choose'),
+    -- How a soft-deleted game appears: just its name, or the whole card
+    -- greyed out with its sign-ups still visible.
+    ('deleted_games_display', 'name'),
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
     ('allow_messaging',              '0'),

@@ -61,12 +61,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('index.php?day=' . $activeDay);          // bail out, no challenge needed
     }
     antibot_check('click');
+    // The admin's game_deletion setting decides which choices exist at all.
+    // Applied HERE rather than only by hiding buttons, since a posted choice is
+    // just a form field. An admin purging an already-soft-deleted game is
+    // exempt: that is the second half of a soft delete, not a way around the
+    // setting.
+    $mode = game_deletion_mode();
+    if ($mode === 'soft' && $choice === 'everything' && !$purge && !is_admin()) {
+        $choice = 'archive';
+    } elseif ($mode === 'hard' && $choice === 'archive') {
+        $choice = 'everything';
+    }
+
     if (!verify_passes($decision, 'game', $gameId, $game['brings_email'], $_POST)) {
         $error = t('verify_failed');                       // failed challenge -> re-show confirm
     } elseif ($choice === 'archive' && !$purge) {   // meaningless when already archived
         notify_game_deleted($game);                        // notify while players still exist
         db_run('UPDATE games SET is_archived = 1 WHERE id = ?', [$gameId]);   // soft-delete
-        log_action('game_archive', $game['name']);
+        // The owner just withdrew the game, so leaving them in its own player
+        // list makes no sense. Only removed when they can be identified with
+        // confidence — see game_drop_bringer_signup(). Done AFTER the notify,
+        // so they still receive the message about their own game.
+        $droppedSelf = game_drop_bringer_signup($game);
+        log_action('game_archive', $game['name'] . ($droppedSelf ? ' (bringer sign-up removed)' : ''));
         redirect('index.php?day=' . $activeDay);
     } elseif ($choice === 'everything') {
         // Players were already notified when the game was soft-deleted, so a
@@ -91,6 +108,8 @@ if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 
 tpl_render('header', ['page_title' => t('delgame_title')]);
 tpl_render('game_delete_confirm', [
+    // Which of the two removals the admin allows; 'choose' offers both.
+    'mode'     => game_deletion_mode(),
     'game'     => $game,
     'decision' => $decision,
     'error'    => $error,

@@ -22,7 +22,10 @@
  *  Styling lives in templates/classic/css/style.css (the gc-* classes).
  * ============================================================================= */
 ?>
-<?php if ((int)$g['is_archived'] === 1): // soft-deleted -> dimmed card + bring-back ?>
+<?php // Skipped entirely when the admin shows deleted games in full: the
+      // active markup below renders instead, wrapped and forced read-only
+      // by front_event.php. ?>
+<?php if ((int)$g['is_archived'] === 1 && deleted_games_display() !== 'full'): // soft-deleted -> dimmed card + bring-back ?>
     <article class="game-card game-archived" id="game-<?= (int)$g['id'] ?>">
         <div class="gc-info">
             <h3 class="gc-name"><?= e($g['name']) ?></h3>

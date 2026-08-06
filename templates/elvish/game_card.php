@@ -27,7 +27,10 @@
  *  and $readonly.
  * ============================================================================= */
 ?>
-<?php if ((int)$g['is_archived'] === 1): // soft-deleted -> a faded entry ?>
+<?php // Skipped entirely when the admin shows deleted games in full: the
+      // active markup below renders instead, wrapped and forced read-only
+      // by front_event.php. ?>
+<?php if ((int)$g['is_archived'] === 1 && deleted_games_display() !== 'full'): // soft-deleted -> a faded entry ?>
     <article class="game-card game-archived" id="game-<?= (int)$g['id'] ?>">
         <div class="game-main">
             <h3 class="game-name"><?= e($g['name']) ?></h3>

@@ -55,6 +55,8 @@ $OPTION_VALUES = [
     'home_layout',  // tables_first|timeline_first; validated below
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
     'day_tab_format',   // one of day_tab_formats(); validated below
+    'game_deletion',        // choose|soft|hard; validated below
+    'deleted_games_display',// name|full; validated below
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
     'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
     'header_brand',         // auto|both|none; validated below
@@ -245,6 +247,12 @@ function option_sanitize($key, $val) {
             // values still RESOLVE (see home_layout_order) so an unsaved site
             // keeps its arrangement, but the form cannot write them back.
             if (!in_array($val, home_layouts(), true)) return null;
+            break;
+        case 'game_deletion':
+            if (!in_array($val, game_deletion_modes(), true)) return null;
+            break;
+        case 'deleted_games_display':
+            if (!in_array($val, deleted_games_displays(), true)) return null;
             break;
         case 'header_brand':
             if (!in_array($val, ['auto', 'both', 'none'], true)) return null;

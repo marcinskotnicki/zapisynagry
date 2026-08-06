@@ -32,7 +32,10 @@
  *  RENDER VARS: identical to light's — $g and $readonly.
  * ============================================================================= */
 ?>
-<?php if ((int)$g['is_archived'] === 1): ?>
+<?php // Skipped entirely when the admin shows deleted games in full: the
+      // active markup below renders instead, wrapped and forced read-only
+      // by front_event.php. ?>
+<?php if ((int)$g['is_archived'] === 1 && deleted_games_display() !== 'full'): ?>
     <article class="game-card game-archived sc-strip" id="game-<?= (int)$g['id'] ?>">
         <div class="sc-id"><span class="sc-id-num">—</span></div>
         <div class="sc-body">

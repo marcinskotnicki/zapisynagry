@@ -656,6 +656,77 @@ function day_hours_label($dayRow) {
     return t('day_hours', $from, $to);
 }
 
+/**
+ * Drop the bringer's own sign-up when their game is soft-deleted.
+ *
+ * A game whose owner has withdrawn should not leave that owner sitting in its
+ * player list — they are the one who just cancelled. The row only goes when it
+ * can be matched CONFIDENTLY, since two different people can share a first
+ * name at a club:
+ *
+ *   - by account, when both the game and the sign-up carry the same user_id;
+ *   - by email, when both sides have one and they match;
+ *   - by name, ONLY when the game has no email to match on AND exactly one
+ *     player has that name — an ambiguous name is left alone rather than
+ *     guessed at, because removing the wrong person's sign-up is worse than
+ *     leaving a stale one.
+ *
+ * @param array $game  The game row, before archiving.
+ * @return int  How many sign-ups were removed (0 or 1).
+ */
+function game_drop_bringer_signup($game) {
+    $gameId = (int)$game['id'];
+    $uid    = $game['brings_user_id'] ?? null;
+    $email  = trim((string)($game['brings_email'] ?? ''));
+    $name   = trim((string)($game['brings_name'] ?? ''));
+
+    if ($uid) {
+        $row = db_one('SELECT id FROM players WHERE game_id = ? AND user_id = ?', [$gameId, (int)$uid]);
+        if ($row) { db_run('DELETE FROM players WHERE id = ?', [(int)$row['id']]); return 1; }
+    }
+    if ($email !== '') {
+        $row = db_one('SELECT id FROM players WHERE game_id = ? AND LOWER(email) = LOWER(?)',
+                      [$gameId, $email]);
+        if ($row) { db_run('DELETE FROM players WHERE id = ?', [(int)$row['id']]); return 1; }
+        // The game HAS an email and no sign-up matched it, so a name match here
+        // would be a different person who happens to share the name.
+        return 0;
+    }
+    if ($name !== '') {
+        $rows = db_all('SELECT id FROM players WHERE game_id = ? AND LOWER(name) = LOWER(?)',
+                       [$gameId, $name]);
+        if (count($rows) === 1) { db_run('DELETE FROM players WHERE id = ?', [(int)$rows[0]['id']]); return 1; }
+    }
+    return 0;
+}
+
+/** How a game may be removed. */
+function game_deletion_modes() {
+    return ['choose', 'soft', 'hard'];
+}
+
+/**
+ * The configured deletion mode.
+ * @return string 'choose'|'soft'|'hard'
+ */
+function game_deletion_mode() {
+    $m = trim((string)opt('game_deletion'));
+    return in_array($m, game_deletion_modes(), true) ? $m : 'choose';
+}
+
+/** How a soft-deleted game is shown. */
+function deleted_games_displays() {
+    return ['name', 'full'];
+}
+
+/**
+ * @return string 'name'|'full'
+ */
+function deleted_games_display() {
+    $m = trim((string)opt('deleted_games_display'));
+    return in_array($m, deleted_games_displays(), true) ? $m : 'name';
+}
+
 /** The tab layouts an admin can choose between, in the order they are offered. */
 function day_tab_formats() {
     return ['num_date_hours', 'num_weekday_date_hours', 'weekday_date_hours_name',

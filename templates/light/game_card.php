@@ -21,7 +21,11 @@
  *    $readonly — archived/read-only view (hides every control).
  * ============================================================================= */
 ?>
-<?php if ((int)$g['is_archived'] === 1): // soft-deleted -> greyed bring-back card ?>
+<?php // With deleted_games_display() = 'full' the name-only card is skipped and
+      // the ACTIVE markup below renders instead; front_event.php wraps it and
+      // forces read-only. Reusing the real card means the deleted view can never
+      // drift from the live one, and no theme fork needs its own copy. ?>
+<?php if ((int)$g['is_archived'] === 1 && deleted_games_display() !== 'full'): ?>
     <article class="game-card game-archived" id="game-<?= (int)$g['id'] ?>">
         <div class="game-main">
             <h3 class="game-name"><?= e($g['name']) ?></h3>

@@ -33,6 +33,14 @@
             <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
 
+        <?php // Restoring re-owns the game, so the new owner picks the slot: the
+              // original time was chosen by someone who has since withdrawn, and
+              // the day's hours may have changed while it was put away. ?>
+        <label for="start_time"><?= e(t('f_start')) ?></label>
+        <input type="time" id="start_time" name="start_time" value="<?= e($form['start_time']) ?>" required>
+
+        <?php // Consent, when the admin configured wording and this is a guest. ?>
+        <?= consent_field() ?>
         <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
         <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
     </form>

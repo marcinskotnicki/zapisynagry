@@ -2,6 +2,9 @@
 /* =============================================================================
  *  templates/light/game_delete_confirm.php — 3-way delete confirm. Presentation.
  * -----------------------------------------------------------------------------
+ *  RENDER VAR $mode — the admin's game_deletion setting: 'choose' offers both
+ *  removals, 'soft'/'hard' offer only that one.
+ *
  *  One form, three submit buttons distinguished by the "choice" value the
  *  controller reads: back (do nothing) / archive (soft-delete, recoverable) /
  *  everything (hard delete). The verification challenge (if needed) is in the
@@ -41,10 +44,19 @@ $purge = !empty($purge);
 
         <div class="delgame-buttons">
             <button type="submit" name="choice" value="back" class="btn"><?= e(t('delgame_back')) ?></button>
-            <?php if (!$purge): // already archived -> no point re-archiving ?>
+            <?php // Which removals are offered follows the admin's game_deletion
+                  // setting. The controller enforces it too — a hidden button is
+                  // not a restriction. An admin purging an ALREADY soft-deleted
+                  // game always gets the permanent option: that is the second
+                  // half of a soft delete rather than a way round the setting. ?>
+            <?php $canSoft = !$purge && $mode !== 'hard'; ?>
+            <?php $canHard = $purge || $mode !== 'soft' || is_admin(); ?>
+            <?php if ($canSoft): ?>
                 <button type="submit" name="choice" value="archive" class="btn"><?= e(t('delgame_archive')) ?></button>
             <?php endif; ?>
-            <button type="submit" name="choice" value="everything" class="btn btn-danger"><?= e(t('delgame_everything')) ?></button>
+            <?php if ($canHard): ?>
+                <button type="submit" name="choice" value="everything" class="btn btn-danger"><?= e(t('delgame_everything')) ?></button>
+            <?php endif; ?>
         </div>
     </form>
 </div>
