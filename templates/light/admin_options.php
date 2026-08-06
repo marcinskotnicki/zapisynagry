@@ -473,6 +473,16 @@ $groupEnd = function () { echo '</div></details>'; };
                    value="<?= e(opt('github_url') !== '' ? opt('github_url') : update_repo_url()) ?>">
             <p class="field-note"><?= e(t('opt_github_url_note')) ?></p>
         </div>
+        <?php // Pre-filled with the EFFECTIVE branch for the same reason as the
+              // URL above: a fresh install should show where it actually pulls
+              // from rather than an empty box. Empty stays storable and means
+              // "keep inheriting config.php". ?>
+        <div class="field">
+            <label for="github_branch"><?= e(t('opt_github_branch')) ?></label>
+            <input type="text" id="github_branch" name="github_branch"
+                   value="<?= e(opt('github_branch') !== '' ? opt('github_branch') : update_branch()) ?>">
+            <p class="field-note"><?= e(t('opt_github_branch_note')) ?></p>
+        </div>
 
         <?php // Settings transfer. Both buttons submit THIS form with a different
               // action, so no nested <form> is needed — nesting is invalid HTML

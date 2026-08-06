@@ -35,6 +35,13 @@ $dayLabel = function($i) {
 <?php endif; ?>
 
 <?php if (($stage ?? 'start') === 'start'): ?>
+    <?php // Only when the archive is OFF, because that is the setting that
+          // decides it: with archives on, several events run side by side and
+          // creating one leaves the others alone. Shown here rather than only
+          // in Options, since this is the screen where the behaviour bites. ?>
+    <?php if (!public_archives_enabled()): ?>
+        <p class="field-warn"><?= e(t('newevent_archive_warning')) ?></p>
+    <?php endif; ?>
     <?php if (!empty($current)): // point at the tab that now owns renaming ?>
         <p class="muted">
             <?= e(t('newevent_current')) ?>: <strong><?= e($current['name']) ?></strong>

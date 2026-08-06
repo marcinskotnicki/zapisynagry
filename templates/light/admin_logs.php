@@ -40,11 +40,11 @@
     <tbody>
     <?php foreach ($logs as $row): ?>
         <tr>
-            <td class="nowrap"><?= e($row['created_at']) ?></td>
-            <td><?= e($row['action']) ?></td>
-            <td><?= e($row['detail']) ?></td>
-            <td><?= e($row['actor_name']) ?><?php if (!empty($row['account_name'])): // the acting ACCOUNT, when logged in ?> <span class="muted">@<?= e($row['account_name']) ?></span><?php endif; ?></td>
-            <td class="nowrap"><?= e($row['ip']) ?></td>
+            <td data-label="<?= e(t('logs_when')) ?>" class="nowrap"><?= e($row['created_at']) ?></td>
+            <td data-label="<?= e(t('logs_action')) ?>"><?= e($row['action']) ?></td>
+            <td data-label="<?= e(t('logs_detail')) ?>"><?= e($row['detail']) ?></td>
+            <td data-label="<?= e(t('logs_actor')) ?>"><?= e($row['actor_name']) ?><?php if (!empty($row['account_name'])): // the acting ACCOUNT, when logged in ?> <span class="muted">@<?= e($row['account_name']) ?></span><?php endif; ?></td>
+            <td data-label="<?= e(t('logs_ip')) ?>" class="nowrap"><?= e($row['ip']) ?></td>
         </tr>
     <?php endforeach; ?>
     </tbody>

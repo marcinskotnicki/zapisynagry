@@ -31,11 +31,11 @@
                     <?php // Date bold, time light: at a glance the eye needs to group
                           // by day first, and "05.08 00:13" read as one blur. ?>
                     <?php $when = chat_time_parts($m['created_at']); ?>
-                    <td class="chat-admin-when">
+                    <td data-label="<?= e(t('chat_admin_when')) ?>" class="chat-admin-when">
                         <strong class="chat-when-date"><?= e($when['date']) ?></strong>
                         <span class="chat-when-time"><?= e($when['time']) ?></span>
                     </td>
-                    <td>
+                    <td data-label="<?= e(t('chat_admin_who')) ?>">
                         <?= e($m['name']) ?>
                         <?php // The role is frozen at post time, so an old line keeps the
                               // badge it was posted with even if the account changed since. ?>
@@ -45,7 +45,7 @@
                             <span class="chat-admin-badge"><?= e(t('chat_admin_is_user')) ?></span>
                         <?php endif; ?>
                     </td>
-                    <td><?= e($m['message']) ?></td>
+                    <td data-label="<?= e(t('chat_admin_message')) ?>"><?= e($m['message']) ?></td>
                     <td>
                         <form method="post" action="admin.php?tab=chat&amp;page=<?= (int)$page ?>" class="inline">
                             <?= $csrf ?>

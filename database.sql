@@ -104,6 +104,10 @@ INSERT INTO options (key, value) VALUES
     -- which is the right default: seeding a literal URL here would be
     -- wrong for anyone who entered their own repo during install.
     ('github_url',            ''),
+    -- Branch to pull updates from. Empty = inherit config.php's GITHUB_BRANCH,
+    -- the same rule as github_url above: seeding a literal here would
+    -- override whatever the installer was told.
+    ('github_branch',         ''),
     -- Chat (shoutbox). Off by default: it is an unmoderated public text field,
     -- so it should be a deliberate choice rather than something a new install
     -- discovers it is already running.

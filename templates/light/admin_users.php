@@ -52,15 +52,15 @@
     <tbody>
     <?php foreach ($users as $u): ?>
         <tr>
-            <td><?= e($u['display_name']) ?></td>
-            <td><?= e($u['email']) ?></td>
-            <td>
+            <td data-label="<?= e(t('users_email')) ?>"><?= e($u['display_name']) ?></td>
+            <td data-label="<?= e(t('users_name')) ?>"><?= e($u['email']) ?></td>
+            <td data-label="<?= e(t('users_role')) ?>">
                 <?= (int)$u['is_admin'] === 1 ? e(t('users_admin')) : e(t('users_user')) ?>
                 <?php if ((int)$u['is_blocked'] === 1): // blocked accounts get a badge next to the role ?>
                     <span class="badge badge-blocked"><?= e(t('users_blocked_badge')) ?></span>
                 <?php endif; ?>
             </td>
-            <td class="row-actions">
+            <td data-label="<?= e(t('users_actions')) ?>" class="row-actions">
                 <?php // Email and password FIRST, so those two inputs start at the
                       // same x on every row. The role and block controls vary in
                       // width and are absent entirely on your own row, so leading

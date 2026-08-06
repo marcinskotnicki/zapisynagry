@@ -36,10 +36,10 @@
                     : ($state === 'current' ? t('archive_current') : t('archive_archived'));
         ?>
         <tr class="archive-row archive-row-<?= e($state) ?>">
-            <td><?= e($ev['name']) ?></td>
-            <td class="archive-status archive-status-<?= e($state) ?>"><?= e($stateLabel) ?></td>
-            <td class="nowrap"><?= e($ev['created_at']) ?></td>
-            <td class="link-cell">
+            <td data-label="<?= e(t('archive_event')) ?>"><?= e($ev['name']) ?></td>
+            <td data-label="<?= e(t('archive_status')) ?>" class="archive-status archive-status-<?= e($state) ?>"><?= e($stateLabel) ?></td>
+            <td data-label="<?= e(t('archive_created')) ?>" class="nowrap"><?= e($ev['created_at']) ?></td>
+            <td data-label="<?= e(t('archive_link')) ?>" class="link-cell">
                 <?php // Input then button on the line below. No flex anywhere near
                       // the cell: display:flex on a <td> replaces display:table-cell
                       // and drops it out of the row's height calculation, which is
@@ -50,7 +50,7 @@
                     <?= e(t('copy')) ?>
                 </button>
             </td>
-            <td class="archive-actions">
+            <td data-label="<?= e(t('archive_action')) ?>" class="archive-actions">
                 <?php $isDeleted = (int)$ev['is_deleted'] === 1; ?>
                 <?php if (!$isDeleted): ?>
                     <?php // Renaming and day management are ordinary event admin, so

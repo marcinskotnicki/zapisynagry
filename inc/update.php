@@ -279,8 +279,33 @@ function update_repo_url() {
  *
  * @return string
  */
+/**
+ * Which branch updates come from.
+ *
+ * Exists so a test site can follow a pre-release branch while every deployed
+ * club stays on the stable one, without editing config.php on each host.
+ *
+ * @return string
+ */
+function update_branch() {
+    // Same rule as update_repo_url(): an admin override wins, otherwise the
+    // coordinates the installer was given. Kept to the characters GitHub
+    // actually allows in a ref, so a stray space or quote cannot be spliced
+    // into the download URL.
+    $custom = trim((string)opt('github_branch'));
+    // A ref may contain dots and slashes (feature/x, v1.2.3), which is exactly
+    // what makes ".." dangerous here: the value is pasted into a URL path, so
+    // "../../x" would climb out of /archive/refs/heads/ and point the updater
+    // somewhere else entirely. Allow the characters, refuse the traversal.
+    $looksLikeRef = $custom !== ''
+        && preg_match('#^[A-Za-z0-9._/-]+$#', $custom)
+        && strpos($custom, '..') === false
+        && $custom[0] !== '/' && substr($custom, -1) !== '/';
+    return $looksLikeRef ? $custom : GITHUB_BRANCH;
+}
+
 function update_zip_url() {
-    return update_repo_url() . '/archive/refs/heads/' . GITHUB_BRANCH . '.zip';
+    return update_repo_url() . '/archive/refs/heads/' . update_branch() . '.zip';
 }
 
 /**

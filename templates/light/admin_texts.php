@@ -28,8 +28,8 @@
         <tbody>
             <?php foreach ($pages as $i => $p): ?>
                 <tr>
-                    <td><a href="page.php?id=<?= (int)$p['id'] ?>"><?= e($p['title']) ?></a></td>
-                    <td class="nowrap">
+                    <td data-label="<?= e(t('texts_page_title')) ?>"><a href="page.php?id=<?= (int)$p['id'] ?>"><?= e($p['title']) ?></a></td>
+                    <td data-label="<?= e(t('texts_order')) ?>" class="nowrap">
                         <?php // Menu order. Arrows rather than a number field: the
                               // only thing an admin wants here is "this one above
                               // that one", and a swap cannot produce a tie. ?>

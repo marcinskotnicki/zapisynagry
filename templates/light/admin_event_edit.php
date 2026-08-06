@@ -90,16 +90,16 @@
                     <?php continue; ?>
                 <?php endif; ?>
                 <tr>
-                    <td><?= (int)$d['day_index'] ?></td>
-                    <td class="nowrap"><?= e($d['day_date']) ?></td>
-                    <td class="nowrap"><?= e($d['start_time']) ?>–<?= e($d['end_time']) ?></td>
+                    <td data-label="<?= e(t('events_day_no')) ?>"><?= (int)$d['day_index'] ?></td>
+                    <td data-label="<?= e(t('events_day_date')) ?>" class="nowrap"><?= e($d['day_date']) ?></td>
+                    <td data-label="<?= e(t('events_day_hours')) ?>" class="nowrap"><?= e($d['start_time']) ?>–<?= e($d['end_time']) ?></td>
                     <?php // Shown BEFORE the delete button, because removing a day
                           // takes its tables, games and sign-ups with it and an
                           // admin should see the cost before clicking. ?>
                     <?php if (day_names_enabled()): ?>
                         <td><?= e($d['day_name'] ?? '') ?></td>
                     <?php endif; ?>
-                    <td><?= e(t('events_day_summary', $info['tables'], $info['games'], $info['players'])) ?></td>
+                    <td data-label="<?= e(t('events_day_contents')) ?>"><?= e(t('events_day_summary', $info['tables'], $info['games'], $info['players'])) ?></td>
                     <td>
                         <a class="btn btn-small" href="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>&amp;day=<?= (int)$d['id'] ?>"><?= e(t('events_day_edit')) ?></a>
                         <?php if (count($days) > 1): ?>

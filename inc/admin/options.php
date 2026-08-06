@@ -55,6 +55,7 @@ $OPTION_VALUES = [
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
     'day_tab_format',   // one of day_tab_formats(); validated below
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
+    'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days',
