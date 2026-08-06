@@ -484,6 +484,16 @@ $groupEnd = function () { echo '</div></details>'; };
         <div class="field">
             <button type="submit" name="action" value="export" class="btn btn-small"><?= e(t('opt_export')) ?></button>
         </div>
+
+        <?php // Whole-database backup. Separate from the settings export above:
+              // that one is deliberately portable and strips credentials, this
+              // one is a complete copy of THIS site meant for restoring it. ?>
+        <hr class="opt-sep">
+        <h4 class="opt-subhead"><?= e(t('opt_backup_title')) ?></h4>
+        <p class="field-note"><?= e(t('opt_backup_note')) ?></p>
+        <div class="field">
+            <button type="submit" name="action" value="backup" class="btn btn-small"><?= e(t('opt_backup')) ?></button>
+        </div>
         <div class="field">
             <label for="import_file"><?= e(t('opt_import_file')) ?></label>
             <input type="file" id="import_file" name="import_file" accept="application/json,.json">

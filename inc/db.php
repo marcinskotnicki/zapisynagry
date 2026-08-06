@@ -84,6 +84,52 @@ function db() {
     return $pdo;
 }
 
+/**
+ * Write a consistent snapshot of the database to $dest.
+ *
+ * NOT a plain file copy. Under WAL the live file is only half the story — the
+ * recent commits sit in the -wal sidecar — so copying it can produce a backup
+ * that is missing data or, mid-write, is internally torn.
+ *
+ * `VACUUM INTO` asks SQLite itself for the snapshot: it takes a read lock,
+ * writes a single self-contained file with no sidecars, and cannot capture a
+ * half-finished transaction. It needs SQLite 3.27 (2019); on anything older we
+ * fall back to checkpointing the WAL back into the main file and copying it
+ * while holding a lock, which is the best a plain copy can do.
+ *
+ * @param string $dest  Absolute path to write. Must not already exist.
+ * @return bool  True on success.
+ */
+function db_snapshot($dest) {
+    if ($dest === '' || file_exists($dest)) return false;
+    $pdo = db();
+
+    try {
+        // Quoted as a literal rather than bound: VACUUM INTO takes a filename
+        // expression, not a bindable parameter. $dest is built by the caller
+        // from a temp dir and a generated name, never from user input.
+        $pdo->exec("VACUUM INTO '" . str_replace("'", "''", $dest) . "'");
+        return is_file($dest) && filesize($dest) > 0;
+    } catch (Throwable $e) {
+        // Older SQLite, or a filesystem that refused the write.
+    }
+
+    try {
+        // Fold the WAL back into the main file so a copy sees everything, then
+        // copy while a read lock keeps writers out for the duration.
+        $pdo->exec('PRAGMA wal_checkpoint(TRUNCATE);');
+        $pdo->beginTransaction();
+        $pdo->exec('SELECT 1');           // materialise the read lock
+        $ok = @copy(DB_PATH, $dest);
+        $pdo->commit();
+        return $ok && is_file($dest) && filesize($dest) > 0;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        @unlink($dest);
+        return false;
+    }
+}
+
 /* ---- A couple of one-liner shortcuts so call sites stay readable. --------- *
  * These all funnel through db() (so they share the one connection) and through
  * prepare()/execute() (so every value is safely bound). Prefer them over

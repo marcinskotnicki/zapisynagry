@@ -33,6 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    [$title, $body, $next]);
             log_action('page_add', $title);
             $flash = t('texts_saved');
+            // Land back on the list: the page is written, and leaving an empty
+            // form open invites accidentally creating a second one.
+            $_GET['new'] = null;
         }
 
     } elseif ($act === 'delete' && $id > 0) {
@@ -66,13 +69,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ?edit=<id> loads one page into the form; anything else is a blank new page.
+// The form is only shown when it was asked for: ?edit=<id> to change an
+// existing page, ?new=1 to start a blank one. Landing on the tab shows the list
+// alone, so opening it to look around does not read as "fill this in".
 $editing = null;
 $editId  = (int)($_GET['edit'] ?? 0);
 if ($editId > 0) $editing = custom_page($editId);
+// A stale ?edit= for a deleted page falls back to the list rather than
+// silently offering a "new page" form the admin did not ask for.
+$showForm = ($editing !== null) || !empty($_GET['new']);
+
+// Loaded by admin_shell only when actually needed — Trix is ~200KB and the
+// bare list has no editor on it.
+$needs_editor = $showForm;
 
 $tab_body = tpl_capture('admin_texts', [
-    'csrf'    => csrf_field(),
-    'pages'   => db_all('SELECT id, title, sort_order FROM custom_pages ORDER BY sort_order, id'),
-    'editing' => $editing,
+    'csrf'      => csrf_field(),
+    'pages'     => db_all('SELECT id, title, sort_order FROM custom_pages ORDER BY sort_order, id'),
+    'editing'   => $editing,
+    'show_form' => $showForm,
 ]);

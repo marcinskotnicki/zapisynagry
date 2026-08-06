@@ -51,5 +51,8 @@ tpl_render('admin_shell', [
     'active_tab' => $tab,
     'tab_body'   => $tab_body,
     'flash'      => $flash,
+    // A tab controller sets $needs_editor when its screen contains a rich-text
+    // field, so the editor's assets load only where they are used.
+    'needs_editor' => !empty($needs_editor),
 ]);
 tpl_render('footer');

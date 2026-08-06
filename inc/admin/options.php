@@ -333,6 +333,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'expor
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'backup') {
+    // Written to the system temp directory, never inside the webroot: this file
+    // contains every password hash, email address and stored credential on the
+    // site, and a copy left under the document root would be downloadable by
+    // anyone who guessed the name.
+    $tmp = tempnam(sys_get_temp_dir(), 'zng');
+    // tempnam() creates the file; VACUUM INTO refuses an existing target.
+    if ($tmp !== false) @unlink($tmp);
+
+    if ($tmp !== false && db_snapshot($tmp)) {
+        $name = 'zapisynagry-backup-' . gmdate('Ymd-His') . '.sqlite';
+        log_action('db_backup', $name);
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $name . '"');
+        header('Content-Length: ' . filesize($tmp));
+        // Straight to the browser, then removed — the snapshot never lingers.
+        readfile($tmp);
+        @unlink($tmp);
+        exit;
+    }
+    @unlink($tmp);
+    $flash = t('opt_backup_failed');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'import') {
     // A pasted file body OR an uploaded file. Paste is offered because it works
     // everywhere and is the path that can actually be tested end to end;
@@ -364,7 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'impor
 // carrying no action at all — that was the contract before those two buttons
 // existed, and keeping it means nothing else that posts here has to be updated.
 if ($_SERVER['REQUEST_METHOD'] === 'POST'
-    && !in_array($_POST['action'] ?? '', ['export', 'import'], true)) {
+    && !in_array($_POST['action'] ?? '', ['export', 'import', 'backup'], true)) {
     // --- Plain value fields ---
     // Credentials first, by their own rule: blank means "unchanged".
     foreach ($OPTION_SECRETS as $key) {

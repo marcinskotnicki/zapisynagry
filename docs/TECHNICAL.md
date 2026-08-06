@@ -655,6 +655,15 @@ treats an absent field as an empty value (or an unticked toggle). A test
 compares the controller's lists against the rendered form and fails naming any
 key that is missing.
 
+**Database backup (Options → Advanced).** `db_snapshot()` in `inc/db.php`
+writes a consistent copy via `VACUUM INTO`, NOT a file copy: under WAL the live
+file is only half the story (recent commits sit in the `-wal` sidecar), so
+copying it can miss data or be torn mid-write. `VACUUM INTO` needs SQLite 3.27;
+older builds fall back to `wal_checkpoint(TRUNCATE)` plus a locked copy. The
+snapshot is staged in the system temp directory, never under the webroot — it
+holds every password hash and stored credential on the site — and is deleted
+once streamed. Audited, and admin-only.
+
 **Settings transfer (Options → Advanced).** Export writes the portable
 settings as JSON; import applies such a file. Three rules hold it together:
 

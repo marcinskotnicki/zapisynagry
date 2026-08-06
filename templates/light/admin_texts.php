@@ -3,9 +3,12 @@
  *  templates/light/admin_texts.php — manage the footer pages.
  * -----------------------------------------------------------------------------
  *  RENDER VARS:
- *    $csrf    — hidden CSRF field.
- *    $pages   — existing pages, in menu order.
- *    $editing — the page being edited, or null for a new one.
+ *    $csrf      — hidden CSRF field.
+ *    $pages     — existing pages, in menu order.
+ *    $editing   — the page being edited, or null when starting a new one.
+ *    $show_form — whether to show the editor at all. Landing on the tab shows
+ *                 just the list: a form that appears unasked reads as something
+ *                 the admin is expected to fill in.
  * ============================================================================= */
 ?>
 <h3><?= e(t('texts_title')) ?></h3>
@@ -65,6 +68,9 @@
     </table>
 <?php endif; ?>
 
+<?php if (!$show_form): ?>
+    <p><a class="btn btn-primary" href="admin.php?tab=texts&amp;new=1"><?= e(t('texts_add')) ?></a></p>
+<?php else: ?>
 <fieldset>
     <legend><?= e($editing ? t('texts_edit_page') : t('texts_new_page')) ?></legend>
     <form method="post" action="admin.php?tab=texts">
@@ -90,8 +96,10 @@
             <p class="field-note"><?= e(t('texts_page_body_note')) ?></p>
         </div>
         <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>
-        <?php if ($editing): ?>
-            <a class="btn" href="admin.php?tab=texts"><?= e(t('cancel')) ?></a>
-        <?php endif; ?>
+        <?php // Always offered now, not only when editing: the form can be open
+              // for a NEW page too, and there has to be a way back to the list
+              // that is not the browser's back button. ?>
+        <a class="btn" href="admin.php?tab=texts"><?= e(t('cancel')) ?></a>
     </form>
 </fieldset>
+<?php endif; ?>

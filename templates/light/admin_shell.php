@@ -54,12 +54,13 @@ if (chat_enabled()) {
     </section>
 </div>
 
-<?php // Trix, only on the Pages tab — no other admin screen needs a rich-text
-      // editor, and this is ~200KB of JS. Vendored locally (see vendor/trix)
-      // rather than pulled from a CDN: the app is FTP-deployed onto shared
-      // hosting and a club's admin panel should not depend on a third party
-      // being reachable. ?>
-<?php if (($active_tab ?? '') === 'texts'): ?>
+<?php // Trix, only where a rich-text field is actually on screen — the tab
+      // controller sets $needs_editor. That is narrower than "the Pages tab":
+      // the bare page LIST has no editor on it, and this is ~200KB of JS.
+      // Vendored locally (see vendor/trix) rather than pulled from a CDN: the
+      // app is FTP-deployed onto shared hosting and a club's admin panel
+      // should not depend on a third party being reachable. ?>
+<?php if (!empty($needs_editor)): ?>
     <link rel="stylesheet" href="vendor/trix/trix.css">
     <script src="vendor/trix/trix.min.js"></script>
 <?php endif; ?>
