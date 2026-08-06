@@ -56,6 +56,7 @@ $OPTION_VALUES = [
     'day_tab_format',   // one of day_tab_formats(); validated below
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
     'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
+    'header_brand',         // auto|both|none; validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days',
@@ -79,7 +80,11 @@ $OPTION_TOGGLES = [
     'send_emails', 'allow_polls', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
-    'allow_start_outside_hours', 'show_venue_name', 'mailing_list', 'antibot_honeypot',
+    'allow_start_outside_hours', 'mailing_list', 'antibot_honeypot',
+    // show_venue_name is NOT here any more: the header_brand dropdown replaced
+    // it, and leaving it in the toggle list would have every save rewrite it to
+    // 0 (an absent checkbox reads as off), destroying the legacy value that
+    // header_brand_mode() falls back to.
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
@@ -233,6 +238,9 @@ function option_sanitize($key, $val) {
             // day_tab_parts() anyway; reject it so the stored value always
             // names a real layout.
             if (!in_array($val, day_tab_formats(), true)) return null;
+            break;
+        case 'header_brand':
+            if (!in_array($val, ['auto', 'both', 'none'], true)) return null;
             break;
         case 'chat_scope':
             if (!in_array($val, ['event', 'global'], true)) return null;

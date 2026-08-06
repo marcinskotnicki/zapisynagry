@@ -282,6 +282,22 @@ function email_required_for_poll($poll) {
  *
  * @return array|null  The event row, or null before the first event is created.
  */
+/**
+ * What the header's left slot shows.
+ *
+ * Replaces the older show_venue_name on/off toggle, which could not express
+ * "logo AND name". An empty stored value falls back to that toggle, so an
+ * existing site keeps whatever it had until an admin saves the form — without
+ * this a site that had the name hidden would have it reappear on update.
+ *
+ * @return string 'auto'|'both'|'none'
+ */
+function header_brand_mode() {
+    $mode = trim((string)opt('header_brand'));
+    if (in_array($mode, ['auto', 'both', 'none'], true)) return $mode;
+    return opt_bool('show_venue_name') ? 'auto' : 'none';
+}
+
 /* ---------------------------------------------------------------------------
  *  Data-protection consent (GDPR / RODO)
  *

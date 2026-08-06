@@ -202,6 +202,13 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- show_venue_name: 1 = show the venue name top-left (current); 0 = hide it,
     -- useful when the venue and event names are the same (avoids showing both).
     ('show_venue_name',              '1'),
+    -- What the header's left slot shows: 'auto' (logo if one is uploaded,
+    -- otherwise the venue name), 'both' (logo then name), or 'none'.
+    -- Seeded EMPTY on purpose: empty means "derive from the older
+    -- show_venue_name toggle above", so an existing site that had the
+    -- name switched off does not have it reappear on update. Saving the
+    -- Options form once makes the choice explicit.
+    ('header_brand',          ''),
     -- site_url: absolute address of the app, used for the link at the foot of
     -- every email. Blank = work it out from the current request, which is fine
     -- for web-triggered mail but NOT for cron (no HTTP_HOST there), so set it

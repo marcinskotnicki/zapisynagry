@@ -262,13 +262,20 @@ $groupEnd = function () { echo '</div></details>'; };
             <p class="field-note"><?= e(t('opt_footer_custom_text_note')) ?></p>
         </div>
 
-        <?php // Hide the top-left venue name — used when the venue and event
-              // names are the same, and when a site logo replaces it. ?>
-        <div class="field field-check">
-            <label>
-                <input type="checkbox" name="show_venue_name" value="1"<?= opt_bool('show_venue_name') ? ' checked' : '' ?>>
-                <?= e(t('opt_show_venue_name')) ?>
-            </label>
+        <?php // What the header's left slot shows. Replaced an on/off checkbox,
+              // which could not express "logo AND name". The current value comes
+              // from header_brand_mode(), so a site that has not saved since the
+              // change shows what it is actually doing rather than a default. ?>
+        <div class="field">
+            <label for="header_brand"><?= e(t('opt_header_brand')) ?></label>
+            <select id="header_brand" name="header_brand">
+                <?php foreach (['auto', 'both', 'none'] as $bm): ?>
+                    <option value="<?= e($bm) ?>"<?= header_brand_mode() === $bm ? ' selected' : '' ?>>
+                        <?= e(t('opt_header_brand_' . $bm)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_header_brand_note')) ?></p>
         </div>
     <?php $groupEnd(); ?>
 

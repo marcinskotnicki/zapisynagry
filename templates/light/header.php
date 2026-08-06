@@ -113,7 +113,10 @@ ob_start();
         echo nav_link('register.php', 'register', t('register'));
     }
 $topnav   = trim(ob_get_clean());
-$showName = opt_bool('show_venue_name');
+// 'auto' | 'both' | 'none' — see header_brand_mode(). $showName stays as the
+// "is there anything in the left slot" test the rest of this template uses.
+$brandMode = header_brand_mode();
+$showName  = $brandMode !== 'none';
 
 // The preference pickers, when the admin has placed them in the header. Three
 // separate settings decide this (may they switch / where / do logged-in users
@@ -143,13 +146,25 @@ $hdrLangPick = function_exists('switcher_visible')
               // it all" toggle. No logo -> unchanged text behaviour, exactly as
               // before this feature existed. ?>
         <?php $logoV = opt('site_logo'); ?>
-        <?php if ($showName && $logoV !== ''): ?>
+        <?php $brandText = opt('venue_name') ?: t('app_name'); ?>
+        <?php if ($brandMode === 'both' && $logoV !== ''): ?>
+            <?php // Logo first, then the name beside it — one link, so the whole
+                  // thing is a single target back to the front page. The alt is
+                  // empty here because the name is right there as real text;
+                  // repeating it would have a screen reader say it twice. ?>
+            <a class="brand brand-both" href="index.php">
+                <img src="logo/logo.png?v=<?= e($logoV) ?>" alt="">
+                <span><?= e($brandText) ?></span>
+            </a>
+        <?php elseif ($showName && $logoV !== ''): ?>
+            <?php // 'auto': the logo stands in for the name. ?>
             <a class="brand brand-logo" href="index.php">
-                <img src="logo/logo.png?v=<?= e($logoV) ?>" alt="<?= e(opt('venue_name') ?: t('app_name')) ?>">
+                <img src="logo/logo.png?v=<?= e($logoV) ?>" alt="<?= e($brandText) ?>">
             </a>
         <?php elseif ($showName): ?>
-            <a class="brand" href="index.php"><?= e(opt('venue_name') ?: t('app_name')) ?></a>
+            <a class="brand" href="index.php"><?= e($brandText) ?></a>
         <?php else: ?>
+            <?php // An empty spacer keeps the nav right-aligned via space-between. ?>
             <span class="brand-spacer"></span>
         <?php endif; ?>
         <?php // Hamburger. Only shown on narrow screens (CSS), and only when
