@@ -323,6 +323,7 @@ return [
     'opt_day_tab_format_num_date_hours'          => 'Numer dnia, data, godziny',
     'opt_day_tab_format_num_weekday_date_hours'  => 'Numer dnia, dzień tygodnia, data, godziny',
     'opt_day_tab_format_weekday_date_hours_name' => 'Dzień tygodnia, data, godziny, nazwa dnia',
+    'opt_day_tab_format_name_date_hours'         => 'Nazwa dnia, data, godziny',
     'opt_day_tab_format_name'                    => 'Tylko nazwa dnia',
     'opt_day_tab_format_date'                    => 'Tylko data',
     'opt_day_tab_format_date_hours'              => 'Data i godziny',

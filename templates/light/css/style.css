@@ -220,6 +220,8 @@ input[type="checkbox"]{width:auto;}
 .day-tab-name { display: block; font-size: 0.85rem; }
 .fmt-num_weekday_date_hours .day-tab-num { font-size: 0.7rem; color: var(--text-muted); }
 .fmt-name .day-tab-name { font-size: 1.05rem; }
+.fmt-name_date_hours .day-tab-date { font-size: 1.05rem; color: var(--text); }
+.fmt-name_date_hours .day-tab-name { font-size: 0.8rem; color: var(--text-muted); }
 .fmt-date .day-tab-date,
 .fmt-date_hours .day-tab-date { font-size: 1.05rem; color: var(--text); }
 

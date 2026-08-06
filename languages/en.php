@@ -331,6 +331,7 @@ return [
     'opt_day_tab_format_num_date_hours'          => 'Day number, date, hours',
     'opt_day_tab_format_num_weekday_date_hours'  => 'Day number, weekday, date, hours',
     'opt_day_tab_format_weekday_date_hours_name' => 'Weekday, date, hours, day name',
+    'opt_day_tab_format_name_date_hours'         => 'Day name, date, hours',
     'opt_day_tab_format_name'                    => 'Day name only',
     'opt_day_tab_format_date'                    => 'Date only',
     'opt_day_tab_format_date_hours'              => 'Date and hours',

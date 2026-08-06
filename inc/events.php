@@ -659,7 +659,7 @@ function day_hours_label($dayRow) {
 /** The tab layouts an admin can choose between, in the order they are offered. */
 function day_tab_formats() {
     return ['num_date_hours', 'num_weekday_date_hours', 'weekday_date_hours_name',
-            'name', 'date', 'date_hours'];
+            'name_date_hours', 'name', 'date', 'date_hours'];
 }
 
 /**
@@ -718,6 +718,12 @@ function day_tab_parts($dayRow, $format = null) {
             break;
         case 'weekday_date_hours_name':
             $order = [['weekday', $weekday], ['date', $date], ['hours', $hours], ['name', $name]];
+            break;
+        case 'name_date_hours':
+            // The DATE leads here, with the label and hours as supporting
+            // lines — the opposite emphasis to 'weekday_date_hours_name',
+            // where the name is the afterthought.
+            $order = [['name', $name], ['date', $date], ['hours', $hours]];
             break;
         case 'name':
             $order = [['name', $name]];
