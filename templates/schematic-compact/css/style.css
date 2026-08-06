@@ -145,6 +145,9 @@ body.tpl-schematic-compact {
 
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
 }
+.tpl-schematic-compact .game-deleted{
+    width: 100%;
+}
 
 @media (min-width: 701px) {
     .tpl-schematic-compact .game-list {

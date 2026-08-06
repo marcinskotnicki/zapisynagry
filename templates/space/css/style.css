@@ -141,6 +141,20 @@ body.tpl-space {
     position: relative;
 }
 
+.tpl-space .game-deleted{
+    flex: 0 1 46%;
+    min-width: 320px;
+    max-width: 640px;
+}
+
+.tpl-space .game-deleted .game-card,
+.tpl-space .game-deleted .poll-card {
+    width:100%;
+    min-width:100%;
+    min-height:100%;
+    background: linear-gradient(rgba(88, 166, 232, .06), transparent 38%), rgba(63, 34, 34, 0.88);
+}
+
 .tpl-space .game-card::before,
 .tpl-space .poll-card::before {
     content: "";
@@ -414,7 +428,8 @@ body.tpl-space {
 
 @media (max-width: 1120px) {
     .tpl-space .game-card,
-    .tpl-space .poll-card { flex: 1 1 100%; min-width: 0; max-width: 100%; }
+    .tpl-space .poll-card,
+    ..tpl-space .gamne-deleted { flex: 1 1 100%; min-width: 0; max-width: 100%; }
 }
 
 @media (max-width: 700px) {
