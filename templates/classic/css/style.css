@@ -111,6 +111,10 @@
     position: relative; z-index: 1;
 }
 
+.tpl-classic .game-deleted .gc-info {
+    background: linear-gradient(#912c2c, #4e2323);
+}
+
 .tpl-classic .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
 .tpl-classic .gc-tab {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
