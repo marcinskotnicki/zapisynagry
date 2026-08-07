@@ -429,7 +429,7 @@ body.tpl-space {
 @media (max-width: 1120px) {
     .tpl-space .game-card,
     .tpl-space .poll-card,
-    ..tpl-space .gamne-deleted { flex: 1 1 100%; min-width: 0; max-width: 100%; }
+    .tpl-space .game-deleted { flex: 1 1 100%; min-width: 0; max-width: 100%; }
 }
 
 @media (max-width: 700px) {
