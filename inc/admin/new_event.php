@@ -137,6 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($error === null) {
                 log_action('event_create', $name);
+                /* Normally: go and look at the event just created.
+                 *
+                 * But if its dates are already past the auto-archive threshold,
+                 * index.php is the WORST place to send the admin — that page
+                 * load runs the sweep, so the event they just made is archived
+                 * before they see it, and the front page shows something else.
+                 * Send them to the archive tab with the warning instead: the
+                 * event is listed there, still active, and the reason it is
+                 * about to disappear is on screen. */
+                if (event_auto_archive_due($eventId)) {
+                    redirect('admin.php?tab=archive&warn=autoarchive');
+                }
                 redirect('index.php');   // success -> show the freshly created event
             }
         }

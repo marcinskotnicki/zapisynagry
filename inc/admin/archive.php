@@ -14,6 +14,36 @@
 
 require_once __DIR__ . '/../events.php';   // events_page(), events_count()
 
+/**
+ * Set the "this will be archived again straight away" warning, if it applies.
+ *
+ * Asked after any change that leaves an ACTIVE event dated past the threshold:
+ * un-archiving one, or editing its days into the past. The event being active
+ * matters — warning about an already-archived event would describe nothing.
+ *
+ * Sets $flash / $flashKind in the caller's scope (admin.php's), replacing the
+ * plain "saved" banner: the save DID work, and that is exactly what makes the
+ * disappearance confusing without this.
+ *
+ * @param int $eventId
+ * @return void
+ */
+$warnIfAutoArchived = function ($eventId) use (&$flash, &$flashKind) {
+    if ($eventId <= 0 || !event_auto_archive_due($eventId)) return;
+    $row = db_one('SELECT is_archived, is_deleted FROM events WHERE id = ?', [$eventId]);
+    if (!$row || (int)$row['is_archived'] !== 0 || (int)$row['is_deleted'] !== 0) return;
+    $flash     = t('archive_unarchive_autorearchive', opt_int('auto_archive_days'));
+    $flashKind = 'warn';
+};
+
+/* Carried across the redirect from event creation (new_event.php), which cannot
+ * hand a flash over any other way. Set before the POST handling below so a real
+ * action this request still wins. */
+if (($_GET['warn'] ?? '') === 'autoarchive') {
+    $flash     = t('archive_create_autoarchive', opt_int('auto_archive_days'));
+    $flashKind = 'warn';
+}
+
 // Archive / un-archive a single event. Only offered when public archives are
 // on: with the feature off, archiving is automatic on new-event creation and a
 // manual button here would fight that behaviour rather than complement it.
@@ -41,6 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         log_action('event_' . $act, 'event #' . $id);
         $flash = t('saved_ok');
+
+        /* Un-archiving an event whose dates are already past the auto-archive
+         * threshold succeeds — and the next visitor's page load runs the sweep
+         * and archives it straight back. Without this the admin sees "saved",
+         * reloads, and the event has vanished with nothing to explain it.
+         *
+         * Said here rather than blocked, because the action is legitimate: the
+         * admin may be about to add new dates to it, which takes it back out of
+         * the sweep's reach on its own. */
+        if ($act === 'unarchive') $warnIfAutoArchived($id);
 
     } elseif ($id > 0 && $act === 'delete') {
         // Hidden, not destroyed. is_archived is set at the same time so that
@@ -77,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (event_day_add($id, $_POST['day_date'] ?? '', $_POST['day_start'] ?? '', $_POST['day_end'] ?? '')) {
             log_action('event_day_add', 'event #' . $id . ' ' . trim((string)($_POST['day_date'] ?? '')));
             $flash = t('days_added');
+            $warnIfAutoArchived($id);   // dates may now be past the sweep's threshold
         } else {
             $flash = t('days_add_failed');
         }
@@ -112,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             event_days_renumber($id);
             log_action('event_day_edit', 'event #' . $id . ' day #' . $dayId);
             $flash = t('days_updated');
+            $warnIfAutoArchived($id);   // dates may now be past the sweep's threshold
         } else {
             $flash = t('days_update_failed');
         }
@@ -126,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($own && event_day_delete($dayId)) {
             log_action('event_day_delete', 'event #' . $id . ' day #' . $dayId);
             $flash = t('days_deleted');
+            $warnIfAutoArchived($id);   // dates may now be past the sweep's threshold
         } else {
             $flash = t('days_delete_failed');
         }

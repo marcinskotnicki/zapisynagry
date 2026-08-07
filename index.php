@@ -141,10 +141,11 @@ if (!$readonly && mailing_enabled()) {
 }
 
 tpl_render('header', ['page_title' => $event['name']]);
-// Event switcher tabs: every event whose LAST day is yesterday or later,
-// soonest first. Only assembled when the feature is on, so the usual
-// single-event install pays nothing for it.
-$eventTabs = public_archives_enabled() ? events_upcoming() : [];
+// Event switcher tabs: every ACTIVE event (not archived, not deleted), soonest
+// first — the same set and the same order as current_event() chooses from, so
+// the event the page landed on always has a tab. Only assembled when the
+// feature is on, so the usual single-event install pays nothing for it.
+$eventTabs = public_archives_enabled() ? events_active() : [];
 
 tpl_render('front_event', [
     'event_tabs'  => $eventTabs,

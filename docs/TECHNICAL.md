@@ -120,7 +120,7 @@ plain-requires the same file later you get *cannot redeclare*. This is why
 | `auth.php` | Sessions, login, CSRF, access checks. | `auth_login`, `auth_logout`, `current_user`, `is_admin`, `require_admin`, `csrf_field`, `csrf_check`, `csrf_rotate` |
 | `lang.php` | Translation loading and lookup. | `lang_load`, `t`, `lang_current` |
 | `template.php` | Theme resolution and view rendering. | `tpl_init`, `tpl_file`, `tpl_render`, `tpl_capture`, `nav_link`, `current_page` |
-| `events.php` | Front-end data and scheduling rules. | `event_days`, `event_tables_full`, `timeline_build`, `day_rel_min`, `start_within_event_hours`, `weight_bucket`, `promote_reserves`, `events_page`, `events_upcoming`, `events_auto_archive`, `calendar_weeks` |
+| `events.php` | Front-end data and scheduling rules. | `event_days`, `event_tables_full`, `timeline_build`, `day_rel_min`, `start_within_event_hours`, `weight_bucket`, `promote_reserves`, `events_page`, `events_active`, `events_auto_archive`, `calendar_weeks` |
 | `polls.php` | Vote tallying and poll resolution. | `poll_check_resolve`, `poll_pick_winner`, `poll_force_resolve`, `poll_resolve_expired`, `poll_deadline_from_hours` |
 | `verify.php` | Guest edit/delete permission. | `verify_can_show_buttons`, `verify_decision`, `verify_passes`, `verify_send_code` |
 | `mail.php` | Outgoing mail (PHPMailer or `mail()`). | `send_mail`, `mail_body_with_footer` |

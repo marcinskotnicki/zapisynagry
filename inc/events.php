@@ -124,17 +124,32 @@ function events_count($archivedOnly = false, $includeDeleted = false) {
 }
 
 /**
- * Events worth offering as tabs on the front page: anything whose LAST day is
- * yesterday or later, soonest first.
+ * Every ACTIVE event, soonest first — the front page switcher tabs, and the
+ * admin's "which event's list?" pickers.
  *
- * Yesterday rather than today so an event that ran last night is still one
- * click away the next morning — people sign up for the next session while
- * still talking about the last one.
+ * Active means exactly what the admin screens mean by it: not archived, not
+ * deleted. It deliberately does NOT filter on dates.
+ *
+ * This used to select "anything whose last day is yesterday or later", from
+ * back when a passing date was the only thing that retired an event. Two
+ * features since made that wrong:
+ *   - auto_archive_days retires finished events explicitly, so the date test
+ *     duplicated a job something else already does; and
+ *   - an admin can bring an archived event BACK, which sets is_archived = 0
+ *     but cannot move its dates into the future.
+ * A brought-back event was therefore live everywhere else — the admin panel
+ * listed it, the archive page opened it, current_event() could even select it
+ * as THE event — while having no tab to reach it by. Whether an event is over
+ * is now one question with one answer: is_archived.
+ *
+ * Ordering matches current_event() exactly, NULLs last included: the first tab
+ * has to be the event the front page actually lands on, and an event with no
+ * days yet must not jump ahead of real ones (plain ASC sorts NULL FIRST in
+ * SQLite, which would do precisely that).
  *
  * @return array  Event rows with date_from / date_to attached.
  */
-function events_upcoming() {
-    $cutoff = date('Y-m-d', strtotime('-1 day'));
+function events_active() {
     return db_all(
         "SELECT e.*,
                 (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
@@ -142,8 +157,7 @@ function events_upcoming() {
            FROM events e
           WHERE e.is_archived = 0
             AND e.is_deleted = 0
-            AND (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) >= ?
-          ORDER BY date_from ASC, e.id ASC", [$cutoff]);
+          ORDER BY date_from IS NULL, date_from ASC, e.id ASC");
 }
 
 /**
@@ -249,6 +263,29 @@ function calendar_normalise($year, $month) {
  *
  * @return int  Events archived.
  */
+/**
+ * Would the auto-archive sweep pick this event up right now?
+ *
+ * Deliberately sits next to events_auto_archive() and asks the same question of
+ * one event, so a change to the rule cannot leave the admin warning describing
+ * the old one. Un-archiving an event older than the threshold otherwise looks
+ * like it worked and is quietly undone by the next visitor's page load.
+ *
+ * @param int $eventId
+ * @return bool  False whenever the sweep is off, so callers need no extra test.
+ */
+function event_auto_archive_due($eventId) {
+    if (!public_archives_enabled()) return false;
+    $days = opt_int('auto_archive_days');
+    if ($days <= 0) return false;
+
+    $last = db_val('SELECT MAX(day_date) FROM event_days WHERE event_id = ?', [(int)$eventId]);
+    // No days yet: the sweep skips it (IS NOT NULL), so nothing to warn about.
+    if ($last === null || $last === '') return false;
+
+    return $last < date('Y-m-d', strtotime('-' . $days . ' day'));
+}
+
 function events_auto_archive() {
     if (!public_archives_enabled()) return 0;
     $days = opt_int('auto_archive_days');

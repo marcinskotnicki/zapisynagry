@@ -66,10 +66,19 @@
                             <input type="hidden" name="event" value="<?= (int)$ev['id'] ?>">
                             <input type="hidden" name="action"
                                    value="<?= (int)$ev['is_archived'] === 1 ? 'unarchive' : 'archive' ?>">
-                            <button class="btn btn-small">
+                            <?php /* Warn BEFORE the click as well as after it: an
+                                     archived event whose dates are past the
+                                     auto-archive threshold will be swept straight
+                                     back by the next visitor's page load. The
+                                     title shows on hover; the flash after the
+                                     action states it in full. */
+                                  $reArchives = (int)$ev['is_archived'] === 1
+                                      && event_auto_archive_due((int)$ev['id']); ?>
+                            <button class="btn btn-small<?= $reArchives ? ' btn-caution' : '' ?>"<?=
+                                $reArchives ? ' title="' . e(t('archive_autoarchive_hint')) . '"' : '' ?>>
                                 <?= (int)$ev['is_archived'] === 1
                                         ? e(t('archive_unarchive'))
-                                        : e(t('archive_archive')) ?>
+                                        : e(t('archive_archive')) ?><?= $reArchives ? ' *' : '' ?>
                             </button>
                         </form>
                     <?php endif; ?>

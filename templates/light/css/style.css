@@ -70,6 +70,8 @@ body.layout-3-mail .mailing-block { order: 3; }
 .msg { padding: 0.6rem 0.9rem; border-radius: var(--radius); margin: 0 0 1rem; }
 .msg-ok    { background: #e8f6ee; color: var(--ok); }
 .msg-error { background: #fdecea; color: var(--error); }
+.msg-warn  { background: #fdf3e0; color: #7a4b00; }
+.btn-caution { border-color: #b8860b; }
 .muted     { color: var(--text-muted); font-size: 0.92rem; }
 
 label { display: block; font-weight: 600; margin: 0.8rem 0 0.25rem; }

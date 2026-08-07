@@ -11,6 +11,9 @@
  *    $active_tab — current tab key (highlights its nav link).
  *    $tab_body   — pre-rendered HTML for the active tab (a string).
  *    $flash      — optional success/info message, or null.
+ *    $flash_kind — 'ok' (green) or 'warn' (amber): a caveat on an action
+ *                  that DID succeed but is about to be undone by something
+ *                  else. Green would bury exactly the part worth reading.
  * ============================================================================= */
 
 // Tab key => language key for the label. The array ORDER defines the nav order.
@@ -39,7 +42,7 @@ if (chat_enabled()) {
     <h1><?= e(t('admin_panel')) ?></h1>
 
     <?php if (!empty($flash)): ?>
-        <p class="msg msg-ok"><?= e($flash) ?></p>
+        <p class="msg msg-<?= ($flash_kind ?? 'ok') === 'warn' ? 'warn' : 'ok' ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
     <nav class="tabs">

@@ -27,7 +27,7 @@ require_once __DIR__ . '/../events.php';
  * default for the front page but a poor thing to guess at when the action is
  * "send mail to these people".
  *
- * Only ACTIVE events are offered — events_upcoming() already excludes archived
+ * Only ACTIVE events are offered — events_active() already excludes archived
  * and deleted ones. Mailing an archived event's subscribers is not a thing an
  * admin does by design, and offering it invites doing it by accident.
  *
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../events.php';
  * send form. Either way it is validated against the list: a hand-typed
  * ?event_id= must not reach an archived event, someone else's, or a deleted
  * one — this is the id that decides who gets the mail. */
-$activeEvents = events_upcoming();
+$activeEvents = events_active();
 $currentEvent = current_event();
 
 $eventId = (int)($_POST['event_id'] ?? $_GET['event_id'] ?? ($currentEvent['id'] ?? 0));
