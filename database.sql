@@ -125,6 +125,11 @@ INSERT INTO options (key, value) VALUES
     -- hammering the button because their message has not appeared yet, not
     -- at bots; 0 disables the wait entirely.
     ('chat_send_delay',       '2'),
+    -- Click anywhere outside the panel to close it. Off by default: the
+    -- chat is a side panel people may deliberately leave open while
+    -- reading the page, and closing it on every stray click would be
+    -- worse than an extra press of the toggle.
+    ('chat_close_outside',    '0'),
     -- Public archives. Off by default: switching it on changes how EVENTS
     -- behave (creating a new one no longer archives the old), so it must be a
     -- deliberate choice rather than a surprise on upgrade.

@@ -161,6 +161,7 @@ return [
     'chat_admin_purge_confirm'       => 'Usunąć wszystkie wiadomości czatu? Tej operacji nie można cofnąć.',
     'chat_admin_purged'              => 'Czat został wyczyszczony.',
     'opt_chat_send_delay'            => 'Przerwa między wiadomościami (sekundy)',
+    'opt_chat_close_outside'         => 'Kliknięcie poza czatem zamyka go',
     'chat_title'                     => 'Czat',
     'chat_send'                      => 'Wyślij',
     'chat_load_earlier'              => 'Wczytaj wcześniejsze wiadomości',

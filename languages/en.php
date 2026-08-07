@@ -169,6 +169,7 @@ return [
     'chat_admin_purge_confirm'       => 'Delete every chat message? This cannot be undone.',
     'chat_admin_purged'              => 'The chat has been cleared.',
     'opt_chat_send_delay'            => 'Pause between messages (seconds)',
+    'opt_chat_close_outside'         => 'Clicking outside the chat closes it',
     'chat_title'                     => 'Chat',
     'chat_send'                      => 'Send',
     'chat_load_earlier'              => 'Load earlier messages',

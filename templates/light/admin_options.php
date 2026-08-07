@@ -378,6 +378,9 @@ $groupEnd = function () { echo '</div></details>'; };
         $text('chat_refresh_seconds', 'number');   // poll interval while open
         $text('chat_send_delay', 'number');        // pause after sending
         ?>
+        <?php $toggle('chat_close_outside'); ?>
+        <?php
+        ?>
     <?php $groupEnd(); ?>
 
     <?php /* 6. ACCOUNTS AND PERMISSIONS */ ?>

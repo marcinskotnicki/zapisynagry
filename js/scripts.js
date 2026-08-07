@@ -363,23 +363,43 @@
         // from here the panel is driven by .is-open so it can slide.
         panel.removeAttribute('hidden');
 
+        // One implementation of each direction, so the toggle button and the
+        // click-outside handler can never drift apart.
+        function openChat() {
+            panel.classList.add('is-open');
+            document.body.classList.add('chat-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            if (!loaded) load(); else scrollDown();
+            start();
+        }
+        function closeChat() {
+            panel.classList.remove('is-open');
+            document.body.classList.remove('chat-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            // Polling stops with the panel: an idle background tab should not
+            // keep hitting the server every few seconds.
+            stop();
+        }
+
         toggle.addEventListener('click', function () {
-            var opening = !panel.classList.contains('is-open');
-            if (opening) {
-                panel.classList.add('is-open');
-                document.body.classList.add('chat-open');
-                toggle.setAttribute('aria-expanded', 'true');
-                if (!loaded) load(); else scrollDown();
-                start();
-            } else {
-                panel.classList.remove('is-open');
-                document.body.classList.remove('chat-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                // Polling stops with the panel: an idle background tab should
-                // not keep hitting the server every few seconds.
-                stop();
-            }
+            if (panel.classList.contains('is-open')) closeChat(); else openChat();
         });
+
+        // Optional: a click anywhere outside closes the panel.
+        //
+        // Bound on mousedown rather than click so a click that STARTS inside
+        // the panel and ends outside — dragging to select a message, or
+        // releasing off a button — is not treated as clicking away.
+        //
+        // The toggle is excluded, or its own handler would reopen what this
+        // just closed.
+        if (window.APP_CHAT.closeOutside) {
+            document.addEventListener('mousedown', function (ev) {
+                if (!panel.classList.contains('is-open')) return;
+                if (panel.contains(ev.target) || toggle.contains(ev.target)) return;
+                closeChat();
+            });
+        }
 
         if (earlier) {
             earlier.addEventListener('click', function () {
