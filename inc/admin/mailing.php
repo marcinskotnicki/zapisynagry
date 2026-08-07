@@ -20,8 +20,38 @@ require_once __DIR__ . '/../mail.php';
 require_once __DIR__ . '/../mailing.php';
 require_once __DIR__ . '/../events.php';
 
-$event   = current_event();
-$eventId = (int)($event['id'] ?? 0);
+/* WHICH event's lists are we writing to?
+ *
+ * "Current event" stopped being an answer once clubs could run several at
+ * once: current_event() picks the soonest one still open, which is a fine
+ * default for the front page but a poor thing to guess at when the action is
+ * "send mail to these people".
+ *
+ * Only ACTIVE events are offered — events_upcoming() already excludes archived
+ * and deleted ones. Mailing an archived event's subscribers is not a thing an
+ * admin does by design, and offering it invites doing it by accident.
+ *
+ * The id arrives by GET (the selector reloads the tab so the audience counts
+ * below match what is actually selected) and again as a hidden field on the
+ * send form. Either way it is validated against the list: a hand-typed
+ * ?event_id= must not reach an archived event, someone else's, or a deleted
+ * one — this is the id that decides who gets the mail. */
+$activeEvents = events_upcoming();
+$currentEvent = current_event();
+
+$eventId = (int)($_POST['event_id'] ?? $_GET['event_id'] ?? ($currentEvent['id'] ?? 0));
+$event   = null;
+foreach ($activeEvents as $ev) {
+    if ((int)$ev['id'] === $eventId) { $event = $ev; break; }
+}
+// Unknown, archived, deleted or absent: fall back to the first active event
+// rather than to whatever was asked for. With no active events at all this
+// stays null and $eventId becomes 0 — the event-scoped audiences are then
+// empty, while 'all_subscribers' still works, which is the sensible reading.
+if ($event === null) {
+    $event   = $activeEvents[0] ?? null;
+    $eventId = (int)($event['id'] ?? 0);
+}
 
 $AUDIENCES = ['subscribers', 'all_subscribers', 'participants', 'event_everyone'];
 
@@ -59,7 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'send'
             send_mail($to, $draft['subject'], $body);
             $sent++;
         }
-        log_action('mailing_broadcast', $draft['audience'] . ' -> ' . $sent . ' recipient(s)');
+        // Name the event in the log line: with several running at once, "who
+        // was mailed" is not answerable from the audience key alone.
+        log_action('mailing_broadcast', $draft['audience'] . ' -> ' . $sent . ' recipient(s)'
+            . ($event ? ' [' . $event['name'] . ']' : ''));
         $flash = t('ml_admin_sent', $sent);
         $draft = ['audience' => $draft['audience'], 'subject' => '', 'body' => ''];
     }
@@ -78,5 +111,8 @@ $tab_body = tpl_capture('admin_mailing', [
     'enabled'   => mailing_enabled(),
     'error'     => $error,
     'event'     => $event,
+    // The selector is skipped entirely when there is nothing to choose between.
+    'events'    => $activeEvents,
+    'event_id'  => $eventId,
     'csrf'      => csrf_field(),
 ]);
