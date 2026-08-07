@@ -15,6 +15,10 @@
     <input type="hidden" name="tab" value="logs">
     <label for="log_event"><?= e(t('logs_event')) ?></label>
     <select id="log_event" name="event_id" onchange="this.form.submit()">
+        <?php // Site-wide entries — settings, accounts, updates, uploads — are
+              // stored with no event, so they get their own scope rather than
+              // being stapled to whichever event was current when they happened. ?>
+        <option value="0"<?= (int)$view_id === 0 ? ' selected' : '' ?>><?= e(t('logs_system')) ?></option>
         <?php foreach ($events as $ev): ?>
             <option value="<?= (int)$ev['id'] ?>"<?= (int)$ev['id'] === (int)$view_id ? ' selected' : '' ?>>
                 <?= e($ev['name']) ?><?= (int)$ev['is_archived'] === 0 ? ' (' . e(t('archive_current')) . ')' : '' ?>

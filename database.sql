@@ -131,6 +131,13 @@ INSERT INTO options (key, value) VALUES
     ('public_archives',       '0'),
     ('archive_per_page',      '20'),   -- events per page on the public list
     ('admin_per_page',        '50'),   -- rows per page on admin lists
+    -- Days of audit log to keep; 0 keeps everything. A year by default: the
+    -- rows are tiny (~114 bytes each, so a busy club is a megabyte or two a
+    -- year), but they carry names and IP addresses, and keeping personal
+    -- data forever with no reason to is exactly what a retention period is
+    -- for.
+    ('log_retention_days',    '365'),
+    ('log_pruned_on',         ''),      -- date of the last prune; throttles it to daily
     -- 0 = never auto-archive. Otherwise an event is archived this many days
     -- after its LAST day ends. Only consulted when public_archives is on.
     ('auto_archive_days',     '0'),

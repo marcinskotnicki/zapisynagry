@@ -30,6 +30,10 @@ poll_resolve_expired();
 // staying editable until the next one.
 events_auto_archive();
 
+// Same slot again: discard audit entries past their retention period. Throttled
+// to once a day inside the function, and a no-op when retention is set to 0.
+logs_prune();
+
 // Decide which event to show: live (interactive) or an archived one (read-only).
 $resolved = event_resolve();
 $event    = $resolved['event'];

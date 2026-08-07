@@ -486,6 +486,31 @@ when the game has no email AND exactly one player carries that name. Two people
 at a club can share a first name, and deleting the wrong person's place is worse
 than leaving a stale one.
 
+**Audit log scoping.** `log_action()` files an entry against
+`current_event()` UNLESS `log_action_is_system()` names the action, in which
+case it is stored with `event_id NULL` and appears under the Logs tab's
+"System" scope. Site-level means configuration, accounts, updates, uploads, the
+chat, the footer pages, and events-as-objects (creating, renaming, deleting one
+— which event is already in the detail, and filing "event deleted" inside that
+event's own log makes it unreachable once the event is gone). Event-level is
+what happens INSIDE an event. The list is explicit rather than prefix-matched,
+so a new action must be classified deliberately; an unclassified one falls to
+the event log, which is the safer default.
+
+Purging an event DELETES its log entries and leaves one `event_purge` line in
+the System log. This is required, not tidiness: the foreign key is
+`ON DELETE SET NULL`, so without it every `game_add` and `signup` from the
+purged event would land under System — entries about an event that no longer
+exists, mixed into site history. Archiving deliberately does NOT prune: an
+archived event can be unarchived, and `auto_archive_days` fires without anyone
+deciding.
+
+`logs_prune()` runs in the same poor-man's-cron slot as the poll and archive
+sweeps, throttled to once a day by the `log_pruned_on` marker. Retention exists
+for data protection, not for space — a log row is about 114 bytes, so even a
+club running weekly for a decade would not notice — but the rows carry names
+and IP addresses. `log_retention_days` defaults to 365; 0 keeps everything.
+
 **`game_tables` cascades.** Deleting a table row deletes its games and polls
 too (`ON DELETE CASCADE`). Move rows off a table before removing it, including
 in test fixtures — deleting a table out from under a game silently destroys the

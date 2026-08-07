@@ -287,6 +287,8 @@ return [
     'logs_actor'          => 'Who',
     'logs_ip'             => 'IP',
     'logs_event'          => 'Event',
+    'logs_system'         => 'System (site-wide)',
+    'logs_purged_n'       => '%d log entries deleted with it',
     'logs_none'           => 'No log entries.',
     'logs_show'           => 'Show',
 
@@ -402,6 +404,8 @@ return [
     'opt_public_archives_note'       => 'Adds an Archive page listing every event, and event tabs on the home page. It also lets several events run at the same time: while this is on, creating a new event no longer archives the previous one, and past events stay open for edits until you archive them yourself. With it off, the app keeps a single live event and archives the previous one automatically whenever you create a new one.',
     'opt_archive_per_page'           => 'Events per page (public archive)',
     'opt_admin_per_page'             => 'Rows per page (admin lists)',
+    'opt_log_retention_days'         => 'Keep audit logs for (days)',
+    'opt_log_retention_days_note'    => 'Older entries are discarded automatically. 0 keeps everything. Logs record names and IP addresses, so a limit is usually the right default.',
     'opt_auto_archive_days'          => 'Auto-archive events after (days, 0 = never)',
 
     // ---- Rules / knowledge dropdowns ----------------------------------------

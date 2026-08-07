@@ -535,6 +535,18 @@ $groupEnd = function () { echo '</div></details>'; };
         $text('login_days', 'number');        // persistent-login lifetime; 0 = session only
         $text('admin_per_page', 'number');    // rows per page on admin lists
         ?>
+        <?php // Audit entries carry names and IP addresses, so they are not kept
+              // indefinitely by default. Size is not the concern — a log row is
+              // around 114 bytes — it is that there is no reason to hold
+              // personal data forever. ?>
+        <div class="field">
+            <label for="log_retention_days"><?= e(t('opt_log_retention_days')) ?></label>
+            <input type="number" id="log_retention_days" name="log_retention_days" min="0"
+                   value="<?= (int)opt('log_retention_days') ?>">
+            <p class="field-note"><?= e(t('opt_log_retention_days_note')) ?></p>
+        </div>
+        <?php
+        ?>
         <?php // Update source. Pre-filled with the EFFECTIVE repo URL, which is
               // config.php's GITHUB_* coords until an admin overrides it here —
               // so a fresh install shows where it actually updates from rather

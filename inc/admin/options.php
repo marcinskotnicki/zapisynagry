@@ -55,6 +55,7 @@ $OPTION_VALUES = [
     'home_layout',  // tables_first|timeline_first; validated below
     'github_url',   // '' = inherit config.php's GITHUB_* coords; validated below
     'day_tab_format',   // one of day_tab_formats(); validated below
+    'log_retention_days',   // 0 = keep everything
     'game_deletion',        // choose|soft|hard; validated below
     'deleted_games_display',// name|full; validated below
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
@@ -219,6 +220,7 @@ function option_sanitize($key, $val) {
         case 'poll_default_deadline_hours':
         case 'login_days':
         case 'archive_per_page':
+        case 'log_retention_days':
         case 'admin_per_page':
         case 'auto_archive_days':
             // Clamped again where they are USED, so a value written

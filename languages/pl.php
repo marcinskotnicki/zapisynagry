@@ -279,6 +279,8 @@ return [
     'logs_actor'          => 'Kto',
     'logs_ip'             => 'IP',
     'logs_event'          => 'Wydarzenie',
+    'logs_system'         => 'System (cała strona)',
+    'logs_purged_n'       => 'usunięto z nim wpisów dziennika: %d',
     'logs_none'           => 'Brak wpisów w logu.',
     'logs_show'           => 'Pokaż',
 
@@ -394,6 +396,8 @@ return [
     'opt_public_archives_note'       => 'Dodaje stronę Archiwum z listą wszystkich wydarzeń oraz zakładki wydarzeń na stronie głównej. Pozwala też prowadzić kilka wydarzeń jednocześnie: gdy ta opcja jest włączona, utworzenie nowego wydarzenia nie archiwizuje poprzedniego, a dawne wydarzenia pozostają otwarte do edycji, dopóki nie zarchiwizujesz ich ręcznie. Przy wyłączonej opcji aplikacja utrzymuje jedno bieżące wydarzenie i archiwizuje poprzednie automatycznie przy tworzeniu nowego.',
     'opt_archive_per_page'           => 'Wydarzeń na stronę (publiczne archiwum)',
     'opt_admin_per_page'             => 'Wierszy na stronę (listy w panelu)',
+    'opt_log_retention_days'         => 'Przechowuj dziennik zdarzeń przez (dni)',
+    'opt_log_retention_days_note'    => 'Starsze wpisy są automatycznie usuwane. 0 oznacza brak limitu. Dziennik zapisuje imiona i adresy IP, więc limit jest zwykle właściwym ustawieniem.',
     'opt_auto_archive_days'          => 'Automatyczna archiwizacja po (dniach, 0 = nigdy)',
 
     // ---- Rules / knowledge dropdowns ----------------------------------------

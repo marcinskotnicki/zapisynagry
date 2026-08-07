@@ -518,6 +518,79 @@ function current_event() {
 }
 
 /**
+ * Drop audit entries older than the configured retention period.
+ *
+ * Called from the same poor-man's-cron slot as the poll and archive sweeps, and
+ * throttled to once a day: the DELETE is cheap but pointless to repeat on every
+ * page view.
+ *
+ * Size is not the reason this exists — a log row is about 114 bytes, so even a
+ * club running weekly for a decade would not notice. The reason is that the
+ * rows carry names and IP addresses, and holding personal data indefinitely
+ * with no purpose is the thing a retention period is meant to prevent.
+ *
+ * @return int  Rows removed on this run.
+ */
+function logs_prune() {
+    $days = (int)opt('log_retention_days');
+    if ($days <= 0) return 0;                     // 0 = keep everything
+
+    // Once a day is plenty; the marker costs one option read.
+    $today = gmdate('Y-m-d');
+    if (opt('log_pruned_on') === $today) return 0;
+    opt_set('log_pruned_on', $today);
+
+    $cutoff = gmdate('Y-m-d H:i:s', time() - $days * 86400);
+    $n = (int)db_val('SELECT COUNT(*) FROM logs WHERE created_at < ?', [$cutoff]);
+    if ($n > 0) db_run('DELETE FROM logs WHERE created_at < ?', [$cutoff]);
+    return $n;
+}
+
+/**
+ * Is this action about the SITE rather than about an event?
+ *
+ * Site-level: configuration, accounts, updates, uploads, the chat, the footer
+ * pages, and anything to do with events THEMSELVES (creating, renaming,
+ * deleting one) — which event that concerns is already named in the detail, and
+ * filing "event deleted" inside that event's own log makes it unreachable the
+ * moment the event is gone.
+ *
+ * Event-level is what happens INSIDE an event: games, players, polls, comments,
+ * tables, messages, mailing signups.
+ *
+ * Listed explicitly rather than matched by prefix, so a new action has to be
+ * classified deliberately. An unknown one falls through to the event log, which
+ * is the safer default: it stays next to whatever it relates to instead of
+ * disappearing into a site-wide list.
+ *
+ * @param string $action
+ * @return bool
+ */
+function log_action_is_system($action) {
+    static $system = [
+        // Configuration and the site itself
+        'options_save', 'options_export', 'options_import', 'db_backup',
+        'force_ssl', 'system_update',
+        // Accounts
+        'login', 'logout', 'register',
+        'user_create', 'user_block', 'user_unblock', 'user_promote', 'user_demote',
+        'user_email', 'user_password',
+        // Uploads and branding
+        'thumb_upload', 'thumb_delete', 'icon_upload', 'icon_delete',
+        'logo_upload', 'logo_delete',
+        // Footer pages
+        'page_add', 'page_edit', 'page_delete',
+        // Moderating the chat is running the site, not running an event.
+        'chat_delete', 'chat_purge',
+        // Events as objects, rather than what happens inside them.
+        'event_create', 'event_rename', 'event_archive', 'event_unarchive',
+        'event_delete', 'event_restore', 'event_purge',
+        'event_day_add', 'event_day_edit', 'event_day_delete',
+    ];
+    return in_array($action, $system, true);
+}
+
+/**
  * Write an audit-log entry.
  *
  * Most callers only pass action + detail; actor and event default to the
@@ -532,7 +605,11 @@ function current_event() {
  */
 function log_action($action, $detail = '', $actorName = null) {
     $user  = current_user();     // null for guests
-    $event = current_event();    // null before any event exists
+    // System actions are recorded globally (event_id NULL). Without this every
+    // settings save and login was stapled to whichever event happened to be
+    // current, so an event's log filled with noise about the site rather than
+    // about the event.
+    $event = log_action_is_system($action) ? null : current_event();
     db_run(
         'INSERT INTO logs (event_id, action, detail, actor_name, actor_user_id, ip)
          VALUES (?,?,?,?,?,?)',

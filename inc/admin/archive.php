@@ -136,8 +136,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // days, tables, games, players, comments and polls with it.
         $row = db_one('SELECT name, is_deleted FROM events WHERE id = ?', [$id]);
         if ($row && (int)$row['is_deleted'] === 1) {
+            // Drop the event's own log entries first. The foreign key is
+            // ON DELETE SET NULL, so without this every game_add and signup
+            // from a purged event would land in the SYSTEM log — entries about
+            // an event that no longer exists, mixed in with site history.
+            $logCount = (int)db_val('SELECT COUNT(*) FROM logs WHERE event_id = ?', [$id]);
+            db_run('DELETE FROM logs WHERE event_id = ?', [$id]);
             db_run('DELETE FROM events WHERE id = ?', [$id]);
-            log_action('event_purge', 'event #' . $id . ' (' . $row['name'] . ')');
+            // One line survives, in the system log, saying what went: the fact
+            // that an event was destroyed is site history worth keeping even
+            // though its contents are not.
+            log_action('event_purge', $row['name'] . ' — ' . t('logs_purged_n', $logCount));
             $flash = t('archive_purged_ok');
         }
     }
