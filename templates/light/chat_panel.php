@@ -11,6 +11,10 @@
  *    $csrf        — hidden CSRF field (posting only).
  *    $antibot     — hidden anti-bot fields.
  *    $logged_in   — bool; hides the name field and makes the list taller.
+ *    $can_post    — bool; false shows a "sign in to join in" note in place of
+ *                   the form (chat_logged_in_only). The LOG still renders —
+ *                   a guest who can read the conversation has a reason to
+ *                   register, which a blank panel would not give them.
  *    $guest_name  — remembered guest name, prefilled.
  * ============================================================================= */
 ?>
@@ -39,6 +43,15 @@
         <div class="chat-messages" id="chat-messages"></div>
     </div>
 
+    <?php if (!$can_post): ?>
+        <?php // Not a disabled form: an input nobody can use invites clicking at
+              // it. A plain note with the two links says what to do instead. ?>
+        <p class="chat-locked">
+            <?= e(t('chat_login_required')) ?>
+            <a href="login.php"><?= e(t('login')) ?></a> ·
+            <a href="register.php"><?= e(t('register')) ?></a>
+        </p>
+    <?php else: ?>
     <form class="chat-form" id="chat-form" method="post" action="chat.php" data-allow-resubmit>
         <?= $csrf ?>
         <?= $antibot ?>
@@ -56,4 +69,5 @@
         </div>
         <p class="chat-error" id="chat-error" hidden></p>
     </form>
+    <?php endif; ?>
 </aside>

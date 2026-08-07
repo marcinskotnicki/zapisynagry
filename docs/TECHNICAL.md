@@ -794,6 +794,17 @@ because a client can simply not send the field. Forms with intermediate submit
 buttons (the poll builder) mark those `formnovalidate`, or a required consent
 box would block adding a candidate or cancelling.
 
+**Add a copyright or legal notice.** Create `inc/copyright.php`. If the file
+exists, `templates/light/footer.php` includes it as the last thing before
+`</body>`, on every page including the admin panel; if it does not, nothing is
+emitted. The file owns its own markup — it sits outside `<footer>`, so it
+should bring whatever wrapper and styling it needs.
+
+It is a file rather than an admin option on purpose: the text is normally a
+licence or attribution line, which should not be editable through a web form.
+It survives upgrades, because `inc/update.php` overlays the release onto the
+install and never deletes files the release does not contain.
+
 **Add a translation key.** Both files, same commit.
 
 **The home page is three independently ordered blocks.** `.content` (tables),

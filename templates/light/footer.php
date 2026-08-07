@@ -105,6 +105,7 @@ if (chat_enabled()):
         'csrf'       => csrf_field(),
         'antibot'    => antibot_field(),
         'logged_in'  => is_logged_in(),
+        'can_post'   => chat_can_post(),
         'guest_name' => is_logged_in() ? '' : guest_identity()['name'],
     ]);
 endif;
@@ -119,5 +120,27 @@ if (is_file(__DIR__ . '/../../' . $jsRel)):
 ?>
 <script src="<?= e($jsRel) ?>?v=<?= $jsV ?>"></script>
 <?php endif; ?>
+<?php
+/* Optional copyright / legal notice, last thing before </body>.
+ *
+ * A site drops in inc/copyright.php and it appears; no file, nothing is
+ * emitted and nothing is checked beyond one is_file(). It lives in inc/
+ * rather than being an admin option because the text it holds is usually a
+ * licence or attribution line that should NOT be editable from a web form.
+ *
+ * It SURVIVES UPDATES: inc/update.php overlays the release over the install
+ * and never deletes files the release does not contain, so a file that exists
+ * only on this site is left alone. (Verified — not assumed.)
+ *
+ * include_once, because footer.php can legitimately render more than once in a
+ * single request (an admin preview inside a page), and a copyright file that
+ * declares a helper would fatal on the second pass with a plain include.
+ *
+ * The file owns its own markup: it sits outside <footer>, so it should emit
+ * whatever wrapper it wants rather than inherit one it cannot change.
+ */
+$copyrightFile = __DIR__ . '/../../inc/copyright.php';
+if (is_file($copyrightFile)) include_once $copyrightFile;
+?>
 </body>
 </html>

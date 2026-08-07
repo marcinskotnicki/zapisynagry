@@ -428,6 +428,12 @@ html { scroll-behavior: smooth; }
 .tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
 
 .field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; }
+.field-check .field-note-mode {
+    margin-top: 0.2rem;
+    margin-left: 1.6rem;
+    font-style: italic;
+    color: var(--text);
+}
 
 .field-warn {
     font-size: 0.82rem;
@@ -614,6 +620,16 @@ body.chat-open .chat-toggle-close { display: inline; }
     flex-direction: column;
     gap: 0.4rem;
 }
+.chat-locked {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0.6rem 0.9rem;
+    border-top: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.chat-locked a { white-space: nowrap; }
 .chat-name { width: 100%; box-sizing: border-box; }
 .chat-send-row { display: flex; gap: 0.4rem; }
 .chat-input { flex: 1 1 auto; min-width: 0; }

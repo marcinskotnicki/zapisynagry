@@ -90,7 +90,7 @@ $OPTION_TOGGLES = [
     // 0 (an absent checkbox reads as off), destroying the legacy value that
     // header_brand_mode() falls back to.
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
-    'chat_close_outside',
+    'chat_close_outside', 'chat_logged_in_only',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 

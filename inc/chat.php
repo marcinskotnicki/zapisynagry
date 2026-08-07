@@ -29,6 +29,31 @@ function chat_enabled() {
 }
 
 /**
+ * May the current visitor POST to the chat?
+ *
+ * 'chat_logged_in_only' (default off) closes posting to guests while leaving
+ * the panel itself readable — the conversation stays visible, which is the
+ * point: a guest who can see what is being said has a reason to register.
+ *
+ * Mirrors messaging_allowed() in inc/auth.php. As there, this is ONE gate used
+ * by both the template (which form to show) and chat.php (whether to accept a
+ * post), so the two cannot disagree. Hiding the form alone would stop nobody:
+ * chat.php is a JSON endpoint that anyone can post to directly.
+ *
+ * @return bool
+ */
+function chat_can_post() {
+    if (!chat_enabled()) return false;
+    if (is_logged_in()) return true;
+    // Inert in guest-only mode, exactly as allow_unregistered_* are. There the
+    // header shows no login or register link at all, so "accounts only" would
+    // leave the chat writable by admins and by nobody else — with the panel
+    // telling everyone to sign in via links that are not there.
+    if (opt('registration_mode') === 'guest_only') return true;
+    return !opt_bool('chat_logged_in_only');
+}
+
+/**
  * How many messages the panel shows when first opened. Clamped: a zero would
  * open an empty panel that looks broken, and an unbounded value would let a
  * typo in the admin field dump the entire log into one response.

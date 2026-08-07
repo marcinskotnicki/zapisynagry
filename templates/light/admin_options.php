@@ -66,11 +66,18 @@ $textarea = function($key, $rows = 4) {
 };
 // Checkbox toggle row (value "1"): checked when the stored value is exactly "1".
 // An unchecked box is simply absent from POST — the controller treats that as "0".
-$toggle = function($key) {
+/**
+ * One checkbox. $noteKey adds a small line under it — used to mark the switches
+ * that behave differently in guest-only mode, so an admin finds that out while
+ * reading the option rather than after wondering why it did nothing.
+ */
+$toggle = function($key, $noteKey = null) {
     $on = opt($key) === '1' ? ' checked' : '';
     echo '<div class="field field-check"><label>';
     echo '<input type="checkbox" name="' . e($key) . '" value="1"' . $on . '> ' . e(t('opt_' . $key));
-    echo '</label></div>';
+    echo '</label>';
+    if ($noteKey !== null) echo '<p class="field-note field-note-mode">' . e(t($noteKey)) . '</p>';
+    echo '</div>';
 };
 
 // One accordion section. <details name=...> makes the browser close the others
@@ -385,11 +392,8 @@ $groupEnd = function () { echo '</div></details>'; };
 
     <?php /* 6. ACCOUNTS AND PERMISSIONS */ ?>
     <?php $group('opt_group_accounts'); ?>
-        <?php
-        // Guest permissions (only relevant in 'registration' mode below).
-        $toggle('allow_unregistered_add_games');
-        $toggle('allow_unregistered_signup');
-        ?>
+        <?php /* The mode comes FIRST: it decides whether accounts exist at all,
+                 and several switches below it are inert in guest-only mode. */ ?>
         <div class="field">
             <label for="registration_mode"><?= e(t('opt_registration_mode')) ?></label>
             <select id="registration_mode" name="registration_mode">
@@ -399,12 +403,25 @@ $groupEnd = function () { echo '</div></details>'; };
                     </option>
                 <?php endforeach; ?>
             </select>
+            <p class="field-note"><?= e(t('opt_registration_mode_note')) ?></p>
         </div>
         <?php
+        /* Guest permissions. Two kinds are marked below:
+         *   INERT   — guest-only mode short-circuits the check entirely, so the
+         *             box does nothing whichever way it is set.
+         *   ACCOUNTS— the switch is fine, but it only ever applies to someone
+         *             logged in, and guest-only mode offers visitors no way to
+         *             be. (An admin who signs in directly still gets it, which
+         *             is why the wording is not "stops working".)
+         * allow_guest_messaging is deliberately unmarked: far from stopping, it
+         * becomes the ONLY thing keeping messaging alive in guest-only mode. */
+        $toggle('allow_unregistered_add_games', 'opt_note_guest_only_inert');
+        $toggle('allow_unregistered_signup',    'opt_note_guest_only_inert');
+        $toggle('chat_logged_in_only',          'opt_note_guest_only_inert');
         $toggle('allow_guest_messaging');      // messaging open to guests too, not just accounts
-        $toggle('allow_user_template');        // accounts may pick a theme (user panel)
+        $toggle('allow_user_template', 'opt_note_guest_only_accounts');   // theme via user panel
         $toggle('allow_guest_template');       // guests may pick a theme (topbar)
-        $toggle('allow_user_language');        // accounts may pick a language (user panel)
+        $toggle('allow_user_language', 'opt_note_guest_only_accounts');   // language via user panel
         $toggle('allow_guest_language');       // guests may pick a language (topbar)
         ?>
         <?php foreach (['language', 'template'] as $sw): ?>
@@ -414,6 +431,7 @@ $groupEnd = function () { echo '</div></details>'; };
                            <?= opt_bool('switcher_show_user_' . $sw) ? 'checked' : '' ?>>
                     <?= e(t('opt_switcher_show_user_' . $sw)) ?>
                 </label>
+                <p class="field-note field-note-mode"><?= e(t('opt_note_guest_only_accounts')) ?></p>
             </div>
         <?php endforeach; ?>
         <p class="field-note"><?= e(t('opt_switcher_show_user_note')) ?></p>

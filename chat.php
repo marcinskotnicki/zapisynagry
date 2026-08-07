@@ -52,6 +52,13 @@ if ($action === 'post') {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         chat_json(['ok' => false, 'error' => 'method'], 405);
     }
+    // Checked HERE, not only in the template. Hiding the form stops an honest
+    // visitor; this endpoint is reachable directly, so the rule has to live on
+    // the side that writes. 'fetch' and 'older' stay open: guests may still
+    // READ, which is the whole shape of this option.
+    if (!chat_can_post()) {
+        chat_json(['ok' => false, 'error' => 'login_required'], 403);
+    }
     csrf_check();
     antibot_check('form');
 
