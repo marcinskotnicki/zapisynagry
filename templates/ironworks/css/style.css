@@ -407,7 +407,7 @@ body.tpl-ironworks {
 .tpl-ironworks .poll-card.active { box-shadow: 0 0 0 2px var(--brass-lit), 0 8px 22px rgba(0, 0, 0, .5); }
 
 .tpl-ironworks .admin .tab { border-radius: 25px 25px 0 0; color: var(--parchment-2); }
-.tpl-ironworks .admin .tab:hover { color: var(--text); }
+.tpl-ironworks .admin .tab:hover, .tpl-ironworks .admin .tab.tab-active { color: var(--text); }
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
 
