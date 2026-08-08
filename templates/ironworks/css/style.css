@@ -408,7 +408,7 @@ body.tpl-ironworks {
 .tpl-ironworks .admin .tab { border-radius: 25px 25px 0 0; }
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
-
+.tpl-ironworks .admin h1{color:var(--surface);}
 @media (max-width: 860px) {
     .tpl-ironworks .game-list { gap: 1.6rem; }
 }
