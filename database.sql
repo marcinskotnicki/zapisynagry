@@ -132,6 +132,7 @@ INSERT INTO options (key, value) VALUES
     ('chat_close_outside',    '0'),
     ('chat_logged_in_only',   '0'),
     ('notify_new_event',      '0'),
+    ('custom_css',            ''),
     -- Public archives. Off by default: switching it on changes how EVENTS
     -- behave (creating a new one no longer archives the old), so it must be a
     -- deliberate choice rather than a surprise on upgrade.

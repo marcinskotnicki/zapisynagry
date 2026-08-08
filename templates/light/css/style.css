@@ -65,12 +65,6 @@ body.layout-3-mail .mailing-block { order: 3; }
     border-radius: var(--radius);
     padding: 1.5rem;
 }
-
-.game-form .field,
-.poll-form .field{
-    padding:5px;
-}
-
 .card-narrow { max-width: 380px; margin: 2rem auto; }
 
 .msg { padding: 0.6rem 0.9rem; border-radius: var(--radius); margin: 0 0 1rem; }
@@ -441,6 +435,7 @@ html { scroll-behavior: smooth; }
 .tpl-dark .comment-list li:nth-child(even) { background: rgba(255, 255, 255, 0.05); }
 
 .field-note { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; }
+.code-area { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.45; white-space: pre; overflow-x: auto; overflow-y: auto; }
 .field-check .field-note-mode {
     margin-top: 0.2rem;
     margin-left: 1.6rem;

@@ -48,6 +48,17 @@ $page_title = $page_title ?? t('app_name');
     <?php foreach (tpl_css_urls() as $cssUrl): ?>
         <link rel="stylesheet" href="<?= e($cssUrl) ?>">
     <?php endforeach; ?>
+    <?php /* The admin's own CSS, last so it wins over the theme without anyone
+             needing to write !important. custom_css_block() returns '' when
+             there is none AND on the admin panel — see its note for why that
+             exclusion is the thing keeping a bad paste recoverable.
+             NOT escaped with e(): this is a stylesheet, not text, and entity
+             encoding would break every > child combinator and " in a font
+             stack. The helper does the one escape a <style> block needs. */ ?>
+    <?php $customCss = custom_css_block(); ?>
+    <?php if ($customCss !== ''): ?>
+        <style><?= $customCss ?></style>
+    <?php endif; ?>
     <?php // The one allowed inline JS: expose chosen UI strings to client scripts. ?>
     <script>
         window.APP_LANG = <?= json_encode([

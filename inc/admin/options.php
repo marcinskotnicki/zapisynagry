@@ -50,6 +50,7 @@ $OPTION_VALUES = [
     'timezone',            // the venue's clock; validated below
     'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
+    'custom_css',          // injected into <head>; '' = nothing rendered
     'antibot_delay_form', 'antibot_delay_click',   // seconds; 0 = off; validated below
     'switcher_pos_template', 'switcher_pos_language',  // header|footer|both|none; validated below
     'home_layout',  // tables_first|timeline_first; validated below

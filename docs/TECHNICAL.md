@@ -794,6 +794,28 @@ because a client can simply not send the field. Forms with intermediate submit
 buttons (the poll builder) mark those `formnovalidate`, or a required consent
 box would block adding a candidate or cancelling.
 
+**Custom CSS (Options -> Advanced).** Whatever an admin pastes there is
+rendered in a `<style>` at the end of every page head — last, so it overrides
+the theme without needing `!important`. Empty means no block at all.
+
+Two rules in `custom_css_block()` (inc/template.php) keep it safe, and both
+matter:
+
+- **It is never applied to admin.php.** The feature exists so a club can
+  restyle without FTP; if it applied to the admin panel too, one rule hiding
+  everything would take out the only screen able to undo it, and fixing it
+  would need exactly the FTP access this avoids.
+- **`</` is escaped to `<\/`.** The HTML parser ends a style element at the
+  literal `</style` wherever it occurs, so pasted text containing it would
+  close the block early and everything after would parse as HTML. `</` has no
+  meaning in CSS outside a quoted string, and inside one the backslash form is
+  the same character — so the escape is lossless. It is deliberately not run
+  through `e()`: that would break every `>` child combinator and every quoted
+  font name.
+
+Nothing else is validated. Browsers skip rules they cannot parse, and a
+validator here would reject next year's CSS.
+
 **Add buttons to a form.** The save/cancel pair at the end of a user-facing
 form goes in `<div class="form-actions">` — one flex row, wrapping on narrow
 screens:

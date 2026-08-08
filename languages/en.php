@@ -138,6 +138,8 @@ return [
     'opt_home_layout_tables_first'    => 'Tables first, then timeline',
     'opt_home_layout_timeline_first'  => 'Timeline first, then tables',
     'opt_github_url'                 => 'Update source (GitHub repository URL)',
+    'opt_custom_css'                  => 'Custom CSS',
+    'opt_custom_css_note'             => 'Added at the end of every page head, so it overrides the theme without needing !important. It is not applied to this admin panel, so even a stylesheet that hides everything can still be fixed here. Empty = nothing is added.',
     'opt_github_url_note'            => 'Where the Update tab downloads new versions from. Leave as-is unless you are running your own fork.',
     'opt_github_branch'              => 'Update branch',
     'opt_github_branch_note'         => 'Which branch updates are pulled from. Leave as it is unless you are deliberately running a test site on a pre-release branch.',

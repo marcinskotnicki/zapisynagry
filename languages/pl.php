@@ -130,6 +130,8 @@ return [
     'opt_home_layout_tables_first'    => 'Najpierw stoliki, potem oś czasu',
     'opt_home_layout_timeline_first'  => 'Najpierw oś czasu, potem stoliki',
     'opt_github_url'                 => 'Źródło aktualizacji (adres repozytorium GitHub)',
+    'opt_custom_css'                  => 'Własny CSS',
+    'opt_custom_css_note'             => 'Wstawiany na końcu nagłówka każdej strony, więc nadpisuje style motywu bez potrzeby !important. Nie działa w panelu administracyjnym — dzięki temu nawet błędny styl zawsze da się tu poprawić. Puste pole = nic nie jest dodawane.',
     'opt_github_url_note'            => 'Stąd zakładka Aktualizacja pobiera nowe wersje. Zostaw bez zmian, chyba że używasz własnego forka.',
     'opt_github_branch'              => 'Gałąź aktualizacji',
     'opt_github_branch_note'         => 'Z której gałęzi pobierane są aktualizacje. Zostaw bez zmian, chyba że świadomie prowadzisz stronę testową na gałęzi przedpremierowej.',

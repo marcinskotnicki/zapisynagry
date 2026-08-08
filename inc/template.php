@@ -246,6 +246,39 @@ function tpl_set_cookie($name) {
  * Used by the header to hide the nav link for the page you're already on.
  * @return string
  */
+/**
+ * The admin's custom CSS, ready to drop inside a <style> block — or '' when
+ * there is none to render.
+ *
+ * TWO THINGS THIS GUARDS:
+ *
+ * 1. NEVER ON THE ADMIN PANEL. The admin shares this header, and the whole
+ *    point of the feature is that a club can restyle its site WITHOUT FTP. So
+ *    a stylesheet that hides everything, or one typo leaving a rule unclosed,
+ *    would take the admin panel down along with the front page and leave no
+ *    way back in — that being the one screen able to undo it. Skipping
+ *    admin.php means the fix is always two clicks away, whatever they paste.
+ *
+ * 2. IT CANNOT CLOSE ITS OWN <style> TAG. The HTML parser ends a style element
+ *    at the literal characters "</style", wherever they occur — so pasted text
+ *    containing that would end the block early and everything after it would
+ *    be parsed as HTML, script tags included. "</" has no legitimate use in
+ *    CSS outside a quoted string, and inside one a backslash before the slash
+ *    means exactly the same character to a CSS parser, so escaping is lossless.
+ *
+ * Not validated beyond that: broken CSS is the author's business, browsers
+ * skip rules they cannot parse, and a validator here would reject next year's
+ * syntax.
+ *
+ * @return string  CSS to render, already safe to place inside <style>.
+ */
+function custom_css_block() {
+    if (current_page() === 'admin.php') return '';
+    $css = trim((string)opt('custom_css'));
+    if ($css === '') return '';
+    return str_ireplace('</', '<\/', $css);
+}
+
 function current_page() {
     return basename($_SERVER['SCRIPT_NAME'] ?? '');
 }
