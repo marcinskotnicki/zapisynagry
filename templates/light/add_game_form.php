@@ -49,37 +49,6 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             <input type="hidden" name="thumbnail" value="<?= e($game['thumbnail']) ?>">
         <?php endif; ?>
 
-        <div class="field field-name">
-            <label for="name"><?= e(t('addgame_name')) ?></label>
-            <input type="text" id="name" name="name" value="<?= e($game['name']) ?>" required>
-        </div>
-
-        <div class="field-row">
-            <div class="field field-length_minutes">
-                <label for="length_minutes"><?= e(t('f_length')) ?></label>
-                <input type="number" id="length_minutes" name="length_minutes" min="0" value="<?= e($game['length_minutes']) ?>">
-            </div>
-            <div class="field field-weight">
-                <label for="weight"><?= e(t('f_weight')) ?></label>
-                <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($game['weight']) ?>">
-            </div>
-            <div class="field field-max_players">
-                <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
-                <input type="number" id="max_players" name="max_players" min="1" value="<?= e($game['max_players']) ?>">
-            </div>
-            <div class="field field-start_time">
-                <label for="start_time"><?= e(t('f_start')) ?></label>
-                <?php // When the admin forbids starts outside event hours, clamp the
-                      // input to the day's own window (bounds are null otherwise). ?>
-                <?php $bounds = start_time_bounds(db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']])); ?>
-                <input type="time" id="start_time" name="start_time" value="<?= e($game['start_time']) ?>"
-                    <?= $bounds ? 'min="' . e($bounds['min']) . '" max="' . e($bounds['max']) . '"' : '' ?>>
-                <?php if ($bounds): ?>
-                    <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <?php if ($isBgg): // BGG: show the locked image (or "none") ?>
             <div class="field field-thumbnail">
                 <label><?= e(t('f_thumbnail')) ?></label>
@@ -111,25 +80,69 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
         <?php endif; ?>
 
-        <div class="field field-language">
-            <label for="language"><?= e(t('f_language')) ?></label>
-            <?php
-            // Choices come from the admin-configured list (one per line in the
-            // Options tab). '' = not specified. If an edited game carries a value
-            // that's no longer on the list, keep it as an extra option so editing
-            // never silently drops it.
-            $langOpts = game_language_options();
-            $curLang  = (string)($game['language'] ?? '');
-            ?>
-            <select id="language" name="language">
-                <option value=""><?= e(t('f_language_none')) ?></option>
-                <?php foreach ($langOpts as $lo): ?>
-                    <option value="<?= e($lo) ?>"<?= $curLang === $lo ? ' selected' : '' ?>><?= e($lo) ?></option>
-                <?php endforeach; ?>
-                <?php if ($curLang !== '' && !in_array($curLang, $langOpts, true)): ?>
-                    <option value="<?= e($curLang) ?>" selected><?= e($curLang) ?></option>
+        <div class="field field-name">
+            <label for="name"><?= e(t('addgame_name')) ?></label>
+            <input type="text" id="name" name="name" value="<?= e($game['name']) ?>" required>
+        </div>
+
+        <div class="field-row">
+            <div class="field field-length_minutes">
+                <label for="length_minutes"><?= e(t('f_length')) ?></label>
+                <input type="number" id="length_minutes" name="length_minutes" min="0" value="<?= e($game['length_minutes']) ?>">
+            </div>
+            <div class="field field-weight">
+                <label for="weight"><?= e(t('f_weight')) ?></label>
+                <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($game['weight']) ?>">
+            </div>
+            <div class="field field-max_players">
+                <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
+                <input type="number" id="max_players" name="max_players" min="1" value="<?= e($game['max_players']) ?>">
+            </div>
+            <div class="field field-start_time">
+                <label for="start_time"><?= e(t('f_start')) ?></label>
+                <?php // When the admin forbids starts outside event hours, clamp the
+                      // input to the day's own window (bounds are null otherwise). ?>
+                <?php $bounds = start_time_bounds(db_one('SELECT * FROM event_days WHERE id = ?', [$table['day_id']])); ?>
+                <input type="time" id="start_time" name="start_time" value="<?= e($game['start_time']) ?>"
+                    <?= $bounds ? 'min="' . e($bounds['min']) . '" max="' . e($bounds['max']) . '"' : '' ?>>
+                <?php if ($bounds): ?>
+                    <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
                 <?php endif; ?>
-            </select>
+            </div>
+        </div>
+
+        <?php // Language and rules-explanation each stood alone taking a full
+              // row, despite being no wider than any of the paired fields above
+              // — pairing them keeps the form's rhythm the same all the way down. ?>
+        <div class="field-row">
+            <div class="field field-language">
+                <label for="language"><?= e(t('f_language')) ?></label>
+                <?php
+                // Choices come from the admin-configured list (one per line in the
+                // Options tab). '' = not specified. If an edited game carries a
+                // value that's no longer on the list, keep it as an extra option
+                // so editing never silently drops it.
+                $langOpts = game_language_options();
+                $curLang  = (string)($game['language'] ?? '');
+                ?>
+                <select id="language" name="language">
+                    <option value=""><?= e(t('f_language_none')) ?></option>
+                    <?php foreach ($langOpts as $lo): ?>
+                        <option value="<?= e($lo) ?>"<?= $curLang === $lo ? ' selected' : '' ?>><?= e($lo) ?></option>
+                    <?php endforeach; ?>
+                    <?php if ($curLang !== '' && !in_array($curLang, $langOpts, true)): ?>
+                        <option value="<?= e($curLang) ?>" selected><?= e($curLang) ?></option>
+                    <?php endif; ?>
+                </select>
+            </div>
+            <div class="field field-explain_rules">
+                <label for="explain_rules"><?= e(t('f_explain')) ?></label>
+                <select id="explain_rules" name="explain_rules">
+                    <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
+                        <option value="<?= $code ?>"<?= (int)$game['explain_rules'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
 
         <div class="field-row">
@@ -156,15 +169,6 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                 </label>
             </div>
         <?php endif; ?>
-
-        <div class="field field-explain_rules">
-            <label for="explain_rules"><?= e(t('f_explain')) ?></label>
-            <select id="explain_rules" name="explain_rules">
-                <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
-                    <option value="<?= $code ?>"<?= (int)$game['explain_rules'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
 
         <?php if (!$is_edit): // add-self only makes sense when creating a new game ?>
             <div class="field field-check field-add_self">

@@ -37,39 +37,6 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             <input type="hidden" name="thumbnail" value="<?= e($cand['thumbnail']) ?>">
         <?php endif; ?>
 
-        <div class="field field-name">
-            <label for="name"><?= e(t('addgame_name')) ?></label>
-            <input type="text" id="name" name="name" value="<?= e($cand['name']) ?>" required>
-        </div>
-
-        <div class="field-row">
-            <div class="field field-length_minutes">
-                <label for="length_minutes"><?= e(t('f_length')) ?></label>
-                <input type="number" id="length_minutes" name="length_minutes" min="0" value="<?= e($cand['length_minutes']) ?>">
-            </div>
-            <div class="field field-weight">
-                <label for="weight"><?= e(t('f_weight')) ?></label>
-                <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($cand['weight']) ?>">
-            </div>
-            <div class="field field-max_players">
-                <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
-                <input type="number" id="max_players" name="max_players" min="1" value="<?= e($cand['max_players']) ?>">
-            </div>
-            <?php // Same rules/manual link a full game can carry, so a candidate
-                  // that wins the poll arrives with its rules already attached. ?>
-            <?php if (opt_bool('allow_manual_links')): ?>
-                <div class="field field-manual_link">
-                    <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
-                    <input type="url" id="manual_link" name="manual_link"
-                           value="<?= e($cand['manual_link'] ?? '') ?>" placeholder="https://">
-                </div>
-            <?php endif; ?>
-            <div class="field field-required_players">
-                <label for="required_players"><?= e(t('poll_required')) ?></label>
-                <input type="number" id="required_players" name="required_players" min="1" value="<?= e($cand['required_players']) ?>">
-            </div>
-        </div>
-
         <?php if ($isBgg): // locked BGG image preview ?>
             <div class="field field-thumbnail">
                 <label><?= e(t('f_thumbnail')) ?></label>
@@ -101,22 +68,61 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             </div>
         <?php endif; ?>
 
-        <div class="field field-language">
-            <label for="language"><?= e(t('f_language')) ?></label>
-            <?php
-            // Same admin-configured dropdown as the game form (see add_game_form).
-            $langOpts = game_language_options();
-            $curLang  = (string)($cand['language'] ?? '');
-            ?>
-            <select id="language" name="language">
-                <option value=""><?= e(t('f_language_none')) ?></option>
-                <?php foreach ($langOpts as $lo): ?>
-                    <option value="<?= e($lo) ?>"<?= $curLang === $lo ? ' selected' : '' ?>><?= e($lo) ?></option>
-                <?php endforeach; ?>
-                <?php if ($curLang !== '' && !in_array($curLang, $langOpts, true)): ?>
-                    <option value="<?= e($curLang) ?>" selected><?= e($curLang) ?></option>
-                <?php endif; ?>
-            </select>
+        <div class="field field-name">
+            <label for="name"><?= e(t('addgame_name')) ?></label>
+            <input type="text" id="name" name="name" value="<?= e($cand['name']) ?>" required>
+        </div>
+
+        <div class="field-row">
+            <div class="field field-length_minutes">
+                <label for="length_minutes"><?= e(t('f_length')) ?></label>
+                <input type="number" id="length_minutes" name="length_minutes" min="0" value="<?= e($cand['length_minutes']) ?>">
+            </div>
+            <div class="field field-weight">
+                <label for="weight"><?= e(t('f_weight')) ?></label>
+                <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($cand['weight']) ?>">
+            </div>
+            <div class="field field-max_players">
+                <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
+                <input type="number" id="max_players" name="max_players" min="1" value="<?= e($cand['max_players']) ?>">
+            </div>
+            <?php // Same rules/manual link a full game can carry, so a candidate
+                  // that wins the poll arrives with its rules already attached. ?>
+            <?php if (opt_bool('allow_manual_links')): ?>
+                <div class="field field-manual_link">
+                    <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
+                    <input type="url" id="manual_link" name="manual_link"
+                           value="<?= e($cand['manual_link'] ?? '') ?>" placeholder="https://">
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php // Player threshold and language each stood alone taking a full
+              // row, despite being no wider than any of the paired fields
+              // above — pairing them keeps the form's rhythm the same all the
+              // way down. ?>
+        <div class="field-row">
+            <div class="field field-required_players">
+                <label for="required_players"><?= e(t('poll_required')) ?></label>
+                <input type="number" id="required_players" name="required_players" min="1" value="<?= e($cand['required_players']) ?>">
+            </div>
+            <div class="field field-language">
+                <label for="language"><?= e(t('f_language')) ?></label>
+                <?php
+                // Same admin-configured dropdown as the game form (see add_game_form).
+                $langOpts = game_language_options();
+                $curLang  = (string)($cand['language'] ?? '');
+                ?>
+                <select id="language" name="language">
+                    <option value=""><?= e(t('f_language_none')) ?></option>
+                    <?php foreach ($langOpts as $lo): ?>
+                        <option value="<?= e($lo) ?>"<?= $curLang === $lo ? ' selected' : '' ?>><?= e($lo) ?></option>
+                    <?php endforeach; ?>
+                    <?php if ($curLang !== '' && !in_array($curLang, $langOpts, true)): ?>
+                        <option value="<?= e($curLang) ?>" selected><?= e($curLang) ?></option>
+                    <?php endif; ?>
+                </select>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
