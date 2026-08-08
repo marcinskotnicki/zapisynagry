@@ -333,69 +333,199 @@ function update_zip_url() {
  *
  * @return array|null  ['date' => 'Y-m-d H:i:s' UTC, 'sha' => short hash]
  */
-function update_remote_commit(&$why = null) {
+function update_remote_commit(&$why = null, $allowFetch = true) {
     $why = '';
+
+    /* $allowFetch = false is the ORDINARY case: rendering the Update tab reads
+     * whatever a previous check left behind and never touches the network.
+     * Only the "check now" button passes true.
+     *
+     * That is the whole design. Polling on page load meant an admin on a host
+     * with no outbound route waited up to ten seconds — two sources, five
+     * seconds each — for a tab to appear, and "what is the newest version" is a
+     * question you ask deliberately, not one worth a network round trip every
+     * time you open a settings page.
+     *
+     * CACHE, both ways. A success is held for an hour; a FAILURE is held for
+     * fifteen minutes, which matters more than it sounds.
+     *
+     * The first version cached only successes, reasoning that a failure should
+     * not be remembered as "no newer version". True, but the effect was worse:
+     * a rate-limited host re-requested on EVERY render of this tab, which kept
+     * the limit pinned and meant it never recovered. GitHub allows 60 requests
+     * an hour PER IP unauthenticated — on shared hosting that IP is shared with
+     * every other site on the box, so the budget can be gone before this app
+     * asks once. Backing off is the only way back under the limit.
+     *
+     * The stale success is still returned while a refresh fails, so a transient
+     * outage shows the last known answer rather than nothing. */
     $cacheRaw = (string)opt('remote_commit_cache');
+    $stale = null;
     if ($cacheRaw !== '') {
         $cache = json_decode($cacheRaw, true);
-        if (is_array($cache) && !empty($cache['fetched_at'])
-            && (time() - (int)$cache['fetched_at']) < 3600
-            && !empty($cache['date'])) {
-            return ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
+        if (is_array($cache)) {
+            if (!empty($cache['fetched_at']) && !empty($cache['date'])) {
+                if ((time() - (int)$cache['fetched_at']) < 3600) {
+                    return ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
+                }
+                $stale = ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
+            }
+            if (!empty($cache['failed_at']) && (time() - (int)$cache['failed_at']) < 900) {
+                $why = (string)($cache['why'] ?? 'unavailable');
+                return $stale;   // null unless a previous success is still on file
+            }
         }
     }
 
-    if (!function_exists('curl_init')) { $why = 'no curl'; return null; }
+    /* Reading only: hand back whatever is on file, however old. An admin who
+     * checked last week should still see last week's answer rather than a
+     * blank — the tab labels it with when it was taken. */
+    if (!$allowFetch) return $stale;
 
-    /* Only github.com has the API this speaks. An admin who pointed
+    $fail = function ($reason) use (&$why, $stale, $cacheRaw) {
+        $why = $reason;
+        /* Preserve a previous success alongside the failure note, so backing
+         * off does not throw away a date we already knew. */
+        $keep = [];
+        if ($cacheRaw !== '') {
+            $prev = json_decode($cacheRaw, true);
+            if (is_array($prev) && !empty($prev['date'])) {
+                $keep = ['date' => $prev['date'], 'sha' => $prev['sha'] ?? '',
+                         'fetched_at' => (int)($prev['fetched_at'] ?? 0)];
+            }
+        }
+        opt_set('remote_commit_cache', json_encode($keep + ['failed_at' => time(), 'why' => $reason]));
+        return $stale;
+    };
+
+    if (!function_exists('curl_init')) return $fail('no curl');
+
+    /* Only github.com has the endpoints this speaks. An admin who pointed
      * github_url at some other host gets no line rather than a wrong one. */
     $repo = update_repo_url();
     if (!preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) {
-        $why = 'not a github.com source';
-        return null;
+        return $fail('not a github.com source');
     }
-    $owner = $m[1];
-    $name  = preg_replace('/\.git$/i', '', $m[2]);
-    $branch = update_branch();
+    $owner = rawurlencode($m[1]);
+    $name  = rawurlencode(preg_replace('/\.git$/i', '', $m[2]));
+    /* A ref may legitimately contain '/' (feature/x), which rawurlencode would
+     * turn into %2F and break the path. update_branch() has already refused
+     * '..' and leading/trailing slashes, so encoding each segment separately
+     * is safe. */
+    $branch = implode('/', array_map('rawurlencode', explode('/', update_branch())));
 
-    $api = 'https://api.github.com/repos/' . rawurlencode($owner) . '/' . rawurlencode($name)
-         . '/commits/' . rawurlencode($branch);
+    /* Tried in order. The API is the better answer — it gives the committer
+     * date and a clean sha — but it is the rate-limited one. The Atom feed is
+     * served from github.com itself, is not subject to the API's hourly limit,
+     * and lives on the host the updater already downloads from, so a host that
+     * can update at all can almost certainly read it. */
+    $sources = [
+        ['url' => 'https://api.github.com/repos/' . $owner . '/' . $name . '/commits/' . $branch,
+         'accept' => 'application/vnd.github+json',
+         'parse' => 'update_parse_commit'],
+        ['url' => 'https://github.com/' . $owner . '/' . $name . '/commits/' . $branch . '.atom',
+         'accept' => 'application/atom+xml',
+         'parse' => 'update_parse_commit_atom'],
+    ];
 
-    $ch = curl_init($api);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-    /* Short, because an admin is watching a page render. The updater itself can
-     * afford 300s for a zip; this cannot afford five. */
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'zapisynagry-updater');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/vnd.github+json']);
-    $body = curl_exec($ch);
-    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $err  = curl_error($ch);
-    curl_close($ch);
+    $lastWhy = 'unavailable';
+    foreach ($sources as $src) {
+        $ch = curl_init($src['url']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        /* Short, because an admin is watching a page render. The updater itself
+         * can afford 300s for a zip; this cannot afford five — and with two
+         * sources the worst case is twice this. */
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'zapisynagry-updater');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: ' . $src['accept']]);
+        $body = curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
 
-    /* Report WHY rather than only that it failed. A blank line on the tab is
-     * indistinguishable between "no network", "rate limited" and "my code is
-     * wrong", which is exactly the position this feature was in when it did
-     * not show up on a live host. */
-    if ($body === false || $err !== '') {
-        $why = 'request failed' . ($err !== '' ? ': ' . $err : '');
-        return null;
+        if ($body === false || $err !== '') {
+            $lastWhy = 'request failed' . ($err !== '' ? ': ' . $err : '');
+            continue;
+        }
+        if ($code < 200 || $code >= 300) {
+            /* 403 from the API is normally the hourly limit rather than a
+             * permissions problem, and saying so saves an admin chasing a
+             * misconfiguration that isn't there. */
+            $lastWhy = 'HTTP ' . $code;
+            if ($code === 403 && stripos((string)$body, 'rate limit') !== false) {
+                $lastWhy = 'GitHub rate limit';
+            }
+            continue;
+        }
+
+        $out = $src['parse']((string)$body);
+        if ($out === null) { $lastWhy = 'unexpected response format'; continue; }
+
+        opt_set('remote_commit_cache', json_encode($out + ['fetched_at' => time()]));
+        return $out;
     }
-    if ($code < 200 || $code >= 300) {
-        /* 403 here is usually GitHub's rate limit (60/hour per IP, shared
-         * across every site on a shared host), not a permissions problem. */
-        $why = 'HTTP ' . $code;
-        return null;
+
+    return $fail($lastWhy);
+}
+
+/**
+ * When the stored upstream answer was last fetched, or 0 if there is none.
+ *
+ * Lets the tab say "checked <when>" beside a cached date. Without it a week-old
+ * answer looks exactly like a fresh one, which matters more here than usual
+ * because nothing refreshes it automatically any more.
+ *
+ * @return int  Unix timestamp, or 0.
+ */
+function update_remote_checked_at() {
+    $raw = (string)opt('remote_commit_cache');
+    if ($raw === '') return 0;
+    $cache = json_decode($raw, true);
+    if (!is_array($cache)) return 0;
+    return max((int)($cache['fetched_at'] ?? 0), (int)($cache['failed_at'] ?? 0));
+}
+
+/**
+ * Same job as update_parse_commit(), for GitHub's Atom commit feed.
+ *
+ * The feed exists because the JSON API is rate-limited per IP and a shared host
+ * burns that budget across every site on it. This is plain XML off github.com,
+ * which the updater already reaches to download releases.
+ *
+ * Its <updated> is the commit date, and the entry <id> carries the sha in the
+ * form "tag:github.com,2008:Grit::Commit/<sha>".
+ *
+ * @param string $xml  Raw feed body.
+ * @return array|null  ['date' => 'Y-m-d H:i:s' UTC, 'sha' => short hash]
+ */
+function update_parse_commit_atom($xml) {
+    if (!function_exists('simplexml_load_string')) return null;
+
+    $prev = libxml_use_internal_errors(true);
+    $feed = simplexml_load_string($xml);
+    libxml_clear_errors();
+    libxml_use_internal_errors($prev);
+    /* === false, not falsy: an empty element casts to false while having
+     * parsed perfectly — the same trap the legacy XML importer hit. */
+    if ($feed === false) return null;
+
+    $entry = $feed->entry[0] ?? null;
+    if ($entry === null) return null;
+
+    $iso = trim((string)$entry->updated);
+    if ($iso === '') return null;
+    $ts = strtotime($iso);
+    if ($ts === false) return null;
+
+    $sha = '';
+    $id  = trim((string)$entry->id);
+    if ($id !== '' && ($slash = strrpos($id, '/')) !== false) {
+        $sha = substr($id, $slash + 1, 7);
     }
-
-    $out = update_parse_commit((string)$body);
-    if ($out === null) { $why = 'unexpected response format'; return null; }
-
-    opt_set('remote_commit_cache', json_encode($out + ['fetched_at' => time()]));
-    return $out;
+    return ['date' => gmdate('Y-m-d H:i:s', $ts), 'sha' => $sha];
 }
 
 /**

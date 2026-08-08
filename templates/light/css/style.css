@@ -155,6 +155,8 @@ input[type="checkbox"]{width:auto;}
 .update-status { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.6rem; margin: 0 0 1rem; font-size: 0.92rem; }
 .update-status dt { color: var(--text-muted); }
 .update-status dd { margin: 0; font-variant-numeric: tabular-nums; }
+.update-checked { font-size: 0.85em; }
+.update-check { margin: 0 0 1.25rem; }
 @media (max-width: 480px) { .update-status { grid-template-columns: 1fr; } .update-status dd { margin-bottom: 0.4rem; } }
 .update-log {
     background: var(--surface-2);
