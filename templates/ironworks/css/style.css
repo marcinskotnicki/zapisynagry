@@ -45,9 +45,14 @@ body.tpl-ironworks {
         radial-gradient(ellipse 50% 40% at 20% 72%, rgba(56, 70, 59, .40), transparent 65%),
         linear-gradient(170deg, var(--slate-2), var(--soot));
     background-attachment: fixed;
-    color: var(--parchment);
+    color: var(--text);
     font-family: var(--font-iw);
 }
+
+.tpl-ironworks .topbar,
+.tpl-ironworks .event-header,
+.tpl-ironworks .table-block,
+.tpl-ironworks .pager { color: var(--parchment); }
 
 .tpl-ironworks h1, .tpl-ironworks h2, .tpl-ironworks h3 { font-family: var(--font-iw); font-weight: 600; }
 .tpl-ironworks .btn, .tpl-ironworks input, .tpl-ironworks select, .tpl-ironworks textarea {
