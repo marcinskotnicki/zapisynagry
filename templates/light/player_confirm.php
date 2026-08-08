@@ -40,7 +40,9 @@
             </div>
         <?php endif; // 'allow' -> no challenge inputs, just the buttons ?>
 
-        <button type="submit" class="btn btn-danger"><?= e(t('delplayer_yes')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('delplayer_no')) ?></a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger"><?= e(t('delplayer_yes')) ?></button>
+            <a class="btn" href="index.php"><?= e(t('delplayer_no')) ?></a>
+        </div>
     </form>
 </div>

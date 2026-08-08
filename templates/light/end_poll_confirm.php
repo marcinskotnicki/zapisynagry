@@ -18,7 +18,9 @@
     <form method="post" action="end_poll.php?poll=<?= (int)$poll['id'] ?>">
         <?= $csrf ?>
         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
-        <button type="submit" class="btn btn-danger"><?= e(t('poll_end_yes')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger"><?= e(t('poll_end_yes')) ?></button>
+            <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        </div>
     </form>
 </div>

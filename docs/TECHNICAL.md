@@ -794,6 +794,26 @@ because a client can simply not send the field. Forms with intermediate submit
 buttons (the poll builder) mark those `formnovalidate`, or a required consent
 box would block adding a candidate or cancelling.
 
+**Add buttons to a form.** The save/cancel pair at the end of a user-facing
+form goes in `<div class="form-actions">` — one flex row, wrapping on narrow
+screens:
+
+```html
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a class="btn" href="index.php">Cancel</a>
+</div>
+```
+
+The container carries the top margin and `.btn` drops its own inside it, so the
+gap above the row is the same as when buttons sat loose in the form.
+
+Not everything with buttons uses it: `.gate-buttons` and `.delgame-buttons` are
+stacked column layouts for choosing between big alternatives rather than a
+save/cancel pair, and inline card actions belong to their row. `.poll-form-
+actions` is the old name for the same thing — kept as a stylesheet alias only,
+since live sites may have written CSS against it.
+
 **Style one form field on its own.** Every field wrapper on the front-facing
 forms carries a class matching the control's `name` attribute, alongside the
 generic `.field`:

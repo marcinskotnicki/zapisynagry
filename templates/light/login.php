@@ -34,7 +34,9 @@
             <input type="password" id="password" name="password" required>
         </div>
 
-        <button type="submit" class="btn btn-primary"><?= e(t('login')) ?></button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('login')) ?></button>
+        </div>
     </form>
 
     <p class="muted"><a href="recover.php"><?= e(t('forgot_password')) ?></a></p>

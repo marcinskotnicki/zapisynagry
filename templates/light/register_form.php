@@ -43,7 +43,9 @@
         <?php // Data-protection consent. Renders nothing for a signed-in visitor,
               // or when the admin has left the wording empty. ?>
         <?= consent_field() ?>
-        <button type="submit" class="btn btn-primary"><?= e(t('reg_button')) ?></button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('reg_button')) ?></button>
+        </div>
     </form>
 
     <p class="muted"><a href="login.php"><?= e(t('reg_have_account')) ?></a></p>

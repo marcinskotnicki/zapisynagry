@@ -125,7 +125,9 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
-        <a class="btn" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('cancel')) ?></a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
+            <a class="btn" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('cancel')) ?></a>
+        </div>
     </form>
 </div>

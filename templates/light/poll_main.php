@@ -150,12 +150,12 @@
         <p class="poll-form-add">
             <button type="submit" name="do" value="addgame" formnovalidate class="btn btn-danger"><?= e(t('poll_addgame')) ?></button>
         </p>
-        <p class="poll-form-actions">
+        <div class="form-actions">
             <?php // Data-protection consent. Renders nothing for a signed-in visitor,
                   // or when the admin has left the wording empty. ?>
             <?= consent_field() ?>
             <button type="submit" name="do" value="finish" class="btn btn-primary"><?= e(t('poll_finish')) ?></button>
             <button type="submit" name="do" value="cancel" formnovalidate class="btn"><?= e(t('cancel')) ?></button>
-        </p>
+        </div>
     </form>
 </div>

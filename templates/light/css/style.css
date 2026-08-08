@@ -26,12 +26,6 @@ body {
 a { color: var(--primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.game-form .field,
-.poll-form .field{
-    padding:5px;
-}
-
-
 .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
 .topbar-inner {
     max-width: var(--maxw);
@@ -71,6 +65,12 @@ body.layout-3-mail .mailing-block { order: 3; }
     border-radius: var(--radius);
     padding: 1.5rem;
 }
+
+.game-form .field,
+.poll-form .field{
+    padding:5px;
+}
+
 .card-narrow { max-width: 380px; margin: 2rem auto; }
 
 .msg { padding: 0.6rem 0.9rem; border-radius: var(--radius); margin: 0 0 1rem; }
@@ -377,7 +377,10 @@ html { scroll-behavior: smooth; }
 .delgame-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
 
 .poll-form-add { margin: 1rem 0 0.6rem; }
+.form-actions,
 .poll-form-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
+.form-actions { margin-top: 1.2rem; }
+.form-actions .btn { margin-top: 0; }
 
 .msg-lang-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; }
 .msg-lang-code { flex: 0 0 2.4rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; }

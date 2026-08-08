@@ -49,7 +49,9 @@
                 <label for="display_name"><?= e(t('up_name')) ?></label>
                 <input type="text" id="display_name" name="display_name" value="<?= e($user['display_name']) ?>" required>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            </div>
         </form>
 
         <?php // Change email (action=email; uniqueness checked server-side). ?>
@@ -61,7 +63,9 @@
                 <label for="email"><?= e(t('up_email')) ?></label>
                 <input type="email" id="email" name="email" value="<?= e($user['email']) ?>" required>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            </div>
         </form>
 
         <?php // Change password (action=password; requires the current one). ?>
@@ -81,7 +85,9 @@
                 <label for="new_password2"><?= e(t('up_new_password2')) ?></label>
                 <input type="password" id="new_password2" name="new_password2" required>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            </div>
         </form>
 
         <?php // Theme / language preference (cookie-based, like the guest picker).
@@ -103,7 +109,9 @@
                     <?= e(t('up_notify_new_event')) ?>
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            </div>
         </form>
         <?php endif; ?>
 
@@ -134,7 +142,9 @@
                     </select>
                 </div>
             <?php endif; ?>
-            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+            </div>
         </form>
         <?php endif; ?>
     </div>

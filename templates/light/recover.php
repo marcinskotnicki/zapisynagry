@@ -29,7 +29,9 @@
                 <label for="email"><?= e(t('recover_email')) ?></label>
                 <input type="email" id="email" name="email" required autofocus>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('recover_send')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('recover_send')) ?></button>
+            </div>
         </form>
 
     <?php elseif ($step === 'sent'): // step 1 done: neutral "sent" (no account probing) ?>
@@ -53,7 +55,9 @@
                 <label for="new_password2"><?= e(t('recover_new_password2')) ?></label>
                 <input type="password" id="new_password2" name="new_password2" required>
             </div>
-            <button type="submit" class="btn btn-primary"><?= e(t('recover_reset_submit')) ?></button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('recover_reset_submit')) ?></button>
+            </div>
         </form>
 
     <?php elseif ($step === 'invalid'): // bad/expired token ?>

@@ -84,8 +84,8 @@
             <textarea id="ml_body" name="body" rows="10"><?= e($draft['body'] ?? '') ?></textarea>
         </div>
 
-        <p class="poll-form-actions">
+        <div class="form-actions">
             <button type="submit" class="btn btn-primary"><?= e(t('ml_admin_send')) ?></button>
-        </p>
+        </div>
     </form>
 <?php endif; ?>

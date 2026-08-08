@@ -154,8 +154,8 @@
     <p class="poll-form-add">
         <a class="btn btn-danger" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
     </p>
-    <p class="poll-form-actions">
+    <div class="form-actions">
         <button type="submit" form="poll-settings" class="btn btn-primary"><?= e(t('save')) ?></button>
         <a class="btn" href="index.php#poll-<?= (int)$poll['id'] ?>"><?= e(t('cancel')) ?></a>
-    </p>
+    </div>
 </div>

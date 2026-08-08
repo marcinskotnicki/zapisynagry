@@ -40,7 +40,9 @@
             </div>
         <?php endif; ?>
 
-        <button type="submit" class="btn btn-primary"><?= e(t('verify_continue')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('verify_continue')) ?></button>
+            <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        </div>
     </form>
 </div>

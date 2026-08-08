@@ -47,7 +47,9 @@
 
         <?php // Consent, when the admin configured wording and this is a guest. ?>
         <?= consent_field() ?>
-        <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
-        <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
+            <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
+        </div>
     </form>
 </div>
