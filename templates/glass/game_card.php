@@ -73,7 +73,6 @@
         <?php // ---- Identity block: the coloured tab that keys the strip ---- ?>
         <div class="sc-id">
             <span class="sc-id-time"><?= e($g['start_time']) ?></span>
-            <span class="sc-id-num"><?= str_pad((string)(int)$g['id'], 3, '0', STR_PAD_LEFT) ?></span>
         </div>
 
         <div class="sc-body">
