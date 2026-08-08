@@ -11,6 +11,7 @@
  *    $last_run   — when the updater last finished, already formatted, or ''.
  *    $remote     — when the newest commit upstream was made, formatted, or ''.
  *    $remote_sha — that commit's short hash, or ''.
+ *    $remote_why — why the upstream check could not run, or '' when it did.
  * ============================================================================= */
 ?>
 <div class="updater">
@@ -30,6 +31,12 @@
             <dd><?= e($remote) ?><?php if ($remote_sha !== ''): ?>
                 <span class="muted">(<?= e($remote_sha) ?>)</span>
             <?php endif; ?></dd>
+        <?php elseif (!empty($remote_why)): ?>
+            <?php // Shown, not hidden: a check that cannot run is worth one
+                  // muted line, so nobody has to guess whether the feature is
+                  // broken or the host simply has no outbound network. ?>
+            <dt><?= e(t('update_remote_latest')) ?></dt>
+            <dd class="muted"><?= e(t('update_remote_unavailable', $remote_why)) ?></dd>
         <?php endif; ?>
     </dl>
 
