@@ -13,7 +13,9 @@
     --plum-2:     #7b6580;
     --berry:      #d1477f;
 
-    --font-bl: 'Quicksand', 'Nunito', 'Varela Round', 'Segoe UI', system-ui, sans-serif;
+    --font-bl: ui-rounded, 'SF Pro Rounded', 'Hiragino Maru Gothic ProN',
+               'Quicksand', 'Varela Round', 'Nunito', 'Trebuchet MS',
+               system-ui, sans-serif;
 
     --bg:           var(--sky-2);
     --surface:      var(--cream);
@@ -55,6 +57,7 @@ body.tpl-blossom {
 .tpl-blossom .topbar a { color: var(--text); }
 .tpl-blossom .topbar a:hover { color: var(--berry); }
 
+.tpl-blossom .event-header { text-align: center; }
 .tpl-blossom .event-header h1 {
     font-size: 2.1rem;
     font-weight: 700;
@@ -80,14 +83,19 @@ body.tpl-blossom {
 }
 
 .tpl-blossom .day-tabs,
-.tpl-blossom .event-tabs { gap: 0.45rem; }
+.tpl-blossom .event-tabs {
+    gap: 0.4rem;
+    justify-content: safe center;
+    border-bottom: 2px solid var(--petal);
+}
 .tpl-blossom .day-tab,
 .tpl-blossom .event-tab {
-    border: 1px solid var(--border);
-    border-radius: 999px;
+    border: 2px solid var(--border);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
     background: rgba(255, 250, 244, .78);
     color: var(--text);
-    padding: 0.4rem 1rem;
+    padding: 0.6rem 1.3rem 0.55rem;
 }
 .tpl-blossom .day-tab:hover,
 .tpl-blossom .event-tab:hover { background: var(--petal-2); }
@@ -97,6 +105,8 @@ body.tpl-blossom {
     border-color: var(--berry);
     color: var(--plum);
     font-weight: 700;
+    margin-bottom: -2px;
+    padding-bottom: 0.7rem;
 }
 
 .tpl-blossom .table-head h2 { color: var(--plum); }
@@ -113,12 +123,16 @@ body.tpl-blossom {
     position: relative;
     flex-direction: column;
     gap: 0.6rem;
-    background: var(--cream);
     border: 2px solid var(--border);
     border-radius: 34px 22px 30px 20px;
-    padding: 1.1rem 1.15rem 1rem;
+    padding: 1.35rem 1.15rem 1rem;
     box-shadow: 0 12px 26px rgba(91, 66, 96, .12);
     transition: transform .18s ease, box-shadow .18s ease;
+    background-color: var(--cream);
+    background-image: linear-gradient(90deg, var(--petal), var(--sun) 45%, var(--leaf));
+    background-repeat: no-repeat;
+    background-size: 100% 11px;
+    background-position: top left;
 }
 .tpl-blossom .game-list > .game-card:nth-child(4n+1) { transform: translateY(0.9rem) rotate(-0.7deg); border-radius: 26px 34px 20px 30px; }
 .tpl-blossom .game-list > .game-card:nth-child(4n+2) { transform: translateY(-0.6rem) rotate(0.6deg); }
@@ -129,31 +143,60 @@ body.tpl-blossom {
     box-shadow: 0 18px 34px rgba(91, 66, 96, .18);
     z-index: 2;
 }
-.tpl-blossom .game-card::before {
-    content: '';
+
+.tpl-blossom .bl-hero {
+    position: relative;
+    margin: -0.15rem -0.35rem 0.15rem;
+    border-radius: 26px 22px 18px 18px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--petal-2), var(--sky-2));
+    border: 2px solid var(--petal-2);
+}
+.tpl-blossom .bl-hero img {
+    display: block;
+    width: 100%;
+    height: 132px;
+    object-fit: cover;
+    object-position: center;
+}
+.tpl-blossom .bl-hero-weight {
     position: absolute;
-    inset: -2px -2px auto -2px;
-    height: 10px;
-    border-radius: 30px 30px 0 0;
-    background: linear-gradient(90deg, var(--petal), var(--sun) 45%, var(--leaf));
+    right: 0.5rem;
+    bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(91, 66, 96, .35);
+}
+.tpl-blossom .bl-body { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.tpl-blossom .bl-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 2px dotted var(--border);
+}
+.tpl-blossom .bl-chips { gap: 0.45rem; align-items: center; }
+.tpl-blossom .bl-chip {
+    display: inline-block;
+    padding: 0.12rem 0.6rem;
+    border-radius: 999px;
+    background: var(--sky-2);
+    border: 1px solid var(--sky);
+    font-size: 0.82rem;
 }
 
-.tpl-blossom .game-thumb {
-    width: auto;
+.tpl-blossom .bl-ribbon {
     display: flex;
-    align-items: flex-start;
-    gap: 0.7rem;
+    align-items: center;
+    gap: 0.6rem;
     flex-wrap: wrap;
-}
-.tpl-blossom .game-thumb img {
-    width: 86px;
-    height: 86px;
-    object-fit: cover;
-    border-radius: 24px 18px 22px 16px;
+    margin: -0.15rem -0.35rem 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 26px 22px 18px 18px;
+    background: linear-gradient(90deg, var(--petal-2), var(--sun));
     border: 2px solid var(--petal-2);
-    background: var(--cream-2);
 }
-.tpl-blossom .game-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; align-content: flex-start; }
+.tpl-blossom .bl-ribbon-until { font-size: 0.84rem; color: var(--plum); }
+.tpl-blossom .bl-poll { padding: 1.35rem 1.15rem 1rem; }
 
 .tpl-blossom .game-name { font-size: 1.16rem; font-weight: 700; }
 .tpl-blossom .game-name a { color: var(--plum); text-decoration: none; }
@@ -242,6 +285,11 @@ body.tpl-blossom {
 
 .tpl-blossom .grid th { color: var(--plum-2); }
 .tpl-blossom .admin .tab { border-radius: 999px 999px 0 0; }
+
+@media (max-width: 700px) {
+    .tpl-blossom .day-tabs { justify-content: flex-start; }
+    .tpl-blossom .event-tabs { justify-content: flex-start; }
+}
 
 @media (max-width: 860px) {
     .tpl-blossom .game-list { grid-template-columns: 1fr; gap: 1rem; }

@@ -87,6 +87,9 @@ body.tpl-glass {
     color: var(--text);
 }
 
+.tpl-glass .day-tabs,
+.tpl-glass .event-tabs { border-bottom: none; }
+
 .tpl-glass .day-tab,
 .tpl-glass .event-tab {
     background: rgba(255, 255, 255, .10);
@@ -94,9 +97,12 @@ body.tpl-glass {
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--edge-soft);
     border-radius: 999px;
+    padding: 0.5rem 1.35rem;
     color: var(--frost);
     box-shadow: inset 0 1px 0 var(--edge-soft);
 }
+.tpl-glass .day-tab-active,
+.tpl-glass .event-tab-active { margin-bottom: 0; }
 .tpl-glass .day-tab:hover,
 .tpl-glass .event-tab:hover { background: rgba(255, 255, 255, .18); }
 .tpl-glass .day-tab-active,
