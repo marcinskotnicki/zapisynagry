@@ -24,11 +24,15 @@
         <?= antibot_field() ?>
         <input type="hidden" name="next" value="<?= e($next ?? '') ?>">
 
-        <label for="email"><?= e(t('email')) ?></label>
-        <input type="email" id="email" name="email" required autofocus>
+        <div class="field field-email">
+            <label for="email"><?= e(t('email')) ?></label>
+            <input type="email" id="email" name="email" required autofocus>
+        </div>
 
-        <label for="password"><?= e(t('password')) ?></label>
-        <input type="password" id="password" name="password" required>
+        <div class="field field-password">
+            <label for="password"><?= e(t('password')) ?></label>
+            <input type="password" id="password" name="password" required>
+        </div>
 
         <button type="submit" class="btn btn-primary"><?= e(t('login')) ?></button>
     </form>

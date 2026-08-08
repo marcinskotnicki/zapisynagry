@@ -50,11 +50,11 @@
               // the email moves the verification target for a guest-made poll,
               // exactly as it does on a game. ?>
         <div class="field-row">
-            <div class="field">
+            <div class="field field-p_name">
                 <label for="p_name"><?= e(t('poll_name')) ?></label>
                 <input type="text" id="p_name" name="name" value="<?= e($poll['proposer_name'] ?? '') ?>">
             </div>
-            <div class="field">
+            <div class="field field-p_email">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
                 <input type="email" id="p_email" name="email" value="<?= e($poll['proposer_email'] ?? '') ?>">
                 <?php if (opt_msg('msg_email_field') !== ''): // optional admin note above email inputs ?>
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <div class="field">
+        <div class="field field-start_time">
             <label for="start_time"><?= e(t('poll_start')) ?></label>
             <input type="time" id="start_time" name="start_time" value="<?= e($poll['start_time']) ?>"
                 <?= $bounds ? 'min="' . e($bounds['min']) . '" max="' . e($bounds['max']) . '"' : '' ?>>
@@ -71,7 +71,7 @@
                 <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
             <?php endif; ?>
         </div>
-        <div class="field">
+        <div class="field field-p_deadline">
             <?php // Hours BEFORE the start when voting closes; 0 removes the deadline.
                   // Moving the start time above shifts this along with it. ?>
             <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
@@ -79,12 +79,12 @@
             <?php // Filled in by initPollDeadlinePreview() in js/scripts.js. ?>
             <p class="field-note poll-deadline-preview"></p>
         </div>
-        <div class="field">
+        <div class="field field-p_comment">
             <label for="p_comment"><?= e(t('poll_comment')) ?></label>
             <textarea id="p_comment" name="comment" rows="3"><?= e((string)$poll['comment']) ?></textarea>
         </div>
 
-        <div class="field">
+        <div class="field field-p_explain">
             <label for="p_explain"><?= e(t('poll_explain')) ?></label>
             <select id="p_explain" name="explain_rules">
                 <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
@@ -97,7 +97,7 @@
               // proposer decides. In the other modes the box isn't rendered and
               // the controller leaves the stored value alone. ?>
         <?php if (email_require_mode() === 2): ?>
-            <div class="field field-check">
+            <div class="field field-check field-require_email">
                 <label>
                     <input type="checkbox" name="require_email" value="1" <?= (int)($poll['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
                     <?= e(t('f_require_email')) ?>
@@ -106,7 +106,7 @@
         <?php endif; ?>
 
         <?php if (poll_optin_relevant($poll)): // hidden when nothing is restricted anyway ?>
-            <div class="field field-check">
+            <div class="field field-check field-allow_others">
                 <label>
                     <input type="checkbox" name="allow_others" value="1" <?= (int)$poll['allow_others_add'] === 1 ? 'checked' : '' ?>>
                     <?= e(t('poll_allow_others')) ?>
@@ -114,7 +114,7 @@
             </div>
         <?php endif; ?>
         <?php // Run to the deadline instead of ending on the first full candidate. ?>
-        <div class="field field-check">
+        <div class="field field-check field-wait_deadline">
             <label>
                 <input type="checkbox" name="wait_deadline" value="1" <?= (int)($poll['wait_for_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
                 <?= e(t('poll_wait_deadline')) ?>

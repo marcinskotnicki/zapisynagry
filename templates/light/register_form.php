@@ -20,22 +20,22 @@
     <form method="post" action="register.php">
         <?= $csrf ?>
         <?= antibot_field() ?>
-        <div class="field">
+        <div class="field field-name">
             <label for="name"><?= e(t('reg_name')) ?> *</label>
             <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required autofocus>
         </div>
-        <div class="field">
+        <div class="field field-email">
             <label for="email"><?= e(t('signup_email')) ?> *</label>
             <input type="email" id="email" name="email" value="<?= e($form['email']) ?>" required>
             <?php if (opt_msg('msg_email_field') !== ''): // the shared email-field note ?>
                 <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
             <?php endif; ?>
         </div>
-        <div class="field">
+        <div class="field field-password">
             <label for="password"><?= e(t('password')) ?> *</label>
             <input type="password" id="password" name="password" required>
         </div>
-        <div class="field">
+        <div class="field field-password2">
             <label for="password2"><?= e(t('reg_password2')) ?> *</label>
             <input type="password" id="password2" name="password2" required>
         </div>

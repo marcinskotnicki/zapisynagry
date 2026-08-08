@@ -37,7 +37,7 @@
             <?= $csrf ?>
             <?= $antibot ?>
             <input type="hidden" name="<?= e($kind) ?>" value="<?= (int)$row['id'] ?>">
-            <div class="field">
+            <div class="field field-move_table">
                 <label for="move_table"><?= e(t('move_target')) ?></label>
                 <select id="move_table" name="table">
                     <?php foreach ($tables as $t): ?>

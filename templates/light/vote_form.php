@@ -31,21 +31,27 @@
         <?= antibot_field() ?>
         <input type="hidden" name="poll_game" value="<?= (int)$cand['id'] ?>">
 
-        <label for="name"><?= e(t('signup_name')) ?></label>
-        <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+        <div class="field field-name">
+            <label for="name"><?= e(t('signup_name')) ?></label>
+            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+        </div>
 
-        <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_poll($poll) ? ' *' : '' ?></label>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
+        <div class="field field-email">
+            <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_poll($poll) ? ' *' : '' ?></label>
+            <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
+        </div>
         <?php if (opt_msg('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
 
-        <label for="knows"><?= e(t('signup_knows')) ?></label>
-        <select id="knows" name="knows">
-            <?php foreach ([0 => 'knows_yes', 1 => 'knows_somewhat', 2 => 'knows_no'] as $code => $k): ?>
-                <option value="<?= $code ?>"<?= (int)$form['knows'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
-            <?php endforeach; ?>
-        </select>
+        <div class="field field-knows">
+            <label for="knows"><?= e(t('signup_knows')) ?></label>
+            <select id="knows" name="knows">
+                <?php foreach ([0 => 'knows_yes', 1 => 'knows_somewhat', 2 => 'knows_no'] as $code => $k): ?>
+                    <option value="<?= $code ?>"<?= (int)$form['knows'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
         <?php // Data-protection consent. Renders nothing for a signed-in visitor,
               // or when the admin has left the wording empty. ?>

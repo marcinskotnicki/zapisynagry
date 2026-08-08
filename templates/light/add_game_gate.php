@@ -34,8 +34,10 @@ $title      = $title     ?? t('addgame_title');
         <?= $csrf ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
-        <label for="game_name"><?= e(t('addgame_name')) ?></label>
-        <input type="text" id="game_name" name="name" autofocus>
+        <div class="field field-game_name">
+            <label for="game_name"><?= e(t('addgame_name')) ?></label>
+            <input type="text" id="game_name" name="name" autofocus>
+        </div>
 
         <div class="gate-buttons">
             <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">

@@ -46,11 +46,11 @@
         <?php endif; ?>
 
         <?php if (!empty($is_guest)): // guests must identify themselves (see message.php) ?>
-            <div class="field">
+            <div class="field field-sender_name">
                 <label for="sender_name"><?= e(t('msg_sender_name')) ?> *</label>
                 <input type="text" id="sender_name" name="sender_name" value="<?= e($sender_name) ?>" required>
             </div>
-            <div class="field">
+            <div class="field field-sender_email">
                 <label for="sender_email"><?= e(t('msg_sender_email')) ?> *</label>
                 <input type="email" id="sender_email" name="sender_email" value="<?= e($sender_email) ?>" required>
                 <?php if (opt_msg('msg_email_field') !== ''): // the shared email-field note ?>
@@ -59,8 +59,10 @@
             </div>
         <?php endif; ?>
 
-        <label for="body"><?= e(t('msg_field')) ?></label>
-        <textarea id="body" name="body" rows="6" required autofocus></textarea>
+        <div class="field field-body">
+            <label for="body"><?= e(t('msg_field')) ?></label>
+            <textarea id="body" name="body" rows="6" required autofocus></textarea>
+        </div>
         <?= $captcha ?? '' ?>
 
         <?php // Data-protection consent. Renders nothing for a signed-in visitor,

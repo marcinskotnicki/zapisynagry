@@ -49,25 +49,25 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             <input type="hidden" name="thumbnail" value="<?= e($game['thumbnail']) ?>">
         <?php endif; ?>
 
-        <div class="field">
+        <div class="field field-name">
             <label for="name"><?= e(t('addgame_name')) ?></label>
             <input type="text" id="name" name="name" value="<?= e($game['name']) ?>" required>
         </div>
 
         <div class="field-row">
-            <div class="field">
+            <div class="field field-length_minutes">
                 <label for="length_minutes"><?= e(t('f_length')) ?></label>
                 <input type="number" id="length_minutes" name="length_minutes" min="0" value="<?= e($game['length_minutes']) ?>">
             </div>
-            <div class="field">
+            <div class="field field-weight">
                 <label for="weight"><?= e(t('f_weight')) ?></label>
                 <input type="number" id="weight" name="weight" min="1" max="5" step="0.01" value="<?= e($game['weight']) ?>">
             </div>
-            <div class="field">
+            <div class="field field-max_players">
                 <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
                 <input type="number" id="max_players" name="max_players" min="1" value="<?= e($game['max_players']) ?>">
             </div>
-            <div class="field">
+            <div class="field field-start_time">
                 <label for="start_time"><?= e(t('f_start')) ?></label>
                 <?php // When the admin forbids starts outside event hours, clamp the
                       // input to the day's own window (bounds are null otherwise). ?>
@@ -81,7 +81,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         </div>
 
         <?php if ($isBgg): // BGG: show the locked image (or "none") ?>
-            <div class="field">
+            <div class="field field-thumbnail">
                 <label><?= e(t('f_thumbnail')) ?></label>
                 <?php if (!empty($game['thumbnail'])): ?>
                     <img class="bgg-thumb" src="<?= e($game['thumbnail']) ?>" alt="">
@@ -90,7 +90,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                 <?php endif; ?>
             </div>
         <?php else: // manual: choose a predefined thumbnail (radio picker), or none ?>
-            <div class="field">
+            <div class="field field-thumbnail">
                 <label><?= e(t('f_thumbnail')) ?></label>
                 <?php if (empty($thumbs)): ?>
                     <span class="muted"><?= e(t('f_no_thumb')) ?></span>
@@ -111,7 +111,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
         <?php endif; ?>
 
-        <div class="field">
+        <div class="field field-language">
             <label for="language"><?= e(t('f_language')) ?></label>
             <?php
             // Choices come from the admin-configured list (one per line in the
@@ -133,11 +133,11 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         </div>
 
         <div class="field-row">
-            <div class="field">
+            <div class="field field-brings_name">
                 <label for="brings_name"><?= e(t('f_brings')) ?></label>
                 <input type="text" id="brings_name" name="brings_name" value="<?= e($game['brings_name']) ?>">
             </div>
-            <div class="field">
+            <div class="field field-brings_email">
                 <?php // '*' only in global mode 1; in mode 2 the requirement is the
                       // proposer's own choice (the checkbox right below). ?>
                 <label for="brings_email"><?= e(t('f_email')) ?><?= email_require_mode() === 1 ? ' *' : '' ?></label>
@@ -149,7 +149,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         </div>
 
         <?php if (email_require_mode() === 2): // per-game rule: proposer decides (their own email then required too) ?>
-            <div class="field field-check">
+            <div class="field field-check field-require_email">
                 <label>
                     <input type="checkbox" name="require_email" value="1" <?= (int)($game['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
                     <?= e(t('f_require_email')) ?>
@@ -157,7 +157,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             </div>
         <?php endif; ?>
 
-        <div class="field">
+        <div class="field field-explain_rules">
             <label for="explain_rules"><?= e(t('f_explain')) ?></label>
             <select id="explain_rules" name="explain_rules">
                 <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
@@ -167,7 +167,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         </div>
 
         <?php if (!$is_edit): // add-self only makes sense when creating a new game ?>
-            <div class="field field-check">
+            <div class="field field-check field-add_self">
                 <label>
                     <input type="checkbox" name="add_self" value="1" <?= (int)$game['add_self'] === 1 ? 'checked' : '' ?>>
                     <?= e(t('f_addself')) ?>
@@ -180,7 +180,7 @@ $captcha = $captcha ?? '';                                       // '' = no capt
               // it does not hand you a rules PDF or a how-to-play video, and the
               // person bringing the copy is the one who has those. ?>
         <?php if (opt_bool('allow_manual_links')): ?>
-            <div class="field">
+            <div class="field field-manual_link">
                 <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
                 <input type="url" id="manual_link" name="manual_link"
                        value="<?= e($game['manual_link'] ?? '') ?>" placeholder="https://">
@@ -191,13 +191,13 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         <?php // Custom link: manual games only (BGG games link via bgg_id) and only
               // while the admin allows it. Bare domains get https:// on save. ?>
         <?php if (!$isBgg && opt_bool('allow_custom_game_links')): ?>
-            <div class="field">
+            <div class="field field-link">
                 <label for="link"><?= e(t('f_link')) ?></label>
                 <input type="url" id="link" name="link" value="<?= e($game['link'] ?? '') ?>" placeholder="https://">
             </div>
         <?php endif; ?>
 
-        <div class="field">
+        <div class="field field-comment">
             <label for="comment"><?= e(t('f_comment')) ?></label>
             <textarea id="comment" name="comment" rows="2"><?= e($game['comment']) ?></textarea>
         </div>

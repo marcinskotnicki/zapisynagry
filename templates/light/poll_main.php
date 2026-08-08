@@ -42,18 +42,18 @@
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
         <div class="field-row">
-            <div class="field">
+            <div class="field field-p_name">
                 <label for="p_name"><?= e(t('poll_name')) ?></label>
                 <input type="text" id="p_name" name="name" value="<?= e($draft['name']) ?>">
             </div>
-            <div class="field">
+            <div class="field field-p_email">
                 <label for="p_email"><?= e(t('poll_email')) ?></label>
                 <input type="email" id="p_email" name="email" value="<?= e($draft['email']) ?>">
                 <?php if (opt_msg('msg_email_field') !== ''): // optional admin note above email inputs ?>
                     <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
-            <div class="field">
+            <div class="field field-p_deadline">
                 <?php // Hours BEFORE the start when voting closes; 0 disables the deadline. ?>
                 <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
                 <input type="number" id="p_deadline" name="deadline_hours" min="0" value="<?= (int)$draft['deadline_hours'] ?>">
@@ -61,7 +61,7 @@
                       // start time + deadline hours; empty until the script runs. ?>
                 <p class="field-note poll-deadline-preview"></p>
             </div>
-            <div class="field">
+            <div class="field field-p_start">
                 <label for="p_start"><?= e(t('poll_start')) ?></label>
                 <?php // Same event-hours clamp as games (the poll resolves into a game at this time). ?>
                 <input type="time" id="p_start" name="start_time" value="<?= e($draft['start_time']) ?>"
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <div class="field">
+        <div class="field field-p_explain">
             <label for="p_explain"><?= e(t('poll_explain')) ?></label>
             <select id="p_explain" name="explain_rules">
                 <?php foreach ([0 => 'rules_explain', 1 => 'rules_summary', 2 => 'rules_known'] as $code => $k): ?>
@@ -81,12 +81,12 @@
             </select>
         </div>
 
-        <div class="field">
+        <div class="field field-p_comment">
             <label for="p_comment"><?= e(t('poll_comment')) ?></label>
             <textarea id="p_comment" name="comment" rows="2"><?= e($draft['comment']) ?></textarea>
         </div>
 
-        <div class="field field-check">
+        <div class="field field-check field-add_self">
             <label>
                 <input type="checkbox" name="add_self" value="1" <?= (int)$draft['add_self'] === 1 ? 'checked' : '' ?>>
                 <?= e(t('poll_addself')) ?>
@@ -97,7 +97,7 @@
               // proposer can still remove any of them from the edit screen.
               // Hidden when it wouldn't restrict anyone anyway (see the helper). ?>
         <?php if (poll_optin_relevant()): ?>
-            <div class="field field-check">
+            <div class="field field-check field-allow_others">
                 <label>
                     <input type="checkbox" name="allow_others" value="1" <?= (int)($draft['allow_others'] ?? 0) === 1 ? 'checked' : '' ?>>
                     <?= e(t('poll_allow_others')) ?>
@@ -111,7 +111,7 @@
               // anything — poll_check_resolve() ignores it without one, so the
               // note spells that out rather than letting someone create a poll
               // that quietly can't finish. ?>
-        <div class="field field-check">
+        <div class="field field-check field-wait_deadline">
             <label>
                 <input type="checkbox" name="wait_deadline" value="1" <?= (int)($draft['wait_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
                 <?= e(t('poll_wait_deadline')) ?>
@@ -120,7 +120,7 @@
         </div>
 
         <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
-            <div class="field field-check">
+            <div class="field field-check field-require_email">
                 <label>
                     <input type="checkbox" name="require_email" value="1" <?= (int)($draft['require_email'] ?? 0) === 1 ? 'checked' : '' ?>>
                     <?= e(t('f_require_email')) ?>

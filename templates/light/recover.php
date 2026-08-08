@@ -25,8 +25,10 @@
         <form method="post" action="recover.php">
             <?= $csrf ?>
             <input type="hidden" name="action" value="request">
-            <label for="email"><?= e(t('recover_email')) ?></label>
-            <input type="email" id="email" name="email" required autofocus>
+            <div class="field field-email">
+                <label for="email"><?= e(t('recover_email')) ?></label>
+                <input type="email" id="email" name="email" required autofocus>
+            </div>
             <button type="submit" class="btn btn-primary"><?= e(t('recover_send')) ?></button>
         </form>
 
@@ -43,10 +45,14 @@
             <?= $csrf ?>
             <input type="hidden" name="action" value="reset">
             <input type="hidden" name="token" value="<?= e($token) ?>">
-            <label for="new_password"><?= e(t('recover_new_password')) ?></label>
-            <input type="password" id="new_password" name="new_password" required autofocus>
-            <label for="new_password2"><?= e(t('recover_new_password2')) ?></label>
-            <input type="password" id="new_password2" name="new_password2" required>
+            <div class="field field-new_password">
+                <label for="new_password"><?= e(t('recover_new_password')) ?></label>
+                <input type="password" id="new_password" name="new_password" required autofocus>
+            </div>
+            <div class="field field-new_password2">
+                <label for="new_password2"><?= e(t('recover_new_password2')) ?></label>
+                <input type="password" id="new_password2" name="new_password2" required>
+            </div>
             <button type="submit" class="btn btn-primary"><?= e(t('recover_reset_submit')) ?></button>
         </form>
 

@@ -45,8 +45,10 @@
             <?= $csrf ?>
             <input type="hidden" name="action" value="name">
             <h3><?= e(t('up_change_name')) ?></h3>
-            <label for="display_name"><?= e(t('up_name')) ?></label>
-            <input type="text" id="display_name" name="display_name" value="<?= e($user['display_name']) ?>" required>
+            <div class="field field-display_name">
+                <label for="display_name"><?= e(t('up_name')) ?></label>
+                <input type="text" id="display_name" name="display_name" value="<?= e($user['display_name']) ?>" required>
+            </div>
             <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
         </form>
 
@@ -55,8 +57,10 @@
             <?= $csrf ?>
             <input type="hidden" name="action" value="email">
             <h3><?= e(t('up_change_email')) ?></h3>
-            <label for="email"><?= e(t('up_email')) ?></label>
-            <input type="email" id="email" name="email" value="<?= e($user['email']) ?>" required>
+            <div class="field field-email">
+                <label for="email"><?= e(t('up_email')) ?></label>
+                <input type="email" id="email" name="email" value="<?= e($user['email']) ?>" required>
+            </div>
             <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
         </form>
 
@@ -65,12 +69,18 @@
             <?= $csrf ?>
             <input type="hidden" name="action" value="password">
             <h3><?= e(t('up_change_password')) ?></h3>
-            <label for="current_password"><?= e(t('up_current_password')) ?></label>
-            <input type="password" id="current_password" name="current_password" required>
-            <label for="new_password"><?= e(t('up_new_password')) ?></label>
-            <input type="password" id="new_password" name="new_password" required>
-            <label for="new_password2"><?= e(t('up_new_password2')) ?></label>
-            <input type="password" id="new_password2" name="new_password2" required>
+            <div class="field field-current_password">
+                <label for="current_password"><?= e(t('up_current_password')) ?></label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="field field-new_password">
+                <label for="new_password"><?= e(t('up_new_password')) ?></label>
+                <input type="password" id="new_password" name="new_password" required>
+            </div>
+            <div class="field field-new_password2">
+                <label for="new_password2"><?= e(t('up_new_password2')) ?></label>
+                <input type="password" id="new_password2" name="new_password2" required>
+            </div>
             <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
         </form>
 
@@ -86,7 +96,7 @@
             <h3><?= e(t('up_notifications')) ?></h3>
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="notify">
-            <div class="field field-check">
+            <div class="field field-check field-notify_new_event">
                 <label>
                     <input type="checkbox" name="notify_new_event" value="1"<?=
                         (int)($user['notify_new_event'] ?? 0) === 1 ? ' checked' : '' ?>>
@@ -105,7 +115,7 @@
             <?= csrf_field() ?>
             <input type="hidden" name="back" value="user.php">
             <?php if ($upTpl): ?>
-                <div class="field">
+                <div class="field field-pref_tpl">
                     <label for="pref_tpl"><?= e(t('pref_template')) ?></label>
                     <select id="pref_tpl" name="template">
                         <?php foreach (tpl_available() as $tn): ?>
@@ -115,7 +125,7 @@
                 </div>
             <?php endif; ?>
             <?php if ($upLang): ?>
-                <div class="field">
+                <div class="field field-pref_lang">
                     <label for="pref_lang"><?= e(t('pref_language')) ?></label>
                     <select id="pref_lang" name="lang">
                         <?php foreach (lang_available() as $lc): ?>

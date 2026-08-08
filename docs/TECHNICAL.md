@@ -794,6 +794,30 @@ because a client can simply not send the field. Forms with intermediate submit
 buttons (the poll builder) mark those `formnovalidate`, or a required consent
 box would block adding a candidate or cancelling.
 
+**Style one form field on its own.** Every field wrapper on the front-facing
+forms carries a class matching the control's `name` attribute, alongside the
+generic `.field`:
+
+```html
+<div class="field field-start_time">
+    <label for="start_time">Godzina</label>
+    <input type="time" id="start_time" name="start_time">
+</div>
+```
+
+So a club wanting a bigger start time writes `.field-start_time input { … }` in
+its theme. The name attribute in the HTML tells you the class, with no lookup
+table to maintain.
+
+Prefixed rather than bare (`field-name`, not `name`): the convention here is
+already `field-check` / `field-row` / `field-note`, and bare names like `.name`
+or `.message` are what a theme would otherwise claim for something else — nine
+themes fork this stylesheet.
+
+`.field` deliberately has no box rules of its own; spacing comes from the
+`label` rule. Several forms gained wrappers purely for these hooks, and that is
+only layout-neutral while it stays true. There is a test guarding it.
+
 **Add a copyright or legal notice.** Create `inc/copyright.php`. If the file
 exists, `templates/light/footer.php` includes it as the last thing before
 `</body>`, on every page including the admin panel; if it does not, nothing is

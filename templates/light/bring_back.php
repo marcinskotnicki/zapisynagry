@@ -24,11 +24,15 @@
         <?= $csrf ?>
         <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
 
-        <label for="name"><?= e(t('bringback_name')) ?></label>
-        <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+        <div class="field field-name">
+            <label for="name"><?= e(t('bringback_name')) ?></label>
+            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+        </div>
 
-        <label for="email"><?= e(t('bringback_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
-        <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
+        <div class="field field-email">
+            <label for="email"><?= e(t('bringback_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>
+            <input type="email" id="email" name="email" value="<?= e($form['email']) ?>">
+        </div>
         <?php if (opt_msg('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
@@ -36,8 +40,10 @@
         <?php // Restoring re-owns the game, so the new owner picks the slot: the
               // original time was chosen by someone who has since withdrawn, and
               // the day's hours may have changed while it was put away. ?>
-        <label for="start_time"><?= e(t('f_start')) ?></label>
-        <input type="time" id="start_time" name="start_time" value="<?= e($form['start_time']) ?>" required>
+        <div class="field field-start_time">
+            <label for="start_time"><?= e(t('f_start')) ?></label>
+            <input type="time" id="start_time" name="start_time" value="<?= e($form['start_time']) ?>" required>
+        </div>
 
         <?php // Consent, when the admin configured wording and this is a guest. ?>
         <?= consent_field() ?>
