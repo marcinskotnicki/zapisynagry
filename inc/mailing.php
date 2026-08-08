@@ -218,6 +218,65 @@ function mailing_notify_new_item($eventId, $name, $dayId, $startTime, $anchor, $
 }
 
 /**
+ * Mail the accounts that asked to hear when a NEW EVENT is created.
+ *
+ * Separate from the per-event mailing list on purpose. That list is opt-in per
+ * event by anyone with an email address; this is a standing preference held by
+ * an account, so:
+ *   - it is NOT gated on mailing_enabled(). A club can run member
+ *     notifications without running a public mailing list, and the admin
+ *     toggle for this is its own switch.
+ *   - there is no unsubscribe token. The recipient has an account; the way off
+ *     the list is the checkbox they ticked, so the footer links there instead
+ *     of at a one-click URL that would need its own table and token.
+ * The master send_emails switch still applies — that one means "this site does
+ * not send mail", which has to outrank every individual feature.
+ *
+ * Blocked accounts are skipped: an account that cannot log in should not keep
+ * receiving mail, and it could not reach the panel to stop it.
+ *
+ * @param int $eventId
+ * @return int  Recipients ATTEMPTED, matching mailing_notify_new_item(): a
+ *              transport accepting a message is not proof of delivery.
+ */
+function mailing_notify_new_event($eventId) {
+    if (!opt_bool('notify_new_event') || !opt_bool('send_emails')) return 0;
+
+    $event = db_one('SELECT * FROM events WHERE id = ?', [(int)$eventId]);
+    if (!$event) return 0;
+
+    // Dates are the whole point of the message, so state the range if there is
+    // one. An event created before its days exist simply says nothing about
+    // when — better than an empty date.
+    $from = db_val('SELECT MIN(day_date) FROM event_days WHERE event_id = ?', [(int)$eventId]);
+    $to   = db_val('SELECT MAX(day_date) FROM event_days WHERE event_id = ?', [(int)$eventId]);
+    if ($from && $to && $from !== $to) {
+        $when = t('ml_event_when_range', mailing_format_date($from), mailing_format_date($to));
+    } elseif ($from) {
+        $when = t('ml_event_when_one', mailing_format_date($from));
+    } else {
+        $when = '';
+    }
+
+    $body = t('ml_new_event_body', $event['name']);
+    if ($when !== '') $body .= "\n" . $when;
+
+    $base = site_base_url();
+    if ($base !== '') {
+        $body .= "\n\n" . rtrim($base, '/') . '/index.php';
+        $body .= "\n\n---\n" . t('ml_notify_event_off') . "\n" . rtrim($base, '/') . '/user.php';
+    }
+
+    $sent = 0;
+    foreach (db_all('SELECT email FROM users WHERE notify_new_event = 1 AND is_blocked = 0') as $u) {
+        if (trim((string)$u['email']) === '') continue;
+        send_mail($u['email'], t('ml_new_event_subject', $event['name']), $body);
+        $sent++;
+    }
+    return $sent;
+}
+
+/**
  * Deep link to one item on the event page. The fragment is what makes the
  * browser scroll to the card; front_event.php gives every game and poll a
  * matching id.

@@ -131,6 +131,7 @@ INSERT INTO options (key, value) VALUES
     -- worse than an extra press of the toggle.
     ('chat_close_outside',    '0'),
     ('chat_logged_in_only',   '0'),
+    ('notify_new_event',      '0'),
     -- Public archives. Off by default: switching it on changes how EVENTS
     -- behave (creating a new one no longer archives the old), so it must be a
     -- deliberate choice rather than a surprise on upgrade.
@@ -279,6 +280,10 @@ CREATE TABLE users (
     display_name  TEXT NOT NULL,
     is_admin      INTEGER NOT NULL DEFAULT 0,    -- 0/1
     is_blocked    INTEGER NOT NULL DEFAULT 0,    -- 0/1; blocked accounts cannot log in
+    -- Opt-in mail when a new event is created. Defaults to 0: nobody is signed
+    -- up to anything by having an account, and existing accounts must not start
+    -- receiving mail because a site upgraded.
+    notify_new_event INTEGER NOT NULL DEFAULT 0,
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

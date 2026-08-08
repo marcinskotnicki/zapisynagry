@@ -32,6 +32,8 @@ $days     = [];   // list of ['date'=>, 'start'=>, 'end'=>] for screen 2 prefill
 // day_names_enabled() / day_tab_formats() live here; this tab does not otherwise
 // need event data, so the dependency is stated explicitly.
 require_once __DIR__ . '/../events.php';
+require_once __DIR__ . '/../mail.php';      // send_mail(), which mailing.php calls
+require_once __DIR__ . '/../mailing.php';   // mailing_notify_new_event()
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postStage = $_POST['stage'] ?? '';
@@ -137,6 +139,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($error === null) {
                 log_action('event_create', $name);
+                /* After the commit, never inside it: a mail cannot be rolled
+                 * back, so telling people about an event whose creation then
+                 * failed would be unfixable. Returns 0 quietly when the feature
+                 * or email sending is off. */
+                mailing_notify_new_event($eventId);
                 /* Normally: go and look at the event just created.
                  *
                  * But if its dates are already past the auto-archive threshold,

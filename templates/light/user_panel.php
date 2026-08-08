@@ -78,6 +78,25 @@
               // Each select renders only if the admin allows switching for ACCOUNTS
               // (allow_user_template / allow_user_language); the whole card hides
               // when neither is allowed or there is nothing to choose from. ?>
+        <?php /* New-event notifications. Only offered when the admin has enabled
+                 the feature AND the site actually sends mail — a checkbox that
+                 silently does nothing is worse than no checkbox. */ ?>
+        <?php if (opt_bool('notify_new_event') && opt_bool('send_emails')): ?>
+        <form method="post" action="user.php" class="card profile-card">
+            <h3><?= e(t('up_notifications')) ?></h3>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="notify">
+            <div class="field field-check">
+                <label>
+                    <input type="checkbox" name="notify_new_event" value="1"<?=
+                        (int)($user['notify_new_event'] ?? 0) === 1 ? ' checked' : '' ?>>
+                    <?= e(t('up_notify_new_event')) ?>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
+        </form>
+        <?php endif; ?>
+
         <?php $upTpl  = tpl_switch_allowed()  && count(tpl_available())  > 1;
               $upLang = lang_switch_allowed() && count(lang_available()) > 1; ?>
         <?php if ($upTpl || $upLang): ?>

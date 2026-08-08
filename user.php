@@ -38,6 +38,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('up_name_updated'));
         }
 
+    } elseif ($action === 'notify') {
+        /* An unticked checkbox posts nothing, so absence IS the "off" answer
+         * here — unlike the admin Options form, where a missing key means
+         * "not submitted". This form carries exactly one field, so there is no
+         * ambiguity to guard against.
+         *
+         * Written even when the feature is switched off site-wide, so an admin
+         * turning it back on restores everyone's previous choice rather than
+         * silently resetting it. */
+        db_run('UPDATE users SET notify_new_event = ? WHERE id = ?',
+               [empty($_POST['notify_new_event']) ? 0 : 1, $u['id']]);
+        flash_set(t('up_notify_saved'));
+
     } elseif ($action === 'password') {
         $cur  = (string)($_POST['current_password'] ?? '');
         $new  = (string)($_POST['new_password'] ?? '');
