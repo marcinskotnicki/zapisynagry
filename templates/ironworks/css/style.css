@@ -316,7 +316,7 @@ body.tpl-ironworks {
 .tpl-ironworks .gc-signup:hover { background: var(--brass-dim); color: #fff6dd; text-decoration: none; }
 .tpl-ironworks .gc-more-slots { color: var(--text-muted); font-size: 0.8rem; }
 
-.tpl-ironworks .gc-info .comment-list li { background: rgba(0, 0, 0, .3); border: none; border-top: 1px solid rgba(233, 223, 198, .08); border-radius: 0; color: var(--parchment-2); text-align: left; }
+.tpl-ironworks .gc-info .comment-list li, .tpl-ironworks .poll-card .comment-list li { background: rgba(0, 0, 0, .3); border: none; border-top: 1px solid rgba(233, 223, 198, .08); border-radius: 0; color: var(--parchment-2); text-align: left; }
 .tpl-ironworks .gc-info .discussion { border-top: none; margin: 0; padding: 0; }
 .tpl-ironworks .gc-info .comment-list { gap: 0; margin: 0; }
 .tpl-ironworks .comment-add summary {
@@ -410,6 +410,8 @@ body.tpl-ironworks {
 .tpl-ironworks .admin .tab:hover { color: var(--text); }
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
+
+
 @media (max-width: 860px) {
     .tpl-ironworks .game-list { gap: 1.6rem; }
 }
