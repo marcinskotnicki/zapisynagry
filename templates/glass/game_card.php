@@ -2,20 +2,33 @@
 /* =============================================================================
  *  templates/glass/game_card.php — one game, as a glass strip.
  * -----------------------------------------------------------------------------
- *  THE MARKUP IS schematic-compact's, DELIBERATELY AND VERBATIM. The brief for
- *  this theme was "liquid glass, layout based on schematic-compact", so the
- *  structure is the same horizontal strip and the difference is entirely in
+ *  THE MARKUP IS schematic-compact's, WITH TWO DELIBERATE EXCEPTIONS. The brief
+ *  for this theme was "liquid glass, layout based on schematic-compact", so the
+ *  structure is the same horizontal strip and almost everything besides it is
  *  css/style.css: frosted translucent panels instead of flat printed ones.
+ *
+ *  The two exceptions:
+ *    1. The accent channel ($chan) keys off difficulty here, not the table
+ *       number — see the comment at its assignment below for why.
+ *    2. The ACTIVE card's identity block shows only the start time, not the
+ *       zero-padded game-id chip (sc-id-num) schematic-compact shows beside
+ *       it. That numbered-console look belongs to schematic-compact; glass
+ *       keeps the archived state's '—' placeholder (identical in both
+ *       themes) but drops the live id. If this ever needs restoring, the
+ *       line is `<span class="sc-id-num"><?= str_pad((string)(int)$g['id'], 3,
+ *       '0', STR_PAD_LEFT) ?></span>`, placed right after the sc-id-time span.
  *
  *  Copied rather than shared because tpl_file() resolves per theme with only a
  *  fallback to light — there is no mechanism for one theme to inherit another's
- *  partial. Keeping the two byte-identical below the header is the point: if
- *  the strip markup changes in schematic-compact, this file should be updated
- *  from it rather than edited on its own.
+ *  partial. Everything BESIDES those two exceptions should stay identical to
+ *  schematic-compact's: if the strip markup changes there, update this file
+ *  from it rather than editing it on its own.
  *
- *  tests/test_glass.php asserts exactly that (identical apart from this header),
- *  and pins the same control set every other fork is pinned to — classic once
- *  forked game_card.php and silently lost its anti-bot field.
+ *  tests/test_newthemes.php asserts exactly that — identical apart from the
+ *  header and the two exceptions above, each matched on its exact line so a
+ *  DIFFERENT change to either spot still fails as unsanctioned drift. It also
+ *  pins the same control set every fork is pinned to — classic once forked
+ *  game_card.php and silently lost its anti-bot field.
  * ============================================================================= */
 ?>
 <?php // Skipped entirely when the admin shows deleted games in full: the

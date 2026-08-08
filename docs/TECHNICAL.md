@@ -189,11 +189,23 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Twelve themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
-**classic**, **corkboard**, **elvish**, **space**, **steampunk**, **imperial**,
-**schematic**, **schematic-compact**, **blossom** and **glass**. They're
-discovered by directory glob, so creating a folder registers one — there is no
-list to update.
+Fourteen themes in `templates/`: **light** (the base — `BASE_TEMPLATE`),
+**dark**, **classic**, **corkboard**, **elvish**, **space**, **steampunk**,
+**imperial**, **schematic**, **schematic-compact**, **blossom**, **glass**,
+**ironworks** and **starchart**. They're discovered by directory glob, so
+creating a folder registers one — there is no list to update.
+
+**A dark page with light surfaces needs the text default INVERTED.** Most of
+what a page paints uses `--surface`, and light's rules give those panels a
+background but no colour — they inherit from `body`. So a theme whose page is
+dark but whose `--surface` is pale must set the body to the DARK text colour and
+name the few genuinely dark areas explicitly, not the other way round. Getting
+this backwards renders text at 1.00:1 — literally invisible — on every surface
+at once; ironworks shipped that way and it was reported as "the admin panel's
+font is the background colour", which was merely where someone happened to look.
+`tests/test_ironworks.php` and `tests/test_starchart.php` both resolve the
+variables and assert the ratio, because in the source each side is just a
+`var()` and the bug is invisible.
 
 **A theme should restyle rather than fork wherever it can.** `blossom` is
 CSS-only: its off-grid pastel layout is `nth-child` transforms over light's
@@ -201,6 +213,22 @@ markup, so a new field on light's card appears there for free. A fork is
 justified when the look needs a value CSS cannot derive (schematic's per-table
 colour channel) or markup light does not emit (its capacity track showing
 EMPTY seats — light renders only players that exist).
+
+**Reusing another theme's layout means copying its partial.** `glass` takes
+`schematic-compact`'s strip; `ironworks` and `starchart` both take `classic`'s
+card — `ironworks` verbatim, `starchart` with a deliberate structural change
+(its departure strip). A copy that diverges is pinned on CONTROL PARITY instead
+of identity: every label and link diffed against light's and classic's cards, so
+a divergence can change the shape but never quietly drop a button. In both cases
+the copy is pinned by a test that compares the two files as CODE — every comment
+stripped through the tokeniser, so the headers may differ while any real change
+shows up. `glass` is allowed exactly one sanctioned divergence (it keys its
+accent colour off difficulty rather than the table); `ironworks` is pinned
+code-identical.
+
+Those tests also check the copy still starts with `<?php`. Dropping it while
+rewriting a header lints perfectly clean and prints the whole comment block onto
+the page — nothing else catches that.
 
 **`glass` copies `schematic-compact`'s two partials verbatim** to reuse the
 strip layout, because `tpl_file()` resolves per theme and falls back only to

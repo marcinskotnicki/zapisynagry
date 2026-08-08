@@ -401,7 +401,7 @@ body.tpl-glass {
 
 .tpl-glass .tl-slot { border-radius: 10px; background: var(--pane-2); border: 1px solid var(--edge-soft); }
 
-.tpl-glass .tl-game.tl-poll{background:#eef3fc4d;}
+.tpl-glass .tl-game.tl-poll { background: #eef3fc24; }
 
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

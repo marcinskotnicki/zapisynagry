@@ -109,6 +109,11 @@ body.tpl-ironworks {
     color: #fff6dd;
     margin-bottom: -2px;
 }
+.tpl-ironworks .day-tab-active:hover,
+.tpl-ironworks .event-tab-active:hover {
+    background: linear-gradient(180deg, #6b5616, #4a3c0f);
+    color: #fff6dd;
+}
 .tpl-ironworks .day-tab-date, .tpl-ironworks .day-tab-hours { color: inherit; opacity: .85; }
 
 .tpl-ironworks .table-block {
@@ -171,7 +176,7 @@ body.tpl-ironworks {
 }
 .tpl-ironworks .game-deleted .gc-info { background: linear-gradient(180deg, #4a2a2a, #2a1616); }
 
-.tpl-ironworks .gc-tabs { display: flex; gap: 0.3rem; padding: 0.4rem 0.4rem 0; justify-content: flex-start; }
+.tpl-ironworks .gc-tabs { display: flex; gap: 0.3rem; padding: 0.4rem 0.4rem 0; margin-bottom: 0.25rem; justify-content: flex-start; }
 .tpl-ironworks .gc-tab {
     font-size: 0.6rem;
     font-weight: 700;
