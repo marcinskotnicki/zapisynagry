@@ -904,6 +904,38 @@ themes fork this stylesheet.
 `label` rule. Several forms gained wrappers purely for these hooks, and that is
 only layout-neutral while it stays true. There is a test guarding it.
 
+**A function the updater adds cannot be called in the SAME request that adds
+it.** `admin.php` requires `inc/bootstrap.php` — which requires every
+`inc/*.php` — at the top of the request, before the Update tab's controller
+runs `update_run()`. If that run overwrites one of those already-required
+files, PHP's `require_once` will not reload it: the process's symbol table is
+whatever it was at bootstrap time, regardless of what is now on disk.
+`custom_css_block()` hit this on a live site — added to `inc/template.php` and
+called from `header.php` in the same release, so the results page rendered
+immediately after a successful update called a function that, in that process,
+had never been defined. `opcache_reset()` (already called at the end of
+`update_run()`) does not help: it resets the compile cache for *other*
+requests, not a symbol table this one already built.
+
+The fix is in `inc/admin/update.php`: a `run` POST redirects back to the same
+tab rather than rendering inline, carrying its result lines through
+`$_SESSION['update_run_results']` (read once, then cleared). The page an admin
+actually sees is always a fresh request, guaranteed to require whatever is
+currently on disk. `check` (the GitHub lookup) does **not** redirect — it only
+reads, and writes a plain option value rather than a `.php` file, so the
+hazard does not apply to it.
+
+That redirect covers every ordinary case, but not a host whose OPcache does
+not share memory across workers — where a sibling worker could keep serving a
+stale compile of a file for a moment after another worker's request updated
+it. `header.php` runs on every page, so its call to `custom_css_block()` is
+wrapped in `function_exists()` as a fallback for exactly that: skipping a
+decorative feature for one stale render beats a fatal error on every page.
+This is a targeted guard for one call site that runs unconditionally
+everywhere, not a pattern to sprinkle on every function call in the app —
+doing that would hide real bugs during ordinary development, where the code
+and the running process are always in sync.
+
 **Add a copyright or legal notice.** Create `inc/copyright.php`. If the file
 exists, `templates/light/footer.php` includes it as the last thing before
 `</body>`, on every page including the admin panel; if it does not, nothing is

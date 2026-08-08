@@ -64,6 +64,11 @@ function update_skipped_paths() {
  * @return bool  True on a 2xx/3xx response with no transport error.
  */
 function update_download($url, $dest) {
+    // curl is effectively required for this app to update at all, so its
+    // absence is rare — but "rare" still fatals every page on a host that
+    // lacks it, rather than showing "Update failed: no curl" on this one tab.
+    // Same reasoning as update_remote_commit()'s guard, applied here too.
+    if (!function_exists('curl_init')) return false;
     $fh = @fopen($dest, 'wb');
     if (!$fh) return false;
     $ch = curl_init($url);

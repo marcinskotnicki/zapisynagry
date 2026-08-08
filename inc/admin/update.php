@@ -16,11 +16,43 @@ $results = null;
  * the actual update, 'check' only asks GitHub what the newest commit is. */
 $checked = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['run'])) {
-    $results = update_run($APP_ROOT);     // $APP_ROOT set by admin.php; returns result lines
+    $runResults = update_run($APP_ROOT);   // $APP_ROOT set by admin.php; returns result lines
     log_action('system_update', 'Admin ran system update');
-    options_load();                       // pick up the last_update_at just written
+
+    /* REDIRECT rather than fall through to render this response — this is not
+     * a style choice, it fixes a real crash a live site hit.
+     *
+     * update_run() can overwrite files THIS VERY REQUEST already require_once'd
+     * during bootstrap (inc/helpers.php, inc/template.php, ...). PHP cannot
+     * hot-reload an already-included file: a function the update ADDS is
+     * undefined for the rest of this process no matter how current the file on
+     * disk now is, because require_once looked at that file exactly once,
+     * before the overlay ran. custom_css_block() was the one that took a site
+     * down — added to inc/template.php in one release, called from every
+     * page's header.php in the same release, so the very first render after
+     * updating called a function that, in THIS process, had never been
+     * defined.
+     *
+     * A redirect forces a brand new request: a fresh PHP process that has not
+     * required anything yet, so whatever it requires is guaranteed current.
+     * update_run()'s own opcache_reset() is for every OTHER request and worker
+     * on the box — it cannot rewrite what this one process already has loaded
+     * into memory.
+     *
+     * The result lines travel through the session rather than a GET parameter,
+     * one-shot: read-and-cleared below, so refreshing the page after a redirect
+     * doesn't show a stale "update complete" forever. */
+    $_SESSION['update_run_results'] = $runResults;
+    redirect('admin.php?tab=update');
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['check'])) {
     $checked = true;
+}
+
+/* Picked up here rather than only right after a run: this is what actually
+ * renders on the fresh request the redirect above lands on. */
+if (!empty($_SESSION['update_run_results'])) {
+    $results = $_SESSION['update_run_results'];
+    unset($_SESSION['update_run_results']);
 }
 
 /**

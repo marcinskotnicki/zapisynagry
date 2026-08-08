@@ -54,8 +54,22 @@ $page_title = $page_title ?? t('app_name');
              exclusion is the thing keeping a bad paste recoverable.
              NOT escaped with e(): this is a stylesheet, not text, and entity
              encoding would break every > child combinator and " in a font
-             stack. The helper does the one escape a <style> block needs. */ ?>
-    <?php $customCss = custom_css_block(); ?>
+             stack. The helper does the one escape a <style> block needs.
+
+             function_exists() GUARDS THIS SPECIFIC CALL, not helper calls in
+             general: header.php runs on every single page, and a function
+             defined only in a NEWER inc/template.php than the one this
+             process already required (via require_once earlier in the same
+             request) is undefined here no matter how current the file on
+             disk now is — that took a live site down mid-update, once. The
+             admin controller now redirects after running the updater so its
+             OWN render is never affected; this guard is the fallback for
+             everything the redirect can't reach — most plausibly a host
+             whose OPcache does not share memory across workers, so a sibling
+             worker keeps serving a stale compile of this file for a moment
+             after another worker updates it. Skipping a decorative feature
+             for one stale render beats a fatal error on every page. */ ?>
+    <?php $customCss = function_exists('custom_css_block') ? custom_css_block() : ''; ?>
     <?php if ($customCss !== ''): ?>
         <style><?= $customCss ?></style>
     <?php endif; ?>
