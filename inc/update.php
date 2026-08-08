@@ -349,55 +349,58 @@ function update_remote_commit(&$why = null, $allowFetch = true) {
      * with no outbound route waited up to ten seconds — two sources, five
      * seconds each — for a tab to appear, and "what is the newest version" is a
      * question you ask deliberately, not one worth a network round trip every
-     * time you open a settings page.
-     *
-     * CACHE, both ways. A success is held for an hour; a FAILURE is held for
-     * fifteen minutes, which matters more than it sounds.
-     *
-     * The first version cached only successes, reasoning that a failure should
-     * not be remembered as "no newer version". True, but the effect was worse:
-     * a rate-limited host re-requested on EVERY render of this tab, which kept
-     * the limit pinned and meant it never recovered. GitHub allows 60 requests
-     * an hour PER IP unauthenticated — on shared hosting that IP is shared with
-     * every other site on the box, so the budget can be gone before this app
-     * asks once. Backing off is the only way back under the limit.
-     *
-     * The stale success is still returned while a refresh fails, so a transient
-     * outage shows the last known answer rather than nothing. */
+     * time you open a settings page. */
     $cacheRaw = (string)opt('remote_commit_cache');
-    $stale = null;
-    if ($cacheRaw !== '') {
-        $cache = json_decode($cacheRaw, true);
-        if (is_array($cache)) {
-            if (!empty($cache['fetched_at']) && !empty($cache['date'])) {
-                if ((time() - (int)$cache['fetched_at']) < 3600) {
-                    return ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
-                }
-                $stale = ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
-            }
-            if (!empty($cache['failed_at']) && (time() - (int)$cache['failed_at']) < 900) {
-                $why = (string)($cache['why'] ?? 'unavailable');
-                return $stale;   // null unless a previous success is still on file
-            }
-        }
+    $cache = $cacheRaw !== '' ? json_decode($cacheRaw, true) : null;
+    if (!is_array($cache)) $cache = [];
+    $stale = !empty($cache['date']) ? ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''] : null;
+
+    if (!$allowFetch) {
+        /* Reading only: hand back whatever is on file, however old, with no
+         * freshness window applied — there is no "should we fetch" decision
+         * to make on this path, since it never fetches either way.
+         *
+         * A prior version applied the same 1-hour/15-minute windows below to
+         * BOTH branches, before this check even ran. That made the CHECK
+         * BUTTON A NO-OP whenever a successful check already existed within
+         * the last hour: pressing it just handed back the old cached answer,
+         * including its old fetched_at, so it looked like a fresh check had
+         * just run when nothing had been requested at all. */
+        if ($stale === null && !empty($cache['why'])) $why = (string)$cache['why'];
+        return $stale;
     }
 
-    /* Reading only: hand back whatever is on file, however old. An admin who
-     * checked last week should still see last week's answer rather than a
-     * blank — the tab labels it with when it was taken. */
-    if (!$allowFetch) return $stale;
+    /* From here on, $allowFetch = true — the button was pressed, and it must
+     * be allowed to reach GitHub even if a recent successful answer exists,
+     * or pressing it would never do anything different from just waiting.
+     *
+     * Two short windows still apply, and both are about the REQUEST, not
+     * about hiding a fresh answer:
+     *   - 60 seconds after a SUCCESS, to absorb a literal double click or a
+     *     resubmitted form, not to defeat a deliberate re-check minutes
+     *     later.
+     *   - 15 minutes after a FAILURE, because this path is reachable by
+     *     repeated human clicks in a way the passive one is not, and
+     *     retrying a live rate limit seconds later only makes it worse.
+     *     GitHub allows 60 requests an hour per IP unauthenticated — on
+     *     shared hosting that IP is shared with every other site on the box,
+     *     so the budget can be gone before this app asks even once. */
+    if (!empty($cache['fetched_at']) && (time() - (int)$cache['fetched_at']) < 60) {
+        return $stale;
+    }
+    if (!empty($cache['failed_at']) && (time() - (int)$cache['failed_at']) < 900) {
+        $why = (string)($cache['why'] ?? 'unavailable');
+        return $stale;
+    }
 
-    $fail = function ($reason) use (&$why, $stale, $cacheRaw) {
+    $fail = function ($reason) use (&$why, $stale, $cache) {
         $why = $reason;
         /* Preserve a previous success alongside the failure note, so backing
          * off does not throw away a date we already knew. */
         $keep = [];
-        if ($cacheRaw !== '') {
-            $prev = json_decode($cacheRaw, true);
-            if (is_array($prev) && !empty($prev['date'])) {
-                $keep = ['date' => $prev['date'], 'sha' => $prev['sha'] ?? '',
-                         'fetched_at' => (int)($prev['fetched_at'] ?? 0)];
-            }
+        if (!empty($cache['date'])) {
+            $keep = ['date' => $cache['date'], 'sha' => $cache['sha'] ?? '',
+                     'fetched_at' => (int)($cache['fetched_at'] ?? 0)];
         }
         opt_set('remote_commit_cache', json_encode($keep + ['failed_at' => time(), 'why' => $reason]));
         return $stale;
