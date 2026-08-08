@@ -25,7 +25,13 @@
  *    $csrf   — hidden CSRF field.
  * ============================================================================= */
 ?>
-<div class="card card-narrow">
+<?php // NOT card-narrow: that caps at 380px, which suits a login box or a
+      // confirm dialog. This is a full editor — poll settings plus the
+      // candidate list plus an add-a-game form — and matches add_game /
+      // add_poll, which are plain .card. classic was the only theme that
+      // looked right, and only because its own .content > .card override
+      // outranks .card-narrow and widened every narrow card on that theme. ?>
+<div class="card">
     <h1><?= e(t('poll_edit_title')) ?></h1>
 
     <?php if (!empty($error)): ?>

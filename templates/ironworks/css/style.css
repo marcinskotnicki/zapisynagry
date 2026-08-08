@@ -190,7 +190,7 @@ body.tpl-ironworks {
     background: var(--slate-3);
     border: 1px solid var(--brass-dim);
 }
-.tpl-ironworks .gc-tab:hover { background: var(--brass-dim); color: #fff6dd; text-decoration: none; }
+.tpl-ironworks .gc-tab:hover { background: #7d6418; color: #fff6dd; text-decoration: none; }
 .tpl-ironworks .gc-tab-del { background: #5e2626; border-color: #8c3b3b; }
 .tpl-ironworks .gc-tab-del:hover { background: #8c3b3b; }
 
@@ -363,6 +363,35 @@ body.tpl-ironworks {
 .tpl-ironworks .poll-opt-bar > span { background: var(--brass); }
 .tpl-ironworks .poll-opt-bar.is-full > span { background: #7fbf6a; }
 .tpl-ironworks .poll-by, .tpl-ironworks .poll-deadline { color: var(--parchment-2); }
+.tpl-ironworks .poll-card .game-rules {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.tpl-ironworks .poll-card .poll-actions .btn {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 2px;
+    text-decoration: none;
+    color: var(--parchment);
+    background: var(--slate-3);
+    border: 1px solid var(--brass-dim);
+    box-shadow: none;
+}
+.tpl-ironworks .poll-card .poll-actions .btn:hover {
+    background: #7d6418;
+    color: #fff6dd;
+    text-decoration: none;
+}
+.tpl-ironworks .poll-card .poll-actions .btn-danger {
+    background: #5e2626;
+    border-color: #8c3b3b;
+    color: var(--parchment);
+}
+.tpl-ironworks .poll-card .poll-actions .btn-danger:hover { background: #8c3b3b; color: var(--parchment); }
 .tpl-ironworks .poll-card .rules-good { color: #8fd6a4; }
 .tpl-ironworks .poll-card .rules-mid  { color: #f0cf6a; }
 .tpl-ironworks .poll-card .rules-bad  { color: #ff9d94; }
