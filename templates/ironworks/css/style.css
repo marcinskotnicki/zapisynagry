@@ -52,7 +52,8 @@ body.tpl-ironworks {
 .tpl-ironworks .topbar,
 .tpl-ironworks .event-header,
 .tpl-ironworks .table-block,
-.tpl-ironworks .pager { color: var(--parchment); }
+.tpl-ironworks .pager,
+.tpl-ironworks .admin h1 { color: var(--parchment); }
 
 .tpl-ironworks h1, .tpl-ironworks h2, .tpl-ironworks h3 { font-family: var(--font-iw); font-weight: 600; }
 .tpl-ironworks .btn, .tpl-ironworks input, .tpl-ironworks select, .tpl-ironworks textarea {
@@ -405,10 +406,10 @@ body.tpl-ironworks {
 .tpl-ironworks .game-card.active .gc-info,
 .tpl-ironworks .poll-card.active { box-shadow: 0 0 0 2px var(--brass-lit), 0 8px 22px rgba(0, 0, 0, .5); }
 
-.tpl-ironworks .admin .tab { border-radius: 25px 25px 0 0; }
+.tpl-ironworks .admin .tab { border-radius: 25px 25px 0 0; color: var(--parchment-2); }
+.tpl-ironworks .admin .tab:hover { color: var(--text); }
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
-.tpl-ironworks .admin h1{color:var(--surface);}
 @media (max-width: 860px) {
     .tpl-ironworks .game-list { gap: 1.6rem; }
 }
