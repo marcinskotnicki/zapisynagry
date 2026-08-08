@@ -189,10 +189,26 @@ Notes that catch people out:
 
 ## 6. Themes and templates
 
-Ten themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
+Twelve themes in `templates/`: **light** (the base — `BASE_TEMPLATE`), **dark**,
 **classic**, **corkboard**, **elvish**, **space**, **steampunk**, **imperial**,
-**schematic** and **schematic-compact**. They're discovered by directory glob,
-so creating a folder registers one — there is no list to update.
+**schematic**, **schematic-compact**, **blossom** and **glass**. They're
+discovered by directory glob, so creating a folder registers one — there is no
+list to update.
+
+**A theme should restyle rather than fork wherever it can.** `blossom` is
+CSS-only: its off-grid pastel layout is `nth-child` transforms over light's
+markup, so a new field on light's card appears there for free. A fork is
+justified when the look needs a value CSS cannot derive (schematic's per-table
+colour channel) or markup light does not emit (its capacity track showing
+EMPTY seats — light renders only players that exist).
+
+**`glass` copies `schematic-compact`'s two partials verbatim** to reuse the
+strip layout, because `tpl_file()` resolves per theme and falls back only to
+light — a theme cannot inherit another theme's partial. `tests/test_newthemes.php`
+pins the pair byte-identical below their header comments, so the copy cannot rot
+silently. It also checks the copies still start with `<?php`: dropping that
+while editing a header lints perfectly clean and prints the whole comment block
+onto the page.
 
 **One `@media` block per condition per file.** Duplicates are legal but make
 the cascade hard to follow, and a media query adds no specificity — so which of
