@@ -133,6 +133,8 @@ INSERT INTO options (key, value) VALUES
     ('chat_logged_in_only',   '0'),
     ('notify_new_event',      '0'),
     ('custom_css',            ''),
+    ('last_update_at',        ''),
+    ('remote_commit_cache',   ''),
     -- Public archives. Off by default: switching it on changes how EVENTS
     -- behave (creating a new one no longer archives the old), so it must be a
     -- deliberate choice rather than a surprise on upgrade.

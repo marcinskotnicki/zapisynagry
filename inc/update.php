@@ -315,6 +315,97 @@ function update_zip_url() {
  * @param string $root  Absolute path to the app root (where index.php lives).
  * @return string[]
  */
+/**
+ * When the newest commit on the update branch was made, or null.
+ *
+ * Best-effort by design. This runs while an admin waits for a tab to render,
+ * so every failure path returns null and the tab simply omits the line:
+ *   - no curl, no network, DNS failure, host blocks outbound requests;
+ *   - a non-GitHub github_url override, which has no API to ask;
+ *   - GitHub rate-limiting (60/hour per IP unauthenticated), which a shared
+ *     host shares across every site on it — so this WILL be refused sometimes.
+ *
+ * CACHED for an hour in an option. Without it, every render of the Update tab
+ * spends a network round trip, and an admin clicking between tabs would burn
+ * the rate limit on its own. The cache stores the answer AND the time it was
+ * fetched, so a failure is not cached as "no newer version" — a failed lookup
+ * leaves the previous good answer in place until it expires normally.
+ *
+ * @return array|null  ['date' => 'Y-m-d H:i:s' UTC, 'sha' => short hash]
+ */
+function update_remote_commit() {
+    $cacheRaw = (string)opt('remote_commit_cache');
+    if ($cacheRaw !== '') {
+        $cache = json_decode($cacheRaw, true);
+        if (is_array($cache) && !empty($cache['fetched_at'])
+            && (time() - (int)$cache['fetched_at']) < 3600
+            && !empty($cache['date'])) {
+            return ['date' => $cache['date'], 'sha' => $cache['sha'] ?? ''];
+        }
+    }
+
+    if (!function_exists('curl_init')) return null;
+
+    /* Only github.com has the API this speaks. An admin who pointed
+     * github_url at some other host gets no line rather than a wrong one. */
+    $repo = update_repo_url();
+    if (!preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) return null;
+    $owner = $m[1];
+    $name  = preg_replace('/\.git$/i', '', $m[2]);
+    $branch = update_branch();
+
+    $api = 'https://api.github.com/repos/' . rawurlencode($owner) . '/' . rawurlencode($name)
+         . '/commits/' . rawurlencode($branch);
+
+    $ch = curl_init($api);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    /* Short, because an admin is watching a page render. The updater itself can
+     * afford 300s for a zip; this cannot afford five. */
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'zapisynagry-updater');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/vnd.github+json']);
+    $body = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($body === false || $code < 200 || $code >= 300) return null;
+
+    $out = update_parse_commit((string)$body);
+    if ($out === null) return null;
+
+    opt_set('remote_commit_cache', json_encode($out + ['fetched_at' => time()]));
+    return $out;
+}
+
+/**
+ * Pull the commit date and short hash out of a GitHub commit API response.
+ *
+ * Split from the fetch so it can be tested without a network: the transport is
+ * a handful of curl options, but THIS is where a change in GitHub's response
+ * shape would silently produce a wrong date, and it is the half worth pinning.
+ *
+ * The COMMITTER date, not the author date: a commit can be authored weeks
+ * before it lands on a branch, and what matters here is when the code this
+ * install would actually pull became available.
+ *
+ * @param string $json  Raw response body.
+ * @return array|null   ['date' => 'Y-m-d H:i:s' UTC, 'sha' => short hash]
+ */
+function update_parse_commit($json) {
+    $data = json_decode($json, true);
+    if (!is_array($data)) return null;
+
+    $iso = $data['commit']['committer']['date'] ?? ($data['commit']['author']['date'] ?? '');
+    if (!is_string($iso) || $iso === '') return null;
+    $ts = strtotime($iso);
+    if ($ts === false) return null;
+
+    return ['date' => gmdate('Y-m-d H:i:s', $ts), 'sha' => substr((string)($data['sha'] ?? ''), 0, 7)];
+}
+
 function update_run($root) {
     $results = [];
 
@@ -527,6 +618,13 @@ function update_run($root) {
         $results[] = t('update_cache_reset');
     }
     clearstatcache(true);                        // also drop PHP's file-stat cache
+
+    /* Stamp WHEN, so the tab can say what it last did. Stored as an option
+     * rather than read back from the audit log: log rows are pruned on the
+     * log_retention_days schedule, so on a site that keeps a year of logs the
+     * "last updated" line would silently go blank the moment the entry aged
+     * out, while the install is no less updated than it was. */
+    opt_set('last_update_at', gmdate('Y-m-d H:i:s'));
 
     $results[] = t('update_done');
     return $results;

@@ -152,6 +152,10 @@ input[type="checkbox"]{width:auto;}
 .options-form legend { font-weight: 700; padding: 0 0.4rem; }
 .options-form .field { margin-bottom: 0.5rem; }
 
+.update-status { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.6rem; margin: 0 0 1rem; font-size: 0.92rem; }
+.update-status dt { color: var(--text-muted); }
+.update-status dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .update-status { grid-template-columns: 1fr; } .update-status dd { margin-bottom: 0.4rem; } }
 .update-log {
     background: var(--surface-2);
     border: 1px solid var(--border);

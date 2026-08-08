@@ -411,8 +411,8 @@ body.tpl-starchart {
 }
 
 @media (max-width: 700px) {
-    .tpl-starchart .game-card { flex-direction: column; width: 100%; }
+    .tpl-starchart .game-card { flex-direction: column; width: 100%; align-items:center;}
     .tpl-starchart .gc-info { width: 100%; flex: 1 1 auto; }
-    .tpl-starchart .gc-players { margin-left: 0; margin-top: 0.6rem; min-width: 0; }
+    .tpl-starchart .gc-players { margin-left: 0; margin-top: 0.0rem; min-width: 90%; }
     .tpl-starchart .gc-resign { margin-right: 0; }
 }

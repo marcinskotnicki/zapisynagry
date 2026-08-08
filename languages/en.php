@@ -217,6 +217,9 @@ return [
 
     // ---- Admin: updater -----------------------------------------------------
     'update_title'        => 'Update the system',
+    'update_when'                     => '%s at %s',
+    'update_last_run'                 => 'Last updated:',
+    'update_remote_latest'            => 'Newest version available:',
     'update_intro'        => 'Download the latest files from GitHub and apply any new database tables or columns. Your settings, database, and uploads are left untouched.',
     'update_run'          => 'Check for and apply updates',
     'update_done'         => 'Update finished.',

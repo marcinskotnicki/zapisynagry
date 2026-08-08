@@ -209,6 +209,9 @@ return [
 
     // ---- Admin: updater -----------------------------------------------------
     'update_title'        => 'Aktualizacja systemu',
+    'update_when'                     => '%s o %s',
+    'update_last_run'                 => 'Ostatnia aktualizacja:',
+    'update_remote_latest'            => 'Najnowsza dostępna wersja:',
     'update_intro'        => 'Pobierz najnowsze pliki z GitHuba i zastosuj nowe tabele lub kolumny bazy. Ustawienia, baza i przesłane pliki pozostają nietknięte.',
     'update_run'          => 'Sprawdź i zastosuj aktualizacje',
     'update_done'         => 'Aktualizacja zakończona.',

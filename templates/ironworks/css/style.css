@@ -414,7 +414,7 @@ body.tpl-ironworks {
 }
 
 @media (max-width: 700px) {
-    .tpl-ironworks .game-card { flex-direction: column; width: 100%; }
+    .tpl-ironworks .game-card { flex-direction: column; width: 100%; align-items:stretch;}
     .tpl-ironworks .gc-info { width: 100%; flex: 1 1 auto; }
     .tpl-ironworks .gc-players { margin-left: 0; margin-top: 0.6rem; min-width: 0; }
     .tpl-ironworks .gc-resign { margin-right: 0; }
