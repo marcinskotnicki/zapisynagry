@@ -52,7 +52,7 @@ body.tpl-glass {
 .tpl-glass .btn, .tpl-glass input, .tpl-glass select, .tpl-glass textarea {
     font-family: var(--font-gl);
 }
-.tpl-glass .content { max-width: var(--maxw); }
+.tpl-glass .content { min-width:85%;max-width: var(--maxw); }
 
 .tpl-glass .topbar {
     background: rgba(255, 255, 255, .10);
