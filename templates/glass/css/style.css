@@ -10,11 +10,12 @@
     --frost:     #f4f7ff;
     --frost-dim: #c3ccdf;
 
-    --ch1: #4aa8ff;
-    --ch2: #35d0c0;
-    --ch3: #a986ff;
-    --ch4: #ff8fb8;
-    --ch5: #ffc861;
+    --ch1: #46d99a;
+    --ch2: #9fdc4a;
+    --ch3: #ffc861;
+    --ch4: #ff9a4a;
+    --ch5: #ff7a90;
+    --ch-poll: #a986ff;
     --chan: var(--ch1);
 
     --font-gl: 'Inter', 'SF Pro Display', 'Segoe UI Variable', 'Segoe UI',
@@ -179,6 +180,7 @@ body.tpl-glass {
     .tpl-glass .sc-strip:nth-child(even):after { display: none; }
 }
 
+.tpl-glass .sc-poll { --chan: var(--ch-poll); }
 .tpl-glass .sc-chan-1 { --chan: var(--ch1); }
 .tpl-glass .sc-chan-2 { --chan: var(--ch2); }
 .tpl-glass .sc-chan-3 { --chan: var(--ch3); }
@@ -331,7 +333,9 @@ body.tpl-glass {
 .tpl-glass .sc-disc { flex: 1 1 100%; }
 
 .tpl-glass .btn {
-    background: rgba(255, 255, 255, .14);
+    --btn-face: rgba(255, 255, 255, .14);
+    background-color: var(--btn-face);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--edge-soft);
@@ -341,16 +345,21 @@ body.tpl-glass {
     font-weight: 600;
     padding: 0.28rem 0.7rem;
     box-shadow: inset 0 1px 0 var(--edge-soft);
-    transition: background .16s ease, box-shadow .16s ease;
+    transition: background-image .16s ease, box-shadow .16s ease;
 }
-.tpl-glass .btn:hover { background: rgba(255, 255, 255, .24); box-shadow: inset 0 1px 0 var(--edge), 0 4px 16px rgba(0, 0, 0, .28); }
+.tpl-glass .btn:hover {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .40), rgba(255, 255, 255, .10));
+    box-shadow: inset 0 1px 0 var(--edge), 0 4px 16px rgba(0, 0, 0, .28);
+}
 .tpl-glass .btn-primary {
-    background: linear-gradient(180deg, rgba(255, 255, 255, .40), rgba(255, 255, 255, .04)), var(--primary);
+    --btn-face: var(--primary);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .40), rgba(255, 255, 255, .04));
     border-color: rgba(255, 255, 255, .50);
     color: #06121f;
 }
 .tpl-glass .btn-danger {
-    background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .04)), #ff7a90;
+    --btn-face: #ff7a90;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .04));
     border-color: rgba(255, 255, 255, .45);
     color: #2a0710;
 }
@@ -385,7 +394,7 @@ body.tpl-glass {
 .tpl-glass .poll-card.active { box-shadow: 0 0 0 2px rgba(74, 168, 255, .65), 0 14px 36px rgba(0, 0, 0, .40); }
 
 .tpl-glass .admin .tab-body { color: var(--frost); }
-.tpl-glass .admin .tab { color: var(--frost-dim); border-radius: 999px 999px 0 0; }
+.tpl-glass .admin .tab { color: var(--frost-dim); border-radius: 25px 25px 0 0; }
 .tpl-glass .admin .tab-active, .tpl-glass .admin .tab:hover { color: #fff; }
 .tpl-glass .grid th { color: var(--frost-dim); }
 .tpl-glass .grid td { border-color: var(--edge-soft); }

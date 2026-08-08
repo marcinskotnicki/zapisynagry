@@ -32,6 +32,12 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
     // value the TIMELINE can also derive, which is what lets a game's band
     // there match its strip here. Falls back to the row id if the render var is
     // ever absent, so an older caller still gets a colour rather than none.
+    // A POLL HAS NO DIFFICULTY OF ITS OWN — each candidate carries one, and
+    // picking any single candidate's would be arbitrary. Game strips key their
+    // accent off weight in this theme, so a hue from that scale would assert a
+    // difficulty this poll does not have: css/style.css overrides .sc-poll to a
+    // colour off the scale entirely. This value is left computed and rendered
+    // so the markup stays shared with schematic-compact, where it IS the key.
     $chan = (((int)($table_no ?? $poll['table_id'])) % 5) + 1;
 ?>
 <article class="poll-card sc-strip sc-poll sc-chan-<?= $chan ?>" id="poll-<?= (int)$poll['id'] ?>">

@@ -39,33 +39,6 @@ $canVote = !$readonly && can_signup();
     $canMsgAll   = !$readonly && messaging_allowed();
     $canAddCand  = !$readonly && poll_can_add_candidate($poll);
     ?>
-    <?php // Skip the row entirely when it would be empty — the read-only
-          // (archived) view shows no controls at all. ?>
-    <?php if ($canEditPoll || $canEnd || $canMsgAll || $canAddCand): ?>
-        <?php // First row: the actions, delete first, mirroring the game card's
-              // DELETE / EDIT tab order. Wraps on narrow screens. ?>
-        <div class="poll-actions">
-            <?php if ($canEditPoll): ?>
-                <?php // delete_poll.php re-checks this — the button only hides. ?>
-                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
-                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
-                <?php if (is_admin()): // move this poll to another table on the same day ?>
-                    <a class="btn btn-small" href="move_item.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('move_btn')) ?></a>
-                <?php endif; ?>
-            <?php endif; ?>
-            <?php if ($canEnd): ?>
-                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
-            <?php endif; ?>
-            <?php // Shown to anyone allowed to add — the proposer, an admin, or
-                  // everyone when the proposer opted in. ?>
-            <?php if ($canAddCand): ?>
-                <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
-            <?php endif; ?>
-            <?php if ($canMsgAll): // mail everyone who voted ?>
-                <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
 
     <?php // Second row: what this is and when. UNCONDITIONAL — the start time,
           // proposer name and the tag are information every viewer gets, not
@@ -187,6 +160,34 @@ $canVote = !$readonly && can_signup();
                         <button type="submit" class="btn btn-small btn-primary"><?= e(t('comment_submit')) ?></button>
                     </form>
                 </details>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php // Skip the row entirely when it would be empty — the read-only
+          // (archived) view shows no controls at all. ?>
+    <?php if ($canEditPoll || $canEnd || $canMsgAll || $canAddCand): ?>
+        <?php // First row: the actions, delete first, mirroring the game card's
+              // DELETE / EDIT tab order. Wraps on narrow screens. ?>
+        <div class="poll-actions bl-actions">
+            <?php if ($canEditPoll): ?>
+                <?php // delete_poll.php re-checks this — the button only hides. ?>
+                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
+                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+                <?php if (is_admin()): // move this poll to another table on the same day ?>
+                    <a class="btn btn-small" href="move_item.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('move_btn')) ?></a>
+                <?php endif; ?>
+            <?php endif; ?>
+            <?php if ($canEnd): ?>
+                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
+            <?php endif; ?>
+            <?php // Shown to anyone allowed to add — the proposer, an admin, or
+                  // everyone when the proposer opted in. ?>
+            <?php if ($canAddCand): ?>
+                <a class="btn btn-small" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
+            <?php endif; ?>
+            <?php if ($canMsgAll): // mail everyone who voted ?>
+                <a class="msg-icon msg-icon-all" href="message.php?poll=<?= (int)$poll['id'] ?>" title="<?= e(t('msgbtn_poll_all')) ?>" aria-label="<?= e(t('msgbtn_poll_all')) ?>">&#9993;</a>
             <?php endif; ?>
         </div>
     <?php endif; ?>

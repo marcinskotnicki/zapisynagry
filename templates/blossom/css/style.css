@@ -281,10 +281,11 @@ body.tpl-blossom {
     border-radius: 30px 22px 30px 22px;
     border: 2px solid var(--petal);
     background: var(--cream);
+    box-shadow: 0 12px 26px rgba(91, 66, 96, .12);
 }
 
 .tpl-blossom .grid th { color: var(--plum-2); }
-.tpl-blossom .admin .tab { border-radius: 999px 999px 0 0; }
+.tpl-blossom .admin .tab { border-radius: 25px 25px 0 0; }
 
 @media (max-width: 700px) {
     .tpl-blossom .day-tabs { justify-content: flex-start; }

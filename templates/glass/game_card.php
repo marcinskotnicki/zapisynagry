@@ -48,13 +48,23 @@
     }
     $max  = (int)$g['max_players'];
     $open = max(0, $max - count($crew));
-// THE COLOUR KEY comes from the table NUMBER, not its row id. Two reasons:
-    // the number is what the visitor sees ("Table #2") and is 1,2,3… per event,
-    // so adjacent tables always differ and the key is stable; and it is the one
-    // value the TIMELINE can also derive, which is what lets a game's band
-    // there match its strip here. Falls back to the row id if the render var is
-    // ever absent, so an older caller still gets a colour rather than none.
-    $chan = (((int)($table_no ?? $g['table_id'])) % 5) + 1;
+// THE COLOUR KEY IS DIFFICULTY here, which is where this theme parts company
+    // with schematic-compact. There the accent keys off the TABLE NUMBER, so a
+    // wall of strips reads as "which table is this on". A glass panel already
+    // carries far more colour than a printed one, so spending it on the table —
+    // which the heading directly above the list already states — wastes it;
+    // spending it on weight makes the list scannable for "something light" at a
+    // glance, which is the question people actually arrive with.
+    //
+    // Safe to diverge because glass does NOT colour the timeline by channel
+    // (schematic-compact does, via .tl-chan-*, which is derived from the table
+    // number in light's timeline.php). Were that added here, the bands would
+    // disagree with the strips unless the timeline learned about weight too.
+    //
+    // weight_bucket() already returns 1..5, the exact range the .sc-chan-*
+    // classes cover, so no arithmetic is needed and an unrated game still lands
+    // in a real bucket rather than falling out of the scale.
+    $chan = $bucket;
     // The track draws a chip per seat, capped so a huge game stays one row.
     $trackSlots = min($max, 12);
     ?>
