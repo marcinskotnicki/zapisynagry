@@ -220,6 +220,7 @@ return [
     'update_when'                     => '%s at %s',
     'update_last_run'                 => 'Last updated:',
     'update_remote_latest'            => 'Newest version available:',
+    'update_remote_unavailable'       => 'unavailable (%s)',
     'update_intro'        => 'Download the latest files from GitHub and apply any new database tables or columns. Your settings, database, and uploads are left untouched.',
     'update_run'          => 'Check for and apply updates',
     'update_done'         => 'Update finished.',

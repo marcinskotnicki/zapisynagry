@@ -333,7 +333,8 @@ function update_zip_url() {
  *
  * @return array|null  ['date' => 'Y-m-d H:i:s' UTC, 'sha' => short hash]
  */
-function update_remote_commit() {
+function update_remote_commit(&$why = null) {
+    $why = '';
     $cacheRaw = (string)opt('remote_commit_cache');
     if ($cacheRaw !== '') {
         $cache = json_decode($cacheRaw, true);
@@ -344,12 +345,15 @@ function update_remote_commit() {
         }
     }
 
-    if (!function_exists('curl_init')) return null;
+    if (!function_exists('curl_init')) { $why = 'no curl'; return null; }
 
     /* Only github.com has the API this speaks. An admin who pointed
      * github_url at some other host gets no line rather than a wrong one. */
     $repo = update_repo_url();
-    if (!preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) return null;
+    if (!preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) {
+        $why = 'not a github.com source';
+        return null;
+    }
     $owner = $m[1];
     $name  = preg_replace('/\.git$/i', '', $m[2]);
     $branch = update_branch();
@@ -369,12 +373,26 @@ function update_remote_commit() {
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/vnd.github+json']);
     $body = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err  = curl_error($ch);
     curl_close($ch);
 
-    if ($body === false || $code < 200 || $code >= 300) return null;
+    /* Report WHY rather than only that it failed. A blank line on the tab is
+     * indistinguishable between "no network", "rate limited" and "my code is
+     * wrong", which is exactly the position this feature was in when it did
+     * not show up on a live host. */
+    if ($body === false || $err !== '') {
+        $why = 'request failed' . ($err !== '' ? ': ' . $err : '');
+        return null;
+    }
+    if ($code < 200 || $code >= 300) {
+        /* 403 here is usually GitHub's rate limit (60/hour per IP, shared
+         * across every site on a shared host), not a permissions problem. */
+        $why = 'HTTP ' . $code;
+        return null;
+    }
 
     $out = update_parse_commit((string)$body);
-    if ($out === null) return null;
+    if ($out === null) { $why = 'unexpected response format'; return null; }
 
     opt_set('remote_commit_cache', json_encode($out + ['fetched_at' => time()]));
     return $out;

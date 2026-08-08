@@ -45,9 +45,13 @@ if ($lastRaw === '') {
     $lastRaw = (string)($row['created_at'] ?? '');
 }
 
-/* Best-effort and cached for an hour; returns null on any failure, in which
- * case the template simply omits the line. See update_remote_commit(). */
-$remote = update_remote_commit();
+/* Best-effort and cached for an hour. On failure it reports a short reason,
+ * shown beside the line rather than swallowed: a missing line is
+ * indistinguishable between "this host has no outbound network", "GitHub is
+ * rate-limiting us" and "the code is wrong", and telling them apart from a
+ * live site is otherwise guesswork. */
+$remoteWhy = '';
+$remote = update_remote_commit($remoteWhy);
 
 $tab_body = tpl_capture('admin_update', [
     'csrf'      => csrf_field(),
@@ -55,4 +59,5 @@ $tab_body = tpl_capture('admin_update', [
     'last_run'  => update_when($lastRaw), // '' when it has never been run
     'remote'    => $remote === null ? '' : update_when($remote['date']),
     'remote_sha'=> $remote['sha'] ?? '',
+    'remote_why'=> $remote === null ? $remoteWhy : '',
 ]);
