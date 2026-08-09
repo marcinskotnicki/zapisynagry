@@ -43,8 +43,11 @@ body.tpl-schematic-compact {
     color: var(--paper);
     font-family: var(--font-sc);
 }
-.tpl-schematic .admin .tab-body, .tpl-schematic .userpanel{
+.tpl-schematic-compact .admin .tab-body, .tpl-schematic-compact .userpanel{
     color: var(--board);
+}
+.tpl-schematic-compact .userpanel h1,  .tpl-schematic-compact .userpanel>h2{
+    color: var(--paper);
 }
 .tpl-schematic-compact .admin .tab {
     color: var(--paper)
