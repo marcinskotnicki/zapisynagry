@@ -758,7 +758,6 @@ body.chat-open .chat-toggle-close { display: inline; }
 
     .archive-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .archive-badge { justify-self: start; }
-    .lib-alpha-btn, .btn-small.lib-alpha-btn {min-width:15%;}
 }
 @media (min-width: 1001px) {
     .content{min-width:950px;}
@@ -1062,4 +1061,7 @@ trix-toolbar .trix-button--dialog {
     trix-toolbar .trix-button-row { flex-wrap: wrap; overflow-x: visible; overflow-y: hidden; justify-content: flex-start; }
     trix-toolbar .trix-button-group { margin-bottom: 0.3rem; }
     trix-editor { min-height: 12rem; }
+
+
+    .lib-alpha-btn, .btn-small.lib-alpha-btn {min-width:15%;}
 }
