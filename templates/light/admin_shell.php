@@ -11,7 +11,7 @@
  *    $active_tab — current tab key (highlights its nav link).
  *    $tab_body   — pre-rendered HTML for the active tab (a string).
  *    $flash      — optional success/info message, or null.
- *    $flash_kind — 'ok' (green) or 'warn' (amber): a caveat on an action
+ *    $flash_kind — 'ok' (green), 'warn' (amber) or 'error' (red): a caveat on an action
  *                  that DID succeed but is about to be undone by something
  *                  else. Green would bury exactly the part worth reading.
  * ============================================================================= */
@@ -37,12 +37,22 @@ if (chat_enabled()) {
           + ['chat' => 'tab_chat']
           + array_slice($tabs, $pos, null, true);
 }
+if (club_shelf_enabled()) {
+    $pos  = array_search('update', array_keys($tabs), true);
+    $tabs = array_slice($tabs, 0, $pos, true)
+          + ['club_shelf' => 'tab_club_shelf']
+          + array_slice($tabs, $pos, null, true);
+}
 ?>
 <div class="admin">
     <h1><?= e(t('admin_panel')) ?></h1>
 
     <?php if (!empty($flash)): ?>
-        <p class="msg msg-<?= ($flash_kind ?? 'ok') === 'warn' ? 'warn' : 'ok' ?>"><?= e($flash) ?></p>
+        <?php // 'error' as well as 'warn': anything not explicitly listed used to
+              // fold to green, so a refusal read as a success. Same bug the
+              // member-facing flashes had. ?>
+        <?php $fk = in_array($flash_kind ?? 'ok', ['ok', 'warn', 'error'], true) ? ($flash_kind ?? 'ok') : 'ok'; ?>
+        <p class="msg msg-<?= e($fk) ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
     <nav class="tabs">

@@ -383,6 +383,13 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('library_mail_venue', 'opt_note_library_off'); ?>
         <p class="field-note"><?= e(t('opt_library_mail_venue_note')) ?></p>
 
+        <?php // The club's OWN shelf. Deliberately NOT gated on the members'
+              // library above — a club may keep a cabinet at the venue without
+              // asking members to list their collections, or the other way
+              // round, so this one carries no "has no effect while..." note. ?>
+        <?php $toggle('club_shelf'); ?>
+        <p class="field-note"><?= e(t('opt_club_shelf_note')) ?></p>
+
         <?php // How the shared game list is broken up once it outgrows a screen. ?>
         <div class="field">
             <label for="library_pagination"><?= e(t('opt_library_pagination')) ?></label>

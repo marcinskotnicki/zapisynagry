@@ -41,7 +41,12 @@
  * somebody reused this partial.
  */
 if (!function_exists('lib_render_row')):
-function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
+function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '', $scope = 'member') {
+    /* $scope tells the manage forms WHICH collection the row belongs to. The two
+     * shelves live in different tables, so a club row's id and a member row's id
+     * can collide — without this the handler would happily act on whichever
+     * table it guessed, and deleting "game 7" could remove the wrong game
+     * entirely. Posted as a hidden field and checked server-side. */
     $link = library_link($g);
     $inactive = isset($g['is_active']) && (int)$g['is_active'] !== 1;
     ?>
@@ -111,6 +116,7 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
                             <?= $csrf ?>
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <input type="hidden" name="scope" value="<?= e($scope) ?>">
                             <div class="field field-link">
                                 <label for="libr_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
                                 <input type="url" id="libr_<?= (int)$g['id'] ?>" name="link"
@@ -129,6 +135,7 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
                             <?= $csrf ?>
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <input type="hidden" name="scope" value="<?= e($scope) ?>">
                             <div class="field field-name">
                                 <label for="libm_n_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
                                 <input type="text" id="libm_n_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>" required>
@@ -161,6 +168,7 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
                     <?= $csrf ?>
                     <input type="hidden" name="action" value="toggle">
                     <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <input type="hidden" name="scope" value="<?= e($scope) ?>">
                     <input type="hidden" name="active" value="<?= $inactive ? '1' : '0' ?>">
                     <button type="submit" class="btn btn-small">
                         <?= $inactive ? e(t('lib_activate')) : e(t('lib_deactivate')) ?>
@@ -171,6 +179,7 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
                     <?= $csrf ?>
                     <input type="hidden" name="action" value="remove">
                     <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <input type="hidden" name="scope" value="<?= e($scope) ?>">
                     <button type="submit" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
                 </form>
             </span>
@@ -196,14 +205,69 @@ endif;
 
     <?php // With the members tab off there is only one view, so a tab strip of
           // one tab would be noise. ?>
-    <?php if ($show_members): ?>
+    <?php // Only when there is more than one view to move between: a strip of a
+          // single tab is noise, which is the case for a club running only its
+          // own shelf. ?>
+    <?php if (($tab_count ?? 0) > 1): ?>
         <nav class="day-tabs lib-tabs">
-            <a class="day-tab<?= $tab === 'games' ? ' day-tab-active' : '' ?>" href="library.php?tab=games"><?= e(t('lib_tab_games')) ?></a>
-            <a class="day-tab<?= $tab === 'members' ? ' day-tab-active' : '' ?>" href="library.php?tab=members"><?= e(t('lib_tab_members')) ?></a>
+            <?php if (!empty($show_games)): ?>
+                <a class="day-tab<?= $tab === 'games' ? ' day-tab-active' : '' ?>" href="library.php?tab=games"><?= e(t('lib_tab_games')) ?></a>
+            <?php endif; ?>
+            <?php if (!empty($show_members)): ?>
+                <a class="day-tab<?= $tab === 'members' ? ' day-tab-active' : '' ?>" href="library.php?tab=members"><?= e(t('lib_tab_members')) ?></a>
+            <?php endif; ?>
+            <?php if (!empty($show_club)): ?>
+                <a class="day-tab<?= $tab === 'club' ? ' day-tab-active' : '' ?>" href="library.php?tab=club"><?= e(t('lib_tab_club')) ?></a>
+            <?php endif; ?>
         </nav>
     <?php endif; ?>
 
-    <?php if ($tab === 'games'): ?>
+    <?php if ($tab === 'club'): ?>
+        <?php // Same row markup and the same alphabet/pager as the members'
+              // list; the one difference is that no owners are named, because
+              // there is only one owner and the tab already says who. ?>
+        <?php if (($mode ?? 'all') === 'alpha' && !empty($letters)): ?>
+            <nav class="lib-alpha">
+                <?php foreach ($letters as $l => $count): ?>
+                    <a class="btn btn-small lib-alpha-btn<?= ($letter ?? '') === (string)$l ? ' lib-alpha-active' : '' ?>"
+                       href="library.php?tab=club&amp;letter=<?= rawurlencode((string)$l) ?>"><?= e($l) ?>
+                        <span class="lib-alpha-count"><?= (int)$count ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+            <?php if (($letter ?? '') !== ''): ?>
+                <p class="lib-alpha-back">
+                    <a class="btn btn-small" href="library.php?tab=club"><?= e(t('lib_all_letters')) ?></a>
+                </p>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if (empty($club_games)): ?>
+            <?php if (($mode ?? 'all') === 'alpha' && !empty($letters) && ($letter ?? '') === ''): ?>
+                <p class="muted"><?= e(t('lib_pick_letter')) ?></p>
+            <?php else: ?>
+                <p class="muted"><?= e(t('lib_club_empty')) ?></p>
+            <?php endif; ?>
+        <?php else: ?>
+            <ul class="lib-list">
+                <?php foreach ($club_games as $g): ?>
+                    <?php lib_render_row($g, null, !empty($club_manage), $csrf ?? '', 'club'); ?>
+                <?php endforeach; ?>
+            </ul>
+            <?php if (($mode ?? 'all') === 'pages' && ($page_count ?? 1) > 1): ?>
+                <nav class="pager">
+                    <?php if (($page ?? 1) > 1): ?>
+                        <a class="btn btn-small" href="library.php?tab=club&amp;page=<?= (int)$page - 1 ?>"><?= e(t('pager_prev')) ?></a>
+                    <?php endif; ?>
+                    <span class="pager-pos"><?= e(t('pager_position', (int)$page, (int)$page_count)) ?></span>
+                    <?php if (($page ?? 1) < ($page_count ?? 1)): ?>
+                        <a class="btn btn-small" href="library.php?tab=club&amp;page=<?= (int)$page + 1 ?>"><?= e(t('pager_next')) ?></a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        <?php endif; ?>
+
+    <?php elseif ($tab === 'games'): ?>
         <?php // ALPHABETICAL INDEX. With no letter chosen this is the whole
               // page: a strip of letters that actually have games behind them,
               // so nothing leads to an empty list. ?>

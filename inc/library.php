@@ -127,6 +127,231 @@ function library_letters(array $games) {
     return $out;
 }
 
+/* -----------------------------------------------------------------------------
+ *  THE CLUB'S OWN SHELF
+ *  Games the club owns, as opposed to games its members own. Independent of the
+ *  members' library: either can be switched on without the other.
+ *
+ *  Only the SQL differs from the member functions above — everything that
+ *  carries the actual behaviour (BGG lookup and promotion, link sanitising,
+ *  letter grouping, pagination, every template) is shared, because none of it
+ *  cares who owns a row.
+ * -------------------------------------------------------------------------- */
+
+/**
+ * Is the club's own shelf switched on?
+ * @return bool
+ */
+function club_shelf_enabled() {
+    return opt_bool('club_shelf');
+}
+
+/**
+ * Is there any library at all to link to — members', club's, or both?
+ *
+ * The header link and library.php ask this rather than either switch on its
+ * own, so turning one off never leaves a link pointing at an empty page.
+ * @return bool
+ */
+function library_any_enabled() {
+    return library_enabled() || club_shelf_enabled();
+}
+
+/**
+ * The club's shelf, alphabetically.
+ *
+ * @param bool $activeOnly  True for the public view; admins see hidden rows too.
+ * @return array
+ */
+function club_shelf_all($activeOnly = false) {
+    return db_all(
+        'SELECT * FROM club_library_games'
+        . ($activeOnly ? ' WHERE is_active = 1' : '')
+        . ' ORDER BY name COLLATE NOCASE ASC, year ASC'
+    );
+}
+
+/**
+ * One row from the club's shelf, or null.
+ * @param int $rowId
+ * @return array|null
+ */
+function club_shelf_entry($rowId) {
+    if ($rowId <= 0) return null;
+    return db_one('SELECT * FROM club_library_games WHERE id = ?', [(int)$rowId]);
+}
+
+/**
+ * Add a game to the club's shelf.
+ *
+ * INSERT OR IGNORE against UNIQUE(bgg_id), so re-adding a BGG game the club
+ * already has is a no-op and a re-run sync cannot duplicate anything — the same
+ * property library_add() relies on.
+ *
+ * @param array $game  ['name','year','bgg_id','link','thumbnail']
+ * @return bool  True when a row was actually written.
+ */
+function club_shelf_add(array $game) {
+    $name = trim((string)($game['name'] ?? ''));
+    if ($name === '') return false;
+
+    // rowCount(), not lastInsertId(): the latter is connection-wide and stale
+    // when INSERT OR IGNORE skips, which made every duplicate report success.
+    $stmt = db_run(
+        'INSERT OR IGNORE INTO club_library_games (name, year, bgg_id, link, thumbnail)
+         VALUES (?,?,?,?,?)',
+        [
+            $name,
+            !empty($game['year']) ? (int)$game['year'] : null,
+            !empty($game['bgg_id']) ? (int)$game['bgg_id'] : null,
+            !empty($game['link']) ? $game['link'] : null,
+            !empty($game['thumbnail']) ? $game['thumbnail'] : null,
+        ]
+    );
+    return $stmt->rowCount() > 0;
+}
+
+/**
+ * Remove one game from the club's shelf.
+ * @param int $rowId
+ * @return void
+ */
+function club_shelf_remove($rowId) {
+    db_run('DELETE FROM club_library_games WHERE id = ?', [(int)$rowId]);
+}
+
+/**
+ * Show or hide one game in the public view of the club's shelf.
+ * @param int  $rowId
+ * @param bool $active
+ * @return void
+ */
+function club_shelf_set_active($rowId, $active) {
+    db_run('UPDATE club_library_games SET is_active = ? WHERE id = ?',
+           [$active ? 1 : 0, (int)$rowId]);
+}
+
+/**
+ * Edit a manually added club entry, promoting it if the link turns out to be
+ * a BGG game page. Mirrors library_update_manual(), same result shape.
+ *
+ * @return array  ['ok'=>bool, 'promoted'?, 'merged'?, 'name'?, 'why'?]
+ */
+function club_shelf_update_manual($rowId, $name, $year, $link = null) {
+    $name = trim((string)$name);
+    if ($name === '') return ['ok' => false, 'why' => 'name'];
+
+    $row = db_one('SELECT * FROM club_library_games WHERE id = ? AND bgg_id IS NULL', [(int)$rowId]);
+    if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    require_once __DIR__ . '/events.php';   // game_link_sanitize()
+    $link = $link === null ? (string)($row['link'] ?? '') : game_link_sanitize($link);
+
+    // Same promotion rules as a member's entry — see library_update_manual().
+    $bggId = library_bgg_id_from_link($link);
+    if ($bggId > 0) {
+        $existing = db_one('SELECT id FROM club_library_games WHERE bgg_id = ? AND id <> ?',
+                           [$bggId, (int)$row['id']]);
+        if ($existing) {
+            db_run('DELETE FROM club_library_games WHERE id = ?', [(int)$row['id']]);
+            return ['ok' => true, 'merged' => true, 'name' => $row['name']];
+        }
+        require_once __DIR__ . '/bgg.php';
+        $thing = bgg_thing($bggId);
+        if (!$thing || empty($thing['name'])) return ['ok' => false, 'why' => 'bgg_lookup'];
+        db_run(
+            'UPDATE club_library_games
+                SET name = ?, year = ?, bgg_id = ?, thumbnail = ?, link = NULL
+              WHERE id = ?',
+            [
+                $thing['name'],
+                !empty($thing['year']) ? (int)$thing['year'] : null,
+                $bggId,
+                !empty($thing['thumbnail']) ? $thing['thumbnail'] : null,
+                (int)$row['id'],
+            ]
+        );
+        return ['ok' => true, 'promoted' => true, 'name' => $thing['name']];
+    }
+
+    db_run('UPDATE club_library_games SET name = ?, year = ?, link = ? WHERE id = ?',
+           [$name, $year > 0 ? (int)$year : null, $link !== '' ? $link : null, (int)$row['id']]);
+    return ['ok' => true];
+}
+
+/**
+ * Point a club BGG entry at a different BGG game. Mirrors library_relink_bgg().
+ * @return array
+ */
+function club_shelf_relink_bgg($rowId, $link) {
+    $row = db_one('SELECT * FROM club_library_games WHERE id = ? AND bgg_id IS NOT NULL', [(int)$rowId]);
+    if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    $bggId = library_bgg_id_from_link($link);
+    if ($bggId <= 0) return ['ok' => false, 'why' => 'not_bgg'];
+    if ($bggId === (int)$row['bgg_id']) return ['ok' => true];
+
+    $existing = db_one('SELECT id FROM club_library_games WHERE bgg_id = ? AND id <> ?',
+                       [$bggId, (int)$row['id']]);
+    if ($existing) {
+        db_run('DELETE FROM club_library_games WHERE id = ?', [(int)$row['id']]);
+        return ['ok' => true, 'merged' => true, 'name' => $row['name']];
+    }
+
+    require_once __DIR__ . '/bgg.php';
+    $thing = bgg_thing($bggId);
+    if (!$thing || empty($thing['name'])) return ['ok' => false, 'why' => 'bgg_lookup'];
+    db_run(
+        'UPDATE club_library_games SET name = ?, year = ?, bgg_id = ?, thumbnail = ?, link = NULL WHERE id = ?',
+        [
+            $thing['name'],
+            !empty($thing['year']) ? (int)$thing['year'] : null,
+            $bggId,
+            !empty($thing['thumbnail']) ? $thing['thumbnail'] : null,
+            (int)$row['id'],
+        ]
+    );
+    return ['ok' => true, 'promoted' => true, 'name' => $thing['name']];
+}
+
+/**
+ * Replace the BGG-sourced half of the club's shelf from a BGG collection.
+ * Mirrors library_sync_from_collection(); hand-added rows are left alone for
+ * the same reason.
+ *
+ * @param array $collection  From library_parse_collection().
+ * @return array  ['added'=>int, 'removed'=>int, 'kept'=>int]
+ */
+function club_shelf_sync_from_collection(array $collection) {
+    $haveRows = db_all('SELECT id, bgg_id FROM club_library_games WHERE bgg_id IS NOT NULL');
+    $have = [];
+    foreach ($haveRows as $r) $have[(int)$r['bgg_id']] = (int)$r['id'];
+
+    $wanted = [];
+    foreach ($collection as $g) $wanted[(int)$g['bgg_id']] = $g;
+
+    $added = 0;
+    $removed = 0;
+    db()->beginTransaction();
+    try {
+        foreach ($wanted as $id => $g) {
+            if (isset($have[$id])) continue;
+            if (club_shelf_add($g)) $added++;
+        }
+        foreach ($have as $id => $rowId) {
+            if (isset($wanted[$id])) continue;
+            db_run('DELETE FROM club_library_games WHERE id = ?', [$rowId]);
+            $removed++;
+        }
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) db()->rollBack();
+        throw $e;
+    }
+
+    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed];
+}
+
 /**
  * Should the public page show the members tab?
  * Meaningless when the library is off; callers check library_enabled() first.

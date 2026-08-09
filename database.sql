@@ -144,6 +144,9 @@ INSERT INTO options (key, value) VALUES
     -- read only when database.sql seeds a fresh options table, never applied
     -- to a row that already exists.
     ('library_pagination',    'alpha'),
+    -- The CLUB's own shelf, independent of the members' shared library above:
+    -- either can be on without the other.
+    ('club_shelf',            '0'),
     ('library_per_page',      '50'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),
@@ -634,6 +637,39 @@ CREATE TABLE library_games (
 );
 CREATE INDEX idx_library_user ON library_games(user_id);
 CREATE INDEX idx_library_name ON library_games(name);
+
+
+-- =============================================================================
+--  club_library_games — games the CLUB itself owns, as opposed to games its
+--  members own. Same shape as library_games minus the owner.
+--
+--  A SEPARATE TABLE rather than a flag on library_games, or a virtual user:
+--    * library_games.user_id is NOT NULL with ON DELETE CASCADE, so hanging
+--      club games off some admin's id would delete the club's shelf the day
+--      that person's account is removed;
+--    * making user_id nullable needs a table rebuild, and the updater is
+--      strictly additive by design (it adds tables and columns, never retypes);
+--    * a users row with id 0 would satisfy the foreign key but then has to be
+--      excluded from the member list, the admin user manager, mailing, login
+--      and every other place that counts users — a lot of places to keep in
+--      step for one flag's worth of meaning.
+--  A new table costs a short SQL layer and nothing else: everything above it
+--  (BGG lookup, promotion, letters, pagination, rendering) is shared.
+--
+--  UNIQUE(bgg_id) because there is only one shelf here — no per-owner scoping —
+--  so the club cannot list the same BGG game twice, and a sync stays idempotent.
+-- =============================================================================
+CREATE TABLE club_library_games (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    name       TEXT NOT NULL,
+    year       INTEGER,
+    bgg_id     INTEGER UNIQUE,               -- NULL for games added outside BGG
+    link       TEXT,
+    thumbnail  TEXT,
+    is_active  INTEGER NOT NULL DEFAULT 1,   -- 0 hides it from the public view
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX idx_club_library_name ON club_library_games(name);
 
 
 CREATE TABLE poll_games (

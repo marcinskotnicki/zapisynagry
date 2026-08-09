@@ -141,7 +141,7 @@ ob_start();
     }
     // The club library, when the admin has switched it on. Public, like the
     // archive above it — the whole point is that anyone can see who owns what.
-    if (library_enabled() && $here !== 'library.php') {
+    if (library_any_enabled() && $here !== 'library.php') {
         echo nav_link('library.php', 'library', t('lib_title'));
     }
     if (is_admin() && $here !== 'admin.php') {          // admins: the panel link

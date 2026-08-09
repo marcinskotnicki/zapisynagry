@@ -28,6 +28,10 @@ $TABS = ['archive', 'new_event', 'thumbnails', 'options', 'logs',
 // switched off falls through to the default rather than rendering a moderation
 // screen for a feature that is not running.
 if (chat_enabled()) $TABS[] = 'chat';
+// Same reasoning for the club's own shelf: removed from the whitelist rather
+// than merely hidden, so ?tab=club_shelf on a site with it switched off falls
+// through instead of rendering a manager for a feature that is not running.
+if (club_shelf_enabled()) $TABS[] = 'club_shelf';
 $TABS[] = 'update';   // appended after the optional tabs so it stays last
 
 $tab = $_GET['tab'] ?? $TABS[0];

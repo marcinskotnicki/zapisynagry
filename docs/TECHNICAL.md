@@ -877,6 +877,29 @@ SECOND explicit guard (`!is_admin() && $meId <= 0`) on top of the permission
 check. Either one alone stops a guest; both exist because that collision is easy
 to reintroduce.
 
+**The club's OWN shelf** (`club_shelf` option, `club_library_games` table,
+`club_shelf_*` in `inc/library.php`, admin tab `inc/admin/club_shelf.php`) holds
+games the club owns rather than games its members own. Independent of
+`club_library`: either switch works without the other, and `library_any_enabled()`
+is what the header link and `library.php` ask.
+
+It is a SEPARATE TABLE rather than a magic owner id in `library_games`. A
+sentinel `user_id = 0` is not available — foreign keys are ON, so 0 fails the
+constraint — and 0 already means "an admin, any row" in the management helpers,
+a collision that caused a real security bug here once. A hidden user row would
+have needed hiding from user management, mailing, member lists, login and
+deletion.
+
+Because the two shelves are different tables, **row id 7 exists in both**. The
+manage forms on the public page post a `scope` field and the handler branches on
+it before touching either table; without it, deleting "game 7" could remove the
+wrong game. Managing the club shelf is admin-only — it is the club's property,
+so there is no owner to fall back on.
+
+Adding and syncing live in the admin tab; editing and hiding live beside each
+game on the public club tab, the same split the members' library uses, so there
+is only ever one list to keep correct.
+
 **The public game list can be split three ways** (`library_pagination`:
 `all` | `pages` | `alpha`, defaulting to `all` so an upgrade changes nothing).
 All three slice the ALREADY-MERGED list in PHP rather than pushing `LIMIT` into

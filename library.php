@@ -20,7 +20,7 @@ require __DIR__ . '/inc/bootstrap.php';
 require_once __DIR__ . '/inc/library.php';   // already in bootstrap; _once so a re-require cannot redeclare
 
 // One gate: with the library off the page does not exist at all.
-if (!library_enabled()) redirect('index.php');
+if (!library_any_enabled()) redirect('index.php');
 
 /* ADMIN MANAGEMENT, from the page an admin is already looking at.
  *
@@ -35,6 +35,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $me     = current_user();
     $meId   = (int)($me['id'] ?? 0);
     $rowId  = (int)($_POST['game'] ?? 0);
+
+    /* THE CLUB'S SHELF IS A DIFFERENT TABLE, so a row id alone is ambiguous —
+     * club row 7 and member row 7 both exist. The form says which it meant, and
+     * the two branches never touch each other's table.
+     *
+     * Managing the club shelf is an ADMIN action: it is the club's property,
+     * not any member's, so there is no owner to fall back on. */
+    if (($_POST['scope'] ?? '') === 'club') {
+        if (!club_shelf_enabled() || !is_admin()) redirect('library.php');
+        $clubRow = $rowId ? club_shelf_entry($rowId) : null;
+        if (!$clubRow) redirect('library.php?tab=club');
+
+        switch ($_POST['action'] ?? '') {
+            case 'remove':
+                club_shelf_remove($rowId);
+                flash_set(t('lib_removed'));
+                break;
+            case 'toggle':
+                club_shelf_set_active($rowId, !empty($_POST['active']));
+                flash_set(t('lib_visibility_saved'));
+                break;
+            case 'edit':
+                // Same split as a member's shelf: a BGG entry's only edit is a
+                // new link, a hand-typed one takes name, year and link.
+                if (!empty($clubRow['bgg_id'])) {
+                    library_flash_edit(club_shelf_relink_bgg($rowId, $_POST['link'] ?? ''));
+                } else {
+                    library_flash_edit(club_shelf_update_manual(
+                        $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0),
+                        library_link_field_visible() ? ($_POST['link'] ?? '') : null
+                    ));
+                }
+                break;
+        }
+        redirect('library.php?tab=club');
+    }
+
     $row    = $rowId ? db_one('SELECT * FROM library_games WHERE id = ?', [$rowId]) : null;
     $back   = 'library.php?tab=members&member=' . (int)($row['user_id'] ?? 0);
 
@@ -80,12 +117,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect($back);
 }
 
-$showMembers = library_members_tab_enabled();
-$tab = $_GET['tab'] ?? 'games';
-// An unknown tab, or the members tab while it is switched off, falls back to
-// the games view rather than 404ing — a stale bookmark should still show
-// something useful.
-if ($tab !== 'members' || !$showMembers) $tab = 'games';
+/* WHICH VIEWS EXIST depends on two independent switches, so all four
+ * combinations have to land somewhere sensible:
+ *   members' library on, club shelf off  -> games / members, as before
+ *   both on                              -> games / members / club
+ *   club shelf only                      -> club alone, and no tab strip,
+ *                                           because one tab is not a choice
+ *   neither                              -> the page redirected away already
+ *
+ * The DEFAULT tab is therefore the club shelf when the members' library is
+ * off: landing on an empty "games" view when the club has a cabinet full of
+ * games would look broken. */
+$showMembers = library_enabled() && library_members_tab_enabled();
+$showClub    = club_shelf_enabled();
+$showMemberGames = library_enabled();
+
+$tab = $_GET['tab'] ?? ($showMemberGames ? 'games' : 'club');
+// A tab that does not exist in this configuration falls back rather than
+// 404ing — a bookmark made while a switch was on should still show something
+// useful after it is turned off.
+if ($tab === 'members' && !$showMembers) $tab = $showMemberGames ? 'games' : 'club';
+if ($tab === 'club' && !$showClub)       $tab = 'games';
+if ($tab === 'games' && !$showMemberGames) $tab = 'club';
+if ($tab !== 'members' && $tab !== 'club') $tab = $showMemberGames ? 'games' : 'club';
+
+/* A tab strip for a single tab is noise, so it appears only when there is
+ * genuinely more than one view to move between. */
+$tabCount = ($showMemberGames ? 1 : 0) + ($showMembers ? 1 : 0) + ($showClub ? 1 : 0);
 
 $memberId = (int)($_GET['member'] ?? 0);
 $member = null;
@@ -107,9 +165,13 @@ if ($tab === 'members' && $memberId > 0) {
     if ($member) $memberGames = library_for_user($memberId, !$canManageShelf);
 }
 
-/* PAGINATION, games tab only. A member's shelf is one person's games and needs
- * no splitting; the merged list is the one that grows past a screenful once a
- * club gets going.
+/* PAGINATION, for whichever whole-collection list this tab shows — the members'
+ * merged list or the club's own. A member's shelf is one person's games and
+ * needs no splitting; these two are the ones that grow past a screenful.
+ *
+ * Applied to both from ONE block rather than a copy per tab: the club shelf was
+ * asked for with "the same layout, pagination options etc", and two copies of
+ * this would drift the moment either changed.
  *
  * All three modes work on the SAME already-merged list rather than pushing
  * LIMIT into SQL, because merging happens in PHP (a game owned by four people
@@ -120,33 +182,46 @@ if ($tab === 'members' && $memberId > 0) {
  * above it. (It was written that way first, and all three modes silently showed
  * the full list.) */
 $games     = $tab === 'games' ? library_all_games() : [];
+/* The club's own games. Active-only for visitors; an admin sees hidden rows
+ * too, since this is the screen the manage controls live on — the same split
+ * a member's shelf makes. */
+$clubManage = is_admin();
+$clubGames  = $tab === 'club' ? club_shelf_all(!$clubManage) : [];
 $mode      = library_pagination();
 $letters   = [];
 $letter    = '';
 $page      = 1;
 $pageCount = 1;
 
-if ($tab === 'games' && $games) {
+// Bound by reference so one block can page either list in place.
+$paged = null;
+if ($tab === 'games')     $paged = &$games;
+elseif ($tab === 'club')  $paged = &$clubGames;
+
+if ($paged !== null && $paged) {
     if ($mode === 'alpha') {
-        $letters = library_letters($games);
+        $letters = library_letters($paged);
         $letter  = (string)($_GET['letter'] ?? '');
         // An unknown letter shows the index rather than an empty list — a stale
         // link should not look like "there are no games".
         if ($letter !== '' && !isset($letters[$letter])) $letter = '';
         if ($letter !== '') {
-            $games = array_values(array_filter($games, function ($g) use ($letter) {
+            $paged = array_values(array_filter($paged, function ($g) use ($letter) {
                 return library_letter($g['name']) === $letter;
             }));
         } else {
-            $games = [];   // the index page lists letters, not games
+            $paged = [];   // the index page lists letters, not games
         }
     } elseif ($mode === 'pages') {
         $per       = library_per_page();
-        $pageCount = max(1, (int)ceil(count($games) / $per));
+        $pageCount = max(1, (int)ceil(count($paged) / $per));
         $page      = max(1, min($pageCount, (int)($_GET['page'] ?? 1)));
-        $games     = array_slice($games, ($page - 1) * $per, $per);
+        $paged     = array_slice($paged, ($page - 1) * $per, $per);
     }
 }
+// Break the reference, or a later write to $paged would silently alter
+// whichever list it still points at.
+unset($paged);
 
 tpl_render('header', ['page_title' => t('lib_title')]);
 tpl_render('library', [
@@ -157,6 +232,11 @@ tpl_render('library', [
     'page_count'   => $pageCount,
     'tab'          => $tab,
     'show_members' => $showMembers,
+    'show_games'   => $showMemberGames,
+    'show_club'    => $showClub,
+    'tab_count'    => $tabCount,
+    'club_games'   => $clubGames,
+    'club_manage'  => $clubManage,
     'games'        => $games,
     'members'      => ($tab === 'members' && !$member) ? library_members() : [],
     'member'       => $member,
