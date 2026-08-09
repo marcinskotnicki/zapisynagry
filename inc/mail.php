@@ -66,16 +66,21 @@ function mail_body_with_footer($body) {
  * subjects, which is worse than the name they didn't pick.
  * @return string  '' when neither is set.
  */
-function mail_subject_prefix() {
+function mail_subject_prefix($mode = null) {
     $venue = trim((string)opt('venue_name'));
     $event = trim((string)(current_event()['name'] ?? ''));
-    if (opt('email_subject_prefix') === 'event') {
+    /* $mode overrides the option for a single message. Used by mail that has no
+     * event to belong to — a library enquiry is about somebody's shelf, not
+     * about a game night, so prefixing it with whichever event happens to be
+     * current would attach it to something unrelated. */
+    $mode = $mode ?? opt('email_subject_prefix');
+    if ($mode === 'event') {
         return $event !== '' ? $event : $venue;
     }
     return $venue !== '' ? $venue : $event;
 }
 
-function send_mail($to, $subject, $body, $replyTo = null) {
+function send_mail($to, $subject, $body, $replyTo = null, $prefixMode = null) {
     // Reject obviously bad addresses up front — also guards the loops in notify.
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
 
@@ -90,7 +95,9 @@ function send_mail($to, $subject, $body, $replyTo = null) {
     // frequent events the EVENT name is what lets people find the right thread.
     // Either way the other one is used as a fallback when the preferred is
     // blank, so the prefix is never empty just because a field was left unset.
-    $prefix = mail_subject_prefix();
+    // $prefixMode lets one caller override the admin's choice — see
+    // mail_subject_prefix(). Null (every existing caller) keeps the option.
+    $prefix = mail_subject_prefix($prefixMode);
     if ($prefix !== '' && strpos($subject, $prefix . ':') !== 0) {
         $subject = $prefix . ': ' . $subject;
     }

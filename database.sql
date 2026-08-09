@@ -136,6 +136,7 @@ INSERT INTO options (key, value) VALUES
     ('club_library',          '0'),
     ('library_show_members',  '1'),
     ('library_allow_contact', '0'),
+    ('library_mail_venue',    '1'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),
     -- Public archives. Off by default: switching it on changes how EVENTS

@@ -68,9 +68,13 @@ function lib_render_row(array $g, $owners = null) {
                                   // to send anything — all three live in
                                   // library_can_contact(). ?>
                             <?php if (library_can_contact($o)): ?>
-                                <a class="msg-icon" href="message.php?library_member=<?= (int)$o['id'] ?>"
-                                   title="<?= e(t('lib_contact_title', $o['display_name'])) ?>"
-                                   aria-label="<?= e(t('lib_contact_title', $o['display_name'])) ?>">&#9993;</a>
+                                <?php // Linked to THIS owner's copy of the game, so the
+                                      // message says which title it is about rather than
+                                      // "about their games" generally. ?>
+                                <?php $oTitle = t('lib_contact_title_game', $o['display_name'], $g['name']); ?>
+                                <a class="msg-icon" href="message.php?library_member=<?= (int)$o['id'] ?>&amp;library_game=<?= (int)$o['row_id'] ?>"
+                                   title="<?= e($oTitle) ?>"
+                                   aria-label="<?= e($oTitle) ?>">&#9993;</a>
                             <?php endif; ?>
                         </span>
                     <?php endforeach; ?>

@@ -25,6 +25,8 @@ $gid = (int)($_GET['game']   ?? $_POST['game']   ?? 0);
 $pwid = (int)($_GET['poll_owner'] ?? $_POST['poll_owner'] ?? 0);   // message the poll's proposer
 $plid = (int)($_GET['poll']       ?? $_POST['poll']       ?? 0);   // message everyone who voted
 $lmid = (int)($_GET['library_member'] ?? $_POST['library_member'] ?? 0);   // a library owner
+// Optional: WHICH of their games prompted the message, so the subject can say.
+$lgid = (int)($_GET['library_game'] ?? $_POST['library_game'] ?? 0);
 
 // Resolve the target: a single player, a whole game's players, a poll's
 // proposer, or a poll's voters. Exactly one of the four ids is expected.
@@ -50,7 +52,15 @@ if ($lmid) {
         redirect('library.php');
     }
     $recipients  = [$libraryMember['email']];
-    $targetLabel = t('lib_contact_title', $libraryMember['display_name']);
+
+    /* Naming the game turns "about their games" into "about Catan", which is
+     * the whole reason someone clicked the envelope next to that title. Looked
+     * up scoped to this member, so a row id from the URL cannot name a game
+     * they do not own. */
+    $libraryGame = $lgid ? library_entry_for_user($lmid, $lgid) : null;
+    $targetLabel = $libraryGame
+        ? t('lib_contact_title_game', $libraryMember['display_name'], $libraryGame['name'])
+        : t('lib_contact_title', $libraryMember['display_name']);
 } elseif ($pid) {
     // One player — only if they actually left an email (else nothing to send to).
     $player = db_one('SELECT * FROM players WHERE id = ?', [$pid]);
@@ -142,12 +152,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // "<venue>: " prefix is added centrally by send_mail(), like on every
         // other outgoing email.
         $re = $libraryMember
-            ? t('lib_contact_subject')
+            ? ($libraryGame ? $libraryGame['name'] : t('lib_contact_subject'))
             : ($game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']));
         $subject = t('msg_subject', $senderName, $re);
         $replyTo = $senderEmail;
+        /* A library enquiry has no event to belong to, so — when the admin
+         * leaves the option on — its subject is prefixed with the VENUE name
+         * even on a site that normally prefixes with the current event's.
+         * Attaching it to whichever event happens to be live would file it
+         * under something unrelated. */
+        $prefixMode = ($libraryMember && opt_bool('library_mail_venue')) ? 'venue' : null;
         foreach ($recipients as $to) {
-            send_mail($to, $subject, $bodyText, $replyTo);
+            send_mail($to, $subject, $bodyText, $replyTo, $prefixMode);
         }
         log_action('message_sent', $targetLabel);
         // Remember the agreement so the next form starts ticked. Only after a
@@ -170,6 +186,7 @@ tpl_render('message_form', [
     'poll_owner'   => $pwid,
     'poll_id'      => $plid,
     'library_member' => $lmid,
+    'library_game'   => $libraryGame ? (int)$libraryGame['id'] : 0,
     'recipients'   => count($recipients),
     // Guest mode: the form shows sender name/email inputs (+ captcha when on);
     // logged-in senders are identified by their account, no extra fields.

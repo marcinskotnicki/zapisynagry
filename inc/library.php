@@ -148,6 +148,12 @@ function library_all_games() {
             'display_name'       => $r['owner_name'],
             'library_contact_ok' => (int)$r['owner_contact_ok'],
             'is_blocked'         => (int)$r['owner_blocked'],
+            /* THIS owner's copy of the game. Entries are merged by identity, so
+             * one line can carry several rows; the contact link needs the row
+             * belonging to the person it is addressed to, and passing the row id
+             * rather than the game's name keeps user-supplied text out of the
+             * URL and out of the subject line. */
+            'row_id'             => (int)$r['id'],
         ];
     }
     return array_values($out);
@@ -167,6 +173,23 @@ function library_members() {
           GROUP BY u.id
           ORDER BY u.display_name COLLATE NOCASE ASC'
     );
+}
+
+/**
+ * One library entry, but only if it belongs to that member.
+ *
+ * The pairing is the point: message.php is handed a member id and a row id from
+ * the URL, and naming somebody else's game in a message addressed to this
+ * member would be both wrong and a small information leak.
+ *
+ * @param int $userId
+ * @param int $rowId
+ * @return array|null
+ */
+function library_entry_for_user($userId, $rowId) {
+    if ($rowId <= 0) return null;
+    return db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?',
+                  [(int)$rowId, (int)$userId]);
 }
 
 /**

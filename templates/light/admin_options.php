@@ -371,6 +371,8 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('library_allow_contact', 'opt_note_library_off');
         ?>
         <p class="field-note"><?= e(t('opt_library_contact_note')) ?></p>
+        <?php $toggle('library_mail_venue', 'opt_note_library_off'); ?>
+        <p class="field-note"><?= e(t('opt_library_mail_venue_note')) ?></p>
     <?php $groupEnd(); ?>
 
     <?php /* 5. CHAT */ ?>
