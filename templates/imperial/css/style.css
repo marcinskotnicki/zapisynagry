@@ -42,7 +42,8 @@ body.tpl-imperial {
     color: var(--vellum);
     font-family: var(--font-im);
 }
-.tpl-imperial .admin .tab-body{color:var(--iron);}
+.tpl-imperial .admin .tab-body,
+..tpl-imperial .userpanel{color:var(--iron);}
 .tpl-imperial .admin .update-log li{color:black;}
 
 .tpl-imperial .content { max-width: var(--maxw); }
