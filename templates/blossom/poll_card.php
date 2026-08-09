@@ -80,8 +80,13 @@ $canVote = !$readonly && can_signup();
                 <?php // Name plus its details are one block so the votes count and
                       // the vote button stay on the right of the row. ?>
                 <div class="poll-opt-main">
-                    <?php if (!empty($c['bgg_id'])): // candidates link to their BGG page ?>
-                        <a class="poll-opt-name" href="https://boardgamegeek.com/boardgame/<?= (int)$c['bgg_id'] ?>" target="_blank" rel="noopener"><?= e($c['name']) ?></a>
+                    <?php $cLink = game_link($c); ?>
+                    <?php // game_link() rather than a hand-built BGG URL: it also honours
+                          // a custom link on a non-BGG candidate, and re-checks the admin
+                          // option on the way out, so switching custom links off hides them
+                          // everywhere at once without touching stored data. ?>
+                    <?php if ($cLink): ?>
+                        <a class="poll-opt-name" href="<?= e($cLink) ?>" target="_blank" rel="noopener"><?= e($c['name']) ?></a>
                     <?php else: ?>
                         <span class="poll-opt-name"><?= e($c['name']) ?></span>
                     <?php endif; ?>

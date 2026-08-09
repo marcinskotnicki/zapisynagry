@@ -60,7 +60,7 @@ function poll_candidate_defaults() {
     return [
         'name' => '', 'length_minutes' => 60, 'weight' => 2.0, 'max_players' => 4,
         'thumbnail' => '', 'bgg_id' => '', 'language' => '', 'required_players' => 4, 'source' => 'manual',
-        'manual_link' => '',
+        'manual_link' => '', 'link' => '',
     ];
 }
 
@@ -78,6 +78,11 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'max_players'      => max(1, (int)($_POST['max_players'] ?? 1)),
         'required_players' => max(1, (int)($_POST['required_players'] ?? 1)),
         'manual_link'      => game_link_sanitize($_POST['manual_link'] ?? ''),
+        /* Custom game link, same rules as a full game's: sanitised here, and
+         * game_link() re-checks the admin option when rendering, so switching
+         * the option off hides existing links without destroying them. A BGG
+         * candidate never needs one — it links by bgg_id. */
+        'link'             => game_link_sanitize($_POST['link'] ?? ''),
         'thumbnail'        => trim($_POST['thumbnail'] ?? ''),
         'bgg_id'           => (int)($_POST['bgg_id'] ?? 0),
         'language'         => trim($_POST['language'] ?? ''),
@@ -100,14 +105,15 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         // new candidate starts at zero votes, so no resolve check is needed.
         db_run(
             'INSERT INTO poll_games
-             (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link)
-             VALUES (?,?,?,?,?,?,?,?,?,?)',
+             (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link,link)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?)',
             [$livePollId, $cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
              $cand['thumbnail'] !== '' ? $cand['thumbnail'] : null,
              $cand['bgg_id'] ?: null,
              $cand['language'] !== '' ? $cand['language'] : null,
              $cand['required_players'],
-             $cand['manual_link'] !== '' ? $cand['manual_link'] : null]
+             $cand['manual_link'] !== '' ? $cand['manual_link'] : null,
+             $cand['link'] !== '' ? $cand['link'] : null]
         );
         log_action('poll_cand_added', $cand['name'] . ' (poll #' . $livePollId . ')');
         // Voters always hear about it; the proposer is added to the list when

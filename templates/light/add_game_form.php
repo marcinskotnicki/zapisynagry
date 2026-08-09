@@ -85,6 +85,11 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             <input type="text" id="name" name="name" value="<?= e($game['name']) ?>" required>
         </div>
 
+        <?php // ONE container for every half-width field, not several rows of two.
+              // .field-row is a 2-column grid, so the fields flow into it and any
+              // that are switched off simply close the gap — with separate rows,
+              // a hidden field left a hole and the row below could not fill it.
+              // Order is unchanged; only the grouping is. ?>
         <div class="field-row">
             <div class="field field-length_minutes">
                 <label for="length_minutes"><?= e(t('f_length')) ?></label>
@@ -109,12 +114,6 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                     <p class="field-note"><?= e(t('f_start_range', $bounds['min'], $bounds['max'])) ?></p>
                 <?php endif; ?>
             </div>
-        </div>
-
-        <?php // Language and rules-explanation each stood alone taking a full
-              // row, despite being no wider than any of the paired fields above
-              // — pairing them keeps the form's rhythm the same all the way down. ?>
-        <div class="field-row">
             <div class="field field-language">
                 <label for="language"><?= e(t('f_language')) ?></label>
                 <?php
@@ -143,9 +142,6 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                     <?php endforeach; ?>
                 </select>
             </div>
-        </div>
-
-        <div class="field-row">
             <div class="field field-brings_name">
                 <label for="brings_name"><?= e(t('f_brings')) ?></label>
                 <input type="text" id="brings_name" name="brings_name" value="<?= e($game['brings_name']) ?>">

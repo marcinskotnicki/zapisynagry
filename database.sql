@@ -589,6 +589,7 @@ CREATE TABLE poll_games (
     bgg_id           INTEGER,
     language         TEXT,                        -- edition/language of the copy (mirrors games.language)
     required_players INTEGER NOT NULL DEFAULT 1, -- votes >= this => option wins
+    link             TEXT,                        -- custom external URL for non-BGG candidates (mirrors games.link)
     manual_link      TEXT,                        -- mirrors games.manual_link
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE

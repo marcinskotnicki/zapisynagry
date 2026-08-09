@@ -73,6 +73,11 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             <input type="text" id="name" name="name" value="<?= e($cand['name']) ?>" required>
         </div>
 
+        <?php // ONE container for every half-width field, not several rows of two.
+              // .field-row is a 2-column grid, so the fields flow into it and any
+              // that are switched off simply close the gap — with separate rows,
+              // a hidden field left a hole and the row below could not fill it.
+              // Order is unchanged; only the grouping is. ?>
         <div class="field-row">
             <div class="field field-length_minutes">
                 <label for="length_minutes"><?= e(t('f_length')) ?></label>
@@ -86,22 +91,6 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
                 <label for="max_players"><?= e(t('f_maxplayers')) ?></label>
                 <input type="number" id="max_players" name="max_players" min="1" value="<?= e($cand['max_players']) ?>">
             </div>
-            <?php // Same rules/manual link a full game can carry, so a candidate
-                  // that wins the poll arrives with its rules already attached. ?>
-            <?php if (opt_bool('allow_manual_links')): ?>
-                <div class="field field-manual_link">
-                    <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
-                    <input type="url" id="manual_link" name="manual_link"
-                           value="<?= e($cand['manual_link'] ?? '') ?>" placeholder="https://">
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <?php // Player threshold and language each stood alone taking a full
-              // row, despite being no wider than any of the paired fields
-              // above — pairing them keeps the form's rhythm the same all the
-              // way down. ?>
-        <div class="field-row">
             <div class="field field-required_players">
                 <label for="required_players"><?= e(t('poll_required')) ?></label>
                 <input type="number" id="required_players" name="required_players" min="1" value="<?= e($cand['required_players']) ?>">
@@ -123,7 +112,27 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
                     <?php endif; ?>
                 </select>
             </div>
+            <?php // Same rules/manual link a full game can carry, so a candidate
+                  // that wins the poll arrives with its rules already attached. ?>
+            <?php if (opt_bool('allow_manual_links')): ?>
+                <div class="field field-manual_link">
+                    <label for="manual_link"><?= e(t('f_manual_link')) ?></label>
+                    <input type="url" id="manual_link" name="manual_link"
+                           value="<?= e($cand['manual_link'] ?? '') ?>" placeholder="https://">
+                </div>
+            <?php endif; ?>
         </div>
+
+        <?php // Custom link, matching the game form exactly: manual candidates
+              // only (a BGG one links via bgg_id) and only while the admin allows
+              // it. Full width like the game form's — a URL is long, and pairing
+              // it would squeeze both it and its neighbour. ?>
+        <?php if (!$isBgg && opt_bool('allow_custom_game_links')): ?>
+            <div class="field field-link">
+                <label for="link"><?= e(t('f_link')) ?></label>
+                <input type="url" id="link" name="link" value="<?= e($cand['link'] ?? '') ?>" placeholder="https://">
+            </div>
+        <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
