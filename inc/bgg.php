@@ -143,6 +143,9 @@ function bgg_parse_thing($xmlString) {
     return [
         'id'         => (int)$item['id'],
         'name'       => $name,
+        // Publication year, for the club library's list. 0 when BGG has none,
+        // which callers store as NULL rather than printing "0".
+        'year'       => (int)($item->yearpublished['value'] ?? 0),
         'type'       => (string)($item['type'] ?? ''),   // 'boardgame' | 'boardgameexpansion' | 'boardgameaccessory' | ...
         'thumbnail'  => (string)($item->thumbnail ?? ''),
         'image'      => (string)($item->image ?? ''),

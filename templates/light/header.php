@@ -139,6 +139,11 @@ ob_start();
     if (public_archives_enabled() && $here !== 'calendar.php') {
         echo nav_link('calendar.php', 'calendar', t('calendar_title'));
     }
+    // The club library, when the admin has switched it on. Public, like the
+    // archive above it — the whole point is that anyone can see who owns what.
+    if (library_enabled() && $here !== 'library.php') {
+        echo nav_link('library.php', 'library', t('lib_title'));
+    }
     if (is_admin() && $here !== 'admin.php') {          // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'));
     }

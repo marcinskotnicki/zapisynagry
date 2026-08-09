@@ -333,6 +333,8 @@ function nav_icon_svg($key) {
         'archive'  => '<path d="M3 7h18v4H3z"/><path d="M5 11v9h14v-9"/><path d="M10 15h4"/>',
         // Calendar: page with a bound top edge and two hanging rings.
         'calendar' => '<path d="M4 6h16v14H4z"/><path d="M4 10h16"/><path d="M9 3v4M15 3v4"/>',
+        // Library: books standing on a shelf, one leaning.
+        'library'  => '<path d="M4 4h4v16H4z"/><path d="M10 4h4v16h-4z"/><path d="M16.5 5.5l3.5 1-3.6 13.4-3.4-1z"/>',
     ];
     if (!isset($paths[$key])) return '';
     return '<svg class="nav-svg" viewBox="0 0 24 24" width="18" height="18" '

@@ -94,6 +94,19 @@
               // Each select renders only if the admin allows switching for ACCOUNTS
               // (allow_user_template / allow_user_language); the whole card hides
               // when neither is allowed or there is nothing to choose from. ?>
+        <?php // The club library, when the admin has switched it on. A link rather
+              // than an inline editor: the library has three add methods and a
+              // destructive sync, which would swamp this panel. ?>
+        <?php if (library_enabled()): ?>
+            <div class="card profile-card lib-panel-card">
+                <h3><?= e(t('lib_my_title')) ?></h3>
+                <p class="muted"><?= e(t('lib_panel_hint')) ?></p>
+                <div class="form-actions">
+                    <a class="btn btn-primary" href="my_library.php"><?= e(t('lib_open_btn')) ?></a>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php /* New-event notifications. Only offered when the admin has enabled
                  the feature AND the site actually sends mail — a checkbox that
                  silently does nothing is worse than no checkbox. */ ?>

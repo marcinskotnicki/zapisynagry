@@ -360,6 +360,19 @@ $groupEnd = function () { echo '</div></details>'; };
         ?>
     <?php $groupEnd(); ?>
 
+    <?php /* 4b. CLUB LIBRARY */ ?>
+    <?php $group('opt_group_library', false, 'opt_group_library_note'); ?>
+        <?php
+        // The master switch first: the two below it do nothing while it is off,
+        // and the group note says so — same shape as the accounts group, where
+        // the mode dropdown leads because it governs what follows.
+        $toggle('club_library');
+        $toggle('library_show_members', 'opt_note_library_off');
+        $toggle('library_allow_contact', 'opt_note_library_off');
+        ?>
+        <p class="field-note"><?= e(t('opt_library_contact_note')) ?></p>
+    <?php $groupEnd(); ?>
+
     <?php /* 5. CHAT */ ?>
     <?php $group('opt_group_chat', false, 'opt_group_chat_note'); ?>
         <div class="field">

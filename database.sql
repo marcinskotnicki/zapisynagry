@@ -133,6 +133,9 @@ INSERT INTO options (key, value) VALUES
     ('chat_logged_in_only',   '0'),
     ('notify_new_event',      '0'),
     ('custom_css',            ''),
+    ('club_library',          '0'),
+    ('library_show_members',  '1'),
+    ('library_allow_contact', '0'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),
     -- Public archives. Off by default: switching it on changes how EVENTS
@@ -287,6 +290,11 @@ CREATE TABLE users (
     -- up to anything by having an account, and existing accounts must not start
     -- receiving mail because a site upgraded.
     notify_new_event INTEGER NOT NULL DEFAULT 0,
+    -- May other members contact this one about their library games? Defaults to
+    -- 1 (the member-facing checkbox is pre-ticked), but it only has any effect
+    -- while the admin's library_allow_contact option is on — so the default
+    -- never exposes anyone until an admin deliberately enables the feature.
+    library_contact_ok INTEGER NOT NULL DEFAULT 1,
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -578,6 +586,36 @@ CREATE TABLE polls (
 --  add-game form collects, plus required_players (the vote threshold that ends
 --  the poll). No explain_rules/brings here — those are poll-level.
 -- =============================================================================
+-- =============================================================================
+--  library_games — one game owned by one member ("club library").
+--  A member's library is a flat list; the public Library page aggregates every
+--  member's rows into a single game list plus a per-member view.
+--
+--  bgg_id is set for BGG-sourced entries (which link by id and can be synced);
+--  link holds a custom URL for games added from outside BGG. Both may be NULL —
+--  a game can be a plain name with nothing to link to.
+--
+--  UNIQUE(user_id, bgg_id) keeps a BGG collection sync idempotent: re-running it
+--  cannot duplicate a game. Manual entries have bgg_id NULL, which SQLite treats
+--  as distinct for uniqueness, so a member may add two same-named manual rows —
+--  their own list, their own business.
+-- =============================================================================
+CREATE TABLE library_games (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    name       TEXT NOT NULL,
+    year       INTEGER,                      -- year published, NULL when unknown
+    bgg_id     INTEGER,                      -- NULL for games added outside BGG
+    link       TEXT,                         -- custom URL for non-BGG entries
+    thumbnail  TEXT,                         -- remote BGG image URL, NULL when none
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE (user_id, bgg_id)
+);
+CREATE INDEX idx_library_user ON library_games(user_id);
+CREATE INDEX idx_library_name ON library_games(name);
+
+
 CREATE TABLE poll_games (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     poll_id          INTEGER NOT NULL,

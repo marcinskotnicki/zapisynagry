@@ -13,6 +13,7 @@ require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/captcha.php';  // guests get the same captcha as other public forms
+require_once __DIR__ . '/inc/library.php';   // library_can_contact(); _once — bootstrap has it too
 
 // One gate for the whole feature (same helper the envelope icons use):
 // allow_messaging on, and — unless allow_guest_messaging — a logged-in account.
@@ -23,6 +24,7 @@ $pid = (int)($_GET['player'] ?? $_POST['player'] ?? 0);
 $gid = (int)($_GET['game']   ?? $_POST['game']   ?? 0);
 $pwid = (int)($_GET['poll_owner'] ?? $_POST['poll_owner'] ?? 0);   // message the poll's proposer
 $plid = (int)($_GET['poll']       ?? $_POST['poll']       ?? 0);   // message everyone who voted
+$lmid = (int)($_GET['library_member'] ?? $_POST['library_member'] ?? 0);   // a library owner
 
 // Resolve the target: a single player, a whole game's players, a poll's
 // proposer, or a poll's voters. Exactly one of the four ids is expected.
@@ -31,7 +33,25 @@ $targetLabel = '';
 $game = null;
 $poll = null;
 
-if ($pid) {
+$libraryMember = null;
+
+if ($lmid) {
+    /* A library owner. Unlike the other four targets this one has no parent
+     * event — it is about somebody's shelf, not about a game night — so the
+     * "live parent" requirement below is skipped for it.
+     *
+     * EVERY gate still applies, and they live in library_can_contact():
+     * messaging enabled, guests allowed (or the sender signed in), the library
+     * feature on, the admin's contact option on, the member's own checkbox
+     * ticked, and the member not blocked. Checked here rather than trusting
+     * that the button was only rendered when allowed. */
+    $libraryMember = db_one('SELECT * FROM users WHERE id = ?', [$lmid]);
+    if (!$libraryMember || !library_can_contact($libraryMember) || empty($libraryMember['email'])) {
+        redirect('library.php');
+    }
+    $recipients  = [$libraryMember['email']];
+    $targetLabel = t('lib_contact_title', $libraryMember['display_name']);
+} elseif ($pid) {
     // One player — only if they actually left an email (else nothing to send to).
     $player = db_one('SELECT * FROM players WHERE id = ?', [$pid]);
     if (!$player || empty($player['email'])) redirect('index.php');
@@ -62,17 +82,24 @@ if ($pid) {
     }
 }
 
-// Must have a live parent (game or poll) and at least one recipient.
-$parentEventId = $game['event_id'] ?? $poll['event_id'] ?? 0;
-$event = $parentEventId ? db_one('SELECT is_archived FROM events WHERE id = ?', [$parentEventId]) : null;
-if ((!$game && !$poll) || !$event || (int)$event['is_archived'] === 1 || empty($recipients)) {
-    redirect('index.php');
+/* A library message has no parent event, so it skips the live-parent check
+ * entirely — its own gate above already decided whether it may be sent. */
+if ($libraryMember) {
+    $activeDay  = 0;
+    $backAnchor = '';
+} else {
+    // Must have a live parent (game or poll) and at least one recipient.
+    $parentEventId = $game['event_id'] ?? $poll['event_id'] ?? 0;
+    $event = $parentEventId ? db_one('SELECT is_archived FROM events WHERE id = ?', [$parentEventId]) : null;
+    if ((!$game && !$poll) || !$event || (int)$event['is_archived'] === 1 || empty($recipients)) {
+        redirect('index.php');
+    }
+    $parentDayId = $game['day_id'] ?? $poll['day_id'];
+    $day = db_one('SELECT day_index FROM event_days WHERE id = ?', [$parentDayId]);
+    $activeDay = (int)($day['day_index'] ?? 1);
+    // Where "back" leads: the game card or the poll card.
+    $backAnchor = $game ? ('#game-' . (int)$game['id']) : ('#poll-' . (int)$poll['id']);
 }
-$parentDayId = $game['day_id'] ?? $poll['day_id'];
-$day = db_one('SELECT day_index FROM event_days WHERE id = ?', [$parentDayId]);
-$activeDay = (int)($day['day_index'] ?? 1);
-// Where "back" leads: the game card or the poll card.
-$backAnchor = $game ? ('#game-' . (int)$game['id']) : ('#poll-' . (int)$poll['id']);
 
 $error = null;
 // Sender identity: accounts supply it implicitly; guests must type BOTH a name
@@ -114,7 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // label + its start time (a poll has no single game name yet). The
         // "<venue>: " prefix is added centrally by send_mail(), like on every
         // other outgoing email.
-        $re = $game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']);
+        $re = $libraryMember
+            ? t('lib_contact_subject')
+            : ($game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']));
         $subject = t('msg_subject', $senderName, $re);
         $replyTo = $senderEmail;
         foreach ($recipients as $to) {
@@ -126,7 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // something that was refused.
         consent_remember();
         flash_set(t('msg_sent'));
-        redirect('index.php?day=' . $activeDay . $backAnchor);
+        // Back where the message was started from: the library, or the event.
+        redirect($libraryMember ? 'library.php' : ('index.php?day=' . $activeDay . $backAnchor));
     }
 }
 
@@ -139,6 +169,7 @@ tpl_render('message_form', [
     'game_id'      => $gid ? (int)$game['id'] : 0,
     'poll_owner'   => $pwid,
     'poll_id'      => $plid,
+    'library_member' => $lmid,
     'recipients'   => count($recipients),
     // Guest mode: the form shows sender name/email inputs (+ captcha when on);
     // logged-in senders are identified by their account, no extra fields.

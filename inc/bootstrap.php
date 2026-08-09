@@ -38,6 +38,7 @@ require __DIR__ . '/options.php';
 require __DIR__ . '/lang.php';
 require __DIR__ . '/template.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/library.php';   // the header asks library_enabled() on every page
 require __DIR__ . '/antibot.php';   // small + universally needed; see its own header
 require __DIR__ . '/chat.php';      // chat_enabled() is asked on every page render
 

@@ -838,6 +838,34 @@ because a client can simply not send the field. Forms with intermediate submit
 buttons (the poll builder) mark those `formnovalidate`, or a required consent
 box would block adding a candidate or cancelling.
 
+**The club library** (`inc/library.php`, `library.php`, `my_library.php`).
+Members list the games they own; the public page merges every member's list into
+a game view and a member view. Off by default; `library_enabled()` is the single
+gate the header link, the panel button, both pages and the admin sub-options all
+ask, so there is no half-enabled state.
+
+`library_public_owner_sql()` is the one place that decides whose games are
+public (blocked accounts are not). It exists as a shared fragment because the
+games list, the members list and one member's shelf must agree — applying it to
+the list and forgetting the detail view is exactly the bug it prevents, and a
+blocked member's shelf is checked against it by id too.
+
+**Contacting a library owner** goes through `message.php?library_member=N`,
+which is the only target with no parent event, so it skips the live-parent
+check. Every other gate still applies and they all live in
+`library_can_contact()`: messaging on, guests allowed (or sender signed in),
+library on, the admin's contact option on, the member's own checkbox ticked, and
+the member not blocked. It is checked in `message.php`, not merely used to hide
+the button.
+
+**The BGG sync is a full sync of the BGG-sourced half only.** Rows with a
+`bgg_id` are reconciled against the collection; rows without one — games typed
+in by hand — are left alone, because a hand-added game was never in the BGG
+collection and "absent from it" is no evidence the member sold it.
+`UNIQUE(user_id, bgg_id)` makes re-running idempotent. The confirmation is
+checked server-side before anything is fetched, since the checkbox's `required`
+attribute is advisory only.
+
 **Custom CSS (Options -> Advanced).** Whatever an admin pastes there is
 rendered in a `<style>` at the end of every page head — last, so it overrides
 the theme without needing `!important`. Empty means no block at all.
