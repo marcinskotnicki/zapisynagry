@@ -634,6 +634,8 @@ body.tpl-schematic-compact {
     color: var(--rule);
 }
 
+.tpl-schematic-compact .event-msg{background: var(--surface-2); color: var(--ink);}
+
 @media (max-width: 700px) {
 
     .tpl-schematic-compact .sc-strip { flex-direction: column; }

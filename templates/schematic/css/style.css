@@ -726,6 +726,9 @@ body.tpl-schematic {
     color: #c2562a;
 }
 
+
+.tpl-schematic .event-msg{background: var(--surface-2); color: var(--ink);}
+
 @media (max-width: 700px) {
 
     .tpl-schematic .sc-strip { flex-direction: column; }
