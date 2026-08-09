@@ -11,6 +11,25 @@ organiser needs no spreadsheet.
 
 ---
 
+## Licence in brief
+
+**KGP member clubs** — and anyone who got this from one of its creators — use it
+freely and modify it however they like, with no further conditions.
+
+**Other non-commercial clubs** use it free too, keeping the footer attribution
+and donating at least **5 kg of cat food** to a shelter, with proof to
+cats@zapisynagry.pl. A club stays non-commercial if its fees (tickets,
+membership) only cover its own costs; if someone profits from them, that's
+commercial use.
+
+**Commercial use** is also free, on the same terms but **10 kg**.
+
+You may add your own copyright line to the footer alongside the existing one.
+
+Full terms in [LICENSE.md](LICENSE.md) · [Polish version](LICENSE.pl.md).
+
+---
+
 ## What it does
 
 **Tables and games.** An event is divided into days, a day into tables, and a

@@ -11,6 +11,27 @@ nie potrzebuje arkusza kalkulacyjnego.
 
 ---
 
+## Licencja w skrócie
+
+**Kluby zrzeszone w KGP** — oraz osoby, które otrzymały program bezpośrednio od
+twórców — korzystają z niego swobodnie i mogą go dowolnie modyfikować, bez
+dodatkowych warunków.
+
+**Pozostałe kluby niekomercyjne** również korzystają bezpłatnie, zachowując
+informację o autorstwie w stopce i przekazując co najmniej **5 kg karmy dla
+kotów** do schroniska — dowód na adres koty@zapisynagry.pl. Klub pozostaje
+niekomercyjny, jeśli opłaty (bilety, składki) pokrywają tylko jego koszty; jeśli
+ktoś na nich zarabia, to już użytek komercyjny.
+
+**Użytek komercyjny** jest także bezpłatny, na tych samych zasadach, ale
+**10 kg**.
+
+Własną informację o prawach autorskich można dopisać w stopce obok istniejącej.
+
+Pełne warunki w pliku [LICENSE.pl.md](LICENSE.pl.md).
+
+---
+
 ## Co potrafi
 
 **Stoły i gry.** Wydarzenie dzieli się na dni, dzień na stoły, a stół mieści
