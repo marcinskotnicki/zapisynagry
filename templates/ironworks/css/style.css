@@ -56,6 +56,8 @@ body.tpl-ironworks {
 .tpl-ironworks .admin h1 { color: var(--parchment); }
 
 .tpl-ironworks h1, .tpl-ironworks h2, .tpl-ironworks h3 { font-family: var(--font-iw); font-weight: 600; }
+.tpl-ironworks .table-title, .tpl-ironworks .table-name{color:var(--parchment-3);}
+.tpl-ironworks .game-deleted-note{color:var(--parchment-3);}
 .tpl-ironworks .btn, .tpl-ironworks input, .tpl-ironworks select, .tpl-ironworks textarea {
     font-family: 'Palatino Linotype', Palatino, Georgia, serif;
 }
