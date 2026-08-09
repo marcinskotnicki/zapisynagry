@@ -80,7 +80,8 @@ body.tpl-ironworks {
     font-size: 1.9rem;
     text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
 }
-.tpl-ironworks .event-header .event-date{
+.tpl-ironworks .event-header .event-date,
+.tpl-ironworks .event-header .event-hours{
     text-align:center;
     color: var(--parchment);
 }
