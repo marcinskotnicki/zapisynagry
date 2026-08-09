@@ -85,6 +85,11 @@ body.tpl-ironworks {
     text-align:center;
     color: var(--parchment);
 }
+
+.tpl-ironworks .poll-opt-meta,
+.tpl-ironworks .poll-opt-votes{
+    color: var(--parchment3);
+}
 .tpl-ironworks .event-header h1::after {
     content: '';
     display: block;
