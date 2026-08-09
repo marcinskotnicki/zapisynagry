@@ -877,6 +877,23 @@ SECOND explicit guard (`!is_admin() && $meId <= 0`) on top of the permission
 check. Either one alone stops a guest; both exist because that collision is easy
 to reintroduce.
 
+**The public game list can be split three ways** (`library_pagination`:
+`all` | `pages` | `alpha`, defaulting to `all` so an upgrade changes nothing).
+All three slice the ALREADY-MERGED list in PHP rather than pushing `LIMIT` into
+SQL: merging happens after the query — a game four people own is one row on
+screen — so a database-level limit would cut the wrong thing and give pages of
+uneven length. Fetch the list before paginating; building `$games` at render
+time silently discards every slice.
+
+Alphabetical mode groups on `library_letter()`, which is `mb_*` throughout
+because Polish titles start with Ą, Ć, Ł, Ś and Ż and `substr()` would cut those
+in half. Non-letters file under `#`. The strip is built from letters that
+actually have games, so no button leads to an empty page, and accented letters
+sort beside their base letter via a small fold map rather than `intl`'s
+collator — the extension is missing on plenty of shared hosts, and a list whose
+order depends on which extensions are installed is worse than one that is
+merely simple. A member's shelf is never split.
+
 **A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
 name, year and thumbnail, drops the custom link, and from then on merges with
 every other member's copy on the public list. That is how a club with one proper

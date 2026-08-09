@@ -44,15 +44,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'edit') {
         // Manual entries only — library_update_manual() enforces that, and
         // reports false when the row is a BGG one or the name is empty.
-        library_flash_edit(library_update_manual(
-            (int)($_POST['game'] ?? 0),
-            $_POST['name'] ?? '',
-            (int)($_POST['year'] ?? 0),
-            $me['id'],
-            // Only accept a link when the field was actually offered, so a
-            // hand-built POST cannot set one the form would not show.
-            library_link_field_visible() ? ($_POST['link'] ?? '') : null
-        ));
+        /* Which editor applies is decided by the ROW, not by the request: a
+         * BGG entry has nothing typeable (its name and year are BGG's), so its
+         * only edit is a new link; a manual one takes name, year and link. */
+        $editId  = (int)($_POST['game'] ?? 0);
+        $editRow = $editId ? db_one('SELECT bgg_id FROM library_games WHERE id = ? AND user_id = ?',
+                                    [$editId, $me['id']]) : null;
+        if ($editRow && !empty($editRow['bgg_id'])) {
+            library_flash_edit(library_relink_bgg($editId, $_POST['link'] ?? '', $me['id']));
+        } else {
+            library_flash_edit(library_update_manual(
+                $editId,
+                $_POST['name'] ?? '',
+                (int)($_POST['year'] ?? 0),
+                $me['id'],
+                // Only accept a link when the field was actually offered, so a
+                // hand-built POST cannot set one the form would not show.
+                library_link_field_visible() ? ($_POST['link'] ?? '') : null
+            ));
+        }
 
     } elseif ($action === 'remove') {
         // Scoped by user id inside library_remove(), so an id from a
@@ -66,7 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name === '' || !text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) {
             flash_set(t('error_name_required'), 'error');
         } else {
-            library_add($me['id'], ['name' => $name, 'link' => $link]);
+            // Year is optional; 0 stores as NULL rather than printing "0".
+            library_add($me['id'], [
+                'name' => $name,
+                'year' => (int)($_POST['year'] ?? 0),
+                'link' => $link,
+            ]);
             flash_set(t('lib_added', $name));
         }
 

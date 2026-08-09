@@ -59,12 +59,13 @@ $OPTION_VALUES = [
     'log_retention_days',   // 0 = keep everything
     'game_deletion',        // choose|soft|hard; validated below
     'deleted_games_display',// name|full; validated below
+    'library_pagination',  // all|pages|alpha; validated below
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
     'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
     'header_brand',         // auto|both|none; validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
-    'archive_per_page', 'admin_per_page', 'auto_archive_days',
+    'archive_per_page', 'admin_per_page', 'auto_archive_days', 'library_per_page',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -222,6 +223,7 @@ function option_sanitize($key, $val) {
         case 'email_smtp_port':
         case 'poll_default_deadline_hours':
         case 'login_days':
+        case 'library_per_page':
         case 'archive_per_page':
         case 'log_retention_days':
         case 'admin_per_page':
@@ -258,6 +260,9 @@ function option_sanitize($key, $val) {
             break;
         case 'deleted_games_display':
             if (!in_array($val, deleted_games_displays(), true)) return null;
+            break;
+        case 'library_pagination':
+            if (!in_array($val, library_pagination_modes(), true)) return null;
             break;
         case 'header_brand':
             if (!in_array($val, ['auto', 'both', 'none'], true)) return null;

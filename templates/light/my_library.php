@@ -88,9 +88,28 @@
                     </span>
 
                     <span class="lib-actions">
-                        <?php // Manual entries only: a BGG game's name and year come
-                              // from BGG and are what a sync matches on. ?>
-                        <?php if (empty($g['bgg_id'])): ?>
+                        <?php if (!empty($g['bgg_id'])): ?>
+                        <?php // A BGG entry has nothing typeable — its name and year
+                              // come from BGG — so its only edit is "this is the
+                              // wrong game", answered with a different address. ?>
+                        <details class="lib-edit">
+                            <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
+                            <form method="post" action="my_library.php" class="lib-edit-form">
+                                <?= $csrf ?>
+                                <input type="hidden" name="action" value="edit">
+                                <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                                <div class="field field-link">
+                                    <label for="lib_r_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
+                                    <input type="url" id="lib_r_<?= (int)$g['id'] ?>" name="link"
+                                           placeholder="https://boardgamegeek.com/boardgame/...">
+                                    <p class="field-note"><?= e(t('lib_relink_hint')) ?></p>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
+                                </div>
+                            </form>
+                        </details>
+                        <?php else: ?>
                             <details class="lib-edit">
                                 <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
                                 <form method="post" action="my_library.php" class="lib-edit-form">
@@ -172,9 +191,19 @@
         <form method="post" action="my_library.php">
             <?= $csrf ?>
             <input type="hidden" name="action" value="add_manual">
-            <div class="field field-name">
-                <label for="lib_name"><?= e(t('lib_add_manual_name')) ?></label>
-                <input type="text" id="lib_name" name="name" required>
+            <div class="field-row">
+                <div class="field field-name">
+                    <label for="lib_name"><?= e(t('lib_add_manual_name')) ?></label>
+                    <input type="text" id="lib_name" name="name" required>
+                </div>
+                <?php // Optional: a year makes two editions of the same title
+                      // tellable apart in the shared list. It was editable but
+                      // not enterable, which meant adding a game then editing it
+                      // just to fill one box. ?>
+                <div class="field field-year">
+                    <label for="lib_year"><?= e(t('lib_year')) ?></label>
+                    <input type="number" id="lib_year" name="year" min="0" max="2999">
+                </div>
             </div>
             <?php // Same admin option as everywhere else: with custom links off
                   // the field disappears, and any link already stored stops

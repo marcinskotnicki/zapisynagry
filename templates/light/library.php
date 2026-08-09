@@ -15,7 +15,11 @@
  *  RENDER VARS:
  *    $tab          — 'games' | 'members'.
  *    $show_members — whether the members tab exists at all.
- *    $games        — merged game list (games tab only).
+ *    $games        — merged game list (games tab only), already paged/filtered.
+ *    $mode         — 'all' | 'pages' | 'alpha'.
+ *    $letters      — letter => count, for the alphabetical index.
+ *    $letter       — the chosen letter, or '' for the index itself.
+ *    $page/$page_count — position in 'pages' mode.
  *    $members      — members with at least one game (members tab, no member chosen).
  *    $member       — the chosen member's row, or null.
  *    $member_games — that member's games.
@@ -97,7 +101,28 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
               // because library_can_manage() already decided who may act. ?>
         <?php if ($manage): ?>
             <span class="lib-actions">
-                <?php if (empty($g['bgg_id'])): ?>
+                <?php if (!empty($g['bgg_id'])): ?>
+                    <?php // A BGG entry has nothing typeable — its name and year come
+                          // from BGG — so its only edit is "this is the wrong game",
+                          // answered with a different address. ?>
+                    <details class="lib-edit">
+                        <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
+                        <form method="post" action="library.php" class="lib-edit-form">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <div class="field field-link">
+                                <label for="libr_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
+                                <input type="url" id="libr_<?= (int)$g['id'] ?>" name="link"
+                                       placeholder="https://boardgamegeek.com/boardgame/...">
+                                <p class="field-note"><?= e(t('lib_relink_hint')) ?></p>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
+                            </div>
+                        </form>
+                    </details>
+                <?php else: ?>
                     <details class="lib-edit">
                         <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
                         <form method="post" action="library.php" class="lib-edit-form">
@@ -179,14 +204,52 @@ endif;
     <?php endif; ?>
 
     <?php if ($tab === 'games'): ?>
+        <?php // ALPHABETICAL INDEX. With no letter chosen this is the whole
+              // page: a strip of letters that actually have games behind them,
+              // so nothing leads to an empty list. ?>
+        <?php if (($mode ?? 'all') === 'alpha' && !empty($letters)): ?>
+            <nav class="lib-alpha">
+                <?php foreach ($letters as $l => $count): ?>
+                    <a class="btn btn-small lib-alpha-btn<?= ($letter ?? '') === (string)$l ? ' lib-alpha-active' : '' ?>"
+                       href="library.php?tab=games&amp;letter=<?= rawurlencode((string)$l) ?>"><?= e($l) ?>
+                        <span class="lib-alpha-count"><?= (int)$count ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+            <?php if (($letter ?? '') !== ''): ?>
+                <p class="lib-alpha-back">
+                    <a class="btn btn-small" href="library.php?tab=games"><?= e(t('lib_all_letters')) ?></a>
+                </p>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <?php if (empty($games)): ?>
-            <p class="muted"><?= e(t('lib_empty')) ?></p>
+            <?php // On the alpha index "no games" would be wrong — there are
+                  // games, none is selected. Say the right thing for the state. ?>
+            <?php if (($mode ?? 'all') === 'alpha' && !empty($letters) && ($letter ?? '') === ''): ?>
+                <p class="muted"><?= e(t('lib_pick_letter')) ?></p>
+            <?php else: ?>
+                <p class="muted"><?= e(t('lib_empty')) ?></p>
+            <?php endif; ?>
         <?php else: ?>
             <ul class="lib-list">
                 <?php foreach ($games as $g): ?>
                     <?php lib_render_row($g, $g['owners']); ?>
                 <?php endforeach; ?>
             </ul>
+            <?php // Prev/next rather than a numbered pager: the same choice the
+                  // archive makes, and it stays usable on a phone. ?>
+            <?php if (($mode ?? 'all') === 'pages' && ($page_count ?? 1) > 1): ?>
+                <nav class="pager">
+                    <?php if (($page ?? 1) > 1): ?>
+                        <a class="btn btn-small" href="library.php?tab=games&amp;page=<?= (int)$page - 1 ?>"><?= e(t('pager_prev')) ?></a>
+                    <?php endif; ?>
+                    <span class="pager-pos"><?= e(t('pager_position', (int)$page, (int)$page_count)) ?></span>
+                    <?php if (($page ?? 1) < ($page_count ?? 1)): ?>
+                        <a class="btn btn-small" href="library.php?tab=games&amp;page=<?= (int)$page + 1 ?>"><?= e(t('pager_next')) ?></a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
         <?php endif; ?>
 
     <?php elseif ($member): ?>

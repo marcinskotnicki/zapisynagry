@@ -36,6 +36,98 @@ function library_enabled() {
 }
 
 /**
+ * The three ways the public game list can be broken up.
+ * @return array
+ */
+function library_pagination_modes() {
+    return ['all', 'pages', 'alpha'];
+}
+
+/**
+ * How the public game list is broken up: 'all', 'pages' or 'alpha'.
+ *
+ * Re-validated on read as well as on save, so a value written straight into the
+ * options table cannot put the page into a mode it has no code for.
+ * @return string
+ */
+function library_pagination() {
+    $mode = (string)opt('library_pagination', 'all');
+    return in_array($mode, library_pagination_modes(), true) ? $mode : 'all';
+}
+
+/**
+ * Games per page in 'pages' mode. Clamped, so a stored 0 cannot produce a page
+ * with no rows on it and an infinite page count.
+ * @return int
+ */
+function library_per_page() {
+    $n = (int)opt('library_per_page', 50);
+    return $n > 0 ? min($n, 500) : 50;
+}
+
+/**
+ * The letter a game is filed under: its first character, uppercased.
+ *
+ * Anything that is not a letter — a digit, a bracket, a quote — is filed under
+ * '#', so "7 Wonders" and "Å" both land somewhere sensible rather than creating
+ * a button each.
+ *
+ * mb_* throughout: Polish titles start with Ą, Ć, Ł, Ś and Ż, and substr() would
+ * cut those multi-byte characters in half and produce a mojibake button.
+ *
+ * @param string $name
+ * @return string  A single uppercase character, or '#'.
+ */
+function library_letter($name) {
+    $name = trim((string)$name);
+    if ($name === '') return '#';
+    $first = mb_strtoupper(mb_substr($name, 0, 1, 'UTF-8'), 'UTF-8');
+    // \p{L} rather than ctype_alpha(), which is byte-based and says no to Ł.
+    return preg_match('/^\p{L}$/u', $first) ? $first : '#';
+}
+
+/**
+ * Which letters actually have games behind them, in order.
+ *
+ * Built from the list rather than from a fixed A-Z, so a club sees buttons only
+ * for letters that lead somewhere — and so Polish letters appear when they are
+ * used without anybody having to configure an alphabet.
+ *
+ * @param array $games  From library_all_games().
+ * @return array  Letter => count.
+ */
+function library_letters(array $games) {
+    $out = [];
+    foreach ($games as $g) {
+        $l = library_letter($g['name']);
+        $out[$l] = ($out[$l] ?? 0) + 1;
+    }
+    /* '#' last: it is the miscellany, and putting it first would give the strip
+     * an odd-looking head.
+     *
+     * Accented letters sort NEXT TO their base letter — Ą after A, Ł after L —
+     * which is what a Polish reader expects and what a byte comparison does
+     * not do (strcmp puts every multi-byte letter after Z). intl's collator
+     * would handle this, but the extension is not present on every shared host,
+     * and a list whose order depends on which extensions happen to be installed
+     * is worse than one that is merely simple. So: fold to a base letter for
+     * comparison, and use the accented form itself only to break ties. */
+    uksort($out, function ($a, $b) {
+        if ($a === '#') return 1;
+        if ($b === '#') return -1;
+        $fold = function ($ch) {
+            $map = ['Ą' => 'A', 'Ć' => 'C', 'Ę' => 'E', 'Ł' => 'L', 'Ń' => 'N',
+                    'Ó' => 'O', 'Ś' => 'S', 'Ź' => 'Z', 'Ż' => 'Z'];
+            return $map[$ch] ?? $ch;
+        };
+        $fa = $fold($a);
+        $fb = $fold($b);
+        return $fa === $fb ? strcmp($a, $b) : strcmp($fa, $fb);
+    });
+    return $out;
+}
+
+/**
  * Should the public page show the members tab?
  * Meaningless when the library is off; callers check library_enabled() first.
  * @return bool
@@ -399,6 +491,74 @@ function library_remove($userId, $gameId) {
 }
 
 /**
+ * Point a BGG entry at a DIFFERENT BGG game.
+ *
+ * The counterpart to promoting a manual entry. A BGG row's name and year are
+ * BGG's, so there is nothing to type here — the only way it can be wrong is
+ * that it is linked to the wrong game, and the fix is a new link. Someone picks
+ * the wrong "Catan" from a search, or a member's sync pulls in an edition
+ * nobody meant; an admin pastes the right address and the row becomes that
+ * game, art and all.
+ *
+ * A NON-BGG LINK IS REFUSED rather than quietly turning the row back into a
+ * hand-typed entry: the field on this form means "which BGG game is this", and
+ * silently changing what kind of row it is would be a surprising answer to a
+ * pasted typo.
+ *
+ * Same result shape as library_update_manual(), so both share
+ * library_flash_edit().
+ *
+ * @param int    $rowId
+ * @param string $link
+ * @param int    $userId  Owner scope; 0 for an admin.
+ * @return array
+ */
+function library_relink_bgg($rowId, $link, $userId = 0) {
+    $where = 'id = ? AND bgg_id IS NOT NULL';
+    $args  = [(int)$rowId];
+    if ($userId > 0) { $where .= ' AND user_id = ?'; $args[] = (int)$userId; }
+
+    $row = db_one('SELECT * FROM library_games WHERE ' . $where, $args);
+    if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    $bggId = library_bgg_id_from_link($link);
+    if ($bggId <= 0) return ['ok' => false, 'why' => 'not_bgg'];
+
+    // Pointing it at the game it already is: nothing to do, and reporting an
+    // error for it would be wrong.
+    if ($bggId === (int)$row['bgg_id']) return ['ok' => true];
+
+    /* Already own the target as a separate row — the same collision promotion
+     * handles. UNIQUE(user_id, bgg_id) would reject the update, so this row is
+     * folded into the one that is already correct. */
+    $existing = db_one('SELECT id FROM library_games WHERE user_id = ? AND bgg_id = ? AND id <> ?',
+                       [(int)$row['user_id'], $bggId, (int)$row['id']]);
+    if ($existing) {
+        db_run('DELETE FROM library_games WHERE id = ?', [(int)$row['id']]);
+        return ['ok' => true, 'merged' => true, 'name' => $row['name']];
+    }
+
+    /* Requires a successful lookup, for the same reason promotion does: keeping
+     * the OLD name against a NEW id would leave the row lying about which game
+     * it is, and it would then merge under that wrong name in the shared list. */
+    require_once __DIR__ . '/bgg.php';
+    $thing = bgg_thing($bggId);
+    if (!$thing || empty($thing['name'])) return ['ok' => false, 'why' => 'bgg_lookup'];
+
+    db_run(
+        'UPDATE library_games SET name = ?, year = ?, bgg_id = ?, thumbnail = ?, link = NULL WHERE id = ?',
+        [
+            $thing['name'],
+            !empty($thing['year']) ? (int)$thing['year'] : null,
+            $bggId,
+            !empty($thing['thumbnail']) ? $thing['thumbnail'] : null,
+            (int)$row['id'],
+        ]
+    );
+    return ['ok' => true, 'promoted' => true, 'name' => $thing['name']];
+}
+
+/**
  * Turn a library_update_manual() result into a flash message.
  *
  * The four outcomes read very differently to whoever pressed Save, and lumping
@@ -420,7 +580,9 @@ function library_flash_edit(array $res) {
         return;
     }
     $why = $res['why'] ?? '';
-    if ($why === 'bgg_lookup') {
+    if ($why === 'not_bgg') {
+        flash_set(t('lib_relink_not_bgg'), 'error');
+    } elseif ($why === 'bgg_lookup') {
         // The link looked like BGG but could not be checked, so nothing was
         // changed — worth saying, or it looks like the edit silently failed.
         flash_set(t('lib_edit_bgg_failed'), 'error');

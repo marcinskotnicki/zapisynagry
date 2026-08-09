@@ -137,6 +137,10 @@ INSERT INTO options (key, value) VALUES
     ('library_show_members',  '1'),
     ('library_allow_contact', '0'),
     ('library_mail_venue',    '1'),
+    -- 'all' | 'pages' | 'alpha'. Defaults to 'all' so an install that upgrades
+    -- keeps the list it already had; a club only paginates once it needs to.
+    ('library_pagination',    'all'),
+    ('library_per_page',      '50'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),
     -- Public archives. Off by default: switching it on changes how EVENTS

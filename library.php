@@ -65,10 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('lib_visibility_saved'));
             break;
         case 'edit':
-            library_flash_edit(library_update_manual(
-                $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0), $scope,
-                library_link_field_visible() ? ($_POST['link'] ?? '') : null
-            ));
+            /* Decided by the row, as on my_library.php: a BGG entry's only
+             * edit is a new link, a manual one takes name, year and link. */
+            if (!empty($row['bgg_id'])) {
+                library_flash_edit(library_relink_bgg($rowId, $_POST['link'] ?? '', $scope));
+            } else {
+                library_flash_edit(library_update_manual(
+                    $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0), $scope,
+                    library_link_field_visible() ? ($_POST['link'] ?? '') : null
+                ));
+            }
             break;
     }
     redirect($back);
@@ -101,11 +107,57 @@ if ($tab === 'members' && $memberId > 0) {
     if ($member) $memberGames = library_for_user($memberId, !$canManageShelf);
 }
 
+/* PAGINATION, games tab only. A member's shelf is one person's games and needs
+ * no splitting; the merged list is the one that grows past a screenful once a
+ * club gets going.
+ *
+ * All three modes work on the SAME already-merged list rather than pushing
+ * LIMIT into SQL, because merging happens in PHP (a game owned by four people
+ * is one row on screen), so a database-level limit would slice the wrong
+ * thing and give pages of uneven length. */
+/* Fetched HERE rather than inline in the render call below: the paging works on
+ * this list, and a $games built at render time would discard every slice made
+ * above it. (It was written that way first, and all three modes silently showed
+ * the full list.) */
+$games     = $tab === 'games' ? library_all_games() : [];
+$mode      = library_pagination();
+$letters   = [];
+$letter    = '';
+$page      = 1;
+$pageCount = 1;
+
+if ($tab === 'games' && $games) {
+    if ($mode === 'alpha') {
+        $letters = library_letters($games);
+        $letter  = (string)($_GET['letter'] ?? '');
+        // An unknown letter shows the index rather than an empty list — a stale
+        // link should not look like "there are no games".
+        if ($letter !== '' && !isset($letters[$letter])) $letter = '';
+        if ($letter !== '') {
+            $games = array_values(array_filter($games, function ($g) use ($letter) {
+                return library_letter($g['name']) === $letter;
+            }));
+        } else {
+            $games = [];   // the index page lists letters, not games
+        }
+    } elseif ($mode === 'pages') {
+        $per       = library_per_page();
+        $pageCount = max(1, (int)ceil(count($games) / $per));
+        $page      = max(1, min($pageCount, (int)($_GET['page'] ?? 1)));
+        $games     = array_slice($games, ($page - 1) * $per, $per);
+    }
+}
+
 tpl_render('header', ['page_title' => t('lib_title')]);
 tpl_render('library', [
+    'mode'         => $mode,
+    'letters'      => $letters,
+    'letter'       => $letter,
+    'page'         => $page,
+    'page_count'   => $pageCount,
     'tab'          => $tab,
     'show_members' => $showMembers,
-    'games'        => $tab === 'games' ? library_all_games() : [],
+    'games'        => $games,
     'members'      => ($tab === 'members' && !$member) ? library_members() : [],
     'member'       => $member,
     'member_games' => $memberGames,

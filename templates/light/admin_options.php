@@ -382,6 +382,23 @@ $groupEnd = function () { echo '</div></details>'; };
         <p class="field-note"><?= e(t('opt_library_contact_note')) ?></p>
         <?php $toggle('library_mail_venue', 'opt_note_library_off'); ?>
         <p class="field-note"><?= e(t('opt_library_mail_venue_note')) ?></p>
+
+        <?php // How the shared game list is broken up once it outgrows a screen. ?>
+        <div class="field">
+            <label for="library_pagination"><?= e(t('opt_library_pagination')) ?></label>
+            <select id="library_pagination" name="library_pagination">
+                <?php foreach (library_pagination_modes() as $libMode): ?>
+                    <option value="<?= e($libMode) ?>"<?= opt('library_pagination') === $libMode ? ' selected' : '' ?>>
+                        <?= e(t('opt_library_pagination_' . $libMode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_note_library_off')) ?></p>
+        </div>
+        <?php // Only does anything in 'pages' mode; the note says so rather than
+              // the field disappearing, so an admin can set it before switching. ?>
+        <?php $text('library_per_page', 'number'); ?>
+        <p class="field-note"><?= e(t('opt_library_per_page_note')) ?></p>
     <?php $groupEnd(); ?>
 
     <?php /* 5. CHAT */ ?>

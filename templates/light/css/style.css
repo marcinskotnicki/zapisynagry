@@ -177,6 +177,12 @@ input[type="checkbox"]{width:auto;}
 .lib-add { margin: 0 0 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.75rem; }
 .lib-add > summary { cursor: pointer; font-weight: 600; }
 .lib-tabs { margin-bottom: 1rem; }
+.lib-alpha { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 1rem; }
+.lib-alpha-btn { display: inline-flex; align-items: baseline; gap: 0.25rem; }
+.lib-alpha-count { font-size: 0.75em; color: var(--text-muted); }
+.lib-alpha-active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+.lib-alpha-active .lib-alpha-count { color: inherit; opacity: 0.8; }
+.lib-alpha-back { margin: 0 0 1rem; }
 .lib-prefs { margin: 0 0 1rem; }
 @media (max-width: 480px) { .lib-item { flex-wrap: wrap; } .lib-del { margin-left: 0; } }
 
