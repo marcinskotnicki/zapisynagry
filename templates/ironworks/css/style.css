@@ -53,7 +53,7 @@ body.tpl-ironworks {
 .tpl-ironworks .event-header,
 .tpl-ironworks .table-block,
 .tpl-ironworks .pager,
-.tpl-ironworks .admin h1 { color: var(--parchment); }
+.tpl-ironworks .admin h1, .tpl-ironworks .userpanel h1, .tpl-ironworks .userpanel>h2 { color: var(--parchment); }
 .tpl-ironworks .fmt-num_weekday_date_hours .day-tab-num{
         color: var(--brass-lit);
 }
