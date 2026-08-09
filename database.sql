@@ -137,9 +137,13 @@ INSERT INTO options (key, value) VALUES
     ('library_show_members',  '1'),
     ('library_allow_contact', '0'),
     ('library_mail_venue',    '1'),
-    -- 'all' | 'pages' | 'alpha'. Defaults to 'all' so an install that upgrades
-    -- keeps the list it already had; a club only paginates once it needs to.
-    ('library_pagination',    'all'),
+    -- 'all' | 'pages' | 'alpha'. Defaults to 'alpha' for a NEW install — a
+    -- club's shared library tends to grow past a screenful, and grouping by
+    -- letter is useful from the start rather than something to discover later.
+    -- An install that upgrades keeps whatever it already has: this default is
+    -- read only when database.sql seeds a fresh options table, never applied
+    -- to a row that already exists.
+    ('library_pagination',    'alpha'),
     ('library_per_page',      '50'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),

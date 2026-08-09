@@ -546,6 +546,38 @@
                 // The day tabs WRAP on desktop and only scroll on mobile, so the
                 // answer changes with the viewport, not just with the content.
                 window.addEventListener('resize', sync);
+
+                // Bring the CURRENT tab into view. On a phone showing four of
+                // ten days, picking day seven reloads to a strip scrolled back
+                // to day one — the tab you just chose is off-screen, and there
+                // is nothing to say the strip moves at all.
+                //
+                // scrollLeft is set directly rather than using
+                // scrollIntoView(): that scrolls every scrollable ancestor,
+                // including the window, so landing on a day would also jump the
+                // page down to the tab strip. This moves the strip and nothing
+                // else.
+                function centreActive() {
+                    // Only when it actually scrolls: on desktop the strip wraps
+                    // instead, and nudging scrollLeft there does nothing useful.
+                    if (strip.scrollWidth <= strip.clientWidth) return;
+                    var active = strip.querySelector('.day-tab-active, .event-tab-active');
+                    if (!active) return;
+
+                    // Rect deltas rather than offsetLeft: offsetLeft is measured
+                    // from the offsetParent, which is whatever happens to be
+                    // positioned nearby and is not reliably the strip.
+                    var sr = strip.getBoundingClientRect();
+                    var ar = active.getBoundingClientRect();
+                    // Centre it, then clamp — a tab near either end cannot be
+                    // centred, and asking for it would leave a gap.
+                    var delta = (ar.left - sr.left) - (sr.width - ar.width) / 2;
+                    strip.scrollLeft = Math.max(0, Math.min(strip.scrollLeft + delta,
+                                                            strip.scrollWidth - strip.clientWidth));
+                    sync();
+                }
+
+                centreActive();
                 sync();
             })(wraps[i]);
         }
