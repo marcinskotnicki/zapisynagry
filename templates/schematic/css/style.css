@@ -49,6 +49,9 @@ body.tpl-schematic {
 .tpl-schematic .admin .tab-body, .tpl-schematic .userpanel{
     color: var(--board);
 }
+.tpl-schematic .userpanel h1,  .tpl-schematic .userpanel>h2{
+    color: var(--paper);
+}
 .tpl-schematic .admin .tab {
     color: var(--paper)
 }
