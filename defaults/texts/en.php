@@ -26,17 +26,11 @@ return [
 
     // The event page — the first thing most visitors see.
     'msg_below_event' =>
-        'New here? This page shows every table and the games planned on them. '
-        . '1) Pick a day at the top. 2) Find a game you like the look of. '
-        . '3) Press "Sign up" to take one of its seats. You do not need an account.',
+        'This page shows all events and the games scheduled for them: choose the date of the meeting, the game you\'re interested in, and click "Sign up" to reserve a spot. You don\'t need an account.',
 
     // The add-a-game gate: name field, then BGG / poll / manual buttons.
     'msg_adding_game' =>
-        'Type the name of the game you want to bring, then choose how to add it. '
-        . 'BoardGameGeek is a big online database of board games — adding from '
-        . 'there fills in the cover picture, playing time and number of players '
-        . 'for you. If your game is not there, or you cannot find it, use '
-        . '"add manually" and just type the details yourself.',
+        'Enter the name of the game you want to propose and choose how to add it. BoardGameGeek is a large online board game database — adding a game from there will automatically fill in the cover image, play time, and player count. If your game isn\'t listed or you can\'t find it, select "Add manually" and enter the details yourself. You can pick a game from the club cabinet or bring your own to play. If a game is another player\'s private property, ask them first if they would be willing to bring it to the meetup.',
 
     // Taking a seat at a game.
     'msg_assigning_player' =>

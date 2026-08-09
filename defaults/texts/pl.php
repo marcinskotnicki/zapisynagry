@@ -26,18 +26,11 @@ return [
 
     // Strona wydarzenia — pierwsze, co widzi większość odwiedzających.
     'msg_below_event' =>
-        'Jesteś tu pierwszy raz? Ta strona pokazuje wszystkie stoły i zaplanowane '
-        . 'na nich gry. 1) Wybierz dzień u góry. 2) Znajdź grę, która Cię '
-        . 'interesuje. 3) Kliknij „Zapisz się”, żeby zająć miejsce. Nie musisz '
-        . 'mieć konta.',
+        'Ta strona pokazuje wszystkie wydarzenia i zaplanowane na nich gry: Wybierz datę spotkania, grę, która Cię interesuje i kliknij „Zapisz się”, żeby zająć miejsce. Nie musisz mieć konta.',
 
     // Ekran dodawania gry: nazwa, a potem BGG / ankieta / ręcznie.
     'msg_adding_game' =>
-        'Wpisz nazwę gry, którą chcesz przynieść, i wybierz sposób dodania. '
-        . 'BoardGameGeek to duża internetowa baza gier planszowych — dodanie '
-        . 'stamtąd samo uzupełni okładkę, czas gry i liczbę graczy. Jeśli Twojej '
-        . 'gry tam nie ma albo nie możesz jej znaleźć, wybierz „dodaj ręcznie” '
-        . 'i wpisz dane samodzielnie.',
+        'Wpisz nazwę gry, którą chcesz zaproponować i sposób jej dodania. BoardGameGeek to duża internetowa baza gier planszowych — dodanie stamtąd samo uzupełni okładkę, czas gry i liczbę graczy. Jeśli Twojej gry tam nie ma albo nie możesz jej znaleźć, wybierz „dodaj ręcznie” i wpisz dane samodzielnie. Możesz wziąć grę z szafki klubu lub przynieść do grania swoją. Jeśli gra jest prywatną własnością innego gracza - najpierw zapytaj go, czy zechce ją przynieść na spotkanie.',
 
     // Zajmowanie miejsca przy grze.
     'msg_assigning_player' =>
