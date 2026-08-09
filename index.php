@@ -50,8 +50,21 @@ if (!$event) {
 $days     = event_days($event['id']);
 $numDays  = max(1, (int)$event['num_days']);
 
-// Active day from ?day= (1-based), clamped to range (bad values -> day 1).
-$activeDay = (int)($_GET['day'] ?? 1);
+/* Active day from ?day= (1-based), clamped to range (bad values -> day 1).
+ *
+ * With NO ?day= at all, an event may nominate a day to open on — useful once a
+ * multi-day event is under way and the interesting day is no longer the first.
+ * An explicit ?day= always wins, so a tab someone clicked, a bookmark and a
+ * shared link all still land exactly where they say.
+ *
+ * highlight_day is a day_index rather than an event_days.id, so it survives days
+ * being rebuilt when an event's length changes. */
+$explicitDay = isset($_GET['day']);
+$activeDay   = (int)($_GET['day'] ?? 0);
+if (!$explicitDay) $activeDay = (int)($event['highlight_day'] ?? 0);
+// One clamp for both routes. A stale highlight_day — left pointing past the end
+// by shortening an event — lands here exactly like a bad ?day= and falls back
+// to day 1, so the stored value needs no separate range check of its own.
 if ($activeDay < 1 || $activeDay > $numDays) $activeDay = 1;
 $dayRow = event_day($event['id'], $activeDay);
 

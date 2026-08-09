@@ -542,10 +542,76 @@
                     wrap.classList.toggle('can-scroll-right', strip.scrollLeft < max - 2);
                 }
 
+                // Two escalating steps for a strip that does not fit, decided
+                // here because CSS cannot ask whether an element overflows.
+                //
+                //   1. .tab-scroll-wide — let the strip use the whole window
+                //      rather than the narrower content column. Padding puts the
+                //      first tab back under the content's left edge, so nothing
+                //      looks shunted sideways; only the room it may scroll
+                //      through grows. For a lot of clubs this alone is enough.
+                //   2. .tab-scroll-over — still too narrow even then, so it
+                //      scrolls. The day tabs stop WRAPPING at this point:
+                //      wrapping to four rows is worse than one scrolling row,
+                //      but wrapping is right for the handful of days most clubs
+                //      have, which is why it is not the default.
+                //
+                // Measured with the classes OFF first, so the answer is about
+                // the content and not about a state left over from last time —
+                // otherwise a strip that widened once would stay wide forever,
+                // including after a resize that made room again.
+                function widen(on) {
+                    if (!on) {
+                        wrap.classList.remove('tab-scroll-wide');
+                        wrap.style.marginLeft = wrap.style.marginRight = '';
+                        wrap.style.paddingLeft = wrap.style.paddingRight = '';
+                        return;
+                    }
+                    /* Pixel values measured here rather than `width: 100vw` in
+                     * CSS: 100vw INCLUDES the vertical scrollbar, so on a normal
+                     * desktop page it overshoots by ~15px and gives the whole
+                     * document a horizontal scrollbar. documentElement.clientWidth
+                     * excludes it, so this lands exactly on the visible width.
+                     *
+                     * The negative margins pull the box out to the window edges;
+                     * the matching padding puts the first tab back under the
+                     * content's left edge, so nothing looks shunted sideways —
+                     * only the room the strip may scroll through grows. */
+                    var docW = document.documentElement.clientWidth;
+                    var r = wrap.getBoundingClientRect();
+                    var leftGap = Math.max(0, Math.round(r.left));
+                    var rightGap = Math.max(0, Math.round(docW - r.right));
+                    wrap.classList.add('tab-scroll-wide');
+                    wrap.style.marginLeft = -leftGap + 'px';
+                    wrap.style.marginRight = -rightGap + 'px';
+                    wrap.style.paddingLeft = leftGap + 'px';
+                    wrap.style.paddingRight = rightGap + 'px';
+                }
+
+                function fit() {
+                    // Cleared before measuring, so the answer is about the
+                    // content and not about a state left over from last time —
+                    // otherwise a strip that widened once would stay wide even
+                    // after a resize made room again.
+                    widen(false);
+                    wrap.classList.remove('tab-scroll-over');
+                    if (strip.scrollWidth <= strip.clientWidth) return;
+
+                    widen(true);
+                    // Re-measured once the widening has landed: the strip is
+                    // bigger now, and that may already be enough.
+                    if (strip.scrollWidth <= strip.clientWidth) return;
+
+                    wrap.classList.add('tab-scroll-over');
+                }
+
                 strip.addEventListener('scroll', sync);
                 // The day tabs WRAP on desktop and only scroll on mobile, so the
                 // answer changes with the viewport, not just with the content.
-                window.addEventListener('resize', sync);
+                window.addEventListener('resize', function () {
+                    fit();
+                    sync();
+                });
 
                 // Bring the CURRENT tab into view. On a phone showing four of
                 // ten days, picking day seven reloads to a strip scrolled back
@@ -577,6 +643,10 @@
                     sync();
                 }
 
+                // fit() BEFORE centreActive(): widening or switching to a
+                // scrolling row changes clientWidth, and centring against the
+                // pre-widening measurement would aim at the wrong place.
+                fit();
                 centreActive();
                 sync();
             })(wraps[i]);

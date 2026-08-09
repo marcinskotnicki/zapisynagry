@@ -33,6 +33,42 @@
     </form>
 </fieldset>
 
+<?php // Which day the event opens on when the address has no ?day=. Useful once
+      // a multi-day event is under way and the first day is no longer the one
+      // people want. Only offered when there is more than one day to choose
+      // between — on a single-day event the setting could not do anything. ?>
+<?php if (count($days) > 1): ?>
+<fieldset>
+    <legend><?= e(t('events_highlight')) ?></legend>
+    <form method="post" action="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>">
+        <?= $csrf ?>
+        <input type="hidden" name="event" value="<?= (int)$event['id'] ?>">
+        <input type="hidden" name="action" value="highlight">
+        <div class="field">
+            <label for="ev_highlight"><?= e(t('events_highlight_label')) ?></label>
+            <select id="ev_highlight" name="highlight_day">
+                <option value="0"><?= e(t('events_highlight_none')) ?></option>
+                <?php foreach ($days as $d): ?>
+                    <?php
+                    $di = (int)$d['day_index'];
+                    // Date and name where they exist, so the choice is
+                    // recognisable rather than "day 4".
+                    $label = t('day_n', $di);
+                    $extra = trim((string)($d['day_date'] ?? '') . ' ' . (string)($d['day_name'] ?? ''));
+                    if ($extra !== '') $label .= ' — ' . $extra;
+                    ?>
+                    <option value="<?= $di ?>"<?= (int)($event['highlight_day'] ?? 0) === $di ? ' selected' : '' ?>>
+                        <?= e($label) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('events_highlight_note')) ?></p>
+        </div>
+        <button type="submit" class="btn"><?= e(t('save')) ?></button>
+    </form>
+</fieldset>
+<?php endif; ?>
+
 <fieldset>
     <legend><?= e(t('events_days')) ?></legend>
 

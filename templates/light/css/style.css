@@ -731,6 +731,7 @@ body.chat-open .chat-toggle-close { display: inline; }
 .pager { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; }
 .pager-pos { color: var(--text-muted); font-size: 0.85rem; }
 
+.archive-row-dates { display: block; font-size: 0.85em; color: var(--text-muted); }
 .archive-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
 
 .archive-item {
@@ -828,6 +829,35 @@ body.chat-open .chat-toggle-close { display: inline; }
 .nav-burger { display: none; }
 
 .tab-scroll { position: relative; }
+
+.tab-scroll-wide { box-sizing: border-box; }
+.tab-scroll-over .day-tabs,
+.tab-scroll-over .event-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+}
+.tab-scroll-over .day-tab,
+.tab-scroll-over .event-tab { flex: 0 0 auto; }
+
+.day-tabs,
+.event-tabs {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+.day-tabs::-webkit-scrollbar,
+.event-tabs::-webkit-scrollbar { height: 8px; }
+.day-tabs::-webkit-scrollbar-track,
+.event-tabs::-webkit-scrollbar-track { background: transparent; }
+.day-tabs::-webkit-scrollbar-thumb,
+.event-tabs::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+}
+.day-tabs::-webkit-scrollbar-thumb:hover,
+.event-tabs::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .tab-scroll::before,
 .tab-scroll::after {
     content: "";

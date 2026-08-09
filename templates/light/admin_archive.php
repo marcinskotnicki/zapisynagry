@@ -36,7 +36,17 @@
                     : ($state === 'current' ? t('archive_current') : t('archive_archived'));
         ?>
         <tr class="archive-row archive-row-<?= e($state) ?>">
-            <td data-label="<?= e(t('archive_event')) ?>"><?= e($ev['name']) ?></td>
+            <td data-label="<?= e(t('archive_event')) ?>">
+                <?= e($ev['name']) ?>
+                <?php // The dates it actually runs, under the name. events_page()
+                      // already selects date_from/date_to, and event_date_label()
+                      // is the same formatter the public archive list uses — so
+                      // an event reads identically in both places. ?>
+                <?php $evDates = event_date_label($ev); ?>
+                <?php if ($evDates !== ''): ?>
+                    <span class="archive-row-dates"><?= e($evDates) ?></span>
+                <?php endif; ?>
+            </td>
             <td data-label="<?= e(t('archive_status')) ?>" class="archive-status archive-status-<?= e($state) ?>"><?= e($stateLabel) ?></td>
             <td data-label="<?= e(t('archive_created')) ?>" class="nowrap"><?= e($ev['created_at']) ?></td>
             <td data-label="<?= e(t('archive_link')) ?>" class="link-cell">

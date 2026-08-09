@@ -113,6 +113,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = t('saved_ok');
         }
 
+    } elseif ($id > 0 && $act === 'highlight') {
+        /* Which day the event opens on when no ?day= is given. 0 clears it and
+         * restores the old behaviour (the first day).
+         *
+         * Validated against the days that actually exist rather than stored
+         * blind: a value naming a day this event does not have would open
+         * nothing, and the front page would silently fall back — a setting that
+         * appears to save but does nothing is worse than one that refuses. */
+        $wanted = (int)($_POST['highlight_day'] ?? 0);
+        $exists = $wanted > 0
+            ? db_one('SELECT 1 FROM event_days WHERE event_id = ? AND day_index = ?', [$id, $wanted])
+            : null;
+        $store = ($wanted > 0 && $exists) ? $wanted : null;
+        db_run('UPDATE events SET highlight_day = ? WHERE id = ?', [$store, $id]);
+        log_action('event_highlight', 'event #' . $id . ' -> ' . ($store === null ? 'none' : 'day ' . $store));
+        $flash = t('saved_ok');
+
     } elseif ($id > 0 && $act === 'day_add') {
         if (event_day_add($id, $_POST['day_date'] ?? '', $_POST['day_start'] ?? '', $_POST['day_end'] ?? '')) {
             log_action('event_day_add', 'event #' . $id . ' ' . trim((string)($_POST['day_date'] ?? '')));

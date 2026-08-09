@@ -352,7 +352,13 @@ CREATE TABLE events (
     access_token TEXT NOT NULL UNIQUE,           -- unguessable; used for archive links
     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
     archived_at  TEXT,                           -- set when archived
-    deleted_at   TEXT                            -- set when deleted
+    deleted_at   TEXT,                           -- set when deleted
+    -- Which day opens by default when no ?day= is given. NULL (the default)
+    -- keeps the old behaviour: the first day. Stored as a day_index rather than
+    -- an event_days.id so it survives days being rebuilt when an event's length
+    -- changes — and it is re-checked against the days that actually exist, so a
+    -- stale index left by shortening an event cannot open a day that is gone.
+    highlight_day INTEGER
 );
 
 
