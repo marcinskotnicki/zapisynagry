@@ -272,9 +272,12 @@ function library_bgg_user_from_input($raw) {
      * literal '#' (a URL fragment), and with # as the delimiter that closes
      * the pattern early — PHP then reads the rest as modifiers and warns
      * "Unknown modifier". */
-    /* Both URL shapes people actually paste: the profile (/user/NAME) and the
-     * collection page they were just looking at (/collection/user/NAME). */
+    /* All three shapes people actually paste. BGG shows a member TWO different
+     * addresses for the same account — /profile/NAME on the profile page itself
+     * and /collection/user/NAME on their game list — and the label offers
+     * either, so refusing the first was simply wrong. */
     if (preg_match('~boardgamegeek\.com/(?:collection/)?user/([^/?#\s]+)~i', $raw, $m)) return urldecode($m[1]);
+    if (preg_match('~boardgamegeek\.com/profile/([^/?#\s]+)~i', $raw, $m)) return urldecode($m[1]);
     if (preg_match('~[?&]username=([^&\s]+)~i', $raw, $m)) return urldecode($m[1]);
     // A bare username: BGG allows letters, digits, underscore, hyphen, dot.
     if (preg_match('~^[A-Za-z0-9._-]+$~', $raw)) return $raw;

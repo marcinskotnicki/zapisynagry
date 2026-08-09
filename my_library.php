@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $link = game_link_sanitize($_POST['link'] ?? '');
         if ($name === '' || !text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) {
-            flash_set(t('error_name_required'));
+            flash_set(t('error_name_required'), 'error');
         } else {
             library_add($me['id'], ['name' => $name, 'link' => $link]);
             flash_set(t('lib_added', $name));
@@ -53,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'add_bgg') {
         $id = library_bgg_id_from_input($_POST['bgg'] ?? '');
         if ($id <= 0) {
-            flash_set(t('lib_bgg_bad_link'));
+            flash_set(t('lib_bgg_bad_link'), 'error');
         } else {
             $thing = bgg_thing($id);
             if (!$thing || empty($thing['name'])) {
                 // Covers a bad id, a BGG outage, and a host with no outbound
                 // route — all the same from the member's point of view.
-                flash_set(t('lib_bgg_not_found'));
+                flash_set(t('lib_bgg_not_found'), 'error');
             } else {
                 library_add($me['id'], [
                     'name'      => $thing['name'],
@@ -76,16 +76,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // server-side rather than relying on the checkbox's `required`, which
         // a client can simply not send.
         if (empty($_POST['confirm'])) {
-            flash_set(t('lib_sync_confirm_required'));
+            flash_set(t('lib_sync_confirm_required'), 'error');
         } else {
             $user = library_bgg_user_from_input($_POST['bgg_user'] ?? '');
             if ($user === '') {
-                flash_set(t('lib_bgg_bad_user'));
+                flash_set(t('lib_bgg_bad_user'), 'error');
             } else {
                 $why = '';
                 $collection = library_fetch_collection($user, $why);
                 if ($collection === null) {
-                    flash_set(t('lib_sync_failed', $why));
+                    flash_set(t('lib_sync_failed', $why), 'error');
                 } else {
                     $res = library_sync_from_collection($me['id'], $collection);
                     flash_set(t('lib_sync_done', $res['added'], $res['removed'], $res['kept']));
@@ -110,6 +110,8 @@ tpl_render('my_library', [
     'games' => library_for_user($me['id']),
     'user'  => $me,
     'flash' => flash_get(),
+    // Read AFTER flash_get(), which clears the text — see flash_kind().
+    'flash_kind' => flash_kind(),
     'csrf'  => csrf_field(),
 ]);
 tpl_render('footer');

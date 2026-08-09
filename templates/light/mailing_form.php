@@ -14,6 +14,7 @@
  *    $active_day — day index to return to after the redirect.
  *    $gdpr       — consent wording, or '' for none.
  *    $flash      — result of the previous attempt, or null.
+ *    $flash_kind — 'ok' | 'error' | 'warn' (optional; neutral when absent).
  *    $csrf       — hidden CSRF field.
  * ============================================================================= */
 ?>
@@ -21,8 +22,9 @@
     <h2><?= e(t('ml_heading')) ?></h2>
     <p class="muted"><?= e(t('ml_intro')) ?></p>
 
+    <?php // Neutral by default, but a refusal (a failed captcha) says so. ?>
     <?php if (!empty($flash)): ?>
-        <p class="msg"><?= e($flash) ?></p>
+        <p class="msg<?= !empty($flash_kind) && $flash_kind !== 'ok' ? ' msg-' . e($flash_kind) : '' ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
     <form method="post" action="subscribe.php" class="mailing-form">

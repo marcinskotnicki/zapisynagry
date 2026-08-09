@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'email') {
         $newEmail = trim($_POST['email'] ?? '');
         if (!email_valid($newEmail)) {         // shared X@Y.Z check (inc/helpers.php)
-            flash_set(t('up_email_invalid'));
+            flash_set(t('up_email_invalid'), 'error');
         } elseif (db_one('SELECT id FROM users WHERE email = ? AND id <> ?', [$newEmail, $u['id']])) {
-            flash_set(t('up_email_taken'));        // email is the login -> must stay unique
+            flash_set(t('up_email_taken'), 'error');   // email is the login -> must stay unique
         } else {
             db_run('UPDATE users SET email = ? WHERE id = ?', [$newEmail, $u['id']]);
             flash_set(t('up_email_updated'));
@@ -57,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new2 = (string)($_POST['new_password2'] ?? '');
         // Require the current password (defence if a session is left open).
         if (!password_verify($cur, $u['password_hash'])) {
-            flash_set(t('up_password_wrong'));
+            flash_set(t('up_password_wrong'), 'error');
         } elseif (strlen($new) < 6) {
-            flash_set(t('up_password_short'));
+            flash_set(t('up_password_short'), 'error');
         } elseif ($new !== $new2) {
-            flash_set(t('up_password_mismatch'));
+            flash_set(t('up_password_mismatch'), 'error');
         } else {
             db_run('UPDATE users SET password_hash = ? WHERE id = ?',
                    [password_hash($new, PASSWORD_DEFAULT), $u['id']]);
@@ -96,6 +96,8 @@ tpl_render('header', ['page_title' => t('up_title')]);
 tpl_render('user_panel', [
     'user'          => $u,
     'flash'         => flash_get(),
+    // Read after flash_get(), which clears the text — see flash_kind().
+    'flash_kind'    => flash_kind(),
     'brought_event' => $broughtEvent, 'brought_all' => $broughtAll,
     'played_event'  => $playedEvent,  'played_all'  => $playedAll,
     'csrf'          => csrf_field(),

@@ -12,15 +12,18 @@
  *  RENDER VARS:
  *    $games — this member's library rows, already sorted.
  *    $user  — the signed-in member (for the contact preference).
- *    $flash — one-shot message from the last action, or null.
+ *    $flash      — one-shot message from the last action, or null.
+ *    $flash_kind — 'ok' | 'error' | 'warn', how to draw it.
  *    $csrf  — hidden CSRF field.
  * ============================================================================= */
 ?>
 <div class="card">
     <h1><?= e(t('lib_my_title')) ?></h1>
 
+    <?php // The kind matters: a refusal drawn in the success colour reads as
+          // "done" whatever the words say. ?>
     <?php if (!empty($flash)): ?>
-        <p class="msg msg-ok"><?= e($flash) ?></p>
+        <p class="msg msg-<?= e($flash_kind ?? 'ok') ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
     <p class="muted"><?= e(t('lib_my_intro')) ?></p>

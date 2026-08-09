@@ -136,6 +136,7 @@ if (!$readonly && mailing_enabled()) {
         'active_day' => $activeDay,
         'gdpr'       => mailing_gdpr_text(),
         'flash'      => flash_get(),
+        'flash_kind' => flash_kind(),   // read after flash_get(), which clears the text
         'csrf'       => csrf_field(),
     ]);
 }

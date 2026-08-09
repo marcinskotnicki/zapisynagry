@@ -38,7 +38,7 @@ if (!email_valid($email)) {
     // Only demanded when the admin actually configured wording to consent to.
     flash_set(t('ml_err_consent'));
 } elseif (captcha_required() && !captcha_verify()) {
-    flash_set(t('error_captcha'));
+    flash_set(t('error_captcha'), 'error');
 } else {
     // The consent text is snapshotted with the row, so a later edit to the
     // admin's wording can't rewrite what this person agreed to.

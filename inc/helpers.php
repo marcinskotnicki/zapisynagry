@@ -42,10 +42,19 @@ function redirect($url) {
 
 /**
  * Stash a message to show after the next redirect.
- * @param string $msg  Already-translated, human-readable text.
+ *
+ * $kind decides how it is drawn. It defaults to 'ok' so every existing caller
+ * keeps working untouched — but a FAILURE must pass 'error', because a flash is
+ * the only thing the visitor sees after a redirect and one drawn green reads as
+ * "done" no matter what it says. ("That is not a BoardGameGeek address" was
+ * being shown in the success colour, which is what prompted this.)
+ *
+ * @param string $msg   Already-translated, human-readable text.
+ * @param string $kind  'ok' | 'error' | 'warn'.
  */
-function flash_set($msg) {
+function flash_set($msg, $kind = 'ok') {
     $_SESSION['flash'] = $msg;
+    $_SESSION['flash_kind'] = in_array($kind, ['ok', 'error', 'warn'], true) ? $kind : 'ok';
 }
 
 /**
@@ -57,6 +66,22 @@ function flash_get() {
     $m = $_SESSION['flash'] ?? null;
     unset($_SESSION['flash']);
     return $m;
+}
+
+/**
+ * The kind of the last flash — call AFTER flash_get(), which clears the text.
+ *
+ * Deliberately a separate reader rather than making flash_get() return an
+ * array: every existing caller passes its result straight to a template as a
+ * string, and changing that shape would break all of them silently (a template
+ * printing "Array"). This way the kind is opt-in per template.
+ *
+ * @return string  'ok' | 'error' | 'warn'
+ */
+function flash_kind() {
+    $k = $_SESSION['flash_kind'] ?? 'ok';
+    unset($_SESSION['flash_kind']);
+    return $k;
 }
 
 /**

@@ -18,7 +18,8 @@
     <h1><?= e(t('up_title')) ?></h1>
 
     <?php if (!empty($flash)): // result of the last profile change ?>
-        <p class="msg msg-ok"><?= e($flash) ?></p>
+        <?php // A refusal ("that password is wrong") drawn green reads as success. ?>
+        <p class="msg msg-<?= e($flash_kind ?? 'ok') ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
     <h2><?= e(t('up_stats')) ?></h2>
