@@ -76,8 +76,13 @@ body.tpl-ironworks {
     color: var(--parchment);
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    text-align:center;
     font-size: 1.9rem;
     text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+}
+.tpl-ironworks .event-header .event-date{
+    text-align:center;
+    color: var(--parchment);
 }
 .tpl-ironworks .event-header h1::after {
     content: '';
