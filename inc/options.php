@@ -69,7 +69,60 @@ function custom_msg_keys() {
         'msg_adding_poll',
         'msg_voting',
         'msg_email_field',
+        // The club library's two screens: a member's own list, and the shared
+        // one. Both only render when filled, like every message above.
+        'msg_my_library',
+        'msg_library',
     ];
+}
+
+/**
+ * The ready-made instruction texts for one language, or [] when there are none.
+ *
+ * Kept in defaults/texts/<lang>.php as plain PHP arrays — the same shape and
+ * the same folder convention as languages/, so editing the wording needs no
+ * tooling and no database access. A language with no file simply has no
+ * standard texts, which is the correct answer for a translation somebody has
+ * dropped in without writing them.
+ *
+ * @param string $lang  A code from lang_available().
+ * @return array  msg key => text.
+ */
+function default_texts($lang) {
+    // Whitelisted against the discovered languages: this builds a file path, so
+    // a code from anywhere else must not be able to steer it.
+    if (!in_array($lang, lang_available(), true)) return [];
+    $path = __DIR__ . '/../defaults/texts/' . $lang . '.php';
+    if (!is_file($path)) return [];
+    $data = require $path;
+    return is_array($data) ? $data : [];
+}
+
+/**
+ * Fill EMPTY custom message fields with the standard texts.
+ *
+ * Only empty ones. A club that has written its own wording — or deliberately
+ * cleared a field — must not have it overwritten by pressing a button whose
+ * label says "load", so this can be pressed twice, or after a partial edit,
+ * without losing anything.
+ *
+ * @return int  How many fields were filled.
+ */
+function load_default_texts() {
+    $filled = 0;
+    foreach (lang_available() as $lang) {
+        $texts = default_texts($lang);
+        if (!$texts) continue;
+        foreach (custom_msg_keys() as $key) {
+            if (!isset($texts[$key])) continue;               // no standard text for this one
+            $optKey = custom_msg_option($key, $lang);
+            if (trim((string)opt($optKey, '')) !== '') continue;   // already written
+            opt_set($optKey, $texts[$key]);
+            $filled++;
+        }
+    }
+    if ($filled > 0) options_load();   // so the screen redraws with them in place
+    return $filled;
 }
 
 /**

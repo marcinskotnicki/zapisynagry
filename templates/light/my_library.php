@@ -26,6 +26,12 @@
         <p class="msg msg-<?= e($flash_kind ?? 'ok') ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
+    <?php // Optional admin note, rendered only when filled — same treatment as
+          // the banner on the event page. ?>
+    <?php if (opt_msg('msg_my_library') !== ''): ?>
+        <p class="event-msg"><?= e(opt_msg('msg_my_library')) ?></p>
+    <?php endif; ?>
+
     <p class="muted"><?= e(t('lib_my_intro')) ?></p>
 
     <?php // The contact preference lives here rather than in the general user
@@ -50,13 +56,15 @@
     <?php endif; ?>
 
     <h2><?= e(t('lib_my_games', count($games))) ?></h2>
+    <p class="muted"><?= e(t('lib_inactive_hint')) ?></p>
     <?php if (empty($games)): ?>
         <p class="muted"><?= e(t('lib_my_empty')) ?></p>
     <?php else: ?>
         <ul class="lib-list">
             <?php foreach ($games as $g): ?>
                 <?php $lnk = library_link($g); ?>
-                <li class="lib-item">
+                <?php $inactive = (int)$g['is_active'] !== 1; ?>
+                <li class="lib-item<?= $inactive ? ' lib-item-inactive' : '' ?>">
                     <?php if (!empty($g['thumbnail'])): ?>
                         <img class="lib-thumb" src="<?= e($g['thumbnail']) ?>" alt="">
                     <?php else: ?>
@@ -68,16 +76,74 @@
                         <?php else: ?>
                             <?= e($g['name']) ?>
                         <?php endif; ?>
+                        <?php if (!empty($g['year'])): ?>
+                            <span class="lib-year"><?= (int)$g['year'] ?></span>
+                        <?php endif; ?>
+                        <?php // Said plainly on the row, because "why is my game
+                              // missing from the library?" is the question this
+                              // feature would otherwise create. ?>
+                        <?php if ($inactive): ?>
+                            <span class="lib-tag-inactive"><?= e(t('lib_inactive_tag')) ?></span>
+                        <?php endif; ?>
                     </span>
-                    <?php if (!empty($g['year'])): ?>
-                        <span class="lib-year"><?= (int)$g['year'] ?></span>
-                    <?php endif; ?>
-                    <form method="post" action="my_library.php" class="lib-del">
-                        <?= $csrf ?>
-                        <input type="hidden" name="action" value="remove">
-                        <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
-                        <button type="submit" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
-                    </form>
+
+                    <span class="lib-actions">
+                        <?php // Manual entries only: a BGG game's name and year come
+                              // from BGG and are what a sync matches on. ?>
+                        <?php if (empty($g['bgg_id'])): ?>
+                            <details class="lib-edit">
+                                <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
+                                <form method="post" action="my_library.php" class="lib-edit-form">
+                                    <?= $csrf ?>
+                                    <input type="hidden" name="action" value="edit">
+                                    <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                                    <div class="field field-name">
+                                        <label for="lib_n_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
+                                        <input type="text" id="lib_n_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>" required>
+                                    </div>
+                                    <div class="field field-year">
+                                        <label for="lib_y_<?= (int)$g['id'] ?>"><?= e(t('lib_year')) ?></label>
+                                        <input type="number" id="lib_y_<?= (int)$g['id'] ?>" name="year" min="0" max="2999"
+                                               value="<?= !empty($g['year']) ? (int)$g['year'] : '' ?>">
+                                    </div>
+                                    <?php // A BGG address here promotes the entry: it adopts
+                                          // BGG's name, year and art and merges with everyone
+                                          // else's copy of the same game. Any other address is
+                                          // kept as a plain link. ?>
+                                    <?php if (library_link_field_visible()): ?>
+                                        <div class="field field-link">
+                                            <label for="lib_l_<?= (int)$g['id'] ?>"><?= e(t('lib_link_label')) ?></label>
+                                            <input type="url" id="lib_l_<?= (int)$g['id'] ?>" name="link"
+                                                   value="<?= e($g['link'] ?? '') ?>" placeholder="https://">
+                                            <p class="field-note"><?= e(t('lib_link_hint')) ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
+                                    </div>
+                                </form>
+                            </details>
+                        <?php endif; ?>
+
+                        <form method="post" action="my_library.php" class="lib-toggle">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="toggle">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <?php // Posts the state we want, not a flip, so a double
+                                  // submit lands on the same result either way. ?>
+                            <input type="hidden" name="active" value="<?= $inactive ? '1' : '0' ?>">
+                            <button type="submit" class="btn btn-small">
+                                <?= $inactive ? e(t('lib_activate')) : e(t('lib_deactivate')) ?>
+                            </button>
+                        </form>
+
+                        <form method="post" action="my_library.php" class="lib-del">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="remove">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <button type="submit" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
+                        </form>
+                    </span>
                 </li>
             <?php endforeach; ?>
         </ul>

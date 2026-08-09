@@ -45,6 +45,15 @@ const BGG_MAX_RETRIES     = 3;    // attempts, for HTTP 202 (queued) responses
  * @return array{0: string|false, 1: int}  [response body or false, HTTP status].
  */
 function bgg_fetch_raw($url) {
+    /* Without the curl extension every BGG feature is unavailable — but it must
+     * be UNAVAILABLE, not fatal. This function is reached from a member adding
+     * a game, an admin correcting one, and the collection sync; an uncaught
+     * Error there takes down the whole page instead of showing "could not
+     * fetch that game". Same guard, same reasoning, as inc/update.php's two
+     * fetchers. Returning the shape callers already handle for a failed
+     * request means no caller needs to know. */
+    if (!function_exists('curl_init')) return [false, 0];
+
     $code = 0; $body = false;
     for ($attempt = 0; $attempt < BGG_MAX_RETRIES; $attempt++) {
         $ch = curl_init($url);

@@ -349,6 +349,17 @@ function option_sanitize($key, $val) {
     return $val;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'load_texts') {
+    /* Fill any EMPTY custom message field with the ready-made instructions from
+     * defaults/texts/. Never overwrites: a club that wrote its own wording, or
+     * deliberately cleared a field, keeps it — so the button is safe to press
+     * twice, or after translating half of them by hand. */
+    $filledCount = load_default_texts();
+    log_action('options_saved', 'Loaded standard instruction texts (' . $filledCount . ' field(s))');
+    flash_set($filledCount > 0 ? t('opt_texts_loaded', $filledCount) : t('opt_texts_none_empty'));
+    redirect('admin.php?tab=options');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'export') {
     // Straight to a download, before any page output — this response is a file,
     // not a screen, so it must not go through the admin shell.

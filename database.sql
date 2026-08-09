@@ -609,6 +609,11 @@ CREATE TABLE library_games (
     bgg_id     INTEGER,                      -- NULL for games added outside BGG
     link       TEXT,                         -- custom URL for non-BGG entries
     thumbnail  TEXT,                         -- remote BGG image URL, NULL when none
+    -- 0 hides the game from the PUBLIC library while leaving it in the owner's
+    -- own list: lent to a friend, left at a parent's house, in a box in the
+    -- loft. Defaults to 1 so nothing a member already added disappears when an
+    -- install upgrades.
+    is_active  INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (user_id, bgg_id)

@@ -349,6 +349,15 @@ $groupEnd = function () { echo '</div></details>'; };
                 <?php endforeach; ?>
             </div>
         <?php endforeach; ?>
+
+        <?php // Ready-made instructions for clubs who would rather not write
+              // their own. Fills only EMPTY boxes, so pressing it cannot lose
+              // anything already typed — which is why it needs no confirmation. ?>
+        <div class="field field-load-texts">
+            <button type="submit" name="action" value="load_texts" class="btn btn-small"
+                    formnovalidate><?= e(t('opt_load_texts')) ?></button>
+            <p class="field-note"><?= e(t('opt_load_texts_note')) ?></p>
+        </div>
     <?php $groupEnd(); ?>
 
     <?php /* 4. ARCHIVE — the title says when these matter, rather than the
@@ -481,6 +490,10 @@ $groupEnd = function () { echo '</div></details>'; };
             <label for="mailing_gdpr_text"><?= e(t('opt_mailing_gdpr')) ?></label>
             <textarea id="mailing_gdpr_text" name="mailing_gdpr_text" rows="4"><?= e(opt('mailing_gdpr_text')) ?></textarea>
             <p class="field-note"><?= e(t('opt_mailing_gdpr_note')) ?></p>
+            <?php // Says which tags survive, so an admin does not discover the
+                  // allowlist by pasting something and watching it appear as
+                  // literal text on a public page. ?>
+            <p class="field-note"><?= e(t('opt_mailing_gdpr_html')) ?></p>
         </div>
         <?php // Only meaningful once wording exists, so it sits directly under it. ?>
         <?php $toggle('gdpr_prefill'); ?>

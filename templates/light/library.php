@@ -19,6 +19,10 @@
  *    $members      — members with at least one game (members tab, no member chosen).
  *    $member       — the chosen member's row, or null.
  *    $member_games — that member's games.
+ *    $can_manage   — draw the per-game manage controls on this shelf.
+ *    $csrf         — hidden CSRF field (only needed when managing).
+ *    $flash        — result of the last manage action, or null.
+ *    $flash_kind   — how to draw it.
  * ============================================================================= */
 
 /**
@@ -33,10 +37,11 @@
  * somebody reused this partial.
  */
 if (!function_exists('lib_render_row')):
-function lib_render_row(array $g, $owners = null) {
+function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '') {
     $link = library_link($g);
+    $inactive = isset($g['is_active']) && (int)$g['is_active'] !== 1;
     ?>
-    <li class="lib-item">
+    <li class="lib-item<?= $inactive ? ' lib-item-inactive' : '' ?>">
         <?php if (!empty($g['thumbnail'])): ?>
             <img class="lib-thumb" src="<?= e($g['thumbnail']) ?>" alt="" loading="lazy">
         <?php else: ?>
@@ -52,6 +57,11 @@ function lib_render_row(array $g, $owners = null) {
                 <?php endif; ?>
                 <?php if (!empty($g['year'])): ?>
                     <span class="lib-year"><?= (int)$g['year'] ?></span>
+                <?php endif; ?>
+                <?php // Only ever visible to someone who can act on it — an
+                      // ordinary visitor never receives inactive rows at all. ?>
+                <?php if ($inactive): ?>
+                    <span class="lib-tag-inactive"><?= e(t('lib_inactive_tag')) ?></span>
                 <?php endif; ?>
             </span>
 
@@ -81,6 +91,65 @@ function lib_render_row(array $g, $owners = null) {
                 </span>
             <?php endif; ?>
         </span>
+
+        <?php // Same three controls the owner gets on their own page, drawn here
+              // for an admin (or the owner) looking at the shelf. One code path,
+              // because library_can_manage() already decided who may act. ?>
+        <?php if ($manage): ?>
+            <span class="lib-actions">
+                <?php if (empty($g['bgg_id'])): ?>
+                    <details class="lib-edit">
+                        <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
+                        <form method="post" action="library.php" class="lib-edit-form">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <div class="field field-name">
+                                <label for="libm_n_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
+                                <input type="text" id="libm_n_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>" required>
+                            </div>
+                            <div class="field field-year">
+                                <label for="libm_y_<?= (int)$g['id'] ?>"><?= e(t('lib_year')) ?></label>
+                                <input type="number" id="libm_y_<?= (int)$g['id'] ?>" name="year" min="0" max="2999"
+                                       value="<?= !empty($g['year']) ? (int)$g['year'] : '' ?>">
+                            </div>
+                            <?php // A BGG address here promotes the entry: it adopts BGG's
+                                  // name, year and art and merges with everyone else's copy
+                                  // of the same game — which is how an admin folds several
+                                  // hand-typed rows into one. ?>
+                            <?php if (library_link_field_visible()): ?>
+                                <div class="field field-link">
+                                    <label for="libm_l_<?= (int)$g['id'] ?>"><?= e(t('lib_link_label')) ?></label>
+                                    <input type="url" id="libm_l_<?= (int)$g['id'] ?>" name="link"
+                                           value="<?= e($g['link'] ?? '') ?>" placeholder="https://">
+                                    <p class="field-note"><?= e(t('lib_link_hint')) ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
+                            </div>
+                        </form>
+                    </details>
+                <?php endif; ?>
+
+                <form method="post" action="library.php" class="lib-toggle">
+                    <?= $csrf ?>
+                    <input type="hidden" name="action" value="toggle">
+                    <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                    <input type="hidden" name="active" value="<?= $inactive ? '1' : '0' ?>">
+                    <button type="submit" class="btn btn-small">
+                        <?= $inactive ? e(t('lib_activate')) : e(t('lib_deactivate')) ?>
+                    </button>
+                </form>
+
+                <form method="post" action="library.php" class="lib-del">
+                    <?= $csrf ?>
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                    <button type="submit" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
+                </form>
+            </span>
+        <?php endif; ?>
     </li>
     <?php
 }
@@ -88,6 +157,17 @@ endif;
 ?>
 <div class="card">
     <h1><?= e(t('lib_title')) ?></h1>
+
+    <?php if (!empty($flash)): ?>
+        <p class="msg msg-<?= e($flash_kind ?? 'ok') ?>"><?= e($flash) ?></p>
+    <?php endif; ?>
+
+    <?php // Optional admin note, rendered only when filled. Above the tabs, so
+          // it applies to the whole library rather than looking like a comment
+          // on whichever view happens to be open. ?>
+    <?php if (opt_msg('msg_library') !== ''): ?>
+        <p class="event-msg"><?= e(opt_msg('msg_library')) ?></p>
+    <?php endif; ?>
 
     <?php // With the members tab off there is only one view, so a tab strip of
           // one tab would be noise. ?>
@@ -122,7 +202,7 @@ endif;
         <?php else: ?>
             <ul class="lib-list">
                 <?php foreach ($member_games as $g): ?>
-                    <?php lib_render_row($g); ?>
+                    <?php lib_render_row($g, null, !empty($can_manage), $csrf ?? ''); ?>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>

@@ -34,7 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'remove') {
+    if ($action === 'toggle') {
+        /* Hide or show one game in the PUBLIC library. It stays in this list
+         * either way — that is the point: a game lent to a friend is still
+         * yours, it just should not be advertised as available. */
+        library_set_active((int)($_POST['game'] ?? 0), !empty($_POST['active']), $me['id']);
+        flash_set(t('lib_visibility_saved'));
+
+    } elseif ($action === 'edit') {
+        // Manual entries only — library_update_manual() enforces that, and
+        // reports false when the row is a BGG one or the name is empty.
+        library_flash_edit(library_update_manual(
+            (int)($_POST['game'] ?? 0),
+            $_POST['name'] ?? '',
+            (int)($_POST['year'] ?? 0),
+            $me['id'],
+            // Only accept a link when the field was actually offered, so a
+            // hand-built POST cannot set one the form would not show.
+            library_link_field_visible() ? ($_POST['link'] ?? '') : null
+        ));
+
+    } elseif ($action === 'remove') {
         // Scoped by user id inside library_remove(), so an id from a
         // hand-edited form cannot reach anybody else's row.
         library_remove($me['id'], (int)($_POST['game'] ?? 0));

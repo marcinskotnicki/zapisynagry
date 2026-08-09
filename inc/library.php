@@ -93,11 +93,139 @@ function library_public_owner_sql() {
  * @param int $userId
  * @return array  library_games rows.
  */
-function library_for_user($userId) {
+function library_for_user($userId, $activeOnly = false) {
+    /* $activeOnly separates the two audiences for the same list. The OWNER (and
+     * an admin managing it) sees everything, including games marked inactive —
+     * that is where they go to switch one back on. Everyone else sees only what
+     * is actually available. Getting this backwards would either hide a
+     * member's own game from them or advertise a game that is sitting in
+     * somebody else's flat. */
     return db_all(
-        'SELECT * FROM library_games WHERE user_id = ? ORDER BY name COLLATE NOCASE ASC, year ASC',
+        'SELECT * FROM library_games
+          WHERE user_id = ?' . ($activeOnly ? ' AND is_active = 1' : '') . '
+          ORDER BY name COLLATE NOCASE ASC, year ASC',
         [(int)$userId]
     );
+}
+
+/**
+ * May this viewer manage this library row — delete, hide or rename it?
+ *
+ * The owner, and an admin. Admins can reach the same controls from the public
+ * member view rather than needing a separate admin tab: it is the screen they
+ * are already looking at when they notice a problem.
+ *
+ * @param array|null $row  A library_games row.
+ * @param int        $viewerId
+ * @return bool
+ */
+function library_can_manage($row, $viewerId) {
+    if (!$row) return false;
+    if (is_admin()) return true;
+    return (int)$row['user_id'] === (int)$viewerId && $viewerId > 0;
+}
+
+/**
+ * Show or hide one entry in the public library.
+ *
+ * @param int  $rowId
+ * @param bool $active
+ * @param int  $userId  Owner scope; pass 0 for an admin acting on any row.
+ * @return void
+ */
+function library_set_active($rowId, $active, $userId = 0) {
+    $sql = 'UPDATE library_games SET is_active = ? WHERE id = ?';
+    $args = [$active ? 1 : 0, (int)$rowId];
+    // A non-admin caller passes their own id, so a hand-edited form cannot
+    // reach somebody else's row.
+    if ($userId > 0) { $sql .= ' AND user_id = ?'; $args[] = (int)$userId; }
+    db_run($sql, $args);
+}
+
+/**
+ * Rename a manually added entry, or correct its year.
+ *
+ * MANUAL ENTRIES ONLY (bgg_id IS NULL). A BGG game's name and year come from
+ * BGG and are what let a sync match it up again; letting somebody rename one
+ * would either be undone by the next sync or quietly break the pairing.
+ *
+ * @param int    $rowId
+ * @param string $name
+ * @param int    $year    0 to clear it.
+ * @param int    $userId  Owner scope; 0 for an admin.
+ * @return bool  False when the name is empty or the row is a BGG entry.
+ */
+function library_update_manual($rowId, $name, $year, $userId = 0, $link = null) {
+    $name = trim((string)$name);
+    if ($name === '') return ['ok' => false, 'why' => 'name'];
+
+    // Same owner scoping as everywhere in this module: 0 means an admin.
+    $where = 'id = ? AND bgg_id IS NULL';
+    $whereArgs = [(int)$rowId];
+    if ($userId > 0) { $where .= ' AND user_id = ?'; $whereArgs[] = (int)$userId; }
+
+    $row = db_one('SELECT * FROM library_games WHERE ' . $where, $whereArgs);
+    if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    /* game_link_sanitize() lives in events.php, which the public library page
+     * does not otherwise need. Required here rather than at the top so the
+     * cost lands only on an actual edit — this file is loaded on every
+     * request. */
+    require_once __DIR__ . '/events.php';
+    $link = $link === null ? (string)($row['link'] ?? '') : game_link_sanitize($link);
+
+    /* PROMOTION. If the link turns out to point at a BGG game page, this stops
+     * being a hand-typed entry and becomes the real thing: it picks up BGG's
+     * canonical name, year and art, and from then on it merges with every other
+     * member's copy of the same game on the public list.
+     *
+     * That is the whole point of the feature — a club ends up with one
+     * "Monopoly" instead of one proper entry plus three hand-typed ones, two of
+     * them misspelled — so BGG's name deliberately WINS over whatever was typed
+     * here, typos included. */
+    $bggId = library_bgg_id_from_link($link);
+    if ($bggId > 0) {
+        /* The member may already own this game as a proper BGG entry — which is
+         * exactly the mess being cleaned up. UNIQUE(user_id, bgg_id) would
+         * reject the update, so the duplicate is folded into the existing row
+         * instead: this one goes. */
+        $existing = db_one('SELECT id FROM library_games WHERE user_id = ? AND bgg_id = ? AND id <> ?',
+                           [(int)$row['user_id'], $bggId, (int)$row['id']]);
+        if ($existing) {
+            db_run('DELETE FROM library_games WHERE id = ?', [(int)$row['id']]);
+            return ['ok' => true, 'merged' => true, 'name' => $row['name']];
+        }
+
+        /* Requires a successful lookup. Setting bgg_id while keeping the typed
+         * name would merge the group under a misspelling — worse than leaving
+         * it alone, and invisible until somebody noticed the club library
+         * listing "Monoply". A failed fetch (no network, bad id, BGG down)
+         * leaves the row exactly as it was. */
+        require_once __DIR__ . '/bgg.php';
+        $thing = bgg_thing($bggId);
+        if (!$thing || empty($thing['name'])) {
+            return ['ok' => false, 'why' => 'bgg_lookup'];
+        }
+
+        db_run(
+            'UPDATE library_games
+                SET name = ?, year = ?, bgg_id = ?, thumbnail = ?, link = NULL
+              WHERE id = ?',
+            [
+                $thing['name'],
+                !empty($thing['year']) ? (int)$thing['year'] : null,
+                $bggId,
+                !empty($thing['thumbnail']) ? $thing['thumbnail'] : null,
+                (int)$row['id'],
+            ]
+        );
+        return ['ok' => true, 'promoted' => true, 'name' => $thing['name']];
+    }
+
+    // An ordinary edit: name, year, and a non-BGG link.
+    db_run('UPDATE library_games SET name = ?, year = ?, link = ? WHERE id = ?',
+           [$name, $year > 0 ? (int)$year : null, $link !== '' ? $link : null, (int)$row['id']]);
+    return ['ok' => true];
 }
 
 /**
@@ -117,6 +245,7 @@ function library_all_games() {
            FROM library_games g
            JOIN users u ON u.id = g.user_id
           WHERE ' . library_public_owner_sql() . '
+            AND g.is_active = 1
           ORDER BY g.name COLLATE NOCASE ASC, g.year ASC'
     );
 
@@ -170,6 +299,7 @@ function library_members() {
            FROM users u
            JOIN library_games g ON g.user_id = u.id
           WHERE ' . library_public_owner_sql() . '
+            AND g.is_active = 1
           GROUP BY u.id
           ORDER BY u.display_name COLLATE NOCASE ASC'
     );
@@ -251,15 +381,93 @@ function library_add($userId, array $game) {
 /**
  * Remove one game from a member's library.
  *
- * Scoped by user_id as well as row id: an id from a hand-edited form must not
- * be able to delete somebody else's entry.
+ * Scoped by user_id as well as row id, so an id from a hand-edited form cannot
+ * delete somebody else's entry — EXCEPT when $userId is 0, which means "an
+ * admin, acting on any row". Same convention as library_set_active() and
+ * library_update_manual(), so all three read alike at the call site and the
+ * caller decides the scope once.
  *
- * @param int $userId
+ * @param int $userId  Owner scope; 0 for an admin.
  * @param int $gameId
  * @return void
  */
 function library_remove($userId, $gameId) {
-    db_run('DELETE FROM library_games WHERE id = ? AND user_id = ?', [(int)$gameId, (int)$userId]);
+    $sql  = 'DELETE FROM library_games WHERE id = ?';
+    $args = [(int)$gameId];
+    if ((int)$userId > 0) { $sql .= ' AND user_id = ?'; $args[] = (int)$userId; }
+    db_run($sql, $args);
+}
+
+/**
+ * Turn a library_update_manual() result into a flash message.
+ *
+ * The four outcomes read very differently to whoever pressed Save, and lumping
+ * them into "saved / not saved" would hide the interesting ones — especially a
+ * promotion, where the name they typed is deliberately replaced by BGG's.
+ *
+ * @param array $res  From library_update_manual().
+ * @return void
+ */
+function library_flash_edit(array $res) {
+    if (!empty($res['ok'])) {
+        if (!empty($res['merged'])) {
+            flash_set(t('lib_edit_merged', $res['name'] ?? ''));
+        } elseif (!empty($res['promoted'])) {
+            flash_set(t('lib_edit_promoted', $res['name'] ?? ''));
+        } else {
+            flash_set(t('lib_edit_saved'));
+        }
+        return;
+    }
+    $why = $res['why'] ?? '';
+    if ($why === 'bgg_lookup') {
+        // The link looked like BGG but could not be checked, so nothing was
+        // changed — worth saying, or it looks like the edit silently failed.
+        flash_set(t('lib_edit_bgg_failed'), 'error');
+    } else {
+        flash_set(t('lib_edit_failed'), 'error');
+    }
+}
+
+/**
+ * Should the edit form offer a link field for a manual entry?
+ *
+ * Custom links are an admin option, so ordinarily it follows that. But an ADMIN
+ * always gets it, because pasting a BGG address here is how they fold three
+ * hand-typed "Monopoly" rows into the one real entry — and a BGG link is not a
+ * "custom link" at all, so the option was never meant to block that.
+ *
+ * One function rather than two copies of the condition: the form and the POST
+ * handler must agree, or the field appears and is then ignored (or worse, is
+ * hidden and still accepted from a hand-built request).
+ *
+ * @return bool
+ */
+function library_link_field_visible() {
+    return opt_bool('allow_custom_game_links') || is_admin();
+}
+
+/**
+ * A BGG game id from a link, but ONLY when the link really is a BGG game page.
+ *
+ * Deliberately stricter than library_bgg_id_from_input(). That one is used on
+ * the "add from BGG" field, where the member has already said what they are
+ * pasting, so it accepts a bare number and falls back to any trailing digits.
+ * Here we are SNIFFING an arbitrary link the member typed, and that fallback
+ * would read `https://example.org/games/42` as BGG game 42 and silently rewrite
+ * an unrelated game into whatever BGG has under that id.
+ *
+ * So: the host must be boardgamegeek.com, and the path must be a game page.
+ *
+ * @param string $raw
+ * @return int  0 when this is not a BGG game link.
+ */
+function library_bgg_id_from_link($raw) {
+    $raw = trim((string)$raw);
+    if ($raw === '') return 0;
+    if (!preg_match('~^(?:https?://)?(?:www\.)?boardgamegeek\.com/~i', $raw)) return 0;
+    if (preg_match('~/boardgame(?:expansion|accessory)?/(\d+)~i', $raw, $m)) return (int)$m[1];
+    return 0;
 }
 
 /**

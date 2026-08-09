@@ -378,6 +378,73 @@ const CONSENT_COOKIE = 'gdpr_ok';
 const CONSENT_DAYS   = 365;
 
 /**
+ * Render admin-written text with a SMALL allowlist of HTML.
+ *
+ * ESCAPE FIRST, THEN SELECTIVELY RESTORE. The opposite order — accepting HTML
+ * and trying to strip the dangerous parts — is the approach that keeps being
+ * found wanting, because the set of dangerous parts is open-ended (attributes,
+ * entities, malformed tags, javascript: URLs). Here nothing survives that was
+ * not explicitly put back, so anything unanticipated arrives on the page as
+ * visible text rather than as markup.
+ *
+ * Allowed: <b> <strong> <i> <em> <u>, <br>, and <a href="..."> with an
+ * http/https/mailto target. Everything else, including any attribute on the
+ * simple tags, is shown literally.
+ *
+ * WHY IT IS RESTRICTED AT ALL, given only an admin can write it: an admin
+ * already has more dangerous tools (custom CSS, the updater). The reason is
+ * blast radius rather than trust — this text renders on public pages for
+ * visitors who are not signed in, so a mistake pasted from a word processor
+ * should degrade into odd-looking text, not a broken page.
+ *
+ * Newlines become <br>, so a notice can be laid out in the textarea as typed.
+ *
+ * @param string $raw
+ * @return string  Safe to echo unescaped.
+ */
+function rich_text_html($raw) {
+    $out = e((string)$raw);
+
+    // The simple tags, opening and closing, with no attributes permitted.
+    $out = preg_replace('~&lt;(/?)(b|strong|i|em|u)&gt;~i', '<$1$2>', $out);
+    $out = preg_replace('~&lt;br\s*/?&gt;~i', '<br>', $out);
+
+    /* Links. The href is decoded and re-checked here rather than trusted: a
+     * javascript: or data: target is dropped entirely, which leaves the link
+     * text on the page without the link. */
+    $out = preg_replace_callback(
+        '~&lt;a\s+href=(?:&quot;|&#039;)([^&<>"\']*)(?:&quot;|&#039;)\s*&gt;~i',
+        function ($m) {
+            $url = html_entity_decode($m[1], ENT_QUOTES, 'UTF-8');
+            if (!preg_match('~^(?:https?://|mailto:)~i', $url)) return '';
+            // noopener/noreferrer because these open in a new tab and the
+            // target is written by hand.
+            return '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer">';
+        },
+        $out
+    );
+    $out = preg_replace('~&lt;/a&gt;~i', '</a>', $out);
+
+    /* Drop closing tags with nothing to close. They arise whenever an opening
+     * tag was REJECTED but its partner was fine — a javascript: link, or a tag
+     * carrying an attribute — and would otherwise leave a stray </a> in the
+     * page. Browsers ignore those, but emitting balanced markup costs one pass
+     * and avoids a puzzle for anyone reading the source later. */
+    foreach (['a', 'b', 'strong', 'i', 'em', 'u'] as $tag) {
+        $open  = preg_match_all('~<' . $tag . '(?:\s[^>]*)?>~i', $out);
+        $close = preg_match_all('~</' . $tag . '>~i', $out);
+        for ($i = 0; $i < $close - $open; $i++) {
+            // Remove from the END, so the ones that do pair up keep their partner.
+            $at = strripos($out, '</' . $tag . '>');
+            if ($at === false) break;
+            $out = substr($out, 0, $at) . substr($out, $at + strlen('</' . $tag . '>'));
+        }
+    }
+
+    return nl2br($out, false);
+}
+
+/**
  * The configured consent wording, or '' when the feature is off.
  * @return string
  */
@@ -465,7 +532,10 @@ function consent_field() {
     $checked = (opt_bool('gdpr_prefill') && consent_remembered()) ? ' checked' : '';
     return '<div class="field field-check gdpr-consent">'
          . '<label><input type="checkbox" name="gdpr_consent" value="1"' . $checked . ' required> '
-         . '<span>' . e(consent_text()) . '</span></label></div>';
+         // rich_text_html(), not e(): the wording may carry bold and a link to
+         // the club's privacy policy, which is the one place a visitor would
+         // reasonably expect one. It escapes everything else.
+         . '<span>' . rich_text_html(consent_text()) . '</span></label></div>';
 }
 
 /**

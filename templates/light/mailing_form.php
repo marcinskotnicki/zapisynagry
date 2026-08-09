@@ -43,7 +43,9 @@
                     <?php // required: the browser blocks submission, and
                           // subscribe.php re-checks server-side. ?>
                     <input type="checkbox" name="ml_consent" value="1" required>
-                    <span><?= e($gdpr) ?></span>
+                    <?php // Allows bold and a policy link — see rich_text_html(),
+                          // which escapes everything it does not explicitly permit. ?>
+                    <span><?= rich_text_html($gdpr) ?></span>
                 </label>
             </div>
         <?php endif; ?>

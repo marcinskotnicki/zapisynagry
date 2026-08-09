@@ -858,6 +858,54 @@ library on, the admin's contact option on, the member's own checkbox ticked, and
 the member not blocked. It is checked in `message.php`, not merely used to hide
 the button.
 
+**`is_active` hides a game from the PUBLIC library without removing it from the
+owner's own list** — for a game that is lent out or kept elsewhere. It defaults
+to 1, so an upgrade hides nothing that members already added. The split matters
+in `library_for_user($userId, $activeOnly)`: the owner and an admin must see
+hidden rows (that screen is where they switch one back on), everyone else must
+not. `library_all_games()` and `library_members()` filter on it too, so a member
+whose games are all hidden drops off the members list rather than appearing with
+games nobody can see.
+
+**Admin management lives on the public shelf, not in a separate admin tab.**
+That is the screen someone is already looking at when they notice a problem, and
+a second copy of the list would be one more thing to keep in step.
+`library_can_manage()` decides, so the owner and an admin travel the same code
+path. The management helpers take an owner scope where **0 means "an admin, any
+row"** — and a signed-out visitor's user id is also 0, so `library.php` carries a
+SECOND explicit guard (`!is_admin() && $meId <= 0`) on top of the permission
+check. Either one alone stops a guest; both exist because that collision is easy
+to reintroduce.
+
+**A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
+name, year and thumbnail, drops the custom link, and from then on merges with
+every other member's copy on the public list. That is how a club with one proper
+"Monopoly" and three hand-typed ones (two misspelled) ends up with one entry.
+
+Two things make it safe. `library_bgg_id_from_link()` is anchored on the
+boardgamegeek.com host and is deliberately STRICTER than
+`library_bgg_id_from_input()`, which is used on the add-from-BGG field where the
+member has declared intent: that looser one falls back to any trailing digits
+and would read `https://example.org/games/42` as BGG game 42, silently rewriting
+an unrelated game. And promotion requires a SUCCESSFUL lookup — setting
+`bgg_id` while keeping the typed name would merge the public group under a
+misspelling, which is worse than doing nothing and invisible until someone
+notices the library listing "Monoply".
+
+If the member already owns that game as a real BGG entry, `UNIQUE(user_id,
+bgg_id)` would reject the update, so the hand-typed row is deleted and folded
+into the existing one instead.
+
+`library_link_field_visible()` decides who is offered the field: it follows
+`allow_custom_game_links`, except an admin always gets it, because a BGG address
+is not a "custom link" and correcting entries is the point. The form and the
+POST handler both call it, so a link posted while the field is hidden is
+ignored.
+
+**Only manual entries can be renamed** (`bgg_id IS NULL` in the UPDATE). A BGG
+game's name and year come from BGG and are what a sync matches on, so renaming
+one would either be undone on the next sync or break the pairing.
+
 **The BGG sync is a full sync of the BGG-sourced half only.** Rows with a
 `bgg_id` are reconciled against the collection; rows without one — games typed
 in by hand — are left alone, because a hand-added game was never in the BGG
@@ -865,6 +913,29 @@ collection and "absent from it" is no evidence the member sold it.
 `UNIQUE(user_id, bgg_id)` makes re-running idempotent. The confirmation is
 checked server-side before anything is fetched, since the checkbox's `required`
 attribute is advisory only.
+
+**Ready-made instruction texts** live in `defaults/texts/<lang>.php` — plain PHP
+arrays keyed by `custom_msg_keys()`, same shape and folder convention as
+`languages/`, so changing the wording is a text edit and nothing else. The
+Options screen's "load standard instruction texts" button calls
+`load_default_texts()`, which fills only fields that are still EMPTY: the label
+says load, not reset, so pressing it twice — or after a club has written half its
+own wording — cannot cost anything. A language with no file simply has no
+standard texts, which is the right answer for a translation somebody dropped in
+without writing them.
+
+**The GDPR/RODO consent wording accepts a little HTML**, via
+`rich_text_html()`: `<b> <strong> <i> <em> <u>`, `<br>`, and `<a href>` with an
+http/https/mailto target. Newlines become `<br>`. A privacy notice that cannot
+link to the privacy policy is a poor notice, which is the whole reason.
+
+It works by ESCAPING EVERYTHING FIRST and then selectively restoring that
+allowlist — not by accepting HTML and stripping the dangerous parts, because
+that set is open-ended and any gap is live on a public page. Attributes are not
+accepted even on allowed tags, a `javascript:`/`data:` target is dropped while
+its link text stays, and a final pass removes closing tags whose opener was
+rejected so the output stays balanced. Both render sites use it: the mailing
+form template and `consent_field()`, which builds its markup in PHP.
 
 **Custom CSS (Options -> Advanced).** Whatever an admin pastes there is
 rendered in a `<style>` at the end of every page head — last, so it overrides

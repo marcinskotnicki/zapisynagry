@@ -22,6 +22,58 @@ require_once __DIR__ . '/inc/library.php';   // already in bootstrap; _once so a
 // One gate: with the library off the page does not exist at all.
 if (!library_enabled()) redirect('index.php');
 
+/* ADMIN MANAGEMENT, from the page an admin is already looking at.
+ *
+ * Deliberately here rather than in a separate admin tab: the moment somebody
+ * notices a game that should not be listed is while browsing the library, and a
+ * second copy of the list in the admin panel would be one more place to keep in
+ * step. Every action is POST + CSRF, and library_can_manage() decides — so a
+ * member reaches exactly the same controls for their OWN rows, which is what
+ * makes one code path serve both. */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $me     = current_user();
+    $meId   = (int)($me['id'] ?? 0);
+    $rowId  = (int)($_POST['game'] ?? 0);
+    $row    = $rowId ? db_one('SELECT * FROM library_games WHERE id = ?', [$rowId]) : null;
+    $back   = 'library.php?tab=members&member=' . (int)($row['user_id'] ?? 0);
+
+    if (!library_can_manage($row, $meId)) {
+        // Not yours and you are not an admin: nothing happens, and the page
+        // does not confirm whether the row existed.
+        redirect('library.php');
+    }
+    /* Owner scope of 0 for an admin (any row), their own id otherwise — the
+     * helpers add the user_id condition only when it is non-zero.
+     *
+     * A SECOND, EXPLICIT GUARD for the signed-out case, because 0 means two
+     * different things here: "an admin, unscoped" and "nobody is signed in".
+     * A guest reaching this line would get scope 0 and therefore admin reach,
+     * so the check above would be the only thing standing between them and
+     * deleting any row in the table. Requiring a real id unless is_admin()
+     * makes that structural instead of a single point of failure. */
+    if (!is_admin() && $meId <= 0) redirect('library.php');
+    $scope = is_admin() ? 0 : $meId;
+
+    switch ($_POST['action'] ?? '') {
+        case 'remove':
+            library_remove($scope, $rowId);
+            flash_set(t('lib_removed'));
+            break;
+        case 'toggle':
+            library_set_active($rowId, !empty($_POST['active']), $scope);
+            flash_set(t('lib_visibility_saved'));
+            break;
+        case 'edit':
+            library_flash_edit(library_update_manual(
+                $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0), $scope,
+                library_link_field_visible() ? ($_POST['link'] ?? '') : null
+            ));
+            break;
+    }
+    redirect($back);
+}
+
 $showMembers = library_members_tab_enabled();
 $tab = $_GET['tab'] ?? 'games';
 // An unknown tab, or the members tab while it is switched off, falls back to
@@ -32,6 +84,7 @@ if ($tab !== 'members' || !$showMembers) $tab = 'games';
 $memberId = (int)($_GET['member'] ?? 0);
 $member = null;
 $memberGames = [];
+$canManageShelf = false;
 if ($tab === 'members' && $memberId > 0) {
     /* Re-checked against the same visibility rule as the list: a blocked
      * member's shelf must not be reachable by guessing an id, even though
@@ -40,7 +93,12 @@ if ($tab === 'members' && $memberId > 0) {
         'SELECT u.* FROM users u WHERE u.id = ? AND ' . library_public_owner_sql(),
         [$memberId]
     );
-    if ($member) $memberGames = library_for_user($memberId);
+    /* Active-only for ordinary visitors; everything for the owner themselves and
+     * for an admin, who need to SEE an inactive game in order to switch it back
+     * on or delete it. Without this a hidden game would be unreachable from the
+     * one screen that manages it. */
+    $canManageShelf = is_admin() || (int)(current_user()['id'] ?? 0) === $memberId;
+    if ($member) $memberGames = library_for_user($memberId, !$canManageShelf);
 }
 
 tpl_render('header', ['page_title' => t('lib_title')]);
@@ -51,5 +109,10 @@ tpl_render('library', [
     'members'      => ($tab === 'members' && !$member) ? library_members() : [],
     'member'       => $member,
     'member_games' => $memberGames,
+    // Whether to draw the manage controls beside each game on this shelf.
+    'can_manage'   => !empty($canManageShelf),
+    'csrf'         => csrf_field(),
+    'flash'        => flash_get(),
+    'flash_kind'   => flash_kind(),
 ]);
 tpl_render('footer');
