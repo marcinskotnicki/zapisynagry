@@ -242,6 +242,36 @@ function tpl_set_cookie($name) {
 }
 
 /**
+ * Drop the visitor's theme override, so they follow the admin's choice again.
+ *
+ * Expiring the cookie rather than writing the current default into it: the
+ * point is to stop having an opinion, so that a later change to
+ * default_template reaches this visitor too. Storing today's default would
+ * freeze them on it and look identical until the admin next switched themes.
+ *
+ * @return void
+ */
+function tpl_clear_cookie() {
+    setcookie('template', '', time() - 3600, '/');
+    unset($_COOKIE['template']);
+}
+
+/**
+ * Is this visitor currently overriding the admin's theme?
+ *
+ * Used to decide whether offering "back to the default" makes any sense — with
+ * no override there is nothing to undo, and the entry would be a no-op sitting
+ * in the list.
+ *
+ * @return bool
+ */
+function tpl_overridden() {
+    $cookie = $_COOKIE['template'] ?? '';
+    if (!tpl_switch_allowed() || !tpl_exists($cookie)) return false;
+    return $cookie !== (string)opt('default_template', BASE_TEMPLATE);
+}
+
+/**
  * The current top-level page's script name, e.g. 'index.php' or 'admin.php'.
  * Used by the header to hide the nav link for the page you're already on.
  * @return string

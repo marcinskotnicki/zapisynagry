@@ -56,6 +56,13 @@ if (function_exists('switcher_visible')) {
                     <?php foreach (tpl_available() as $tn): ?>
                         <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
                     <?php endforeach; ?>
+                    <?php // Last, and only when there is an override to undo — with
+                          // none set this would be a no-op sitting in the list. An
+                          // empty value means "no preference of my own"; prefs.php
+                          // clears the cookie rather than storing today's default. ?>
+                    <?php if (tpl_overridden()): ?>
+                        <option value=""><?= e(t('pref_reset')) ?></option>
+                    <?php endif; ?>
                 </select>
             </label>
         <?php endif; ?>

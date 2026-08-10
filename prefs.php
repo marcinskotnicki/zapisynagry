@@ -24,9 +24,20 @@ if ($back === '' || strpos($back, '://') !== false || substr($back, 0, 2) === '/
     $back = 'index.php';
 }
 
-// Theme: setter validates existence again; the gate checks the admin toggle.
-if (isset($_POST['template']) && tpl_switch_allowed() && tpl_exists((string)$_POST['template'])) {
-    tpl_set_cookie((string)$_POST['template']);
+/* Theme: setter validates existence again; the gate checks the admin toggle.
+ *
+ * An EMPTY value means "no preference of my own" — the reset entry at the end
+ * of the picker. It cannot collide with a real choice, since a theme is a
+ * directory name and tpl_exists('') is false. Clearing rather than writing the
+ * current default keeps the visitor following the admin's choice in future
+ * too. */
+if (isset($_POST['template']) && tpl_switch_allowed()) {
+    $wantTpl = (string)$_POST['template'];
+    if ($wantTpl === '') {
+        tpl_clear_cookie();
+    } elseif (tpl_exists($wantTpl)) {
+        tpl_set_cookie($wantTpl);
+    }
 }
 // Language: same pattern.
 if (isset($_POST['lang']) && lang_switch_allowed() && lang_exists((string)$_POST['lang'])) {

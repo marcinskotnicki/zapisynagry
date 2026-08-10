@@ -237,6 +237,11 @@ $hdrLangPick = function_exists('switcher_visible')
                             <?php foreach (tpl_available() as $tn): ?>
                                 <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
                             <?php endforeach; ?>
+                            <?php // Last, and only when there is an override to undo.
+                                  // Empty value = "no preference of my own". ?>
+                            <?php if (tpl_overridden()): ?>
+                                <option value=""><?= e(t('pref_reset')) ?></option>
+                            <?php endif; ?>
                         </select>
                     </label>
                 <?php endif; ?>
