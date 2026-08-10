@@ -207,6 +207,13 @@ font is the background colour", which was merely where someone happened to look.
 variables and assert the ratio, because in the source each side is just a
 `var()` and the bug is invisible.
 
+**`.card` is too broad a hook for a page-specific fix.** Nearly every page uses
+it, so a rule written as `.tpl-x .card` to fix one page's contrast lands on
+every other card-shaped page too. The two library pages (`library.php`,
+`my_library.php`) carry `.card library` rather than `.card` alone, mirroring how
+`.admin` and `.userpanel` already give the admin panel and the user panel their
+own scoping hook — `.tpl-x .library` reaches only these two.
+
 **A theme should restyle rather than fork wherever it can.** `blossom` is
 CSS-only: its off-grid pastel layout is `nth-child` transforms over light's
 markup, so a new field on light's card appears there for free. A fork is

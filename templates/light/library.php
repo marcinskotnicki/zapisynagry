@@ -27,6 +27,13 @@
  *    $csrf         — hidden CSRF field (only needed when managing).
  *    $flash        — result of the last manage action, or null.
  *    $flash_kind   — how to draw it.
+ *
+ *  The outer container carries BOTH .card (the boxed look every page with one
+ *  gets) AND .library. .card alone is too broad a hook for a theme-specific
+ *  fix — it wraps nearly every page, so a rule aimed at "the library page"
+ *  written as .tpl-x .card would also hit sign-up forms, message forms, and
+ *  everything else boxed. .library scopes a fix to exactly these two pages,
+ *  the same way .admin and .userpanel already scope fixes to those sections.
  * ============================================================================= */
 
 /**
@@ -197,7 +204,7 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '', $
 }
 endif;
 ?>
-<div class="card">
+<div class="card library">
     <h1><?= e(t('lib_title')) ?></h1>
 
     <?php if (!empty($flash)): ?>

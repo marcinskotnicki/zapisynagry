@@ -15,9 +15,14 @@
  *    $flash      — one-shot message from the last action, or null.
  *    $flash_kind — 'ok' | 'error' | 'warn', how to draw it.
  *    $csrf  — hidden CSRF field.
+ *
+ *  The outer container carries BOTH .card (the boxed look every page with one
+ *  gets) AND .library, the same scoping hook library.php uses — see that
+ *  file's header for why .card alone is too broad a target for a
+ *  theme-specific fix.
  * ============================================================================= */
 ?>
-<div class="card">
+<div class="card library">
     <h1><?= e(t('lib_my_title')) ?></h1>
 
     <?php // The kind matters: a refusal drawn in the success colour reads as
