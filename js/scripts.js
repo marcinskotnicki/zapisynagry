@@ -530,7 +530,7 @@
 
         for (var i = 0; i < wraps.length; i++) {
             (function (wrap) {
-                var strip = wrap.querySelector('.day-tabs, .event-tabs');
+                var strip = wrap.querySelector('.day-tabs, .event-tabs, .tabs');
                 if (!strip) return;
 
                 function sync() {
@@ -588,6 +588,32 @@
                     wrap.style.paddingRight = rightGap + 'px';
                 }
 
+                /* How wide the tabs would be on ONE line.
+                 *
+                 * scrollWidth cannot answer that for a strip that WRAPS: a
+                 * wrapped strip reports scrollWidth == clientWidth however many
+                 * rows it has spilled onto, so overflow looks like a perfect
+                 * fit. The day tabs and the admin nav both wrap by default, so
+                 * measuring that way silently did nothing for them and only
+                 * ever worked for the event tabs, which never wrap.
+                 *
+                 * Summing the children answers it in either state, which also
+                 * means fit() gives the same verdict before and after the
+                 * classes it is deciding about are applied. */
+                function naturalWidth() {
+                    var kids = strip.children;
+                    if (!kids.length) return 0;
+                    var total = 0;
+                    for (var k = 0; k < kids.length; k++) {
+                        total += kids[k].getBoundingClientRect().width;
+                    }
+                    // The flex gap between them counts too, or a strip that is
+                    // a few pixels over reads as fitting.
+                    var cs = window.getComputedStyle(strip);
+                    var gap = parseFloat(cs.columnGap || cs.gap || 0) || 0;
+                    return total + gap * (kids.length - 1);
+                }
+
                 function fit() {
                     // Cleared before measuring, so the answer is about the
                     // content and not about a state left over from last time —
@@ -595,12 +621,12 @@
                     // after a resize made room again.
                     widen(false);
                     wrap.classList.remove('tab-scroll-over');
-                    if (strip.scrollWidth <= strip.clientWidth) return;
+                    if (naturalWidth() <= strip.clientWidth) return;
 
                     widen(true);
                     // Re-measured once the widening has landed: the strip is
                     // bigger now, and that may already be enough.
-                    if (strip.scrollWidth <= strip.clientWidth) return;
+                    if (naturalWidth() <= strip.clientWidth) return;
 
                     wrap.classList.add('tab-scroll-over');
                 }
@@ -627,7 +653,9 @@
                     // Only when it actually scrolls: on desktop the strip wraps
                     // instead, and nudging scrollLeft there does nothing useful.
                     if (strip.scrollWidth <= strip.clientWidth) return;
-                    var active = strip.querySelector('.day-tab-active, .event-tab-active');
+                    // .tab-active is the admin panel's; class matching is by
+                    // whole token, so this does not also catch .day-tab-active.
+                    var active = strip.querySelector('.day-tab-active, .event-tab-active, .tab-active');
                     if (!active) return;
 
                     // Rect deltas rather than offsetLeft: offsetLeft is measured

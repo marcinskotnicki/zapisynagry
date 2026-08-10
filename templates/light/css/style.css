@@ -836,7 +836,8 @@ body.chat-open .chat-toggle-close { display: inline; }
 
 .tab-scroll-wide { box-sizing: border-box; }
 .tab-scroll-over .day-tabs,
-.tab-scroll-over .event-tabs {
+.tab-scroll-over .event-tabs,
+.tab-scroll-over .tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
@@ -844,24 +845,30 @@ body.chat-open .chat-toggle-close { display: inline; }
     justify-content: flex-start;
 }
 .tab-scroll-over .day-tab,
-.tab-scroll-over .event-tab { flex: 0 0 auto; }
+.tab-scroll-over .event-tab,
+.tab-scroll-over .tab { flex: 0 0 auto; }
 
 .day-tabs,
-.event-tabs {
+.event-tabs,
+.tabs {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
 .day-tabs::-webkit-scrollbar,
-.event-tabs::-webkit-scrollbar { height: 8px; }
+.event-tabs::-webkit-scrollbar,
+.tabs::-webkit-scrollbar { height: 8px; }
 .day-tabs::-webkit-scrollbar-track,
-.event-tabs::-webkit-scrollbar-track { background: transparent; }
+.event-tabs::-webkit-scrollbar-track,
+.tabs::-webkit-scrollbar-track { background: transparent; }
 .day-tabs::-webkit-scrollbar-thumb,
-.event-tabs::-webkit-scrollbar-thumb {
+.event-tabs::-webkit-scrollbar-thumb,
+.tabs::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 999px;
 }
 .day-tabs::-webkit-scrollbar-thumb:hover,
-.event-tabs::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.event-tabs::-webkit-scrollbar-thumb:hover,
+.tabs::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .tab-scroll::before,
 .tab-scroll::after {
     content: "";

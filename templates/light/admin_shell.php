@@ -59,12 +59,19 @@ if (club_shelf_enabled()) {
         <p class="msg msg-<?= e($fk) ?>"><?= e($flash) ?></p>
     <?php endif; ?>
 
+    <?php // Same wrapper the event and day strips use, so initTabScroll() picks
+          // this up too: it widens the strip past the content column when the
+          // tabs outgrow it, scrolls when even the window is not enough, and
+          // brings the CURRENT tab into view on load. The panel has enough tabs
+          // to need all three on a phone. ?>
+    <div class="tab-scroll">
     <nav class="tabs">
         <?php foreach ($tabs as $key => $labelKey): ?>
             <a class="tab<?= $key === ($active_tab ?? '') ? ' tab-active' : '' ?>"
                href="admin.php?tab=<?= e($key) ?>"><?= e(t($labelKey)) ?></a>
         <?php endforeach; ?>
     </nav>
+    </div>
 
     <section class="tab-body">
         <?= $tab_body ?? '' /* trusted: built by a tab controller via tpl_capture */ ?>
