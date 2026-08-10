@@ -294,7 +294,7 @@ return [
     'lib_open_btn'                      => 'Otwórz moją bibliotekę',
     'lib_back_to_panel'                 => 'Wróć do panelu',
     'opt_group_library'                 => 'Biblioteka klubu',
-    'opt_group_library_note'            => 'Ustawienia biblioteki członków i własnej kolekcji klubu. Obie włącza się w ustawieniach podstawowych; nic tutaj nie działa, dopóki któraś z nich nie jest włączona.',
+    'opt_group_library_note'            => '— dotyczy tylko włączonej biblioteki klubu i/lub kolekcji gier',
     'opt_club_library'                  => 'Włącz bibliotekę klubu',
     'opt_library_show_members'          => 'Pokaż zakładkę członków w bibliotece',
     'opt_library_allow_contact'         => 'Pozwól pisać do członków w sprawie ich gier',

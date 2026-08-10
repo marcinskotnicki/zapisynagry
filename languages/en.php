@@ -302,7 +302,7 @@ return [
     'lib_open_btn'                      => 'Open my library',
     'lib_back_to_panel'                 => 'Back to my panel',
     'opt_group_library'                 => 'Club library',
-    'opt_group_library_note'            => 'Settings for the members\' library and the club\'s own collection. Both are switched on in Basic settings; nothing here does anything until one of them is.',
+    'opt_group_library_note'            => '— only applies when the club library and/or the game collection is enabled',
     'opt_club_library'                  => 'Enable the club library',
     'opt_library_show_members'          => 'Show the members tab in the library',
     'opt_library_allow_contact'         => 'Allow contacting members about their games',
