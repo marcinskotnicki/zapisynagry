@@ -1036,6 +1036,65 @@ function library_link_field_visible() {
 }
 
 /**
+ * The title a chosen edition should be stored under.
+ *
+ * A version carries a nickname ("Polish edition") and, for a localised
+ * printing, the name it is actually sold under ("Aura"). The nickname is not a
+ * game title and must not be stored as one, so: an ALTERNATE name is used when
+ * the item has one, and the game's own name otherwise.
+ *
+ * Which BGG element carries which has not been checked against a live response
+ * from here, so the chooser SHOWS the result of this function beside every
+ * option. If the guess is wrong the person picking sees it before saving, and
+ * can rename afterwards — rather than finding a shelf full of entries called
+ * "Polish edition".
+ *
+ * @param array  $version   From bgg_parse_versions().
+ * @param string $gameName  The game's own primary name.
+ * @return string
+ */
+function library_version_title(array $version, $gameName) {
+    $names = $version['names'] ?? [];
+    $primary = (string)($version['name'] ?? '');
+    foreach ($names as $n) {
+        if ($n !== $primary && trim($n) !== '') return $n;   // the localised title
+    }
+    return $gameName !== '' ? $gameName : $primary;
+}
+
+/**
+ * A label for one edition in the chooser: nickname, year and language.
+ *
+ * @param array $version
+ * @return string
+ */
+function library_version_label(array $version) {
+    $bits = [];
+    if (!empty($version['name'])) $bits[] = $version['name'];
+    if (!empty($version['year'])) $bits[] = '(' . (int)$version['year'] . ')';
+    if (!empty($version['languages'])) $bits[] = implode(', ', $version['languages']);
+    return implode(' ', $bits);
+}
+
+/**
+ * Which edition to preselect: the first English one, else the newest.
+ *
+ * So somebody who does not care can press Next without reading the list, and
+ * gets the edition most likely to match the name they searched for.
+ *
+ * @param array $versions
+ * @return int  A version id, or 0.
+ */
+function library_default_version(array $versions) {
+    foreach ($versions as $v) {
+        foreach ($v['languages'] ?? [] as $l) {
+            if (strcasecmp($l, 'English') === 0) return (int)$v['id'];
+        }
+    }
+    return $versions ? (int)$versions[0]['id'] : 0;
+}
+
+/**
  * Turn whatever was pasted into a library entry.
  *
  * Handles BOTH shapes with one call, so the member page and the club shelf
@@ -1058,28 +1117,14 @@ function library_entry_from_bgg_input($raw, &$why = null) {
     $why = '';
     require_once __DIR__ . '/bgg.php';
 
-    /* A version link first: it is the more specific shape, and its id would
-     * otherwise be read as a game id and fetch the wrong game entirely. */
-    $versionId = library_bgg_version_id_from_link($raw);
-    $version   = null;
-    if ($versionId > 0) {
-        $version = library_fetch_version($versionId, $why);
-        if (!$version) {
-            /* Reported as its OWN failure rather than folded into "could not
-             * fetch that game". Reading a version page is scraping — it depends
-             * on BGG's markup and on their front end answering an automated
-             * request at all — so when it breaks, the reason is the only thing
-             * that distinguishes "they changed the page" from "they blocked us"
-             * from "no network". Collapsing them all into one sentence is what
-             * made the first failure here impossible to diagnose. */
-            $why = 'version: ' . $why;
-            return null;
-        }
-        $gameId = (int)$version['game_id'];
-    } else {
-        $gameId = library_bgg_id_from_input($raw);
-    }
+    /* A VERSION LINK is refused rather than followed. Resolving one needs the
+     * version's own web page, and BGG answers that with 403 for anything that
+     * is not a browser — verified on a live site, not guessed. The editions are
+     * available from the documented API instead (thing?versions=1), so the add
+     * flow asks the game for its editions and lets the person choose. */
+    if (library_bgg_version_id_from_link($raw) > 0) { $why = 'version link'; return null; }
 
+    $gameId = library_bgg_id_from_input($raw);
     if ($gameId <= 0) { $why = 'not a bgg link'; return null; }
 
     $thing = bgg_thing($gameId);
@@ -1092,14 +1137,10 @@ function library_entry_from_bgg_input($raw, &$why = null) {
         'thumbnail' => $thing['thumbnail'] ?? '',
     ];
 
-    /* The edition's own title and cover WIN over the game's, which is the whole
-     * point of pasting a version link — but only when the page actually yielded
-     * them, so a partial parse degrades to the game's own details rather than
-     * to a blank name. */
-    if ($version) {
-        if (!empty($version['name']))      $entry['name']      = $version['name'];
-        if (!empty($version['thumbnail'])) $entry['thumbnail'] = $version['thumbnail'];
-    }
+    /* The EDITION is applied by the caller, not here: this returns the game as
+     * BGG has it, and the chooser then overrides the title, cover and year for
+     * whichever edition was picked. Keeping that out of here means the one
+     * builder still answers exactly one question — "what game is this link?" */
     return $entry;
 }
 
@@ -1127,140 +1168,12 @@ function library_bgg_version_id_from_link($raw) {
     return 0;
 }
 
-/**
- * Pull the parent game and the edition's own details out of a BGG version page.
- *
- * PURE — takes the page text, returns what it found — so the shape-matching is
- * testable even though the fetch itself cannot be exercised here.
- *
- * WHY THE PAGE AND NOT THE API: the XML thing endpoint is documented for GAME
- * ids. A version id is a different kind of object, and asking `thing` for one
- * returns nothing useful, so there is no documented call that maps a version id
- * back to its game. The version's own page names its game, which is the only
- * route that does not require already knowing the answer.
- *
- * Deliberately tolerant: several shapes are tried, and a miss returns null
- * rather than a guess, because a wrong parent id would attach somebody's game
- * to an unrelated title.
- *
- * @param string $html  A BGG version page.
- * @return array|null  ['game_id' => int, 'name' => string, 'thumbnail' => string]
- */
-function library_parse_version_page($html) {
-    if (!is_string($html) || trim($html) === '') return null;
-
-    /* ANCHORED ON THE INFOTABLE, not on the first /boardgame link in the page.
-     * A version page carries dozens of unrelated game links — sidebars, "hot"
-     * lists, /boardgame/random — and taking the first one picked an entirely
-     * unrelated game (the first attempt at this returned 9209 for a page whose
-     * game is 210274). The infotable is the block that actually describes THIS
-     * version, and its "Board Game" row names the parent. */
-    if (!preg_match('~<table[^>]*class="[^"]*geekitem_infotable[^"]*"[^>]*>(.*?)</table>~is', $html, $tm)) {
-        return null;
-    }
-    $table = $tm[1];
-
-    // Absolute or relative: the live page uses the full URL, older markup did not.
-    if (!preg_match('~(?:https?://(?:www\.)?boardgamegeek\.com)?/boardgame/(\d+)~i', $table, $m)) {
-        return null;
-    }
-    $gameId = (int)$m[1];
-    if ($gameId <= 0) return null;
-
-    /* The edition's own title, which is the point of pasting a version link —
-     * the Polish printing of Petrichor is called "Aura". It sits in the
-     * linked-name block as nested divs, so tags are stripped rather than
-     * matched. Falls back to nothing, and the caller then keeps the game's own
-     * name. */
-    $name = '';
-    if (preg_match('~<div[^>]*id="edit_linkednameid"[^>]*>(.*?)</div>\s*</td>~is', $html, $nm)
-        || preg_match('~<div[^>]*id="edit_linkednameid"[^>]*>(.*)~is', $html, $nm)) {
-        $name = trim(html_entity_decode(strip_tags($nm[1]), ENT_QUOTES, 'UTF-8'));
-        // Nested divs can leave the rest of the page in $nm[1] on a loose
-        // match; a title is one line, so anything multi-line is not one.
-        $name = trim(preg_split('~[\r\n]~', $name)[0] ?? '');
-        if (mb_strlen($name) > 200) $name = '';
-    }
-
-    /* THE COVER. Not the first image on the page: these pages carry ~90 tiny
-     * `__square30` UI icons (avatars, badges) and exactly one real cover, so
-     * taking the first match returns a 30px sprite. The cover is the one image
-     * that is NOT a square30 variant.
-     *
-     * Matched anywhere rather than in an src="" attribute, because the cover is
-     * served through srcset and a saved copy of the page rewrites src to a
-     * local file — the URL is present either way.
-     *
-     * A version with no art of its own yields the GAME's image here, which is
-     * the right answer rather than a miss. */
-    $thumb = '';
-    /* The ')' is NOT a terminator: these URLs contain filter segments like
-     * `filters:strip_icc()`, and excluding it truncated every one of them
-     * mid-path. Stop at whitespace, quotes and commas only — a comma does
-     * separate srcset entries. */
-    if (preg_match_all('~https://cf\.geekdo-images\.com/[^\s"\',]+~i', $html, $ims)) {
-        foreach ($ims[0] as $candidate) {
-            if (stripos($candidate, '__square') !== false) continue;   // UI sprite
-            if (stripos($candidate, 'avatar') !== false) continue;
-            $thumb = rtrim($candidate, ',');
-            break;
-        }
-    }
-
-    return ['game_id' => $gameId, 'name' => $name, 'thumbnail' => $thumb];
-}
-
-/**
- * Resolve a version id to a game, with the edition's own title and cover.
- *
- * NETWORK — returns null on any failure, and the caller falls back to treating
- * the link as an ordinary one.
- *
- * @param int    $versionId
- * @param string $why  Out-param: short reason when it returns null.
- * @return array|null  ['game_id','name','thumbnail']
- */
-function library_fetch_version($versionId, &$why = null) {
-    $why = '';
-    $versionId = (int)$versionId;
-    if ($versionId <= 0) { $why = 'no version id'; return null; }
-
-    if (!function_exists('curl_init')) { $why = 'no curl'; return null; }
-
-    /* A SEPARATE FETCH from bgg_fetch_raw(), which is built for the XML API:
-     * it announces itself as "zapisynagry/1.0" and attaches the API bearer
-     * token. Those are right for the API and wrong here — this is an ordinary
-     * web page, served through the same protection as any browser request, and
-     * an unfamiliar agent is the usual reason such a request comes back 403
-     * while the API is perfectly happy. So: a browser-shaped request, no API
-     * token, and the slug in the URL as a browser would have it. */
-    $url = 'https://boardgamegeek.com/boardgameversion/' . $versionId;
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_ENCODING, '');          // accept gzip; BGG serves it
-    curl_setopt($ch, CURLOPT_USERAGENT,
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
-        . 'Chrome/124.0 Safari/537.36');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Accept: text/html,application/xhtml+xml',
-        'Accept-Language: en',
-    ]);
-    $body = curl_exec($ch);
-    $err  = curl_error($ch);
-    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($body === false) { $why = 'request failed' . ($err !== '' ? ': ' . $err : ''); return null; }
-    if ($code < 200 || $code >= 300) { $why = 'HTTP ' . $code; return null; }
-
-    $parsed = library_parse_version_page((string)$body);
-    if (!$parsed) { $why = 'could not find the game on that page'; return null; }
-    return $parsed;
-}
+/* The version-page SCRAPER that used to live here has been removed. Resolving a
+ * /boardgameversion/NNN link needs that page, and BGG answers it with HTTP 403
+ * for anything that is not a browser — confirmed against a live site, not
+ * assumed. The editions are available from the documented API instead
+ * (thing?versions=1), which is what the add flow uses now, so the scraper was
+ * unreachable code that still looked like a working option. */
 
 /**
  * A BGG game id from a link, but ONLY when the link really is a BGG game page.

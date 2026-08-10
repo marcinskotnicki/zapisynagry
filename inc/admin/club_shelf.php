@@ -60,15 +60,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $why = '';
         $entry = library_entry_from_bgg_input($_POST['bgg'] ?? '', $why);
         if (!$entry) {
-            if ($why === 'not a bgg link') {
-                $flash = t('lib_bgg_bad_link');
-            } elseif (strpos($why, 'version: ') === 0) {
-                $flash = t('lib_bgg_version_failed', substr($why, 9));
-            } else {
-                $flash = t('lib_bgg_not_found');
-            }
+            if ($why === 'version link')       $flash = t('lib_bgg_version_link');
+            elseif ($why === 'not a bgg link') $flash = t('lib_bgg_bad_link');
+            else                               $flash = t('lib_bgg_not_found');
             $flashKind = 'error';
         } else {
+            // More than one edition: ask which, exactly as a member's own shelf
+            // does. Rendered straight away so the fetched list is used now.
+            $versions = bgg_versions((int)$entry['bgg_id']);
+            if (count($versions) > 1) {
+                $tab_body = tpl_capture('lib_version_pick', [
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'versions' => $versions,
+                    'default'  => library_default_version($versions),
+                    'action'   => 'admin.php?tab=club_shelf',
+                    'back'     => 'admin.php?tab=club_shelf',
+                    'csrf'     => csrf_field(),
+                ]);
+                return;
+            }
+            club_shelf_add($entry);
+            log_action('club_shelf_add', $entry['name'] . ' (BGG ' . $entry['bgg_id'] . ')');
+            $flash = t('lib_added', $entry['name']);
+        }
+
+    } elseif ($action === 'add_bgg_pick') {
+        $why    = '';
+        $gameId = (int)($_POST['game_id'] ?? 0);
+        $entry  = $gameId > 0 ? library_entry_from_bgg_input((string)$gameId, $why) : null;
+        if (!$entry) {
+            $flash = t('lib_bgg_not_found');
+            $flashKind = 'error';
+        } else {
+            $wantVersion = (int)($_POST['version'] ?? 0);
+            if ($wantVersion > 0) {
+                foreach (bgg_versions($gameId) as $v) {
+                    if ((int)$v['id'] !== $wantVersion) continue;
+                    $entry['name'] = library_version_title($v, $entry['name']);
+                    if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
+                    if (!empty($v['year']))      $entry['year']      = $v['year'];
+                    break;
+                }
+            }
             club_shelf_add($entry);
             log_action('club_shelf_add', $entry['name'] . ' (BGG ' . $entry['bgg_id'] . ')');
             $flash = t('lib_added', $entry['name']);

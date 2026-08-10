@@ -269,6 +269,92 @@ function bgg_search($query) {
  * @param int $id  BGG game id.
  * @return array|null
  */
+/**
+ * Parse the <versions> block of a thing response into a pickable list.
+ *
+ * PURE — no network — so the shape-matching is testable in an environment with
+ * no outbound route, which is the one this was written in.
+ *
+ * DELIBERATELY DEFENSIVE about where a version's title comes from. BGG gives a
+ * version both a nickname ("Polish edition") and, for a localised printing, the
+ * name that edition is actually sold under ("Aura"). Which element carries
+ * which has not been verified against a live response here, so every name on
+ * the item is collected and the caller picks — rather than reading one field
+ * confidently and silently storing the wrong string.
+ *
+ * @param string $xmlString  A thing?...&versions=1 response.
+ * @return array  List of ['id','name','nickname','names','year','thumbnail',
+ *                'image','languages'], newest first. Empty when there are none.
+ */
+function bgg_parse_versions($xmlString) {
+    if (!is_string($xmlString) || trim($xmlString) === '') return [];
+
+    $prev = libxml_use_internal_errors(true);
+    $xml  = simplexml_load_string($xmlString);
+    libxml_clear_errors();
+    libxml_use_internal_errors($prev);
+    if ($xml === false || !isset($xml->item)) return [];
+
+    $out = [];
+    foreach ($xml->item->versions->item ?? [] as $v) {
+        $id = (int)($v['id'] ?? 0);
+        if ($id <= 0) continue;
+
+        /* Every name the item carries, primary first. The primary is usually
+         * the nickname; a localised title, when present, is among these. */
+        $names = [];
+        $primary = '';
+        foreach ($v->name ?? [] as $n) {
+            $val = trim((string)($n['value'] ?? ''));
+            if ($val === '') continue;
+            $names[] = $val;
+            if ((string)($n['type'] ?? '') === 'primary' && $primary === '') $primary = $val;
+        }
+        if ($primary === '' && $names) $primary = $names[0];
+
+        // Languages, so an English edition can be preselected for people who
+        // do not care which one they get.
+        $languages = [];
+        foreach ($v->link ?? [] as $l) {
+            if ((string)($l['type'] ?? '') === 'language') {
+                $lv = trim((string)($l['value'] ?? ''));
+                if ($lv !== '') $languages[] = $lv;
+            }
+        }
+
+        $out[] = [
+            'id'        => $id,
+            'name'      => $primary,
+            'nickname'  => $primary,
+            'names'     => $names,
+            'year'      => (int)($v->yearpublished['value'] ?? 0),
+            'thumbnail' => trim((string)($v->thumbnail ?? '')),
+            'image'     => trim((string)($v->image ?? '')),
+            'languages' => $languages,
+        ];
+    }
+
+    /* Newest first: a club buying a game today wants the current printing, and
+     * BGG returns these in no order a human would expect. */
+    usort($out, function ($a, $b) { return $b['year'] <=> $a['year']; });
+    return $out;
+}
+
+/**
+ * Every published edition of a game. Network — [] on any failure.
+ *
+ * @param int $id  A GAME id.
+ * @return array
+ */
+function bgg_versions($id) {
+    // The documented endpoint, so no scraping and no 403: BGG returns the
+    // versions alongside the game itself.
+    $url = BGG_BASE . 'thing?versions=1&id=' . (int)$id;
+    [$body, $code] = bgg_fetch_raw($url);
+    if ($body === false || $code !== 200) return [];
+    return bgg_parse_versions($body);
+}
+
 function bgg_thing($id) {
     $url = BGG_BASE . 'thing?stats=1&id=' . (int)$id;
     [$body, $code] = bgg_fetch_raw($url);

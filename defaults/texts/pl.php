@@ -66,8 +66,5 @@ return [
 
     // Wspólna biblioteka klubu.
     'msg_library' =>
-        'To gry, które mają członkowie klubu. W zakładce „Gry” zobaczysz, kto co '
-        . 'posiada, a w „Członkowie” możesz przejrzeć zbiory jednej osoby. Jeśli '
-        . 'chcesz w coś zagrać, poproś właściciela, żeby przyniósł grę na '
-        . 'spotkanie.',
+        'TTu prezentujemy gry z biblioteczki klubu, a w osobnych zakładkach: prywatne gry jego członków oraz wszystkie gry zebrane razem. Pamiętaj: O przyniesieniu gry prywatnej decyduje zawsze jej właściciel, możesz do niego napisać z zapytaniem, jeśli włączył taką opcję.',
 ];

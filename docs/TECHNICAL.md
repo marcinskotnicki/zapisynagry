@@ -942,32 +942,27 @@ collator — the extension is missing on plenty of shared hosts, and a list whos
 order depends on which extensions are installed is worse than one that is
 merely simple. A member's shelf is never split.
 
-**A link to one EDITION adds the same game under that edition's name and art.**
-BGG gives each printing its own id (`/boardgameversion/391600/...` beside
-`/boardgame/210274/...`). `library_entry_from_bgg_input()` handles both shapes
-for every add path, and **checks for a version FIRST** — the loose game-id
-extractor happily reads `391600` out of a version link, so testing for a game
-first would fetch an unrelated title.
+**Editions are CHOSEN, not scraped.** BGG gives each printing its own id
+(`/boardgameversion/391600/...`). Resolving such a link needs that web page, and
+BGG answers it with **HTTP 403** for anything that is not a browser — confirmed
+against a live site, with a browser user-agent, not assumed. A version link is
+therefore refused with its own message telling the person to paste the main game
+link instead.
 
-The `bgg_id` stored is always the GAME's, never the version's: that is what
-merges two members' copies into one library entry even when they pasted
-different editions, and what the collection sync matches on. Only the displayed
-name and cover come from the edition.
+The editions come from the documented API: `thing?versions=1` returns them
+alongside the game. When a game has more than one, the add flow shows a chooser;
+the English edition is preselected so somebody who does not care can press the
+button. Picking one stores that edition's title, cover and year, but the stored
+`bgg_id` is still the GAME's — that is what merges two members' copies into one
+library entry when they picked different printings, and what the collection sync
+matches on.
 
-**Resolving a version id needs the version's own PAGE, not the XML API.** The
-`thing` endpoint is documented for game ids; a version is a different kind of
-object, so there is no documented call mapping a version id back to its game.
-`library_parse_version_page()` is therefore pure, and **anchored on
-`table.geekitem_infotable`** — the block that describes the version itself. That
-anchoring is the whole trick: a version page carries ~74 other `/boardgame/NNN`
-links (sidebars, hot lists) and ~150 `__square30` UI sprites BEFORE that table,
-so "first game link on the page" returns an unrelated game and "first image"
-returns a 30px icon. The first attempt did both. The edition's own title comes
-from `div#edit_linkednameid`, and a miss returns null rather than a guess.
-
-`tests/fixtures/bgg_version_page.html` is a trimmed copy of a real page, noise
-included on purpose: a fixture without those decoy links passes whether the
-parser is anchored or not, which is how the bug shipped in the first place.
+`library_version_title()` prefers an ALTERNATE name over the version's primary
+one, because the primary is usually a nickname ("Polish edition") and the
+alternate is the title the edition is actually sold under ("Aura"). Which BGG
+field carries which has not been verified against a live response, so **the
+chooser prints the resulting name beside every option** — a wrong guess is then
+visible before saving rather than found later as a shelf full of nicknames.
 
 **A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
 name, year and thumbnail, drops the custom link, and from then on merges with

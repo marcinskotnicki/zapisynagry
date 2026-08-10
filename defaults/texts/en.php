@@ -65,8 +65,5 @@ return [
 
     // The shared club library.
     'msg_library' =>
-        'These are the games club members own between them. '
-        . 'Under "Games" you can see who has what; under "Members" you can '
-        . 'browse one person\'s shelf. If you would like to play something, '
-        . 'ask whoever owns it to bring it along.',
+        'Here we present games from the club library, and in separate tabs: members\' private games and all games combined. Keep in mind: Bringing a private game is always up to its owner, but you can message them to ask if they have enabled this option.',
 ];

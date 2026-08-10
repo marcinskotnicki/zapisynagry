@@ -87,26 +87,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'add_bgg') {
-        /* Accepts a game link OR a link to one EDITION of it — a version link
-         * stores the same game but carries that edition's title and cover, so a
-         * Polish printing lists under its Polish name. See
-         * library_entry_from_bgg_input(). */
         $why = '';
         $entry = library_entry_from_bgg_input($_POST['bgg'] ?? '', $why);
         if (!$entry) {
-            // A bad id, a BGG outage, and a host with no outbound route all
-            // look the same from the member's point of view; only "that is not
-            // a BGG address at all" is worth its own wording.
-            if ($why === 'not a bgg link') {
-                flash_set(t('lib_bgg_bad_link'), 'error');
-            } elseif (strpos($why, 'version: ') === 0) {
-                // Says WHY, because a version lookup reads a web page and can
-                // fail in ways worth telling apart.
-                flash_set(t('lib_bgg_version_failed', substr($why, 9)), 'error');
-            } else {
-                flash_set(t('lib_bgg_not_found'), 'error');
-            }
+            /* A version link gets its own wording: "that is not a BGG address"
+             * would be both wrong and unhelpful, since it IS one — just not one
+             * that can be resolved directly. */
+            if ($why === 'version link')       flash_set(t('lib_bgg_version_link'), 'error');
+            elseif ($why === 'not a bgg link') flash_set(t('lib_bgg_bad_link'), 'error');
+            else                               flash_set(t('lib_bgg_not_found'), 'error');
         } else {
+            /* More than one published edition: ask which, rather than picking
+             * silently. Rendered here rather than redirected to, so the list
+             * just fetched is used immediately instead of being stashed. */
+            $versions = bgg_versions((int)$entry['bgg_id']);
+            if (count($versions) > 1) {
+                tpl_render('header', ['page_title' => t('lib_my_title')]);
+                tpl_render('lib_version_pick', [
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'versions' => $versions,
+                    'default'  => library_default_version($versions),
+                    'action'   => 'my_library.php',
+                    'back'     => 'my_library.php',
+                    'csrf'     => csrf_field(),
+                ]);
+                tpl_render('footer');
+                exit;
+            }
+            library_add($me['id'], $entry);
+            flash_set(t('lib_added', $entry['name']));
+        }
+
+    } elseif ($action === 'add_bgg_pick') {
+        // The chooser's answer. The game is re-fetched from its id rather than
+        // carried through the form, so a hand-edited post cannot invent one.
+        $why    = '';
+        $gameId = (int)($_POST['game_id'] ?? 0);
+        $entry  = $gameId > 0 ? library_entry_from_bgg_input((string)$gameId, $why) : null;
+        if (!$entry) {
+            flash_set(t('lib_bgg_not_found'), 'error');
+        } else {
+            $wantVersion = (int)($_POST['version'] ?? 0);
+            if ($wantVersion > 0) {
+                foreach (bgg_versions($gameId) as $v) {
+                    if ((int)$v['id'] !== $wantVersion) continue;
+                    /* The edition's title, cover and year. The stored bgg_id
+                     * stays the GAME's, so two members who picked different
+                     * editions still merge into one library entry. */
+                    $entry['name'] = library_version_title($v, $entry['name']);
+                    if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
+                    if (!empty($v['year']))      $entry['year']      = $v['year'];
+                    break;
+                }
+            }
             library_add($me['id'], $entry);
             flash_set(t('lib_added', $entry['name']));
         }
