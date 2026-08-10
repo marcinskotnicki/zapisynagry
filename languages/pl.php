@@ -275,7 +275,7 @@ return [
     'lib_removed'                       => 'Gra usunięta.',
     'lib_add_bgg'                       => 'Dodaj grę z BGG',
     'lib_add_bgg_label'                 => 'Link do gry na BoardGameGeek',
-    'lib_add_bgg_hint'                  => 'Wklej adres strony gry albo sam jej numer.',
+    'lib_add_bgg_hint'                  => 'Wklej adres strony gry albo konkretnego wydania — wydanie doda tę samą grę, ale z tytułem i okładką tego wydania.',
     'lib_bgg_bad_link'                  => 'To nie wygląda na adres gry w serwisie BoardGameGeek.',
     'lib_bgg_not_found'                 => 'Nie udało się pobrać tej gry z BoardGameGeek.',
     'lib_add_manual'                    => 'Dodaj grę spoza BGG',

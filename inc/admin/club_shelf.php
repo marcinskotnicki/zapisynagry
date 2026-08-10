@@ -55,27 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'add_bgg') {
-        $id = library_bgg_id_from_input($_POST['bgg'] ?? '');
-        if ($id <= 0) {
-            $flash = t('lib_bgg_bad_link');
+        // Same builder as a member's own shelf, so both accept a game link or
+        // a link to one EDITION of it — see library_entry_from_bgg_input().
+        $why = '';
+        $entry = library_entry_from_bgg_input($_POST['bgg'] ?? '', $why);
+        if (!$entry) {
+            $flash = ($why === 'not a bgg link') ? t('lib_bgg_bad_link') : t('lib_bgg_not_found');
             $flashKind = 'error';
         } else {
-            $thing = bgg_thing($id);
-            if (!$thing || empty($thing['name'])) {
-                // Covers a bad id, a BGG outage, and a host with no outbound
-                // route — all the same from the admin's point of view.
-                $flash = t('lib_bgg_not_found');
-                $flashKind = 'error';
-            } else {
-                club_shelf_add([
-                    'name'      => $thing['name'],
-                    'year'      => $thing['year'] ?? 0,
-                    'bgg_id'    => $thing['id'],
-                    'thumbnail' => $thing['thumbnail'] ?? '',
-                ]);
-                log_action('club_shelf_add', $thing['name'] . ' (BGG ' . $thing['id'] . ')');
-                $flash = t('lib_added', $thing['name']);
-            }
+            club_shelf_add($entry);
+            log_action('club_shelf_add', $entry['name'] . ' (BGG ' . $entry['bgg_id'] . ')');
+            $flash = t('lib_added', $entry['name']);
         }
 
     } elseif ($action === 'sync') {

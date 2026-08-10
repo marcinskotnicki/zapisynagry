@@ -1036,6 +1036,161 @@ function library_link_field_visible() {
 }
 
 /**
+ * Turn whatever was pasted into a library entry.
+ *
+ * Handles BOTH shapes with one call, so the member page and the club shelf
+ * cannot drift:
+ *
+ *   a game link    -> that game, with BGG's own title and cover;
+ *   a version link -> the SAME game, but carrying that edition's title and
+ *                     cover, so a Polish printing lists under its Polish name.
+ *
+ * The bgg_id stored is always the GAME's, never the version's. That is what
+ * makes two members' copies of the same game merge into one entry on the
+ * library page even when they pasted different editions — and it is what the
+ * collection sync matches on.
+ *
+ * @param string $raw   A pasted link or a bare game id.
+ * @param string $why   Out-param: short reason when it returns null.
+ * @return array|null   ['name','year','bgg_id','thumbnail']
+ */
+function library_entry_from_bgg_input($raw, &$why = null) {
+    $why = '';
+    require_once __DIR__ . '/bgg.php';
+
+    /* A version link first: it is the more specific shape, and its id would
+     * otherwise be read as a game id and fetch the wrong game entirely. */
+    $versionId = library_bgg_version_id_from_link($raw);
+    $version   = null;
+    if ($versionId > 0) {
+        $version = library_fetch_version($versionId, $why);
+        if (!$version) return null;               // said which way it failed
+        $gameId = (int)$version['game_id'];
+    } else {
+        $gameId = library_bgg_id_from_input($raw);
+    }
+
+    if ($gameId <= 0) { $why = 'not a bgg link'; return null; }
+
+    $thing = bgg_thing($gameId);
+    if (!$thing || empty($thing['name'])) { $why = 'lookup failed'; return null; }
+
+    $entry = [
+        'name'      => $thing['name'],
+        'year'      => $thing['year'] ?? 0,
+        'bgg_id'    => $thing['id'],
+        'thumbnail' => $thing['thumbnail'] ?? '',
+    ];
+
+    /* The edition's own title and cover WIN over the game's, which is the whole
+     * point of pasting a version link — but only when the page actually yielded
+     * them, so a partial parse degrades to the game's own details rather than
+     * to a blank name. */
+    if ($version) {
+        if (!empty($version['name']))      $entry['name']      = $version['name'];
+        if (!empty($version['thumbnail'])) $entry['thumbnail'] = $version['thumbnail'];
+    }
+    return $entry;
+}
+
+/**
+ * A BGG VERSION id from a link, or 0.
+ *
+ * A version is one edition of a game — the Polish printing of Petrichor, say —
+ * and it has its own id, its own title and its own cover:
+ *
+ *   .../boardgame/210274/petrichor              -> the game   (id 210274)
+ *   .../boardgameversion/391600/polish-edition  -> a version  (id 391600)
+ *
+ * Host-anchored for the same reason library_bgg_id_from_link() is: this decides
+ * what an arbitrary pasted link MEANS, so a lookalike path on another host must
+ * not match.
+ *
+ * @param string $raw
+ * @return int  0 when this is not a BGG version link.
+ */
+function library_bgg_version_id_from_link($raw) {
+    $raw = trim((string)$raw);
+    if ($raw === '') return 0;
+    if (!preg_match('~^(?:https?://)?(?:www\.)?boardgamegeek\.com/~i', $raw)) return 0;
+    if (preg_match('~/boardgameversion/(\d+)~i', $raw, $m)) return (int)$m[1];
+    return 0;
+}
+
+/**
+ * Pull the parent game and the edition's own details out of a BGG version page.
+ *
+ * PURE — takes the page text, returns what it found — so the shape-matching is
+ * testable even though the fetch itself cannot be exercised here.
+ *
+ * WHY THE PAGE AND NOT THE API: the XML thing endpoint is documented for GAME
+ * ids. A version id is a different kind of object, and asking `thing` for one
+ * returns nothing useful, so there is no documented call that maps a version id
+ * back to its game. The version's own page names its game, which is the only
+ * route that does not require already knowing the answer.
+ *
+ * Deliberately tolerant: several shapes are tried, and a miss returns null
+ * rather than a guess, because a wrong parent id would attach somebody's game
+ * to an unrelated title.
+ *
+ * @param string $html  A BGG version page.
+ * @return array|null  ['game_id' => int, 'name' => string, 'thumbnail' => string]
+ */
+function library_parse_version_page($html) {
+    if (!is_string($html) || trim($html) === '') return null;
+
+    /* BGG renders these pages from a JSON blob embedded in the markup, so the
+     * structured fields are tried first and the plain link is the fallback. */
+    $gameId = 0;
+    if (preg_match('~[\'"]objectid[\'"]\s*:\s*[\'"]?(\d+)~i', $html, $m)) {
+        $gameId = (int)$m[1];
+    }
+    if ($gameId <= 0 && preg_match('~/boardgame/(\d+)~i', $html, $m)) {
+        $gameId = (int)$m[1];
+    }
+    if ($gameId <= 0) return null;
+
+    $name = '';
+    if (preg_match('~<title>\s*(.*?)\s*(?:\||</title>)~is', $html, $m)) {
+        $name = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES, 'UTF-8'));
+    }
+
+    $thumb = '';
+    if (preg_match('~<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)~i', $html, $m)) {
+        $thumb = $m[1];
+    }
+
+    return ['game_id' => $gameId, 'name' => $name, 'thumbnail' => $thumb];
+}
+
+/**
+ * Resolve a version id to a game, with the edition's own title and cover.
+ *
+ * NETWORK — returns null on any failure, and the caller falls back to treating
+ * the link as an ordinary one.
+ *
+ * @param int    $versionId
+ * @param string $why  Out-param: short reason when it returns null.
+ * @return array|null  ['game_id','name','thumbnail']
+ */
+function library_fetch_version($versionId, &$why = null) {
+    $why = '';
+    $versionId = (int)$versionId;
+    if ($versionId <= 0) { $why = 'no version id'; return null; }
+
+    require_once __DIR__ . '/bgg.php';
+    if (!function_exists('curl_init')) { $why = 'no curl'; return null; }
+
+    list($body, $code) = bgg_fetch_raw('https://boardgamegeek.com/boardgameversion/' . $versionId);
+    if ($body === false) { $why = 'request failed'; return null; }
+    if ($code < 200 || $code >= 300) { $why = 'HTTP ' . $code; return null; }
+
+    $parsed = library_parse_version_page((string)$body);
+    if (!$parsed) { $why = 'could not find the game on that page'; return null; }
+    return $parsed;
+}
+
+/**
  * A BGG game id from a link, but ONLY when the link really is a BGG game page.
  *
  * Deliberately stricter than library_bgg_id_from_input(). That one is used on

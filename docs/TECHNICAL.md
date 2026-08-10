@@ -942,6 +942,27 @@ collator — the extension is missing on plenty of shared hosts, and a list whos
 order depends on which extensions are installed is worse than one that is
 merely simple. A member's shelf is never split.
 
+**A link to one EDITION adds the same game under that edition's name and art.**
+BGG gives each printing its own id (`/boardgameversion/391600/...` beside
+`/boardgame/210274/...`). `library_entry_from_bgg_input()` handles both shapes
+for every add path, and **checks for a version FIRST** — the loose game-id
+extractor happily reads `391600` out of a version link, so testing for a game
+first would fetch an unrelated title.
+
+The `bgg_id` stored is always the GAME's, never the version's: that is what
+merges two members' copies into one library entry even when they pasted
+different editions, and what the collection sync matches on. Only the displayed
+name and cover come from the edition.
+
+**Resolving a version id needs the version's own PAGE, not the XML API.** The
+`thing` endpoint is documented for game ids; a version is a different kind of
+object, so there is no documented call mapping a version id back to its game.
+`library_parse_version_page()` is therefore pure and tolerant of several markup
+shapes, and returns null rather than a guess — a wrong parent id would file
+somebody's game under an unrelated title. **This is the one part of the library
+that has never been exercised against the live site**, since the container has
+no outbound route.
+
 **A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
 name, year and thumbnail, drops the custom link, and from then on merges with
 every other member's copy on the public list. That is how a club with one proper

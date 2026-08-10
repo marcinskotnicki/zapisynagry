@@ -87,24 +87,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'add_bgg') {
-        $id = library_bgg_id_from_input($_POST['bgg'] ?? '');
-        if ($id <= 0) {
-            flash_set(t('lib_bgg_bad_link'), 'error');
+        /* Accepts a game link OR a link to one EDITION of it — a version link
+         * stores the same game but carries that edition's title and cover, so a
+         * Polish printing lists under its Polish name. See
+         * library_entry_from_bgg_input(). */
+        $why = '';
+        $entry = library_entry_from_bgg_input($_POST['bgg'] ?? '', $why);
+        if (!$entry) {
+            // A bad id, a BGG outage, and a host with no outbound route all
+            // look the same from the member's point of view; only "that is not
+            // a BGG address at all" is worth its own wording.
+            flash_set($why === 'not a bgg link' ? t('lib_bgg_bad_link') : t('lib_bgg_not_found'), 'error');
         } else {
-            $thing = bgg_thing($id);
-            if (!$thing || empty($thing['name'])) {
-                // Covers a bad id, a BGG outage, and a host with no outbound
-                // route — all the same from the member's point of view.
-                flash_set(t('lib_bgg_not_found'), 'error');
-            } else {
-                library_add($me['id'], [
-                    'name'      => $thing['name'],
-                    'year'      => $thing['year'] ?? 0,
-                    'bgg_id'    => $thing['id'],
-                    'thumbnail' => $thing['thumbnail'] ?? '',
-                ]);
-                flash_set(t('lib_added', $thing['name']));
-            }
+            library_add($me['id'], $entry);
+            flash_set(t('lib_added', $entry['name']));
         }
 
     } elseif ($action === 'sync') {
