@@ -1064,7 +1064,17 @@ function library_entry_from_bgg_input($raw, &$why = null) {
     $version   = null;
     if ($versionId > 0) {
         $version = library_fetch_version($versionId, $why);
-        if (!$version) return null;               // said which way it failed
+        if (!$version) {
+            /* Reported as its OWN failure rather than folded into "could not
+             * fetch that game". Reading a version page is scraping — it depends
+             * on BGG's markup and on their front end answering an automated
+             * request at all — so when it breaks, the reason is the only thing
+             * that distinguishes "they changed the page" from "they blocked us"
+             * from "no network". Collapsing them all into one sentence is what
+             * made the first failure here impossible to diagnose. */
+            $why = 'version: ' . $why;
+            return null;
+        }
         $gameId = (int)$version['game_id'];
     } else {
         $gameId = library_bgg_id_from_input($raw);
@@ -1215,11 +1225,36 @@ function library_fetch_version($versionId, &$why = null) {
     $versionId = (int)$versionId;
     if ($versionId <= 0) { $why = 'no version id'; return null; }
 
-    require_once __DIR__ . '/bgg.php';
     if (!function_exists('curl_init')) { $why = 'no curl'; return null; }
 
-    list($body, $code) = bgg_fetch_raw('https://boardgamegeek.com/boardgameversion/' . $versionId);
-    if ($body === false) { $why = 'request failed'; return null; }
+    /* A SEPARATE FETCH from bgg_fetch_raw(), which is built for the XML API:
+     * it announces itself as "zapisynagry/1.0" and attaches the API bearer
+     * token. Those are right for the API and wrong here — this is an ordinary
+     * web page, served through the same protection as any browser request, and
+     * an unfamiliar agent is the usual reason such a request comes back 403
+     * while the API is perfectly happy. So: a browser-shaped request, no API
+     * token, and the slug in the URL as a browser would have it. */
+    $url = 'https://boardgamegeek.com/boardgameversion/' . $versionId;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_ENCODING, '');          // accept gzip; BGG serves it
+    curl_setopt($ch, CURLOPT_USERAGENT,
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+        . 'Chrome/124.0 Safari/537.36');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Accept: text/html,application/xhtml+xml',
+        'Accept-Language: en',
+    ]);
+    $body = curl_exec($ch);
+    $err  = curl_error($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($body === false) { $why = 'request failed' . ($err !== '' ? ': ' . $err : ''); return null; }
     if ($code < 200 || $code >= 300) { $why = 'HTTP ' . $code; return null; }
 
     $parsed = library_parse_version_page((string)$body);

@@ -97,7 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // A bad id, a BGG outage, and a host with no outbound route all
             // look the same from the member's point of view; only "that is not
             // a BGG address at all" is worth its own wording.
-            flash_set($why === 'not a bgg link' ? t('lib_bgg_bad_link') : t('lib_bgg_not_found'), 'error');
+            if ($why === 'not a bgg link') {
+                flash_set(t('lib_bgg_bad_link'), 'error');
+            } elseif (strpos($why, 'version: ') === 0) {
+                // Says WHY, because a version lookup reads a web page and can
+                // fail in ways worth telling apart.
+                flash_set(t('lib_bgg_version_failed', substr($why, 9)), 'error');
+            } else {
+                flash_set(t('lib_bgg_not_found'), 'error');
+            }
         } else {
             library_add($me['id'], $entry);
             flash_set(t('lib_added', $entry['name']));

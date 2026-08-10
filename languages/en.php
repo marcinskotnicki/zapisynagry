@@ -286,6 +286,7 @@ return [
     'lib_add_bgg_hint'                  => 'Paste the address of the game page, or of a specific edition — an edition adds the same game under that edition\'s title and cover.',
     'lib_bgg_bad_link'                  => 'That does not look like a BoardGameGeek game address.',
     'lib_bgg_not_found'                 => 'Could not fetch that game from BoardGameGeek.',
+    'lib_bgg_version_failed'        => 'Could not read that edition\'s page on BoardGameGeek (%s). Try the main game link instead.',
     'lib_add_manual'                    => 'Add a game from outside BGG',
     'lib_add_manual_name'               => 'Game name',
     'lib_add_manual_link'               => 'Link (optional)',

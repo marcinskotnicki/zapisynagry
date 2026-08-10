@@ -278,6 +278,7 @@ return [
     'lib_add_bgg_hint'                  => 'Wklej adres strony gry albo konkretnego wydania — wydanie doda tę samą grę, ale z tytułem i okładką tego wydania.',
     'lib_bgg_bad_link'                  => 'To nie wygląda na adres gry w serwisie BoardGameGeek.',
     'lib_bgg_not_found'                 => 'Nie udało się pobrać tej gry z BoardGameGeek.',
+    'lib_bgg_version_failed'        => 'Nie udało się odczytać strony tego wydania na BoardGameGeek (%s). Spróbuj linku do gry głównej.',
     'lib_add_manual'                    => 'Dodaj grę spoza BGG',
     'lib_add_manual_name'               => 'Nazwa gry',
     'lib_add_manual_link'               => 'Link (opcjonalnie)',

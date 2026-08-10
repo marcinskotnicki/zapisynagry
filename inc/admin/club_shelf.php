@@ -60,7 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $why = '';
         $entry = library_entry_from_bgg_input($_POST['bgg'] ?? '', $why);
         if (!$entry) {
-            $flash = ($why === 'not a bgg link') ? t('lib_bgg_bad_link') : t('lib_bgg_not_found');
+            if ($why === 'not a bgg link') {
+                $flash = t('lib_bgg_bad_link');
+            } elseif (strpos($why, 'version: ') === 0) {
+                $flash = t('lib_bgg_version_failed', substr($why, 9));
+            } else {
+                $flash = t('lib_bgg_not_found');
+            }
             $flashKind = 'error';
         } else {
             club_shelf_add($entry);
