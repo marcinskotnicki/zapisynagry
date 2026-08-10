@@ -103,6 +103,14 @@
                                 <?= $csrf ?>
                                 <input type="hidden" name="action" value="edit">
                                 <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                                <?php // A BGG title sometimes comes back in the wrong
+                                      // language. Renaming leaves bgg_id alone, so
+                                      // the pairing that drives syncing and merging
+                                      // still holds — only the label changes. ?>
+                                <div class="field field-name">
+                                    <label for="lib_n2_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
+                                    <input type="text" id="lib_n2_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>">
+                                </div>
                                 <div class="field field-link">
                                     <label for="lib_r_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
                                     <input type="url" id="lib_r_<?= (int)$g['id'] ?>" name="link"

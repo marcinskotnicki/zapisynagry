@@ -209,6 +209,22 @@ function club_shelf_pick_enabled() {
 }
 
 /**
+ * Should the club's own games be offered FIRST?
+ *
+ * For a club whose cabinet is the usual source: the pick button leads the
+ * add-a-game screen rather than sitting under the BGG search, and the club tab
+ * opens by default on the library page.
+ *
+ * Presentation only — it changes what leads, never what is available, so
+ * nothing is hidden by switching it on or off.
+ *
+ * @return bool
+ */
+function library_prefer_club() {
+    return club_shelf_enabled() && opt_bool('library_prefer_club');
+}
+
+/**
  * Fill a game form from a club shelf entry.
  *
  * WHY THE SHELF STORES bgg_id: a club row keeps only what a library needs —
@@ -383,9 +399,21 @@ function club_shelf_update_manual($rowId, $name, $year, $link = null) {
  * Point a club BGG entry at a different BGG game. Mirrors library_relink_bgg().
  * @return array
  */
-function club_shelf_relink_bgg($rowId, $link) {
+function club_shelf_relink_bgg($rowId, $link, $name = null) {
     $row = db_one('SELECT * FROM club_library_games WHERE id = ? AND bgg_id IS NOT NULL', [(int)$rowId]);
     if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    $link = trim((string)$link);
+
+    // Renaming with no new link — see library_relink_bgg() for why this is safe
+    // against a later sync.
+    if ($link === '') {
+        $name = trim((string)$name);
+        if ($name === '') return ['ok' => false, 'why' => 'name'];
+        if ($name === (string)$row['name']) return ['ok' => true];
+        db_run('UPDATE club_library_games SET name = ? WHERE id = ?', [$name, (int)$row['id']]);
+        return ['ok' => true, 'renamed' => true, 'name' => $name];
+    }
 
     $bggId = library_bgg_id_from_link($link);
     if ($bggId <= 0) return ['ok' => false, 'why' => 'not_bgg'];
@@ -888,13 +916,34 @@ function library_remove($userId, $gameId) {
  * @param int    $userId  Owner scope; 0 for an admin.
  * @return array
  */
-function library_relink_bgg($rowId, $link, $userId = 0) {
+function library_relink_bgg($rowId, $link, $userId = 0, $name = null) {
     $where = 'id = ? AND bgg_id IS NOT NULL';
     $args  = [(int)$rowId];
     if ($userId > 0) { $where .= ' AND user_id = ?'; $args[] = (int)$userId; }
 
     $row = db_one('SELECT * FROM library_games WHERE ' . $where, $args);
     if (!$row) return ['ok' => false, 'why' => 'not_editable'];
+
+    $link = trim((string)$link);
+
+    /* RENAMING A BGG ENTRY, when no new link is given. BGG sometimes returns a
+     * title in the wrong language, and being stuck with it was the only thing
+     * wrong with the row.
+     *
+     * Safe against a later sync: library_sync_from_collection() skips ids it
+     * already holds, so it never rewrites the name of a game that stays owned.
+     * (This was originally blocked on the belief that a sync WOULD overwrite
+     * it — checking the sync showed otherwise.)
+     *
+     * The bgg_id is untouched, so the pairing that drives syncing and merging
+     * still holds; only the label a human reads changes. */
+    if ($link === '') {
+        $name = trim((string)$name);
+        if ($name === '') return ['ok' => false, 'why' => 'name'];
+        if ($name === (string)$row['name']) return ['ok' => true];
+        db_run('UPDATE library_games SET name = ? WHERE id = ?', [$name, (int)$row['id']]);
+        return ['ok' => true, 'renamed' => true, 'name' => $name];
+    }
 
     $bggId = library_bgg_id_from_link($link);
     if ($bggId <= 0) return ['ok' => false, 'why' => 'not_bgg'];
@@ -945,7 +994,9 @@ function library_relink_bgg($rowId, $link, $userId = 0) {
  */
 function library_flash_edit(array $res) {
     if (!empty($res['ok'])) {
-        if (!empty($res['merged'])) {
+        if (!empty($res['renamed'])) {
+            flash_set(t('lib_edit_renamed', $res['name'] ?? ''));
+        } elseif (!empty($res['merged'])) {
             flash_set(t('lib_edit_merged', $res['name'] ?? ''));
         } elseif (!empty($res['promoted'])) {
             flash_set(t('lib_edit_promoted', $res['name'] ?? ''));

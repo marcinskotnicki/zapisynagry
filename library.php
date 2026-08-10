@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Same split as a member's shelf: a BGG entry's only edit is a
                 // new link, a hand-typed one takes name, year and link.
                 if (!empty($clubRow['bgg_id'])) {
-                    library_flash_edit(club_shelf_relink_bgg($rowId, $_POST['link'] ?? ''));
+                    library_flash_edit(club_shelf_relink_bgg($rowId, $_POST['link'] ?? '', $_POST['name'] ?? ''));
                 } else {
                     library_flash_edit(club_shelf_update_manual(
                         $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0),
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* Decided by the row, as on my_library.php: a BGG entry's only
              * edit is a new link, a manual one takes name, year and link. */
             if (!empty($row['bgg_id'])) {
-                library_flash_edit(library_relink_bgg($rowId, $_POST['link'] ?? '', $scope));
+                library_flash_edit(library_relink_bgg($rowId, $_POST['link'] ?? '', $scope, $_POST['name'] ?? ''));
             } else {
                 library_flash_edit(library_update_manual(
                     $rowId, $_POST['name'] ?? '', (int)($_POST['year'] ?? 0), $scope,
@@ -132,14 +132,19 @@ $showMembers = library_enabled() && library_members_tab_enabled();
 $showClub    = club_shelf_enabled();
 $showMemberGames = library_enabled();
 
-$tab = $_GET['tab'] ?? ($showMemberGames ? 'games' : 'club');
+/* Which view opens when the address names none. The club shelf leads when the
+ * admin prefers it, or when it is the only thing switched on — landing on an
+ * empty "games" view while the club has a cabinet full of games would look
+ * broken either way. */
+$defaultTab = ($showClub && (library_prefer_club() || !$showMemberGames)) ? 'club' : 'games';
+$tab = $_GET['tab'] ?? $defaultTab;
 // A tab that does not exist in this configuration falls back rather than
 // 404ing — a bookmark made while a switch was on should still show something
 // useful after it is turned off.
-if ($tab === 'members' && !$showMembers) $tab = $showMemberGames ? 'games' : 'club';
-if ($tab === 'club' && !$showClub)       $tab = 'games';
+if ($tab === 'members' && !$showMembers)    $tab = $defaultTab;
+if ($tab === 'club' && !$showClub)         $tab = 'games';
 if ($tab === 'games' && !$showMemberGames) $tab = 'club';
-if ($tab !== 'members' && $tab !== 'club') $tab = $showMemberGames ? 'games' : 'club';
+if ($tab !== 'members' && $tab !== 'club' && $tab !== 'games') $tab = $defaultTab;
 
 /* A tab strip for a single tab is noise, so it appears only when there is
  * genuinely more than one view to move between. */
@@ -233,6 +238,8 @@ tpl_render('library', [
     'tab'          => $tab,
     'show_members' => $showMembers,
     'show_games'   => $showMemberGames,
+    // Draw the club tab first when the admin prefers that source.
+    'club_first'   => library_prefer_club(),
     'show_club'    => $showClub,
     'tab_count'    => $tabCount,
     'club_games'   => $clubGames,

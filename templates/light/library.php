@@ -132,6 +132,14 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '', $
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                             <input type="hidden" name="scope" value="<?= e($scope) ?>">
+                            <?php // A BGG title sometimes comes back in the wrong
+                                  // language. Renaming leaves bgg_id alone, so the
+                                  // pairing that drives syncing and merging still
+                                  // holds — only the label changes. ?>
+                            <div class="field field-name">
+                                <label for="libn_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
+                                <input type="text" id="libn_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>">
+                            </div>
                             <div class="field field-link">
                                 <label for="libr_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
                                 <input type="url" id="libr_<?= (int)$g['id'] ?>" name="link"
@@ -225,13 +233,19 @@ endif;
           // own shelf. ?>
     <?php if (($tab_count ?? 0) > 1): ?>
         <nav class="day-tabs lib-tabs">
+            <?php // The club tab leads when the admin prefers that source, so the
+                  // strip matches which view actually opens by default —
+                  // otherwise the first tab and the landing view disagree. ?>
+            <?php if (!empty($show_club) && !empty($club_first)): ?>
+                <a class="day-tab<?= $tab === 'club' ? ' day-tab-active' : '' ?>" href="library.php?tab=club"><?= e(t('lib_tab_club')) ?></a>
+            <?php endif; ?>
             <?php if (!empty($show_games)): ?>
                 <a class="day-tab<?= $tab === 'games' ? ' day-tab-active' : '' ?>" href="library.php?tab=games"><?= e(t('lib_tab_games')) ?></a>
             <?php endif; ?>
             <?php if (!empty($show_members)): ?>
                 <a class="day-tab<?= $tab === 'members' ? ' day-tab-active' : '' ?>" href="library.php?tab=members"><?= e(t('lib_tab_members')) ?></a>
             <?php endif; ?>
-            <?php if (!empty($show_club)): ?>
+            <?php if (!empty($show_club) && empty($club_first)): ?>
                 <a class="day-tab<?= $tab === 'club' ? ' day-tab-active' : '' ?>" href="library.php?tab=club"><?= e(t('lib_tab_club')) ?></a>
             <?php endif; ?>
         </nav>

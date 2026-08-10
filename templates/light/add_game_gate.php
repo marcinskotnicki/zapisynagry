@@ -34,21 +34,36 @@ $title      = $title     ?? t('addgame_title');
         <?= $csrf ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
 
+        <?php // The club-shelf button. It is the same KIND of step as the BGG
+              // search — pick a known game — so it looks the same; only its
+              // position changes with the admin's preference.
+              //
+              // formnovalidate throughout: the club list does not need the name
+              // field, which the BGG search beside it requires.
+              //
+              // PREFERRED: above the name field, because for a club whose
+              // cabinet is the usual source, typing a name to search BGG is the
+              // fallback rather than the first move. ?>
+        <?php if (club_shelf_pick_enabled() && library_prefer_club()): ?>
+            <div class="gate-buttons gate-buttons-lead">
+                <button type="submit" name="go" value="club" class="btn btn-primary btn-big" formnovalidate>
+                    <?= e(t('addgame_from_club')) ?>
+                </button>
+            </div>
+        <?php endif; ?>
+
         <div class="field field-game_name">
             <label for="game_name"><?= e(t('addgame_name')) ?></label>
-            <input type="text" id="game_name" name="name" autofocus>
+            <input type="text" id="game_name" name="name"<?= (club_shelf_pick_enabled() && library_prefer_club()) ? '' : ' autofocus' ?>>
         </div>
 
         <div class="gate-buttons">
             <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
                 <?= e(t('addgame_from_bgg')) ?>
             </button>
-            <?php // Directly under the BGG button, because it is the same kind of
-                  // step — pick a known game — just from a shorter, local list.
-                  // formnovalidate: the club list does not need the name field
-                  // the BGG search above it requires. ?>
-            <?php if (club_shelf_pick_enabled()): ?>
-                <button type="submit" name="go" value="club" class="btn btn-big" formnovalidate>
+            <?php // NOT preferred: under the BGG button, as a second option. ?>
+            <?php if (club_shelf_pick_enabled() && !library_prefer_club()): ?>
+                <button type="submit" name="go" value="club" class="btn btn-primary btn-big" formnovalidate>
                     <?= e(t('addgame_from_club')) ?>
                 </button>
             <?php endif; ?>

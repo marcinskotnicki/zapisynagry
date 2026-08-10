@@ -97,7 +97,7 @@ $OPTION_TOGGLES = [
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
-    'club_shelf', 'club_shelf_pick', 'library_show_club',
+    'club_shelf', 'club_shelf_pick', 'library_show_club', 'library_prefer_club',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 

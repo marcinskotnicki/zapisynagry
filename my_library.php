@@ -51,7 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $editRow = $editId ? db_one('SELECT bgg_id FROM library_games WHERE id = ? AND user_id = ?',
                                     [$editId, $me['id']]) : null;
         if ($editRow && !empty($editRow['bgg_id'])) {
-            library_flash_edit(library_relink_bgg($editId, $_POST['link'] ?? '', $me['id']));
+            // Name too: a BGG entry may carry a title in the wrong language.
+            library_flash_edit(library_relink_bgg($editId, $_POST['link'] ?? '', $me['id'], $_POST['name'] ?? ''));
         } else {
             library_flash_edit(library_update_manual(
                 $editId,

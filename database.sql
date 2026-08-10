@@ -151,6 +151,10 @@ INSERT INTO options (key, value) VALUES
     -- poll. Only does anything while club_shelf is on: there is nothing to pick
     -- from otherwise.
     ('club_shelf_pick',       '0'),
+    -- Put the club's own games first: the pick button leads the add-a-game
+    -- screen instead of sitting under the search, and the club tab opens by
+    -- default on the library page. For clubs whose cabinet is the usual source.
+    ('library_prefer_club',   '0'),
     -- Also list the club's own games on the members' library page, credited to
     -- "CLUB". They keep their own tab either way; this only adds them to the
     -- merged list, where a game the club AND members own shows one line with

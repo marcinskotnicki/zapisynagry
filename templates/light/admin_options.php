@@ -396,6 +396,9 @@ $groupEnd = function () { echo '</div></details>'; };
 
         <?php $toggle('library_show_club'); ?>
         <p class="field-note"><?= e(t('opt_library_show_club_note')) ?></p>
+
+        <?php $toggle('library_prefer_club'); ?>
+        <p class="field-note"><?= e(t('opt_library_prefer_club_note')) ?></p>
         <?php // No address means no contact button for the club: there is no
               // per-member opt-in to fall back on here, so the address IS it. ?>
         <?php $text('library_club_email', 'email'); ?>
