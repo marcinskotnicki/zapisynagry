@@ -244,7 +244,7 @@ return [
     'lib_contact_title_game'            => 'Contact %s about %s',
     'opt_library_mail_venue'            => 'Library emails always start with the venue name',
     'opt_library_mail_venue_note'       => 'A library message is about someone\'s shelf, not about a game night, so it is not filed under whichever event happens to be running. Only matters when the subject prefix above is set to the event name.',
-    'lib_contact_btn'                   => 'Contact',
+    'lib_contact_btn'          => 'Send a message',
     'lib_contact_subject'               => 'a game from the club library',
     'lib_my_title'                      => 'Game library',
     'lib_relink_label'                  => 'Link to the correct game on BoardGameGeek',

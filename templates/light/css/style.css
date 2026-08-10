@@ -162,6 +162,8 @@ input[type="checkbox"]{width:auto;}
 .lib-owners { display: flex; flex-wrap: wrap; gap: 0.3rem; font-size: 0.85rem; }
 .lib-owner-club .msg-icon { color: inherit; }
 .lib-club-contact { margin: 0 0 1rem; }
+.lib-contact-btn { display: inline-flex; align-items: center; gap: 0.35rem; }
+.lib-contact-btn .msg-icon { color: inherit; padding: 0; font-size: 1em; }
 .lib-owner { display: inline-flex; align-items: center; gap: 0.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0.05rem 0.5rem; }
 .lib-owner.lib-owner-club { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; letter-spacing: 0.03em; }
 .lib-del { margin: 0; }

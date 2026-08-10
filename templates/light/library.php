@@ -232,10 +232,15 @@ endif;
 
     <?php if ($tab === 'club'): ?>
         <?php // The same address, offered once for the shelf as a whole — the
-              // counterpart of the button on a member's own shelf page. ?>
+              // counterpart of the button on a member's own shelf page.
+              // Shares lib_contact_btn (and its icon) with that button, so
+              // "Send a message" and the envelope look the same everywhere the
+              // library offers to contact someone. ?>
         <?php if (library_club_can_contact()): ?>
             <p class="lib-club-contact">
-                <a class="btn btn-small" href="message.php?library_club=1"><?= e(t('lib_contact_btn')) ?></a>
+                <a class="btn btn-small lib-contact-btn" href="message.php?library_club=1">
+                    <span class="msg-icon" aria-hidden="true">&#9993;</span><?= e(t('lib_contact_btn')) ?>
+                </a>
             </p>
         <?php endif; ?>
         <?php // Same row markup and the same alphabet/pager as the members'
@@ -336,7 +341,9 @@ endif;
         <h2 class="lib-member-head">
             <?= e($member['display_name']) ?>
             <?php if (library_can_contact($member)): ?>
-                <a class="btn btn-small" href="message.php?library_member=<?= (int)$member['id'] ?>"><?= e(t('lib_contact_btn')) ?></a>
+                <a class="btn btn-small lib-contact-btn" href="message.php?library_member=<?= (int)$member['id'] ?>">
+                    <span class="msg-icon" aria-hidden="true">&#9993;</span><?= e(t('lib_contact_btn')) ?>
+                </a>
             <?php endif; ?>
         </h2>
         <?php if (empty($member_games)): ?>

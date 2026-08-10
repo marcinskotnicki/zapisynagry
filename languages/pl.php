@@ -236,7 +236,7 @@ return [
     'lib_contact_title_game'            => 'Napisz do %s w sprawie gry %s',
     'opt_library_mail_venue'            => 'Maile z biblioteki zawsze zaczynają się od nazwy lokalu',
     'opt_library_mail_venue_note'       => 'Wiadomość z biblioteki dotyczy czyichś gier, a nie konkretnego spotkania, więc nie jest przypisywana do aktualnego wydarzenia. Ma znaczenie tylko wtedy, gdy powyższy przedrostek tematu jest ustawiony na nazwę wydarzenia.',
-    'lib_contact_btn'                   => 'Napisz',
+    'lib_contact_btn'          => 'Napisz wiadomość',
     'lib_contact_subject'               => 'gra z biblioteki klubu',
     'lib_my_title'                      => 'Biblioteka gier',
     'lib_relink_label'                  => 'Link do właściwej gry na BoardGameGeek',
