@@ -68,11 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // More than one edition: ask which, exactly as a member's own shelf
             // does. Rendered straight away so the fetched list is used now.
             $versions = bgg_versions((int)$entry['bgg_id']);
-            if (count($versions) > 1) {
+            if (count($versions) > 1 || count($entry['names'] ?? []) > 1) {
                 $tab_body = tpl_capture('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
+                                   'names' => $entry['names'] ?? [$entry['name']]],
                     'versions' => $versions,
-                    'default'  => library_default_version($versions),
+                    'row_id'   => 0,
                     'action'   => 'admin.php?tab=club_shelf',
                     'back'     => 'admin.php?tab=club_shelf',
                     'csrf'     => csrf_field(),
@@ -92,19 +93,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = t('lib_bgg_not_found');
             $flashKind = 'error';
         } else {
-            $wantVersion = (int)($_POST['version'] ?? 0);
-            if ($wantVersion > 0) {
-                foreach (bgg_versions($gameId) as $v) {
-                    if ((int)$v['id'] !== $wantVersion) continue;
-                    $entry['name'] = library_version_title($v, $entry['name']);
-                    if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
-                    if (!empty($v['year']))      $entry['year']      = $v['year'];
-                    break;
-                }
-            }
+            $entry = library_apply_version_choice($entry, $gameId, $_POST);
             club_shelf_add($entry);
             log_action('club_shelf_add', $entry['name'] . ' (BGG ' . $entry['bgg_id'] . ')');
             $flash = t('lib_added', $entry['name']);
+        }
+
+    } elseif ($action === 'pick_version') {
+        // "Choose edition" for a club game already on the shelf.
+        $row = club_shelf_entry((int)($_POST['game'] ?? 0));
+        if (!$row || empty($row['bgg_id'])) {
+            $flash = t('lib_edit_failed');
+            $flashKind = 'error';
+        } else {
+            $why  = '';
+            $game = library_entry_from_bgg_input((string)(int)$row['bgg_id'], $why);
+            if (!$game) {
+                $flash = t('lib_bgg_not_found');
+                $flashKind = 'error';
+            } else {
+                $tab_body = tpl_capture('lib_version_pick', [
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
+                                   'names' => $game['names'] ?? [$game['name']]],
+                    'versions' => bgg_versions((int)$row['bgg_id']),
+                    'row_id'   => (int)$row['id'],
+                    'action'   => 'admin.php?tab=club_shelf',
+                    'back'     => 'admin.php?tab=club_shelf',
+                    'csrf'     => csrf_field(),
+                ]);
+                return;
+            }
+        }
+
+    } elseif ($action === 'set_version') {
+        $row = club_shelf_entry((int)($_POST['game'] ?? 0));
+        if (!$row || empty($row['bgg_id'])) {
+            $flash = t('lib_edit_failed');
+            $flashKind = 'error';
+        } else {
+            $chosen = library_apply_version_choice(
+                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail']],
+                (int)$row['bgg_id'], $_POST);
+            db_run('UPDATE club_library_games SET name = ?, year = ?, thumbnail = ? WHERE id = ?',
+                   [$chosen['name'], !empty($chosen['year']) ? (int)$chosen['year'] : null,
+                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null, (int)$row['id']]);
+            log_action('club_shelf_edit', 'edition chosen for #' . (int)$row['id']);
+            $flash = t('lib_edit_renamed', $chosen['name']);
         }
 
     } elseif ($action === 'sync') {

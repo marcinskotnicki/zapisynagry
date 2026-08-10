@@ -1035,31 +1035,58 @@ function library_link_field_visible() {
     return opt_bool('allow_custom_game_links') || is_admin();
 }
 
+/* library_version_title() has been REMOVED. It preferred a version's alternate
+ * name over its primary, on the guess that a localised printing carried its
+ * real title there. A live response settled it: the versions block carries only
+ * NICKNAMES ("Polish edition"), so the function fell back to the game's name
+ * every single time and the chooser showed "Adds as: Petrichor" against every
+ * edition.
+ *
+ * The localised titles ("Aura") are on the GAME item instead, as alternate
+ * names — bgg_parse_thing() now returns them all — so the chooser offers the
+ * title as its own choice rather than inferring one from the edition. */
+
 /**
- * The title a chosen edition should be stored under.
+ * Apply the edition/title chosen in lib_version_pick to an entry.
  *
- * A version carries a nickname ("Polish edition") and, for a localised
- * printing, the name it is actually sold under ("Aura"). The nickname is not a
- * game title and must not be stored as one, so: an ALTERNATE name is used when
- * the item has one, and the game's own name otherwise.
+ * ONE function for every caller — adding to a member's shelf, adding to the
+ * club's, and correcting a row already on either — because the three used to be
+ * three copies of the same loop and would have drifted the first time the shape
+ * changed.
  *
- * Which BGG element carries which has not been checked against a live response
- * from here, so the chooser SHOWS the result of this function beside every
- * option. If the guess is wrong the person picking sees it before saving, and
- * can rename afterwards — rather than finding a shelf full of entries called
- * "Polish edition".
+ * The TITLE comes from the game's own names, the COVER and YEAR from the chosen
+ * edition. They are separate choices because BGG keeps them in separate places:
+ * a version's name is a nickname ("Polish edition"), never a title.
  *
- * @param array  $version   From bgg_parse_versions().
- * @param string $gameName  The game's own primary name.
- * @return string
+ * The title is checked against the list BGG actually returned rather than
+ * trusted from the form, so a hand-edited post cannot set an arbitrary name
+ * through a screen that only ever offered a dropdown.
+ *
+ * @param array $entry     The entry so far (name/year/thumbnail).
+ * @param int   $gameId    The BGG game id.
+ * @param array $post      The submitted form.
+ * @return array           The entry with the choice applied.
  */
-function library_version_title(array $version, $gameName) {
-    $names = $version['names'] ?? [];
-    $primary = (string)($version['name'] ?? '');
-    foreach ($names as $n) {
-        if ($n !== $primary && trim($n) !== '') return $n;   // the localised title
+function library_apply_version_choice(array $entry, $gameId, array $post) {
+    require_once __DIR__ . '/bgg.php';
+
+    $wantTitle = trim((string)($post['title'] ?? ''));
+    if ($wantTitle !== '') {
+        $thing = bgg_thing((int)$gameId);
+        $known = $thing['names'] ?? [];
+        if (in_array($wantTitle, $known, true)) $entry['name'] = $wantTitle;
     }
-    return $gameName !== '' ? $gameName : $primary;
+
+    $wantVersion = (int)($post['version'] ?? 0);
+    if ($wantVersion > 0) {
+        foreach (bgg_versions((int)$gameId) as $v) {
+            if ((int)$v['id'] !== $wantVersion) continue;
+            if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
+            if (!empty($v['year']))      $entry['year']      = $v['year'];
+            break;
+        }
+    }
+    return $entry;
 }
 
 /**
@@ -1076,23 +1103,11 @@ function library_version_label(array $version) {
     return implode(' ', $bits);
 }
 
-/**
- * Which edition to preselect: the first English one, else the newest.
- *
- * So somebody who does not care can press Next without reading the list, and
- * gets the edition most likely to match the name they searched for.
- *
- * @param array $versions
- * @return int  A version id, or 0.
- */
-function library_default_version(array $versions) {
-    foreach ($versions as $v) {
-        foreach ($v['languages'] ?? [] as $l) {
-            if (strcasecmp($l, 'English') === 0) return (int)$v['id'];
-        }
-    }
-    return $versions ? (int)$versions[0]['id'] : 0;
-}
+/* library_default_version() has been REMOVED too. It guessed at an English
+ * edition to preselect; with "no particular edition" always offered at the top
+ * of the list, that is the honest default — it adds the game exactly as BGG has
+ * it, which is what somebody who does not care about editions wants, and it
+ * needs no guessing. */
 
 /**
  * Turn whatever was pasted into a library entry.

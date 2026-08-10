@@ -97,6 +97,16 @@
                         <?php // A BGG entry has nothing typeable — its name and year
                               // come from BGG — so its only edit is "this is the
                               // wrong game", answered with a different address. ?>
+                        <?php // For a game imported from a BGG collection: pick the edition
+                              // and the title without typing anything. BGG entries only —
+                              // a hand-added game has no editions to choose from. ?>
+                        <form method="post" action="my_library.php" class="lib-pickver">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="pick_version">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+
+                            <button type="submit" class="btn btn-small"><?= e(t('lib_pick_version_btn')) ?></button>
+                        </form>
                         <details class="lib-edit">
                             <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
                             <form method="post" action="my_library.php" class="lib-edit-form">

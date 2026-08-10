@@ -1,25 +1,28 @@
 <?php
 /* =============================================================================
- *  templates/light/lib_version_pick.php — choose which edition to add.
+ *  templates/light/lib_version_pick.php — choose an edition and a title.
  * -----------------------------------------------------------------------------
- *  Shown between "paste a BGG link" and the game landing on the shelf, when BGG
- *  reports more than one published edition. Picking one stores that edition's
- *  cover and, for a localised printing, the name it is actually sold under —
- *  the Polish edition of Petrichor is called Aura.
+ *  Shown when BGG reports more than one published edition of a game. Two
+ *  choices, because BGG keeps them in two different places:
  *
- *  EVERY OPTION SHOWS THE NAME IT WILL BE SAVED UNDER. BGG gives a version both
- *  a nickname ("Polish edition") and sometimes a real localised title, and which
- *  field carries which has not been verified against a live response. Printing
- *  the outcome means a wrong guess is visible before saving rather than
- *  discovered later as a shelf full of entries called "Polish edition".
+ *    EDITION  — from the game's versions block. Sets the cover (and year).
+ *               Its entries are NICKNAMES ("Polish edition"), not titles.
+ *    TITLE    — from the game's own names. This is where a localised title
+ *               lives ("Aura" for the Polish printing of Petrichor), and it is
+ *               offered separately rather than inferred from the edition,
+ *               because nothing in the data links the two.
  *
- *  One template, two callers (a member's shelf and the club's), so $action and
- *  $back say where to post and where to go back to.
+ *  "No particular edition" leads and is preselected: it adds the game exactly
+ *  as BGG has it, which is what somebody who does not care wants, and it needs
+ *  no guessing about which edition anyone meant.
+ *
+ *  Used both when ADDING a game and when correcting one already on a shelf, so
+ *  $row_id is set in the second case and the form says which it is.
  *
  *  RENDER VARS:
- *    $game     — ['id','name'] the game itself.
+ *    $game     — ['id','name','names'] the game and every title it is sold under.
  *    $versions — from bgg_parse_versions(), newest first.
- *    $default  — version id to preselect.
+ *    $row_id   — an existing shelf row to update, or 0 when adding.
  *    $action   — form target.
  *    $back     — cancel link.
  *    $csrf     — hidden CSRF field.
@@ -31,28 +34,48 @@
 
     <form method="post" action="<?= e($action) ?>">
         <?= $csrf ?>
-        <input type="hidden" name="action" value="add_bgg_pick">
+        <input type="hidden" name="action" value="<?= !empty($row_id) ? 'set_version' : 'add_bgg_pick' ?>">
         <input type="hidden" name="game_id" value="<?= (int)$game['id'] ?>">
+        <?php if (!empty($row_id)): ?>
+            <input type="hidden" name="game" value="<?= (int)$row_id ?>">
+            <?php if (!empty($scope)): ?>
+                <input type="hidden" name="scope" value="<?= e($scope) ?>">
+            <?php endif; ?>
+        <?php endif; ?>
 
+        <?php // The title, when BGG knows the game under more than one. This is
+              // the field that gets a Polish printing filed as "Aura" rather
+              // than "Petrichor" — the edition list cannot do it, since its
+              // entries are nicknames. ?>
+        <?php if (count($game['names'] ?? []) > 1): ?>
+            <div class="field field-title">
+                <label for="lib_pick_name"><?= e(t('lib_pick_version_name')) ?></label>
+                <select id="lib_pick_name" name="title">
+                    <?php foreach ($game['names'] as $gn): ?>
+                        <option value="<?= e($gn) ?>"<?= $gn === $game['name'] ? ' selected' : '' ?>><?= e($gn) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="field-note"><?= e(t('lib_pick_version_name_note')) ?></p>
+            </div>
+        <?php endif; ?>
+
+        <h2 class="lib-pick-head"><?= e(t('lib_pick_version_edition')) ?></h2>
         <ul class="lib-list lib-version-list">
-            <?php // "Just the game" first: it is the old behaviour, and someone
-                  // who does not care about editions should not have to read the
-                  // list to get it. ?>
             <li class="lib-item">
                 <label class="lib-version-opt">
-                    <input type="radio" name="version" value="0"<?= (int)$default === 0 ? ' checked' : '' ?>>
+                    <input type="radio" name="version" value="0" checked>
+                    <span class="lib-thumb lib-thumb-none" aria-hidden="true"></span>
                     <span class="lib-main">
                         <span class="lib-name"><?= e(t('lib_pick_version_none')) ?></span>
-                        <span class="lib-version-as"><?= e(t('lib_pick_version_as', $game['name'])) ?></span>
+                        <span class="lib-version-as"><?= e(t('lib_pick_version_none_note')) ?></span>
                     </span>
                 </label>
             </li>
 
             <?php foreach ($versions as $v): ?>
-                <?php $title = library_version_title($v, $game['name']); ?>
                 <li class="lib-item">
                     <label class="lib-version-opt">
-                        <input type="radio" name="version" value="<?= (int)$v['id'] ?>"<?= (int)$default === (int)$v['id'] ? ' checked' : '' ?>>
+                        <input type="radio" name="version" value="<?= (int)$v['id'] ?>">
                         <?php if (!empty($v['thumbnail'])): ?>
                             <img class="lib-thumb" src="<?= e($v['thumbnail']) ?>" alt="" loading="lazy">
                         <?php else: ?>
@@ -60,8 +83,6 @@
                         <?php endif; ?>
                         <span class="lib-main">
                             <span class="lib-name"><?= e(library_version_label($v)) ?></span>
-                            <?php // The decisive line: what this option will store. ?>
-                            <span class="lib-version-as"><?= e(t('lib_pick_version_as', $title)) ?></span>
                         </span>
                     </label>
                 </li>
@@ -69,7 +90,7 @@
         </ul>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><?= e(t('lib_add_btn')) ?></button>
+            <button type="submit" class="btn btn-primary"><?= e(!empty($row_id) ? t('save') : t('lib_add_btn')) ?></button>
             <a class="btn" href="<?= e($back) ?>"><?= e(t('back')) ?></a>
         </div>
     </form>

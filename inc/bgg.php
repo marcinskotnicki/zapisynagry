@@ -140,8 +140,21 @@ function bgg_parse_thing($xmlString) {
 
     // Primary name.
     $name = '';
+    /* EVERY name, not just the primary. A game's localised titles live here as
+     * `alternate` entries — the Polish edition of Petrichor is sold as "Aura" —
+     * and this is the only place BGG exposes them. The versions block carries
+     * nicknames ("Polish edition"), which are not titles and must never be
+     * stored as one. */
+    $names = [];
     foreach ($item->name as $n) {
-        if ((string)$n['type'] === 'primary') { $name = (string)$n['value']; break; }
+        $val = trim((string)$n['value']);
+        if ($val === '') continue;
+        if ((string)$n['type'] === 'primary') {
+            $name = $val;
+            array_unshift($names, $val);       // primary leads the list
+        } elseif (!in_array($val, $names, true)) {
+            $names[] = $val;
+        }
     }
 
     // Average weight (complexity). Clamp into 1..5 for our weight buckets.
@@ -152,6 +165,10 @@ function bgg_parse_thing($xmlString) {
     return [
         'id'         => (int)$item['id'],
         'name'       => $name,
+        // Every title this game is published under, primary first — what the
+        // edition chooser offers so a localised printing can be filed under
+        // its real name rather than the English one.
+        'names'      => $names,
         // Publication year, for the club library's list. 0 when BGG has none,
         // which callers store as NULL rather than printing "0".
         'year'       => (int)($item->yearpublished['value'] ?? 0),

@@ -59,6 +59,17 @@
                     </span>
                 </span>
                 <span class="lib-actions">
+                    <?php // For a game imported from a BGG collection: pick the
+                          // edition and the title without typing anything. BGG
+                          // entries only — a hand-added game has no editions. ?>
+                    <?php if (!empty($g['bgg_id'])): ?>
+                        <form method="post" action="admin.php?tab=club_shelf" class="lib-pickver">
+                            <?= $csrf ?>
+                            <input type="hidden" name="action" value="pick_version">
+                            <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
+                            <button type="submit" class="btn btn-small"><?= e(t('lib_pick_version_btn')) ?></button>
+                        </form>
+                    <?php endif; ?>
                     <form method="post" action="admin.php?tab=club_shelf" class="lib-del">
                         <?= $csrf ?>
                         <input type="hidden" name="action" value="remove">

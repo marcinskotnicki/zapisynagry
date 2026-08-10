@@ -101,12 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              * silently. Rendered here rather than redirected to, so the list
              * just fetched is used immediately instead of being stashed. */
             $versions = bgg_versions((int)$entry['bgg_id']);
-            if (count($versions) > 1) {
+            // Offered when there is a real choice to make: several editions, or
+            // several titles the game is sold under.
+            if (count($versions) > 1 || count($entry['names'] ?? []) > 1) {
                 tpl_render('header', ['page_title' => t('lib_my_title')]);
                 tpl_render('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
+                                   'names' => $entry['names'] ?? [$entry['name']]],
                     'versions' => $versions,
-                    'default'  => library_default_version($versions),
+                    'row_id'   => 0,
                     'action'   => 'my_library.php',
                     'back'     => 'my_library.php',
                     'csrf'     => csrf_field(),
@@ -127,21 +130,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$entry) {
             flash_set(t('lib_bgg_not_found'), 'error');
         } else {
-            $wantVersion = (int)($_POST['version'] ?? 0);
-            if ($wantVersion > 0) {
-                foreach (bgg_versions($gameId) as $v) {
-                    if ((int)$v['id'] !== $wantVersion) continue;
-                    /* The edition's title, cover and year. The stored bgg_id
-                     * stays the GAME's, so two members who picked different
-                     * editions still merge into one library entry. */
-                    $entry['name'] = library_version_title($v, $entry['name']);
-                    if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
-                    if (!empty($v['year']))      $entry['year']      = $v['year'];
-                    break;
-                }
-            }
+            $entry = library_apply_version_choice($entry, $gameId, $_POST);
             library_add($me['id'], $entry);
             flash_set(t('lib_added', $entry['name']));
+        }
+
+    } elseif ($action === 'pick_version') {
+        /* "Choose edition" on a game already on the shelf — for people who
+         * imported a BGG collection and got the English titles and covers. Same
+         * screen as adding, but it UPDATES the row instead of creating one. */
+        $rowId = (int)($_POST['game'] ?? 0);
+        $row   = $rowId ? db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?',
+                                 [$rowId, $me['id']]) : null;
+        if (!$row || empty($row['bgg_id'])) {
+            flash_set(t('lib_edit_failed'), 'error');
+        } else {
+            $why  = '';
+            $game = library_entry_from_bgg_input((string)(int)$row['bgg_id'], $why);
+            if (!$game) {
+                flash_set(t('lib_bgg_not_found'), 'error');
+            } else {
+                tpl_render('header', ['page_title' => t('lib_my_title')]);
+                tpl_render('lib_version_pick', [
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
+                                   'names' => $game['names'] ?? [$game['name']]],
+                    'versions' => bgg_versions((int)$row['bgg_id']),
+                    'row_id'   => $rowId,
+                    'action'   => 'my_library.php',
+                    'back'     => 'my_library.php',
+                    'csrf'     => csrf_field(),
+                ]);
+                tpl_render('footer');
+                exit;
+            }
+        }
+
+    } elseif ($action === 'set_version') {
+        // The chooser's answer for an existing row.
+        $rowId = (int)($_POST['game'] ?? 0);
+        $row   = $rowId ? db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?',
+                                 [$rowId, $me['id']]) : null;
+        if (!$row || empty($row['bgg_id'])) {
+            flash_set(t('lib_edit_failed'), 'error');
+        } else {
+            $chosen = library_apply_version_choice(
+                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail']],
+                (int)$row['bgg_id'], $_POST);
+            db_run('UPDATE library_games SET name = ?, year = ?, thumbnail = ? WHERE id = ?',
+                   [$chosen['name'], !empty($chosen['year']) ? (int)$chosen['year'] : null,
+                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null, $rowId]);
+            flash_set(t('lib_edit_renamed', $chosen['name']));
         }
 
     } elseif ($action === 'sync') {
