@@ -27,6 +27,9 @@ $plid = (int)($_GET['poll']       ?? $_POST['poll']       ?? 0);   // message ev
 $lmid = (int)($_GET['library_member'] ?? $_POST['library_member'] ?? 0);   // a library owner
 // Optional: WHICH of their games prompted the message, so the subject can say.
 $lgid = (int)($_GET['library_game'] ?? $_POST['library_game'] ?? 0);
+// The club itself, as an owner on the library page. Not a user id — the club
+// is not a person — so it is its own flag with its own address.
+$lclub = !empty($_GET['library_club']) || !empty($_POST['library_club']);
 
 // Resolve the target: a single player, a whole game's players, a poll's
 // proposer, or a poll's voters. Exactly one of the four ids is expected.
@@ -36,8 +39,27 @@ $game = null;
 $poll = null;
 
 $libraryMember = null;
+$libraryClub   = false;
+$libraryGame   = null;
 
-if ($lmid) {
+if ($lclub) {
+    /* THE CLUB'S OWN GAMES. Like the member target this has no parent event, so
+     * it skips the live-parent check below.
+     *
+     * The gate is library_club_can_contact(): the shelf is on, an admin has
+     * actually entered an address, and the ordinary messaging rules allow this
+     * visitor to send anything. There is no per-member opt-in here because
+     * there is no member — the address being set IS the opt-in. */
+    if (!library_club_can_contact()) redirect('library.php');
+    $recipients  = [library_club_email()];
+    $libraryClub = true;
+
+    // Which of the club's games prompted it, looked up in the club's own table.
+    $libraryGame = $lgid ? club_shelf_entry($lgid) : null;
+    $targetLabel = $libraryGame
+        ? t('lib_contact_title_game', t('lib_club_owner'), $libraryGame['name'])
+        : t('lib_contact_title', t('lib_club_owner'));
+} elseif ($lmid) {
     /* A library owner. Unlike the other four targets this one has no parent
      * event — it is about somebody's shelf, not about a game night — so the
      * "live parent" requirement below is skipped for it.
@@ -94,7 +116,7 @@ if ($lmid) {
 
 /* A library message has no parent event, so it skips the live-parent check
  * entirely — its own gate above already decided whether it may be sent. */
-if ($libraryMember) {
+if ($libraryMember || $libraryClub) {
     $activeDay  = 0;
     $backAnchor = '';
 } else {
@@ -151,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // label + its start time (a poll has no single game name yet). The
         // "<venue>: " prefix is added centrally by send_mail(), like on every
         // other outgoing email.
-        $re = $libraryMember
+        $re = ($libraryMember || $libraryClub)
             ? ($libraryGame ? $libraryGame['name'] : t('lib_contact_subject'))
             : ($game ? $game['name'] : (t('poll_label') . ' ' . $poll['start_time']));
         $subject = t('msg_subject', $senderName, $re);
@@ -161,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * even on a site that normally prefixes with the current event's.
          * Attaching it to whichever event happens to be live would file it
          * under something unrelated. */
-        $prefixMode = ($libraryMember && opt_bool('library_mail_venue')) ? 'venue' : null;
+        $prefixMode = (($libraryMember || $libraryClub) && opt_bool('library_mail_venue')) ? 'venue' : null;
         foreach ($recipients as $to) {
             send_mail($to, $subject, $bodyText, $replyTo, $prefixMode);
         }
@@ -172,7 +194,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         consent_remember();
         flash_set(t('msg_sent'));
         // Back where the message was started from: the library, or the event.
-        redirect($libraryMember ? 'library.php' : ('index.php?day=' . $activeDay . $backAnchor));
+        redirect(($libraryMember || $libraryClub)
+            ? ($libraryClub ? 'library.php?tab=club' : 'library.php')
+            : ('index.php?day=' . $activeDay . $backAnchor));
     }
 }
 
@@ -186,6 +210,7 @@ tpl_render('message_form', [
     'poll_owner'   => $pwid,
     'poll_id'      => $plid,
     'library_member' => $lmid,
+    'library_club'   => $libraryClub ? 1 : 0,
     'library_game'   => $libraryGame ? (int)$libraryGame['id'] : 0,
     'recipients'   => count($recipients),
     // Guest mode: the form shows sender name/email inputs (+ captcha when on);

@@ -158,6 +158,45 @@ function library_any_enabled() {
 }
 
 /**
+ * Should the club's games also appear on the members' library page?
+ *
+ * They keep their own tab regardless; this only adds them to the merged list.
+ * Needs the shelf itself, or there would be nothing to merge.
+ *
+ * @return bool
+ */
+function library_show_club_games() {
+    return club_shelf_enabled() && opt_bool('library_show_club');
+}
+
+/**
+ * Where a "contact the club about this game" message goes, or '' for none.
+ *
+ * No address means no contact button — for the club there is no per-member
+ * opt-in to fall back on, so the address IS the opt-in.
+ *
+ * @return string
+ */
+function library_club_email() {
+    return trim((string)opt('library_club_email', ''));
+}
+
+/**
+ * May the club be contacted about its games?
+ *
+ * Deliberately NOT gated on library_allow_contact: that switch is about
+ * exposing MEMBERS to messages, which is a privacy question about individuals.
+ * The club's address is one an admin typed in on purpose. The ordinary
+ * messaging rules still apply, so a site with messaging off — or one barring
+ * guests from it — bars this too.
+ *
+ * @return bool
+ */
+function library_club_can_contact() {
+    return club_shelf_enabled() && library_club_email() !== '' && messaging_allowed();
+}
+
+/**
  * May a game be added to an event straight from the club's shelf?
  *
  * BOTH switches: the shelf has to exist before it can be picked from, so this
@@ -663,6 +702,56 @@ function library_all_games() {
             'row_id'             => (int)$r['id'],
         ];
     }
+    /* THE CLUB'S OWN GAMES, when an admin has asked for them here too.
+     *
+     * Merged into the SAME grouping the members' rows built, so a game owned by
+     * both the club and two members is one line with three owners rather than a
+     * duplicate entry. That works without any schema change because the key is
+     * the game's identity — its BGG id, or its name — and a club row carries
+     * both. The two shelves being separate tables costs nothing here.
+     *
+     * CLUB goes FIRST among the owners of a game: it is the copy anyone can
+     * count on being in the building, so it is the useful one to read first. */
+    if (library_show_club_games()) {
+        foreach (club_shelf_all(true) as $c) {
+            $key = !empty($c['bgg_id'])
+                ? 'b' . (int)$c['bgg_id']
+                : 'n' . mb_strtolower(trim((string)$c['name']));
+            if (!isset($out[$key])) {
+                $out[$key] = [
+                    'name'      => $c['name'],
+                    'year'      => $c['year'],
+                    'bgg_id'    => $c['bgg_id'],
+                    'link'      => $c['link'],
+                    'thumbnail' => $c['thumbnail'],
+                    'owners'    => [],
+                ];
+            }
+            if (empty($out[$key]['thumbnail']) && !empty($c['thumbnail'])) {
+                $out[$key]['thumbnail'] = $c['thumbnail'];
+            }
+            if (empty($out[$key]['link']) && !empty($c['link'])) {
+                $out[$key]['link'] = $c['link'];
+            }
+            array_unshift($out[$key]['owners'], [
+                // No user id: this is not a person, and nothing downstream may
+                // treat it as one. is_club is what the template keys on.
+                'id'                 => 0,
+                'is_club'            => true,
+                'display_name'       => t('lib_club_owner'),
+                'library_contact_ok' => 1,
+                'is_blocked'         => 0,
+                'row_id'             => (int)$c['id'],
+            ]);
+        }
+        /* Re-sorted because the club's games were appended after the members'
+         * were already ordered — a club-only title would otherwise land at the
+         * end of an alphabetical list. */
+        uasort($out, function ($a, $b) {
+            return strcasecmp((string)$a['name'], (string)$b['name']);
+        });
+    }
+
     return array_values($out);
 }
 

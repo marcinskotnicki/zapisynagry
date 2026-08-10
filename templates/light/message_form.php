@@ -41,6 +41,12 @@
             <input type="hidden" name="poll_owner" value="<?= (int)$poll_owner ?>">
         <?php elseif (!empty($poll_id)): ?>
             <input type="hidden" name="poll" value="<?= (int)$poll_id ?>">
+        <?php elseif (!empty($library_club)): ?>
+            <?php // The club, not a member — see message.php. ?>
+            <input type="hidden" name="library_club" value="1">
+            <?php if (!empty($library_game)): ?>
+                <input type="hidden" name="library_game" value="<?= (int)$library_game ?>">
+            <?php endif; ?>
         <?php elseif (!empty($library_member)): ?>
             <?php // A library owner — no parent game or poll, see message.php.
                   // library_game is optional: it names WHICH of their games this

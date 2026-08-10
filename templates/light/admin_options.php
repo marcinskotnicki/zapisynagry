@@ -394,6 +394,13 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('club_shelf_pick'); ?>
         <p class="field-note"><?= e(t('opt_club_shelf_pick_note')) ?></p>
 
+        <?php $toggle('library_show_club'); ?>
+        <p class="field-note"><?= e(t('opt_library_show_club_note')) ?></p>
+        <?php // No address means no contact button for the club: there is no
+              // per-member opt-in to fall back on here, so the address IS it. ?>
+        <?php $text('library_club_email', 'email'); ?>
+        <p class="field-note"><?= e(t('opt_library_club_email_note')) ?></p>
+
         <?php // How the shared game list is broken up once it outgrows a screen. ?>
         <div class="field">
             <label for="library_pagination"><?= e(t('opt_library_pagination')) ?></label>

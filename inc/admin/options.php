@@ -66,6 +66,9 @@ $OPTION_VALUES = [
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days', 'library_per_page',
+    // A text field, NOT a toggle: listed among the checkboxes it would be
+    // rewritten to '0' by every save, since an absent checkbox reads as off.
+    'library_club_email',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -94,7 +97,7 @@ $OPTION_TOGGLES = [
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
-    'club_shelf', 'club_shelf_pick',
+    'club_shelf', 'club_shelf_pick', 'library_show_club',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 

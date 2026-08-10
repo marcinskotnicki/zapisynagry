@@ -79,19 +79,27 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '', $
                       // the rest of the list off the screen. ?>
                 <span class="lib-owners">
                     <?php foreach ($owners as $o): ?>
-                        <span class="lib-owner">
+                        <?php // The club is not a person: it gets its own class
+                              // (and colour) so nobody reads CLUB as a member's
+                              // display name, and its contact link goes to the
+                              // club address rather than to a user id. ?>
+                        <?php $isClub = !empty($o['is_club']); ?>
+                        <span class="lib-owner<?= $isClub ? ' lib-owner-club' : '' ?>">
                             <?= e($o['display_name']) ?>
                             <?php // The contact button appears only for members who
                                   // opted in AND while the admin allows it AND while
                                   // the ordinary messaging rules permit this visitor
                                   // to send anything — all three live in
                                   // library_can_contact(). ?>
-                            <?php if (library_can_contact($o)): ?>
+                            <?php if ($isClub ? library_club_can_contact() : library_can_contact($o)): ?>
                                 <?php // Linked to THIS owner's copy of the game, so the
                                       // message says which title it is about rather than
                                       // "about their games" generally. ?>
                                 <?php $oTitle = t('lib_contact_title_game', $o['display_name'], $g['name']); ?>
-                                <a class="msg-icon" href="message.php?library_member=<?= (int)$o['id'] ?>&amp;library_game=<?= (int)$o['row_id'] ?>"
+                                <?php $oHref = $isClub
+                                    ? 'message.php?library_club=1&amp;library_game=' . (int)$o['row_id']
+                                    : 'message.php?library_member=' . (int)$o['id'] . '&amp;library_game=' . (int)$o['row_id']; ?>
+                                <a class="msg-icon" href="<?= $oHref ?>"
                                    title="<?= e($oTitle) ?>"
                                    aria-label="<?= e($oTitle) ?>">&#9993;</a>
                             <?php endif; ?>
@@ -223,6 +231,13 @@ endif;
     <?php endif; ?>
 
     <?php if ($tab === 'club'): ?>
+        <?php // The same address, offered once for the shelf as a whole — the
+              // counterpart of the button on a member's own shelf page. ?>
+        <?php if (library_club_can_contact()): ?>
+            <p class="lib-club-contact">
+                <a class="btn btn-small" href="message.php?library_club=1"><?= e(t('lib_contact_btn')) ?></a>
+            </p>
+        <?php endif; ?>
         <?php // Same row markup and the same alphabet/pager as the members'
               // list; the one difference is that no owners are named, because
               // there is only one owner and the tab already says who. ?>

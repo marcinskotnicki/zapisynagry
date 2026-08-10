@@ -151,6 +151,14 @@ INSERT INTO options (key, value) VALUES
     -- poll. Only does anything while club_shelf is on: there is nothing to pick
     -- from otherwise.
     ('club_shelf_pick',       '0'),
+    -- Also list the club's own games on the members' library page, credited to
+    -- "CLUB". They keep their own tab either way; this only adds them to the
+    -- merged list, where a game the club AND members own shows one line with
+    -- CLUB first among the owners.
+    ('library_show_club',     '0'),
+    -- Where a "contact CLUB about this game" message goes. Empty means no
+    -- contact button for the club — there is nowhere to send it.
+    ('library_club_email',    ''),
     ('library_per_page',      '50'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),
