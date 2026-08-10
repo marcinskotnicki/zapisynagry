@@ -162,7 +162,14 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('mailing_list');
         $toggle('send_emails');       // master switch for notifications
         $toggle('allow_messaging');
+        // The two libraries. Their master switches belong HERE, with the other
+        // feature switches, rather than at the top of their own group: this is
+        // where an admin looks to find out what the site has switched on. The
+        // library group keeps everything that only tunes them.
+        $toggle('club_library');
+        $toggle('club_shelf');
         ?>
+        <p class="field-note"><?= e(t('opt_club_shelf_note')) ?></p>
         <div class="field">
             <label for="verification_method"><?= e(t('opt_verification_method')) ?></label>
             <select id="verification_method" name="verification_method">
@@ -372,10 +379,9 @@ $groupEnd = function () { echo '</div></details>'; };
     <?php /* 4b. CLUB LIBRARY */ ?>
     <?php $group('opt_group_library', false, 'opt_group_library_note'); ?>
         <?php
-        // The master switch first: the two below it do nothing while it is off,
-        // and the group note says so — same shape as the accounts group, where
-        // the mode dropdown leads because it governs what follows.
-        $toggle('club_library');
+        // The two master switches are in Basic, with the other feature
+        // switches — everything here only tunes them, and does nothing at all
+        // until one of them is on, which the group note says.
         $toggle('library_show_members', 'opt_note_library_off');
         $toggle('library_allow_contact', 'opt_note_library_off');
         ?>
@@ -383,13 +389,7 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('library_mail_venue', 'opt_note_library_off'); ?>
         <p class="field-note"><?= e(t('opt_library_mail_venue_note')) ?></p>
 
-        <?php // The club's OWN shelf. Deliberately NOT gated on the members'
-              // library above — a club may keep a cabinet at the venue without
-              // asking members to list their collections, or the other way
-              // round, so this one carries no "has no effect while..." note. ?>
-        <?php $toggle('club_shelf'); ?>
-        <p class="field-note"><?= e(t('opt_club_shelf_note')) ?></p>
-        <?php // Depends on the shelf above rather than on the members' library,
+        <?php // Depends on the club's shelf rather than on the members' library,
               // so it gets its own note rather than the generic one. ?>
         <?php $toggle('club_shelf_pick'); ?>
         <p class="field-note"><?= e(t('opt_club_shelf_pick_note')) ?></p>
