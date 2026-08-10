@@ -117,9 +117,9 @@
                                 <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
                                     <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>">&times;</a>
                                 <?php endif; ?>
-                                <?php if (!empty($p['user_id']) && !empty($p['account_name'])
-                                    && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
-                                    <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                                <?php $signedBy = player_signed_up_by($p);
+                                    if ($signedBy !== ''): ?>
+                                    <span class="p-signedby"><?= e(t('player_signed_by', $signedBy)) ?></span>
                                 <?php endif; ?>
                             </li>
                         <?php endforeach; ?>

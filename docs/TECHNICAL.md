@@ -1030,6 +1030,28 @@ its link text stays, and a final pass removes closing tags whose opener was
 rejected so the output stays balanced. Both render sites use it: the mailing
 form template and `consent_field()`, which builds its markup in PHP.
 
+**Signing somebody else up** (`signup_proxy_name`, off by default). The sign-up
+form gains a second, optional name box: the first says who is filling it in, the
+second who will play. Filled, `players.name` is the SECOND name and
+`players.signed_up_by` records the first.
+
+A version of this already existed — a logged-in member typing a different name
+got "signed up by <their account>" — but only for accounts. The common case is a
+GUEST entering a guest, where there is nothing to infer from, which is why
+`signed_up_by` is stored rather than derived. `player_signed_up_by()` decides
+between the two paths, preferring the stored value; **twelve themes fork
+`game_card.php` and every one renders this marker**, so the logic lives in that
+one function rather than in twelve copies.
+
+A second switch (`signup_proxy_members`) narrows the box to signed-in members,
+for clubs happy to let their own people book a seat for a child but not to have
+passers-by adding arbitrary names. Both switches are answered by the one
+`signup_proxy_enabled()`, which the form AND the POST handler ask — so a field
+that is not offered cannot be used by posting it anyway.
+
+Existing rows get `signed_up_by = NULL` on upgrade and keep behaving exactly as
+before.
+
 **Custom CSS (Options -> Advanced).** Whatever an admin pastes there is
 rendered in a `<style>` at the end of every page head — last, so it overrides
 the theme without needing `!important`. Empty means no block at all.

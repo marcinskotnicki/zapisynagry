@@ -32,6 +32,9 @@ $form = [
     'name'  => $_POST['name']  ?? ($u['display_name'] ?? guest_identity()['name']),
     'email' => $_POST['email'] ?? ($u['email'] ?? guest_identity()['email']),
     'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
+    // Set on POST below; declared here so the form can redisplay it after an
+    // error without a notice.
+    'player_name' => $_POST['player_name'] ?? '',
 ];
 $error = null;
 
@@ -40,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     antibot_check('form');
     $form['name']  = trim((string)$form['name']);
     $form['email'] = trim((string)$form['email']);
+    // Only accepted when the field was actually offered, so a hand-built POST
+    // cannot use a form the admin has switched off.
+    $form['player_name'] = signup_proxy_enabled() ? trim((string)($_POST['player_name'] ?? '')) : '';
     $form['knows'] = min(2, max(0, (int)$form['knows']));   // clamp to the 0..2 codes
 
     // Data-protection consent, when the admin configured wording and the
@@ -53,6 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_name_meaningless');
     } elseif (text_too_long($form['name'], TEXT_NAME_MAX)) {
         $error = t('error_too_long', TEXT_NAME_MAX);
+    } elseif ($form['player_name'] !== '' && !text_has_content($form['player_name'])) {
+        // Held to the same standard as the main name — it is the one that ends
+        // up on the table.
+        $error = t('error_name_meaningless');
+    } elseif (text_too_long($form['player_name'], TEXT_NAME_MAX)) {
+        $error = t('error_too_long', TEXT_NAME_MAX);
     } elseif (email_required_for_game($game) && $form['email'] === '') {
         // Required globally (mode 1) or because THIS game's proposer demands it.
         $error = t('error_email_required');
@@ -62,17 +74,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Confirmed unless the game is already full RIGHT NOW (re-checked here,
         // not from a value computed earlier, so the race resolves correctly).
         $isReserve = game_is_full($gameId, $game['max_players']) ? 1 : 0;
+
+        /* WHO SITS AT THE TABLE is the second field when it is filled, and the
+         * first field then records who put them there. Left blank — the normal
+         * case — the first field is the player, exactly as before. */
+        $playerName = $form['player_name'] !== '' ? $form['player_name'] : $form['name'];
+        $signedUpBy = $form['player_name'] !== '' ? $form['name'] : null;
+
         db_run(
-            'INSERT INTO players (game_id, name, email, knows_rules, is_reserve, user_id)
-             VALUES (?,?,?,?,?,?)',
+            'INSERT INTO players (game_id, name, email, knows_rules, is_reserve, user_id, signed_up_by)
+             VALUES (?,?,?,?,?,?,?)',
             [
-                $gameId, $form['name'],
+                $gameId, $playerName,
                 $form['email'] !== '' ? $form['email'] : null,   // store NULL, not ''
                 $form['knows'], $isReserve,
                 $u['id'] ?? null,                                // link to account if logged in
+                $signedUpBy,
             ]
         );
-        log_action('signup', $form['name'] . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : ''));
+        log_action('signup', $playerName . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : '')
+            . ($signedUpBy !== null ? ' (by ' . $signedUpBy . ')' : ''));
         // Remember the agreement so the next form starts ticked. Only after a
         // successful submission, so the cookie can never record consent for
         // something that was refused.

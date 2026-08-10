@@ -106,7 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (count($versions) > 1) {
                 tpl_render('header', ['page_title' => t('lib_my_title')]);
                 tpl_render('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
+                                   // Fallback art for editions BGG has no cover for.
+                                   'thumbnail' => $entry['thumbnail'] ?? ''],
                     'versions' => $versions,
                     'row_id'   => 0,
                     'action'   => 'my_library.php',
@@ -151,7 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 tpl_render('header', ['page_title' => t('lib_my_title')]);
                 tpl_render('lib_version_pick', [
-                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name']],
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
+                                   'thumbnail' => $game['thumbnail'] ?? ''],
                     'versions' => bgg_versions((int)$row['bgg_id']),
                     'row_id'   => $rowId,
                     'action'   => 'my_library.php',

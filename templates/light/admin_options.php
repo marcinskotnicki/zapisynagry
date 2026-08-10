@@ -479,6 +479,15 @@ $groupEnd = function () { echo '</div></details>'; };
          * becomes the ONLY thing keeping messaging alive in guest-only mode. */
         $toggle('allow_unregistered_add_games', 'opt_note_guest_only_inert');
         $toggle('allow_unregistered_signup',    'opt_note_guest_only_inert');
+        // Sign somebody else up (a parent entering a child). Belongs here
+        // rather than with the game settings: it is about WHO may appear at a
+        // table, which is what this group governs.
+        $toggle('signup_proxy_name');
+        ?>
+        <p class="field-note"><?= e(t('opt_signup_proxy_name_note')) ?></p>
+        <?php
+        // Directly under the switch it depends on, and marked inert without it.
+        $toggle('signup_proxy_members', 'opt_note_proxy_off');
         $toggle('chat_logged_in_only',          'opt_note_guest_only_inert');
         $toggle('allow_guest_messaging');      // messaging open to guests too, not just accounts
         $toggle('allow_user_template', 'opt_note_guest_only_accounts');   // theme via user panel

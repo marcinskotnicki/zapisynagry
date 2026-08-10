@@ -36,10 +36,23 @@
         <?= antibot_field() ?>
         <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
 
+        <?php // With the proxy field on, this box means "who is filling the form
+              // in" rather than "who is playing", so it says so. Without it, the
+              // wording is unchanged — most clubs never see this. ?>
         <div class="field field-name">
-            <label for="name"><?= e(t('signup_name')) ?></label>
+            <label for="name"><?= e(signup_proxy_enabled() ? t('signup_your_name') : t('signup_name')) ?></label>
             <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
         </div>
+
+        <?php // Signing somebody else up — a parent entering a child. Optional:
+              // left blank, the form behaves exactly as it always did. ?>
+        <?php if (signup_proxy_enabled()): ?>
+            <div class="field field-player_name">
+                <label for="player_name"><?= e(t('signup_player_name')) ?></label>
+                <input type="text" id="player_name" name="player_name" value="<?= e($form['player_name'] ?? '') ?>">
+                <p class="field-note"><?= e(t('signup_player_name_note')) ?></p>
+            </div>
+        <?php endif; ?>
 
         <div class="field field-email">
             <label for="email"><?= e(t('signup_email')) ?><?= email_required_for_game($game) ? ' *' : '' ?></label>

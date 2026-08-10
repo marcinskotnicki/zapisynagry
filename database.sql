@@ -155,6 +155,12 @@ INSERT INTO options (key, value) VALUES
     -- screen instead of sitting under the search, and the club tab opens by
     -- default on the library page. For clubs whose cabinet is the usual source.
     ('library_prefer_club',   '0'),
+    -- Offer a second name box on the sign-up form, so one person can enter
+    -- another (a parent booking a seat for a child).
+    ('signup_proxy_name',     '0'),
+    -- Restrict that second box to signed-in members. Only means anything while
+    -- signup_proxy_name is on.
+    ('signup_proxy_members',  '0'),
     -- Also list the club's own games on the members' library page, credited to
     -- "CLUB". They keep their own tab either way; this only adds them to the
     -- merged list, where a game the club AND members own shows one line with
@@ -539,6 +545,11 @@ CREATE TABLE players (
     knows_rules INTEGER,                          -- see code map; NULL allowed
     is_reserve  INTEGER NOT NULL DEFAULT 0,
     user_id     INTEGER,                          -- NULL if signed up unregistered
+    -- Who signed this person up, when it was somebody else — a parent entering
+    -- a child, say. Stored as free text rather than derived from user_id,
+    -- because the commonest case is a GUEST signing up a guest, where there is
+    -- no account on either side to derive it from.
+    signed_up_by TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL

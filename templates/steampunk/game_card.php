@@ -179,9 +179,9 @@
                               // .gc-resign carries margin-left:auto, which parks it at the
                               // right edge — so anything rendered after it lands to its
                               // RIGHT, leaving the delete button stranded mid-row. ?>
-                        <?php if (!empty($p['user_id']) && !empty($p['account_name'])
-                            && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
-                            <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                        <?php $signedBy = player_signed_up_by($p);
+                            if ($signedBy !== ''): ?>
+                            <span class="p-signedby"><?= e(t('player_signed_by', $signedBy)) ?></span>
                         <?php endif; ?>
                         <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
                             <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>

@@ -175,9 +175,9 @@
                             <?php if (is_admin() && !empty($p['user_id'])): ?>
                                 <span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span>
                             <?php endif; ?>
-                            <?php if (!empty($p['user_id']) && !empty($p['account_name'])
-                                && mb_strtolower(trim($p['name'])) !== mb_strtolower(trim($p['account_name']))): ?>
-                                <span class="p-signedby"><?= e(t('player_signed_by', $p['account_name'])) ?></span>
+                            <?php $signedBy = player_signed_up_by($p);
+                                if ($signedBy !== ''): ?>
+                                <span class="p-signedby"><?= e(t('player_signed_by', $signedBy)) ?></span>
                             <?php endif; ?>
                             <?php if ($canMsg && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>

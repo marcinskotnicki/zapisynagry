@@ -70,7 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $versions = bgg_versions((int)$entry['bgg_id']);
             if (count($versions) > 1) {
                 $tab_body = tpl_capture('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
+                                   // Fallback art for editions BGG has no cover for.
+                                   'thumbnail' => $entry['thumbnail'] ?? ''],
                     'versions' => $versions,
                     'row_id'   => 0,
                     'action'   => 'admin.php?tab=club_shelf',
@@ -112,7 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $flashKind = 'error';
             } else {
                 $tab_body = tpl_capture('lib_version_pick', [
-                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name']],
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
+                                   'thumbnail' => $game['thumbnail'] ?? ''],
                     'versions' => bgg_versions((int)$row['bgg_id']),
                     'row_id'   => (int)$row['id'],
                     'action'   => 'admin.php?tab=club_shelf',

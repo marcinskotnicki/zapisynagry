@@ -20,7 +20,9 @@
  *  $row_id is set in the second case and the form says which it is.
  *
  *  RENDER VARS:
- *    $game     — ['id','name'] the game itself; each edition carries its own title.
+ *    $game     — ['id','name','thumbnail'] the game itself. Its cover stands in
+ *                for editions BGG has no picture of; each edition carries its
+ *                own title.
  *    $versions — from bgg_parse_versions(), newest first.
  *    $row_id   — an existing shelf row to update, or 0 when adding.
  *    $action   — form target.
@@ -51,7 +53,13 @@
             <li class="lib-item">
                 <label class="lib-version-opt">
                     <input type="radio" name="version" value="0" checked>
-                    <span class="lib-thumb lib-thumb-none" aria-hidden="true"></span>
+                    <?php // The game's own cover: this option adds the game as
+                          // BGG has it, so its art is exactly what you would get. ?>
+                    <?php if (!empty($game['thumbnail'])): ?>
+                        <img class="lib-thumb" src="<?= e($game['thumbnail']) ?>" alt="" loading="lazy">
+                    <?php else: ?>
+                        <span class="lib-thumb lib-thumb-none" aria-hidden="true"></span>
+                    <?php endif; ?>
                     <span class="lib-main">
                         <span class="lib-name"><?= e(t('lib_pick_version_none')) ?></span>
                         <span class="lib-version-as"><?= e(t('lib_pick_version_none_note')) ?></span>
@@ -63,8 +71,16 @@
                 <li class="lib-item">
                     <label class="lib-version-opt">
                         <input type="radio" name="version" value="<?= (int)$v['id'] ?>">
-                        <?php if (!empty($v['thumbnail'])): ?>
-                            <img class="lib-thumb" src="<?= e($v['thumbnail']) ?>" alt="" loading="lazy">
+                        <?php /* Not every edition has its own cover — BGG has
+                               * none for the Russian printing of Petrichor, for
+                               * instance — and an empty white box says nothing.
+                               * The game's art is the honest stand-in: it is
+                               * what this entry will end up showing anyway,
+                               * since the edition has no picture to override
+                               * it with. */ ?>
+                        <?php $vThumb = !empty($v['thumbnail']) ? $v['thumbnail'] : ($game['thumbnail'] ?? ''); ?>
+                        <?php if ($vThumb !== ''): ?>
+                            <img class="lib-thumb" src="<?= e($vThumb) ?>" alt="" loading="lazy">
                         <?php else: ?>
                             <span class="lib-thumb lib-thumb-none" aria-hidden="true"></span>
                         <?php endif; ?>

@@ -445,6 +445,57 @@ function rich_text_html($raw) {
 }
 
 /**
+ * Who signed this player up, or '' when they signed themselves up.
+ *
+ * ONE function because TWELVE themes fork game_card.php and every one of them
+ * renders this. Pasting the logic into each is how the copies drift — the
+ * decision lives here and the cards just print the result.
+ *
+ * Two ways a player can have been entered by somebody else:
+ *
+ *   1. signed_up_by is set — the second name box was used. Works for GUESTS,
+ *      which is the common case and why it is stored rather than derived.
+ *   2. the row is bound to an account whose name DIFFERS from the player name —
+ *      the older path, still true of rows written before that box existed.
+ *
+ * The stored value wins: it is what someone actually typed, where the account
+ * name is only an inference.
+ *
+ * @param array $p  A players row (with account_name joined in).
+ * @return string
+ */
+function player_signed_up_by($p) {
+    if (!empty($p['signed_up_by'])) return (string)$p['signed_up_by'];
+    if (!empty($p['user_id']) && !empty($p['account_name'])
+        && mb_strtolower(trim((string)$p['name'])) !== mb_strtolower(trim((string)$p['account_name']))) {
+        return (string)$p['account_name'];
+    }
+    return '';
+}
+
+/**
+ * May one person sign another up, with a second name box on the form?
+ *
+ * A parent entering a child, most often. Off by default: an extra field on the
+ * commonest form on the site is not something to inflict on clubs that do not
+ * need it.
+ *
+ * A second switch narrows it to signed-in members — for clubs happy to let
+ * their own people book a seat for a child, but not to have passers-by adding
+ * arbitrary names to a table.
+ *
+ * ONE function, asked by both the form and the POST handler, so a field that is
+ * not offered cannot be used by posting it anyway.
+ *
+ * @return bool
+ */
+function signup_proxy_enabled() {
+    if (!opt_bool('signup_proxy_name')) return false;
+    if (opt_bool('signup_proxy_members') && !is_logged_in()) return false;
+    return true;
+}
+
+/**
  * The configured consent wording, or '' when the feature is off.
  * @return string
  */
