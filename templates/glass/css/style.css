@@ -133,6 +133,10 @@ body.tpl-glass {
 }
 .tpl-glass .game-deleted { width: 100%; }
 
+.tpl-glass .game-deleted .sc-strip{
+    width:100%;
+}
+
 @media (min-width: 701px) {
     .tpl-glass .game-list {
         position: relative;
