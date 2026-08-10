@@ -158,6 +158,67 @@ function library_any_enabled() {
 }
 
 /**
+ * May a game be added to an event straight from the club's shelf?
+ *
+ * BOTH switches: the shelf has to exist before it can be picked from, so this
+ * cannot be turned on alone and quietly show an empty chooser.
+ *
+ * @return bool
+ */
+function club_shelf_pick_enabled() {
+    return club_shelf_enabled() && opt_bool('club_shelf_pick');
+}
+
+/**
+ * Fill a game form from a club shelf entry.
+ *
+ * WHY THE SHELF STORES bgg_id: a club row keeps only what a library needs —
+ * name, year, art, a link. A game form wants playing time, weight and player
+ * count too, and those come from BGG. So for a shelf entry that came from BGG
+ * we fetch the full record, exactly as choosing a search result does, and the
+ * pick replaces the search step rather than the form.
+ *
+ * The fetch is BEST-EFFORT: on a host with no outbound route, or when BGG is
+ * down, the form still opens prefilled with everything the shelf knows and the
+ * remaining fields keep their defaults. Refusing to open would make the feature
+ * unusable exactly when the ordinary BGG search is unusable too.
+ *
+ * @param array $form  Defaults from game_form_defaults().
+ * @param array $row   A club_library_games row.
+ * @return array       The form, prefilled.
+ */
+function club_shelf_prefill(array $form, array $row) {
+    $form['name'] = $row['name'];
+
+    if (!empty($row['bgg_id'])) {
+        $form['bgg_id'] = (int)$row['bgg_id'];
+        $form['source'] = 'bgg';
+        // The shelf's own thumbnail first, so something shows even if the
+        // lookup below fails.
+        if (!empty($row['thumbnail'])) $form['thumbnail'] = $row['thumbnail'];
+
+        require_once __DIR__ . '/bgg.php';
+        $detail = bgg_thing((int)$row['bgg_id']);
+        if ($detail) {
+            $form['length_minutes'] = $detail['length']     ?: $form['length_minutes'];
+            $form['weight']         = $detail['weight']     ?: $form['weight'];
+            $form['max_players']    = $detail['maxplayers'] ?: $form['max_players'];
+            // Prefer the full image, as the BGG search path does.
+            $form['thumbnail']      = $detail['image'] ?: ($detail['thumbnail'] ?: $form['thumbnail']);
+        }
+        return $form;
+    }
+
+    /* A hand-added shelf entry: no BGG record to enrich it with, so it stays a
+     * manual game and carries across the one extra thing the shelf holds — its
+     * custom link. */
+    $form['source'] = 'manual';
+    if (!empty($row['link'])) $form['link'] = $row['link'];
+    if (!empty($row['thumbnail'])) $form['thumbnail'] = $row['thumbnail'];
+    return $form;
+}
+
+/**
  * The club's shelf, alphabetically.
  *
  * @param bool $activeOnly  True for the public view; admins see hidden rows too.

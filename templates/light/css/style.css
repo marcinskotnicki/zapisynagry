@@ -177,6 +177,9 @@ input[type="checkbox"]{width:auto;}
 .lib-add { margin: 0 0 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.75rem; }
 .lib-add > summary { cursor: pointer; font-weight: 600; }
 .lib-tabs { margin-bottom: 1rem; }
+.club-pick { display: flex; align-items: center; gap: 0.7rem; flex: 1 1 auto; text-decoration: none; color: inherit; min-width: 0; }
+.club-pick:hover { text-decoration: none; }
+.club-pick-list .lib-item:hover { border-color: var(--primary); }
 .lib-alpha { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 1rem; justify-content:space-evenly;}
 .lib-alpha-btn, .btn-small.lib-alpha-btn { display: inline-flex; align-items: center; gap: 0.25rem; min-width:10%; padding:0.7rem; justify-content:center;}
 .lib-alpha-count { font-size: 0.75em; color: var(--text-muted); }

@@ -232,8 +232,49 @@ if (isset($_GET['id'])) {
 }
 
 /* =============================================================================
- *  GATE BUTTONS  (manual / bgg) — which path the user picked on the gate.
+ *  CLUB SHELF PICK  (?club=ROWID) — chosen a game the club owns.
+ * -----------------------------------------------------------------------------
+ *  Replaces the BGG SEARCH step, not the form: from here on everything is the
+ *  same as choosing a search result, which is why nothing below this had to
+ *  change.
  * ============================================================================= */
+if (isset($_GET['club'])) {
+    // Re-checked rather than trusting that the button was only rendered when
+    // allowed, and again that the row is really on the shelf.
+    if (!club_shelf_pick_enabled()) redirect('index.php');
+    $shelfRow = club_shelf_entry((int)$_GET['club']);
+    if (!$shelfRow) redirect('add_game.php?table=' . (int)$table['id']);
+
+    $form = club_shelf_prefill(game_form_defaults($table, $day), $shelfRow);
+    tpl_render('header', ['page_title' => t('addgame_title')]);
+    tpl_render('add_game_form', [
+        'table'   => $table, 'game' => $form, 'source' => $form['source'],
+        // A BGG-sourced pick locks its image, like the search path; a
+        // hand-added one can still choose a predefined thumbnail.
+        'thumbs'  => $form['source'] === 'bgg'
+            ? []
+            : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
+        'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
+/* =============================================================================
+ *  GATE BUTTONS  (manual / bgg / club) — which path the user picked on the gate.
+ * ============================================================================= */
+if ($go === 'club' && club_shelf_pick_enabled()) {
+    // The shelf, for picking from: active games only — a game marked as lent
+    // out should not be offered for a table tonight.
+    tpl_render('header', ['page_title' => t('addgame_title')]);
+    tpl_render('add_game_club_list', [
+        'table' => $table,
+        'games' => club_shelf_all(true),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if ($go === 'manual') {
     // Manual entry: blank form, carrying over whatever name they typed on the gate.
     $form = game_form_defaults($table, $day);

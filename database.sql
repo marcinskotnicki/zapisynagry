@@ -147,6 +147,10 @@ INSERT INTO options (key, value) VALUES
     -- The CLUB's own shelf, independent of the members' shared library above:
     -- either can be on without the other.
     ('club_shelf',            '0'),
+    -- Offer the club's own games as a source when adding a game to a table or a
+    -- poll. Only does anything while club_shelf is on: there is nothing to pick
+    -- from otherwise.
+    ('club_shelf_pick',       '0'),
     ('library_per_page',      '50'),
     ('last_update_at',        ''),
     ('remote_commit_cache',   ''),

@@ -389,6 +389,10 @@ $groupEnd = function () { echo '</div></details>'; };
               // round, so this one carries no "has no effect while..." note. ?>
         <?php $toggle('club_shelf'); ?>
         <p class="field-note"><?= e(t('opt_club_shelf_note')) ?></p>
+        <?php // Depends on the shelf above rather than on the members' library,
+              // so it gets its own note rather than the generic one. ?>
+        <?php $toggle('club_shelf_pick'); ?>
+        <p class="field-note"><?= e(t('opt_club_shelf_pick_note')) ?></p>
 
         <?php // How the shared game list is broken up once it outgrows a screen. ?>
         <div class="field">

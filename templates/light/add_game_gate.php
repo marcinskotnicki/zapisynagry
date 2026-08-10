@@ -43,6 +43,15 @@ $title      = $title     ?? t('addgame_title');
             <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
                 <?= e(t('addgame_from_bgg')) ?>
             </button>
+            <?php // Directly under the BGG button, because it is the same kind of
+                  // step — pick a known game — just from a shorter, local list.
+                  // formnovalidate: the club list does not need the name field
+                  // the BGG search above it requires. ?>
+            <?php if (club_shelf_pick_enabled()): ?>
+                <button type="submit" name="go" value="club" class="btn btn-big" formnovalidate>
+                    <?= e(t('addgame_from_club')) ?>
+                </button>
+            <?php endif; ?>
         </div>
     </form>
 

@@ -154,7 +154,39 @@ if (isset($_GET['id'])) {
     exit;
 }
 
-/* ---- Gate buttons (manual / bgg) ----------------------------------------- */
+/* ---- Club shelf pick -> prefilled candidate form -------------------------- */
+/* Same shape as the BGG detail branch above: this replaces the SEARCH step, so
+ * everything after it is unchanged. club_shelf_prefill() does the filling for
+ * both flows, which is what keeps the two consistent. */
+if (isset($_GET['club'])) {
+    if (!club_shelf_pick_enabled()) redirect('index.php');
+    $shelfRow = club_shelf_entry((int)$_GET['club']);
+    if (!$shelfRow) redirect('add_poll_game.php');
+
+    $cand = club_shelf_prefill(poll_candidate_defaults(), $shelfRow);
+    tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
+    tpl_render('poll_candidate_form', [
+        'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
+        'thumbs' => $cand['source'] === 'bgg'
+            ? []                                  // image locked to the BGG one
+            : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
+        'error' => null, 'csrf' => csrf_field(),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
+/* ---- Gate buttons (manual / bgg / club) ---------------------------------- */
+if ($go === 'club' && club_shelf_pick_enabled()) {
+    tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
+    tpl_render('add_poll_club_list', [
+        'table' => $table,
+        'games' => club_shelf_all(true),   // active only: not a game that is lent out
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if ($go === 'manual') {
     $cand = poll_candidate_defaults();
     $cand['name'] = trim($_POST['name'] ?? '');      // carry the gate's typed name

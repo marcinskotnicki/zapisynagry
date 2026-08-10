@@ -900,6 +900,24 @@ Adding and syncing live in the admin tab; editing and hiding live beside each
 game on the public club tab, the same split the members' library uses, so there
 is only ever one list to keep correct.
 
+**Adding an event game straight from the club shelf** (`club_shelf_pick`, on
+top of `club_shelf`). The gate gains a third button beside the BGG one; it lists
+the club's ACTIVE games, and picking one opens the ordinary game form prefilled.
+
+It replaces the SEARCH step, not the form — which is why nothing downstream
+changed. `club_shelf_prefill()` does the filling for both the game and the poll
+flows, so they cannot drift.
+
+**This is what the shelf's `bgg_id` is for.** A club row stores only what a
+library needs (name, year, art, link); a game form also wants playing time,
+weight and player count, and those come from BGG. So a BGG-sourced pick fetches
+the full record exactly as choosing a search result does. The fetch is
+BEST-EFFORT: with no outbound route the form still opens with everything the
+shelf knows and the rest at defaults, because refusing would break the feature
+precisely when the ordinary BGG search is broken too. A hand-added shelf entry
+has no record to enrich it with, so it stays a manual game and carries its
+custom link across.
+
 **The public game list can be split three ways** (`library_pagination`:
 `all` | `pages` | `alpha`, defaulting to `all` so an upgrade changes nothing).
 All three slice the ALREADY-MERGED list in PHP rather than pushing `LIMIT` into
