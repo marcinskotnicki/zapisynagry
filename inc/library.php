@@ -1139,25 +1139,62 @@ function library_bgg_version_id_from_link($raw) {
 function library_parse_version_page($html) {
     if (!is_string($html) || trim($html) === '') return null;
 
-    /* BGG renders these pages from a JSON blob embedded in the markup, so the
-     * structured fields are tried first and the plain link is the fallback. */
-    $gameId = 0;
-    if (preg_match('~[\'"]objectid[\'"]\s*:\s*[\'"]?(\d+)~i', $html, $m)) {
-        $gameId = (int)$m[1];
+    /* ANCHORED ON THE INFOTABLE, not on the first /boardgame link in the page.
+     * A version page carries dozens of unrelated game links — sidebars, "hot"
+     * lists, /boardgame/random — and taking the first one picked an entirely
+     * unrelated game (the first attempt at this returned 9209 for a page whose
+     * game is 210274). The infotable is the block that actually describes THIS
+     * version, and its "Board Game" row names the parent. */
+    if (!preg_match('~<table[^>]*class="[^"]*geekitem_infotable[^"]*"[^>]*>(.*?)</table>~is', $html, $tm)) {
+        return null;
     }
-    if ($gameId <= 0 && preg_match('~/boardgame/(\d+)~i', $html, $m)) {
-        $gameId = (int)$m[1];
+    $table = $tm[1];
+
+    // Absolute or relative: the live page uses the full URL, older markup did not.
+    if (!preg_match('~(?:https?://(?:www\.)?boardgamegeek\.com)?/boardgame/(\d+)~i', $table, $m)) {
+        return null;
     }
+    $gameId = (int)$m[1];
     if ($gameId <= 0) return null;
 
+    /* The edition's own title, which is the point of pasting a version link —
+     * the Polish printing of Petrichor is called "Aura". It sits in the
+     * linked-name block as nested divs, so tags are stripped rather than
+     * matched. Falls back to nothing, and the caller then keeps the game's own
+     * name. */
     $name = '';
-    if (preg_match('~<title>\s*(.*?)\s*(?:\||</title>)~is', $html, $m)) {
-        $name = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES, 'UTF-8'));
+    if (preg_match('~<div[^>]*id="edit_linkednameid"[^>]*>(.*?)</div>\s*</td>~is', $html, $nm)
+        || preg_match('~<div[^>]*id="edit_linkednameid"[^>]*>(.*)~is', $html, $nm)) {
+        $name = trim(html_entity_decode(strip_tags($nm[1]), ENT_QUOTES, 'UTF-8'));
+        // Nested divs can leave the rest of the page in $nm[1] on a loose
+        // match; a title is one line, so anything multi-line is not one.
+        $name = trim(preg_split('~[\r\n]~', $name)[0] ?? '');
+        if (mb_strlen($name) > 200) $name = '';
     }
 
+    /* THE COVER. Not the first image on the page: these pages carry ~90 tiny
+     * `__square30` UI icons (avatars, badges) and exactly one real cover, so
+     * taking the first match returns a 30px sprite. The cover is the one image
+     * that is NOT a square30 variant.
+     *
+     * Matched anywhere rather than in an src="" attribute, because the cover is
+     * served through srcset and a saved copy of the page rewrites src to a
+     * local file — the URL is present either way.
+     *
+     * A version with no art of its own yields the GAME's image here, which is
+     * the right answer rather than a miss. */
     $thumb = '';
-    if (preg_match('~<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)~i', $html, $m)) {
-        $thumb = $m[1];
+    /* The ')' is NOT a terminator: these URLs contain filter segments like
+     * `filters:strip_icc()`, and excluding it truncated every one of them
+     * mid-path. Stop at whitespace, quotes and commas only — a comma does
+     * separate srcset entries. */
+    if (preg_match_all('~https://cf\.geekdo-images\.com/[^\s"\',]+~i', $html, $ims)) {
+        foreach ($ims[0] as $candidate) {
+            if (stripos($candidate, '__square') !== false) continue;   // UI sprite
+            if (stripos($candidate, 'avatar') !== false) continue;
+            $thumb = rtrim($candidate, ',');
+            break;
+        }
     }
 
     return ['game_id' => $gameId, 'name' => $name, 'thumbnail' => $thumb];

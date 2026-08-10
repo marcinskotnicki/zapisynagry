@@ -957,11 +957,17 @@ name and cover come from the edition.
 **Resolving a version id needs the version's own PAGE, not the XML API.** The
 `thing` endpoint is documented for game ids; a version is a different kind of
 object, so there is no documented call mapping a version id back to its game.
-`library_parse_version_page()` is therefore pure and tolerant of several markup
-shapes, and returns null rather than a guess — a wrong parent id would file
-somebody's game under an unrelated title. **This is the one part of the library
-that has never been exercised against the live site**, since the container has
-no outbound route.
+`library_parse_version_page()` is therefore pure, and **anchored on
+`table.geekitem_infotable`** — the block that describes the version itself. That
+anchoring is the whole trick: a version page carries ~74 other `/boardgame/NNN`
+links (sidebars, hot lists) and ~150 `__square30` UI sprites BEFORE that table,
+so "first game link on the page" returns an unrelated game and "first image"
+returns a 30px icon. The first attempt did both. The edition's own title comes
+from `div#edit_linkednameid`, and a miss returns null rather than a guess.
+
+`tests/fixtures/bgg_version_page.html` is a trimmed copy of a real page, noise
+included on purpose: a fixture without those decoy links passes whether the
+parser is anchored or not, which is how the bug shipped in the first place.
 
 **A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
 name, year and thumbnail, drops the custom link, and from then on merges with
