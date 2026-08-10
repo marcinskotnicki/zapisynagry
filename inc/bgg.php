@@ -317,17 +317,23 @@ function bgg_parse_versions($xmlString) {
         $id = (int)($v['id'] ?? 0);
         if ($id <= 0) continue;
 
-        /* Every name the item carries, primary first. The primary is usually
-         * the nickname; a localised title, when present, is among these. */
-        $names = [];
-        $primary = '';
+        /* TWO different strings, and the distinction is the whole feature:
+         *
+         *   <name value="Polish edition"/>   — the NICKNAME. What the edition
+         *                                      is called on BGG. Not a title.
+         *   <canonicalname value="Aura"/>    — the TITLE this edition is
+         *                                      actually published under.
+         *
+         * The first attempt read only <name> and stored nicknames, so every
+         * edition of Petrichor came out called "Petrichor" (the fallback) and
+         * the localised titles never appeared. canonicalname is where they are. */
+        $nickname = '';
         foreach ($v->name ?? [] as $n) {
-            $val = trim((string)($n['value'] ?? ''));
-            if ($val === '') continue;
-            $names[] = $val;
-            if ((string)($n['type'] ?? '') === 'primary' && $primary === '') $primary = $val;
+            if ((string)($n['type'] ?? '') !== 'primary') continue;
+            $nickname = trim((string)($n['value'] ?? ''));
+            break;
         }
-        if ($primary === '' && $names) $primary = $names[0];
+        $title = trim((string)($v->canonicalname['value'] ?? ''));
 
         // Languages, so an English edition can be preselected for people who
         // do not care which one they get.
@@ -341,9 +347,10 @@ function bgg_parse_versions($xmlString) {
 
         $out[] = [
             'id'        => $id,
-            'name'      => $primary,
-            'nickname'  => $primary,
-            'names'     => $names,
+            // The title to store; falls back to the nickname only when BGG has
+            // no canonical name at all, which is better than an empty label.
+            'title'     => $title !== '' ? $title : $nickname,
+            'nickname'  => $nickname,
             'year'      => (int)($v->yearpublished['value'] ?? 0),
             'thumbnail' => trim((string)($v->thumbnail ?? '')),
             'image'     => trim((string)($v->image ?? '')),

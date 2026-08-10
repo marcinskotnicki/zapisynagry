@@ -957,12 +957,18 @@ button. Picking one stores that edition's title, cover and year, but the stored
 library entry when they picked different printings, and what the collection sync
 matches on.
 
-`library_version_title()` prefers an ALTERNATE name over the version's primary
-one, because the primary is usually a nickname ("Polish edition") and the
-alternate is the title the edition is actually sold under ("Aura"). Which BGG
-field carries which has not been verified against a live response, so **the
-chooser prints the resulting name beside every option** — a wrong guess is then
-visible before saving rather than found later as a shelf full of nicknames.
+**A version carries TWO strings and they are easy to confuse** — getting it
+wrong shipped twice:
+
+    <name value="Polish edition"/>   the NICKNAME. Not a title.
+    <canonicalname value="Aura"/>    the TITLE it is published under.
+
+`bgg_parse_versions()` returns both, as `nickname` and `title`. The chooser shows
+the title as each row's heading (it is what gets stored) with the
+nickname/year/language underneath (that is what tells two editions apart), and
+picking an edition stores its title, cover and year. There is deliberately no
+separate title control: the edition already answers that question, so a dropdown
+would be a second conflicting way to set the same field.
 
 **A link that turns out to point at BGG PROMOTES the entry** — it adopts BGG's
 name, year and thumbnail, drops the custom link, and from then on merges with

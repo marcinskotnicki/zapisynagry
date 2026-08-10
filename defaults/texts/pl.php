@@ -66,5 +66,5 @@ return [
 
     // Wspólna biblioteka klubu.
     'msg_library' =>
-        'TTu prezentujemy gry z biblioteczki klubu, a w osobnych zakładkach: prywatne gry jego członków oraz wszystkie gry zebrane razem. Pamiętaj: O przyniesieniu gry prywatnej decyduje zawsze jej właściciel, możesz do niego napisać z zapytaniem, jeśli włączył taką opcję.',
+        'Tu prezentujemy gry z biblioteczki klubu, a w osobnych zakładkach: prywatne gry jego członków oraz wszystkie gry zebrane razem. Pamiętaj: O przyniesieniu gry prywatnej decyduje zawsze jej właściciel, możesz do niego napisać z zapytaniem, jeśli włączył taką opcję.',
 ];

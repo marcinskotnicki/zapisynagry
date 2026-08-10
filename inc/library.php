@@ -1070,17 +1070,15 @@ function library_link_field_visible() {
 function library_apply_version_choice(array $entry, $gameId, array $post) {
     require_once __DIR__ . '/bgg.php';
 
-    $wantTitle = trim((string)($post['title'] ?? ''));
-    if ($wantTitle !== '') {
-        $thing = bgg_thing((int)$gameId);
-        $known = $thing['names'] ?? [];
-        if (in_array($wantTitle, $known, true)) $entry['name'] = $wantTitle;
-    }
-
     $wantVersion = (int)($post['version'] ?? 0);
     if ($wantVersion > 0) {
         foreach (bgg_versions((int)$gameId) as $v) {
             if ((int)$v['id'] !== $wantVersion) continue;
+            /* The edition's OWN title, from BGG's canonicalname — this is what
+             * files a Polish printing as "Aura" rather than "Petrichor", and it
+             * overrides the title dropdown because it is the more specific
+             * answer: the person picked this exact edition. */
+            if (!empty($v['title']))     $entry['name']      = $v['title'];
             if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
             if (!empty($v['year']))      $entry['year']      = $v['year'];
             break;
@@ -1096,9 +1094,12 @@ function library_apply_version_choice(array $entry, $gameId, array $post) {
  * @return string
  */
 function library_version_label(array $version) {
+    // The nickname, year and language — what tells two editions apart. The
+    // TITLE is shown separately and more prominently, because that is the
+    // string that will actually be stored.
     $bits = [];
-    if (!empty($version['name'])) $bits[] = $version['name'];
-    if (!empty($version['year'])) $bits[] = '(' . (int)$version['year'] . ')';
+    if (!empty($version['nickname'])) $bits[] = $version['nickname'];
+    if (!empty($version['year']))     $bits[] = '(' . (int)$version['year'] . ')';
     if (!empty($version['languages'])) $bits[] = implode(', ', $version['languages']);
     return implode(' ', $bits);
 }

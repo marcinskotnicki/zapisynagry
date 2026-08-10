@@ -68,10 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // More than one edition: ask which, exactly as a member's own shelf
             // does. Rendered straight away so the fetched list is used now.
             $versions = bgg_versions((int)$entry['bgg_id']);
-            if (count($versions) > 1 || count($entry['names'] ?? []) > 1) {
+            if (count($versions) > 1) {
                 $tab_body = tpl_capture('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
-                                   'names' => $entry['names'] ?? [$entry['name']]],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
                     'versions' => $versions,
                     'row_id'   => 0,
                     'action'   => 'admin.php?tab=club_shelf',
@@ -113,8 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $flashKind = 'error';
             } else {
                 $tab_body = tpl_capture('lib_version_pick', [
-                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
-                                   'names' => $game['names'] ?? [$game['name']]],
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name']],
                     'versions' => bgg_versions((int)$row['bgg_id']),
                     'row_id'   => (int)$row['id'],
                     'action'   => 'admin.php?tab=club_shelf',

@@ -103,11 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $versions = bgg_versions((int)$entry['bgg_id']);
             // Offered when there is a real choice to make: several editions, or
             // several titles the game is sold under.
-            if (count($versions) > 1 || count($entry['names'] ?? []) > 1) {
+            if (count($versions) > 1) {
                 tpl_render('header', ['page_title' => t('lib_my_title')]);
                 tpl_render('lib_version_pick', [
-                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name'],
-                                   'names' => $entry['names'] ?? [$entry['name']]],
+                    'game'     => ['id' => (int)$entry['bgg_id'], 'name' => $entry['name']],
                     'versions' => $versions,
                     'row_id'   => 0,
                     'action'   => 'my_library.php',
@@ -152,8 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 tpl_render('header', ['page_title' => t('lib_my_title')]);
                 tpl_render('lib_version_pick', [
-                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name'],
-                                   'names' => $game['names'] ?? [$game['name']]],
+                    'game'     => ['id' => (int)$row['bgg_id'], 'name' => $game['name']],
                     'versions' => bgg_versions((int)$row['bgg_id']),
                     'row_id'   => $rowId,
                     'action'   => 'my_library.php',
