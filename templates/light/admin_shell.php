@@ -20,7 +20,11 @@
 // (Keep in sync with admin.php's $TABS whitelist.)
 $tabs = [
     'archive'    => 'tab_archive',
-    'new_event'  => 'tab_new_event',
+    // 'new_event' is deliberately NOT here. It is still a real tab — the
+    // screen, its controller and its URL are unchanged — but with this many
+    // tabs the nav had become the crowded part, and creating an event is an
+    // action taken FROM the events list rather than a place to browse to. The
+    // button at the top of that list links here.
     'thumbnails' => 'tab_thumbnails',
     'options'    => 'tab_options',
     'logs'       => 'tab_logs',

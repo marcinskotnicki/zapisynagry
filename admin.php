@@ -21,6 +21,10 @@ $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (u
 // Order is the order they appear, and the FIRST is the default landing tab —
 // events, because that is what an admin opens the panel to look at. Update is
 // deliberately last: it is the one that changes code rather than content.
+// 'new_event' stays here — it is a real screen with a real URL — but it is not
+// in the nav (see admin_shell.php): it is reached by the button at the top of
+// the events list, because creating an event is an action taken from that list
+// rather than somewhere to browse to.
 $TABS = ['archive', 'new_event', 'thumbnails', 'options', 'logs',
          'texts', 'users', 'mailing'];
 // The chat tab exists only while the feature does. Removed from the whitelist

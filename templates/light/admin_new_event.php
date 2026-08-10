@@ -63,7 +63,14 @@ $dayLabel = function($i) {
             <input type="number" id="ev_days" name="num_days" min="1" max="60" value="<?= e($num_days) ?>" required>
         </div>
 
-        <button type="submit" class="btn btn-primary"><?= e(t('newevent_next')) ?></button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('newevent_next')) ?></button>
+            <?php // A way back, now that this screen is reached by a button on the
+                  // events list rather than by a nav tab — without it the only
+                  // exit is another tab, which loses what was typed with no hint
+                  // that it would. ?>
+            <a class="btn" href="admin.php?tab=archive"><?= e(t('back')) ?></a>
+        </div>
     </form>
 
 <?php else: ?>

@@ -11,6 +11,14 @@
  *    $base   — link prefix ending in "index.php?e="; the token is appended here.
  * ============================================================================= */
 ?>
+<?php // Creating an event is the thing an admin most often comes to this list to
+      // do, so it leads rather than hiding among the tabs. Above the table, and
+      // outside the empty check below — a site with no events yet is exactly
+      // when this button matters most. ?>
+<p class="admin-newevent">
+    <a class="btn btn-primary btn-big" href="admin.php?tab=new_event"><?= e(t('tab_new_event')) ?></a>
+</p>
+
 <?php if (empty($events)): ?>
     <p class="muted"><?= e(t('archive_none')) ?></p>
 <?php else: ?>
