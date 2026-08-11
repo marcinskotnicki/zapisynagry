@@ -39,7 +39,7 @@
 .tpl-dark .players .signup-btn { display: block; width: fit-content; margin-left: auto; }
 
 .tpl-dark input, .tpl-dark select, .tpl-dark textarea {
-    background: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
     color: var(--text);
     border: 1px solid var(--border);
 }
