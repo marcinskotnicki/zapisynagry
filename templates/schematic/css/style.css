@@ -540,7 +540,7 @@ body.tpl-schematic {
 .tpl-schematic .msg-icon { color: var(--chan); }
 
 .tpl-schematic input, .tpl-schematic select, .tpl-schematic textarea {
-    background: var(--paper-2);
+    background-color: var(--paper-2);
     border: 1px solid var(--rule);
     color: var(--ink);
     border-radius: 0;

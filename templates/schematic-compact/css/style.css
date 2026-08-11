@@ -443,7 +443,7 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .msg-icon { color: var(--chan); }
 
 .tpl-schematic-compact input, .tpl-schematic-compact select, .tpl-schematic-compact textarea {
-    background: var(--paper-2);
+    background-color: var(--paper-2);
     border: 1px solid var(--rule);
     color: var(--ink);
     border-radius: 0;

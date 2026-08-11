@@ -304,7 +304,7 @@ body.tpl-space {
 .tpl-space .signup-btn:hover { background: rgba(88, 166, 232, .26); }
 
 .tpl-space input, .tpl-space select, .tpl-space textarea {
-    background: rgba(8, 13, 26, .7);
+    background-color: rgba(8, 13, 26, .7);
     border: 1px solid var(--border);
     color: var(--ceramic);
     border-radius: 3px;

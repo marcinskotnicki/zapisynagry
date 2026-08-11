@@ -369,7 +369,7 @@ body.tpl-glass {
 }
 
 .tpl-glass input, .tpl-glass select, .tpl-glass textarea {
-    background: rgba(255, 255, 255, .10);
+    background-color: rgba(255, 255, 255, .10);
     border: 1px solid var(--edge-soft);
     border-radius: 12px;
     color: var(--frost);

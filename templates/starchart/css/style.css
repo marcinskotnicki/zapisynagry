@@ -386,7 +386,7 @@ body.tpl-starchart {
 .tpl-starchart .btn-danger:hover { background: linear-gradient(180deg, #e56680, #c93b58); }
 
 .tpl-starchart input, .tpl-starchart select, .tpl-starchart textarea {
-    background: #fffdf5;
+    background-color: #fffdf5;
     border: 1px solid var(--gold-dim);
     border-radius: 10px;
     color: var(--ink);

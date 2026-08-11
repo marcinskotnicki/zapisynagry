@@ -361,7 +361,7 @@ body.tpl-imperial {
 .tpl-imperial .btn-danger:hover { background: var(--imperial); border-color: #5e1109; color: #f2e9d6; }
 
 .tpl-imperial input, .tpl-imperial select, .tpl-imperial textarea {
-    background: rgba(20, 17, 14, .8);
+    background-color: rgba(20, 17, 14, .8);
     border: 1px solid rgba(168, 134, 63, .4);
     color: var(--vellum);
     border-radius: 0;

@@ -309,7 +309,7 @@ body.tpl-elvish {
 .tpl-elvish .signup-btn:hover { background: rgba(201, 162, 39, .26); }
 
 .tpl-elvish input, .tpl-elvish select, .tpl-elvish textarea {
-    background: var(--moss-deep);
+    background-color: var(--moss-deep);
     border: 1px solid rgba(201, 162, 39, .35);
     color: var(--vellum);
     border-radius: 2px;

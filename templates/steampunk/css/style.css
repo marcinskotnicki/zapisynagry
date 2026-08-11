@@ -328,7 +328,7 @@ body.tpl-steampunk {
 .tpl-steampunk .btn-danger:hover { background: linear-gradient(#d9633a, var(--ember)); border-color: #7d2c11; color: #fff5ef; }
 
 .tpl-steampunk input, .tpl-steampunk select, .tpl-steampunk textarea {
-    background: rgba(0, 0, 0, .35);
+    background-color: rgba(0, 0, 0, .35);
     border: 1px solid var(--brass-dark);
     color: var(--parchment);
     border-radius: 2px;

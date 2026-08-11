@@ -438,7 +438,7 @@ body.tpl-ironworks {
 .tpl-ironworks .btn-danger:hover { background: linear-gradient(180deg, #b84040, #922f2f); }
 
 .tpl-ironworks input, .tpl-ironworks select, .tpl-ironworks textarea {
-    background: #f3ecda;
+    background-color: #f3ecda;
     border: 1px solid var(--parchment-3);
     border-radius: 2px;
     color: var(--text);
