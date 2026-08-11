@@ -938,6 +938,18 @@ written before the column existed have `image` NULL and are upgraded on the fly
 where it is safe — when their crop is the GAME's own, no edition was chosen, so
 the size can be raised without changing which picture is shown.
 
+**A sync has three modes** (`library_sync_mode()`): add only, add and fill
+gaps, or a full sync that also DELETES what is no longer on BGG. Only the last
+is destructive, so only it demands the confirmation checkbox — the other two
+used to make people tick a warning about removal that did not apply. An
+unrecognised mode falls back to add-only, never to full: a garbled request must
+not be the thing that wipes a shelf.
+
+`library_sync_fill_row()` fills EMPTY fields only, and the name is not among
+the columns it may touch — it is not even selected into the row it sees. A club
+that corrected its wrong-language titles would otherwise watch them revert to
+English on every sync, which is precisely what renaming exists to fix.
+
 **Rows written before `image` existed are topped up by the SYNC button**, not
 guessed at. The on-the-fly upgrade only recognises a crop that is the GAME's
 own; a row added by picking an edition carries that edition's crop and never

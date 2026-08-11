@@ -474,26 +474,102 @@ function club_shelf_relink_bgg($rowId, $link, $name = null) {
  * @param array $collection  From library_parse_collection().
  * @return array  ['added'=>int, 'removed'=>int, 'kept'=>int]
  */
-function club_shelf_sync_from_collection(array $collection) {
-    $haveRows = db_all('SELECT id, bgg_id FROM club_library_games WHERE bgg_id IS NOT NULL');
+/**
+ * The three ways a sync may treat what is already on a shelf.
+ *
+ * @return array
+ */
+function library_sync_modes() {
+    return ['add', 'update', 'full'];
+}
+
+/**
+ * Normalise a submitted sync mode, defaulting to the SAFEST one.
+ *
+ * An unrecognised value falls back to 'add' rather than 'full': a mangled or
+ * hand-built request must not be the thing that deletes somebody's shelf.
+ *
+ * @param mixed $raw
+ * @return string
+ */
+function library_sync_mode($raw) {
+    $raw = (string)$raw;
+    return in_array($raw, library_sync_modes(), true) ? $raw : 'add';
+}
+
+/**
+ * Fill in what a shelf row is MISSING from its BGG entry.
+ *
+ * WHAT IT DELIBERATELY DOES NOT DO is overwrite a value that is already there.
+ * A row's name may have been corrected by hand (BGG hands back wrong-language
+ * titles, which is why renaming exists), and its picture may be a chosen
+ * edition's. Refreshing those on every sync would silently undo both, and a
+ * club would find its Polish titles reverting to English every time somebody
+ * pressed the button.
+ *
+ * So an update fills the gaps — most usefully the full-size `image` that older
+ * rows lack — and leaves every deliberate choice alone.
+ *
+ * @param string $table  'club_library_games' or 'library_games'
+ * @param array  $row    The existing row (id + current values).
+ * @param array  $g      The BGG collection entry.
+ * @return bool          Whether anything changed.
+ */
+function library_sync_fill_row($table, array $row, array $g) {
+    if ($table !== 'club_library_games' && $table !== 'library_games') return false;
+
+    $set = [];
+    $args = [];
+    foreach (['year', 'thumbnail', 'image', 'link'] as $col) {
+        if (!array_key_exists($col, $row)) continue;          // column not selected
+        if (!empty($row[$col])) continue;                     // already set: leave it
+        if (empty($g[$col])) continue;                        // nothing to fill it with
+        $set[] = $col . ' = ?';
+        $args[] = ($col === 'year') ? (int)$g[$col] : $g[$col];
+    }
+    if (!$set) return false;
+
+    $args[] = (int)$row['id'];
+    db_run('UPDATE ' . $table . ' SET ' . implode(', ', $set) . ' WHERE id = ?', $args);
+    return true;
+}
+
+function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
+    $mode = library_sync_mode($mode);
+    $haveRows = db_all('SELECT id, bgg_id, year, thumbnail, image, link
+                          FROM club_library_games WHERE bgg_id IS NOT NULL');
     $have = [];
-    foreach ($haveRows as $r) $have[(int)$r['bgg_id']] = (int)$r['id'];
+    $rows = [];
+    foreach ($haveRows as $r) {
+        $have[(int)$r['bgg_id']] = (int)$r['id'];
+        $rows[(int)$r['bgg_id']] = $r;
+    }
 
     $wanted = [];
     foreach ($collection as $g) $wanted[(int)$g['bgg_id']] = $g;
 
     $added = 0;
     $removed = 0;
+    $updated = 0;
     db()->beginTransaction();
     try {
         foreach ($wanted as $id => $g) {
-            if (isset($have[$id])) continue;
+            if (isset($have[$id])) {
+                // Only 'add' leaves existing rows completely untouched.
+                if ($mode !== 'add' && library_sync_fill_row('club_library_games', $rows[$id], $g)) {
+                    $updated++;
+                }
+                continue;
+            }
             if (club_shelf_add($g)) $added++;
         }
-        foreach ($have as $id => $rowId) {
-            if (isset($wanted[$id])) continue;
-            db_run('DELETE FROM club_library_games WHERE id = ?', [$rowId]);
-            $removed++;
+        // DELETION IS THE ONE DESTRUCTIVE STEP, and only the full mode does it.
+        if ($mode === 'full') {
+            foreach ($have as $id => $rowId) {
+                if (isset($wanted[$id])) continue;
+                db_run('DELETE FROM club_library_games WHERE id = ?', [$rowId]);
+                $removed++;
+            }
         }
         db()->commit();
     } catch (Throwable $e) {
@@ -501,7 +577,8 @@ function club_shelf_sync_from_collection(array $collection) {
         throw $e;
     }
 
-    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed];
+    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed,
+            'updated' => $updated];
 }
 
 /**
@@ -1535,28 +1612,43 @@ function library_fetch_collection($username, &$why = null) {
  * @param array $collection  From library_parse_collection().
  * @return array  ['added'=>int, 'removed'=>int, 'kept'=>int]
  */
-function library_sync_from_collection($userId, array $collection) {
+function library_sync_from_collection($userId, array $collection, $mode = 'full') {
     $userId = (int)$userId;
+    $mode   = library_sync_mode($mode);
 
-    $haveRows = db_all('SELECT id, bgg_id FROM library_games WHERE user_id = ? AND bgg_id IS NOT NULL', [$userId]);
+    $haveRows = db_all('SELECT id, bgg_id, year, thumbnail, image, link
+                          FROM library_games WHERE user_id = ? AND bgg_id IS NOT NULL', [$userId]);
     $have = [];
-    foreach ($haveRows as $r) $have[(int)$r['bgg_id']] = (int)$r['id'];
+    $rows = [];
+    foreach ($haveRows as $r) {
+        $have[(int)$r['bgg_id']] = (int)$r['id'];
+        $rows[(int)$r['bgg_id']] = $r;
+    }
 
     $wanted = [];
     foreach ($collection as $g) $wanted[(int)$g['bgg_id']] = $g;
 
     $added = 0;
     $removed = 0;
+    $updated = 0;
     db()->beginTransaction();
     try {
         foreach ($wanted as $id => $g) {
-            if (isset($have[$id])) continue;
+            if (isset($have[$id])) {
+                if ($mode !== 'add' && library_sync_fill_row('library_games', $rows[$id], $g)) {
+                    $updated++;
+                }
+                continue;
+            }
             if (library_add($userId, $g)) $added++;
         }
-        foreach ($have as $id => $rowId) {
-            if (isset($wanted[$id])) continue;
-            db_run('DELETE FROM library_games WHERE id = ? AND user_id = ?', [$rowId, $userId]);
-            $removed++;
+        // Only the full mode removes anything.
+        if ($mode === 'full') {
+            foreach ($have as $id => $rowId) {
+                if (isset($wanted[$id])) continue;
+                db_run('DELETE FROM library_games WHERE id = ? AND user_id = ?', [$rowId, $userId]);
+                $removed++;
+            }
         }
         db()->commit();
     } catch (Throwable $e) {
@@ -1564,5 +1656,6 @@ function library_sync_from_collection($userId, array $collection) {
         throw $e;
     }
 
-    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed];
+    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed,
+            'updated' => $updated];
 }

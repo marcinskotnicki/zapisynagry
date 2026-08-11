@@ -17,6 +17,7 @@
         initSecretFields();
         initVersionPick();
         initClubFilter();
+        initSyncMode();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -698,6 +699,41 @@
                     if (groups[j] !== this && groups[j].open) groups[j].open = false;
                 }
             });
+        }
+    }
+
+    /* 15. The sync form's confirmation only belongs to the mode that deletes.
+     *
+     * Asking somebody to tick "I understand games will be removed" before an
+     * add-only sync is both untrue and the kind of prompt people learn to click
+     * through. So the box appears for the destructive mode and is hidden —
+     * and unticked, and un-required — for the other two.
+     *
+     * The server does not rely on any of this: it demands the confirmation for
+     * the deleting mode regardless of what the form sent.
+     */
+    function initSyncMode() {
+        var boxes = document.querySelectorAll('.js-sync-confirm');
+        for (var i = 0; i < boxes.length; i++) {
+            (function (wrap) {
+                var form = wrap.closest ? wrap.closest('form') : null;
+                if (!form) return;
+                var select = form.querySelector('select[name="mode"]');
+                var check  = wrap.querySelector('input[type="checkbox"]');
+                if (!select || !check) return;
+                var danger = wrap.getAttribute('data-danger-mode') || 'full';
+
+                function apply() {
+                    var risky = (select.value === danger);
+                    wrap.hidden = !risky;
+                    check.required = risky;
+                    // Unticked when hidden, so a previous choice cannot be
+                    // carried invisibly into a later submission.
+                    if (!risky) check.checked = false;
+                }
+                select.addEventListener('change', apply);
+                apply();
+            })(boxes[i]);
         }
     }
 

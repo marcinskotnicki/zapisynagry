@@ -257,7 +257,24 @@
                 <input type="text" id="bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…" required>
                 <p class="field-note"><?= e(t('lib_sync_manual_note')) ?></p>
             </div>
-            <div class="field field-check field-confirm">
+            <?php // WHAT the sync is allowed to do, rather than a bare "are you
+                  // sure". Only the last option deletes anything, so the two safe
+                  // ones no longer make people tick a warning about removal that
+                  // does not apply to them. ?>
+            <div class="field field-syncmode">
+                <label for="ml_sync_mode"><?= e(t('lib_sync_mode')) ?></label>
+                <select id="ml_sync_mode" name="mode">
+                    <?php foreach (library_sync_modes() as $sm): ?>
+                        <option value="<?= e($sm) ?>"<?= $sm === 'add' ? ' selected' : '' ?>>
+                            <?= e(t('lib_sync_mode_' . $sm)) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="field-note"><?= e(t('lib_sync_mode_note')) ?></p>
+            </div>
+            <?php // Still required, but only the deleting option is worth confirming;
+                  // the script unticks and hides this for the other two. ?>
+            <div class="field field-check field-confirm js-sync-confirm" data-danger-mode="full">
                 <label>
                     <input type="checkbox" name="confirm" value="1" required>
                     <?= e(t('lib_sync_confirm')) ?>

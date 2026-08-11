@@ -143,10 +143,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'sync') {
-        /* The confirmation is required because this DELETES games. Checked
+        /* The confirmation is required ONLY for the mode that deletes. Checked
          * server-side rather than relying on the checkbox's `required`, which a
-         * client can simply not send. */
-        if (empty($_POST['confirm'])) {
+         * client can simply not send — and an unrecognised mode falls back to
+         * the safest one, so a mangled request cannot become a full wipe. */
+        $syncMode = library_sync_mode($_POST['mode'] ?? '');
+        if ($syncMode === 'full' && empty($_POST['confirm'])) {
             $flash = t('lib_sync_confirm_required');
             $flashKind = 'error';
         } else {
@@ -161,10 +163,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $flash = t('lib_sync_failed', $why);
                     $flashKind = 'error';
                 } else {
-                    $res = club_shelf_sync_from_collection($collection);
-                    log_action('club_shelf_sync',
-                        '+' . $res['added'] . ' -' . $res['removed'] . ' =' . $res['kept']);
+                    $res = club_shelf_sync_from_collection($collection, $syncMode);
+                    log_action('club_shelf_sync', $syncMode
+                        . ' +' . $res['added'] . ' -' . $res['removed'] . ' =' . $res['kept']
+                        . ' ~' . $res['updated']);
                     $flash = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+                    if (!empty($res['updated'])) $flash .= ' ' . t('lib_sync_updated', $res['updated']);
 
                     /* Also top up the full-size pictures of games added before
                      * they were recorded, which is why a synced shelf could

@@ -9,8 +9,9 @@
  *    add_manual— a name, and optionally a link, for anything not on BGG.
  *    remove    — drop one entry.
  *    sync      — replace the BGG-sourced half of this library with a BGG user's
- *                owned collection. DESTRUCTIVE by design, so the form says so
- *                and the POST carries an explicit confirmation checkbox.
+ *                owned collection. What it may do is chosen on the form:
+ *                add only, add and fill gaps, or a full sync that also
+ *                DELETES. Only the last needs the confirmation checkbox.
  *
  *  EVERY ACTION IS SCOPED TO THE SIGNED-IN MEMBER. Nothing here takes a user id
  *  from the request: a member can only ever edit their own library, so a
@@ -184,10 +185,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($action === 'sync') {
-        // The confirmation is required because this DELETES games. Checked
-        // server-side rather than relying on the checkbox's `required`, which
-        // a client can simply not send.
-        if (empty($_POST['confirm'])) {
+        /* The confirmation is required ONLY for the mode that deletes. Checked
+         * server-side rather than relying on the checkbox's `required`, which a
+         * client can simply not send — and an unrecognised mode falls back to
+         * the safest one, so a mangled request cannot become a full wipe. */
+        $syncMode = library_sync_mode($_POST['mode'] ?? '');
+        if ($syncMode === 'full' && empty($_POST['confirm'])) {
             flash_set(t('lib_sync_confirm_required'), 'error');
         } else {
             $user = library_bgg_user_from_input($_POST['bgg_user'] ?? '');
@@ -199,8 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($collection === null) {
                     flash_set(t('lib_sync_failed', $why), 'error');
                 } else {
-                    $res = library_sync_from_collection($me['id'], $collection);
+                    $res = library_sync_from_collection($me['id'], $collection, $syncMode);
                     $msg = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+                    if (!empty($res['updated'])) $msg .= ' ' . t('lib_sync_updated', $res['updated']);
                     // Same top-up as the club shelf: fill in full-size pictures
                     // for games added before those were recorded.
                     $fill = library_backfill_images('library_games');
