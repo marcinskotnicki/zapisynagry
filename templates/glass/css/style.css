@@ -48,6 +48,10 @@ body.tpl-glass {
     font-family: var(--font-gl);
 }
 
+.tpl-glass .day-tabs{
+    gap:0.55 rem;
+}
+
 .tpl-glass h1, .tpl-glass h2, .tpl-glass h3,
 .tpl-glass .btn, .tpl-glass input, .tpl-glass select, .tpl-glass textarea {
     font-family: var(--font-gl);
