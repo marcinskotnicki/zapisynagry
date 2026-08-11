@@ -925,6 +925,19 @@ precisely when the ordinary BGG search is broken too. A hand-added shelf entry
 has no record to enrich it with, so it stays a manual game and carries its
 custom link across.
 
+**A library row stores TWO picture URLs**, `thumbnail` and `image`. BGG gives a
+fit-in/200x150 crop and an original, and they cannot be derived from each other:
+the asset id matches but the **path hash differs between sizes**, because BGG
+signs these URLs — rewriting `__small` into `__original` yields a link that will
+not load. Checked against a real pair, not assumed.
+
+So both are kept. Library lists draw dozens of covers at 40px and use the crop;
+a game put on a table uses the original. Storing only the crop is what put
+miniatures on tables next to full-size art from the ordinary BGG path. Rows
+written before the column existed have `image` NULL and are upgraded on the fly
+where it is safe — when their crop is the GAME's own, no edition was chosen, so
+the size can be raised without changing which picture is shown.
+
 **The public game list can be split three ways** (`library_pagination`:
 `all` | `pages` | `alpha`, defaulting to `all` so an upgrade changes nothing).
 All three slice the ALREADY-MERGED list in PHP rather than pushing `LIMIT` into

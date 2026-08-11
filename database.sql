@@ -657,6 +657,12 @@ CREATE TABLE library_games (
     bgg_id     INTEGER,                      -- NULL for games added outside BGG
     link       TEXT,                         -- custom URL for non-BGG entries
     thumbnail  TEXT,                         -- remote BGG image URL, NULL when none
+    -- The FULL-SIZE version of that picture. Kept alongside rather than instead
+    -- of it: the library lists dozens of covers at 40px, where pulling
+    -- originals would be wasteful, but a game card shows one big. The two URLs
+    -- cannot be derived from each other — BGG signs them, and the path hash
+    -- differs between sizes — so both are stored.
+    image      TEXT,
     -- 0 hides the game from the PUBLIC library while leaving it in the owner's
     -- own list: lent to a friend, left at a parent's house, in a box in the
     -- loft. Defaults to 1 so nothing a member already added disappears when an
@@ -697,6 +703,7 @@ CREATE TABLE club_library_games (
     bgg_id     INTEGER UNIQUE,               -- NULL for games added outside BGG
     link       TEXT,
     thumbnail  TEXT,
+    image      TEXT,               -- full-size counterpart; see library_games
     is_active  INTEGER NOT NULL DEFAULT 1,   -- 0 hides it from the public view
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

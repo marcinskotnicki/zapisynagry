@@ -257,18 +257,28 @@ function club_shelf_prefill(array $form, array $row) {
             $form['max_players']    = $detail['maxplayers'] ?: $form['max_players'];
         }
 
-        /* THE SHELF'S OWN COVER WINS, and it is applied AFTER the lookup rather
-         * than before it.
+        /* THE PICTURE THAT GOES ON THE TABLE, largest available first.
          *
-         * A club row may hold a deliberately chosen edition — somebody picked
-         * the Polish printing, so the row carries that box art and that title.
-         * Overwriting it with BGG's generic game image throws that away, which
-         * is exactly what happened: the cover was set first and then replaced
-         * on the next line, so every pick came through with the default
-         * picture. The name never had this problem, being set once.
+         * 1. the row's own `image` — the full-size art of whatever edition was
+         *    chosen. Exactly right, and the reason the column exists.
+         * 2. BGG's full-size game image, but ONLY when the row's small
+         *    thumbnail is the game's own. That means no edition was picked, so
+         *    upgrading the size changes nothing but the resolution. Rows added
+         *    before `image` existed land here and come out big, without a
+         *    migration.
+         * 3. the row's small thumbnail — an edition cover from an older row.
+         *    Small, but it is the RIGHT picture, and swapping it for a
+         *    bigger-but-wrong one is the trade the previous version made.
          *
-         * BGG's image is the FALLBACK, for a shelf row with no art of its own. */
-        if (!empty($row['thumbnail'])) {
+         * The two URLs cannot be derived from each other: BGG signs them and
+         * the path hash differs between sizes, so string-rewriting a small URL
+         * into an original produces a link that will not load. */
+        if (!empty($row['image'])) {
+            $form['thumbnail'] = $row['image'];
+        } elseif ($detail && !empty($detail['image'])
+                  && (empty($row['thumbnail']) || $row['thumbnail'] === ($detail['thumbnail'] ?? ''))) {
+            $form['thumbnail'] = $detail['image'];
+        } elseif (!empty($row['thumbnail'])) {
             $form['thumbnail'] = $row['thumbnail'];
         } elseif ($detail) {
             $form['thumbnail'] = $detail['image'] ?: ($detail['thumbnail'] ?: $form['thumbnail']);
@@ -326,14 +336,16 @@ function club_shelf_add(array $game) {
     // rowCount(), not lastInsertId(): the latter is connection-wide and stale
     // when INSERT OR IGNORE skips, which made every duplicate report success.
     $stmt = db_run(
-        'INSERT OR IGNORE INTO club_library_games (name, year, bgg_id, link, thumbnail)
-         VALUES (?,?,?,?,?)',
+        'INSERT OR IGNORE INTO club_library_games (name, year, bgg_id, link, thumbnail, image)
+         VALUES (?,?,?,?,?,?)',
         [
             $name,
             !empty($game['year']) ? (int)$game['year'] : null,
             !empty($game['bgg_id']) ? (int)$game['bgg_id'] : null,
             !empty($game['link']) ? $game['link'] : null,
             !empty($game['thumbnail']) ? $game['thumbnail'] : null,
+            // Full-size counterpart, for when this game reaches a table.
+            !empty($game['image']) ? $game['image'] : null,
         ]
     );
     return $stmt->rowCount() > 0;
@@ -871,8 +883,8 @@ function library_add($userId, array $game) {
      * never written. library_sync_from_collection() counts additions with this
      * return value, and would have overreported every re-sync. */
     $stmt = db_run(
-        'INSERT OR IGNORE INTO library_games (user_id, name, year, bgg_id, link, thumbnail)
-         VALUES (?,?,?,?,?,?)',
+        'INSERT OR IGNORE INTO library_games (user_id, name, year, bgg_id, link, thumbnail, image)
+         VALUES (?,?,?,?,?,?,?)',
         [
             (int)$userId,
             $name,
@@ -880,6 +892,7 @@ function library_add($userId, array $game) {
             !empty($game['bgg_id']) ? (int)$game['bgg_id'] : null,
             !empty($game['link']) ? $game['link'] : null,
             !empty($game['thumbnail']) ? $game['thumbnail'] : null,
+            !empty($game['image']) ? $game['image'] : null,
         ]
     );
     return $stmt->rowCount() > 0;
@@ -1137,11 +1150,13 @@ function library_apply_version_choice(array $entry, $gameId, array $post) {
              *
              * The small one stays the fallback for a version that has no
              * original on file. */
-            if (!empty($v['image'])) {
-                $entry['thumbnail'] = $v['image'];
-            } elseif (!empty($v['thumbnail'])) {
-                $entry['thumbnail'] = $v['thumbnail'];
-            }
+            /* Both sizes again: the list shows the small crop, the table shows
+             * the original. Storing only the original made library lists pull
+             * full-size art; storing only the crop is what put miniatures on
+             * the tables. */
+            if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
+            if (!empty($v['image']))     $entry['image']     = $v['image'];
+            elseif (!empty($v['thumbnail'])) $entry['image'] = $v['thumbnail'];
             if (!empty($v['year'])) $entry['year'] = $v['year'];
             break;
         }
@@ -1212,7 +1227,10 @@ function library_entry_from_bgg_input($raw, &$why = null) {
         'name'      => $thing['name'],
         'year'      => $thing['year'] ?? 0,
         'bgg_id'    => $thing['id'],
+        // Both sizes: the small one for library lists, the full one for when
+        // this game is put on a table. They cannot be derived from each other.
         'thumbnail' => $thing['thumbnail'] ?? '',
+        'image'     => $thing['image'] ?? '',
     ];
 
     /* The EDITION is applied by the caller, not here: this returns the game as
