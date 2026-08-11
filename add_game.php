@@ -200,7 +200,9 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'table'   => $table, 'game' => $form, 'source' => $form['source'],
         'thumbs'  => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'captcha' => captcha_html(), 'error' => $error, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }
@@ -226,7 +228,9 @@ if (isset($_GET['id'])) {
         'table'   => $table, 'game' => $form, 'source' => 'bgg',
         'thumbs'  => [],                 // empty: the image is locked to the BGG one
         'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }
@@ -255,7 +259,9 @@ if (isset($_GET['club'])) {
             ? []
             : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }
@@ -284,7 +290,9 @@ if ($go === 'manual') {
         'table'   => $table, 'game' => $form, 'source' => 'manual',
         'thumbs'  => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }

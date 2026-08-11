@@ -92,6 +92,29 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
 
 /* ---- Rename a table (POST, interactive view only) ------------------------ */
 // The tiny edit button on a table block leads to an inline form (see the
+/* ---- Delete an EMPTY table (POST, admins only) ---------------------------
+ *
+ * Admin-only and empty-only, both re-checked here rather than trusted from the
+ * fact that a button was drawn. Emptiness is counted from the database, so a
+ * table holding a soft-deleted game is not empty — deleting cascades, and that
+ * history would go with it.
+ */
+if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_table') {
+    csrf_check();
+    if (is_admin()) {
+        $delId  = (int)($_POST['table_id'] ?? 0);
+        // Must belong to THIS event's active day — blocks stale or foreign ids.
+        $delRow = ($delId && $dayRow)
+            ? db_one('SELECT * FROM game_tables WHERE id = ? AND day_id = ?', [$delId, $dayRow['id']])
+            : null;
+        if ($delRow && table_is_empty($delId)) {
+            db_run('DELETE FROM game_tables WHERE id = ?', [$delId]);
+            log_action('table_delete', 'Table #' . $delRow['table_number']);
+        }
+    }
+    redirect('index.php?day=' . $activeDay);   // PRG: a refresh must not repeat it
+}
+
 // ?rename_table= handling below); this is where that form lands. An empty
 // name CLEARS the label (back to just "Table #N").
 if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'rename_table') {
@@ -174,6 +197,9 @@ tpl_render('front_event', [
     'max_reached' => $maxReached,
     'can_set_names'  => $canSetNames,    // show the optional name input on add-table
     'can_edit_names' => $canEditNames,   // show the tiny per-table rename button
+    // Admins may remove a table that has nothing on it at all. Decided here so
+    // the template does not run a query per table while rendering.
+    'can_del_tables' => !$readonly && is_admin(),
     'rename_table'   => $renameTable,    // table id whose inline rename form is open (0 = none)
     'csrf'        => csrf_field(),
 ]);

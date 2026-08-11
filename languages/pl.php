@@ -547,6 +547,11 @@ return [
     // ---- Add game -----------------------------------------------------------
     'addgame_title'       => 'Dodaj grę',
     'addgame_name'        => 'Nazwa gry',
+    'gvp_button'                    => 'Wybierz wydanie',
+    'gvp_intro'                     => 'Wybierz wydanie, które przyniesiesz. Nazwa i okładka pójdą za Twoim wyborem.',
+    'gvp_ok'                        => 'OK',
+    'opt_game_version_pick'         => 'Pozwól wybrać wydanie gry przy jej proponowaniu',
+    'opt_game_version_pick_note'    => 'Dodaje przycisk „wybierz wydanie” obok nazwy w formularzach dodawania gry i kandydata do ankiety, dla gier pobranych z BoardGameGeek. Przydatne w klubach grających na wydaniach lokalnych.',
     'addgame_from_bgg'    => 'Dodaj grę z BGG',
     'addgame_from_club'           => 'Dodaj grę z biblioteki klubu',
     'addgame_club_title'          => 'Gry klubowe',
@@ -867,6 +872,8 @@ Link wygasa za godzinę.',
     'opt_table_names_any'    => 'Każdy może nadawać i zmieniać nazwy stołów',
     'table_name_label'       => 'Nazwa stołu (opcjonalnie)',
     'table_rename'           => 'Zmień nazwę stołu',
+    'table_delete'            => 'Usuń ten stół',
+    'table_delete_confirm'    => 'Usunąć ten pusty stół?',
 
     // ---- Poll deadline live preview (JS, add_poll.php) --------------------------
     'poll_deadline_preview'   => 'Ankieta zostanie automatycznie rozstrzygnięta {date} ({weekday}) o godzinie {time}.',

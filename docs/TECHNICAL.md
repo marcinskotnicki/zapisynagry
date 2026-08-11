@@ -1052,6 +1052,19 @@ that is not offered cannot be used by posting it anyway.
 Existing rows get `signed_up_by = NULL` on upgrade and keep behaving exactly as
 before.
 
+**Choosing an edition while PROPOSING a game** (`game_version_pick`, off by
+default) puts a "choose version" button beside the name on the add-a-game and
+poll-candidate forms. Unlike the library chooser, which is its own page, this one
+is rendered inline and applied in the browser: each edition carries its title and
+cover as data- attributes, so pressing OK is a local edit. A round trip would
+discard whatever the proposer had already typed into the other fields.
+
+Two things that bite here: every control in the panel needs `type="button"`,
+because the panel sits INSIDE the game form and a bare <button> submits it; and
+the cover is only written into the hidden BGG thumbnail field, since a manual
+game picks its picture from a radio grid instead. With JavaScript off the panel
+never opens and the form behaves exactly as before.
+
 **Custom CSS (Options -> Advanced).** Whatever an admin pastes there is
 rendered in a `<style>` at the end of every page head — last, so it overrides
 the theme without needing `!important`. Empty means no block at all.

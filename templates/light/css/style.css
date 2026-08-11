@@ -161,6 +161,9 @@ input[type="checkbox"], input[type="radio"]{width:auto;flex:0 0 auto;}
 .lib-year { color: var(--text-muted); font-weight: 400; font-size: 0.85em; margin-left: 0.35rem; }
 .lib-owners { display: flex; flex-wrap: wrap; gap: 0.3rem; font-size: 0.85rem; }
 .lib-owner-club .msg-icon { color: inherit; }
+.verpick { margin-top: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem; background: var(--surface-2); }
+.verpick-list { max-height: 22rem; overflow-y: auto; }
+.field-versionpick { margin-top: 0.25rem; }
 .lib-version-opt { display: flex; align-items: center; gap: 0.7rem; flex: 1 1 auto; cursor: pointer; min-width: 0; text-align: left; }
 .lib-version-as { display: block; font-size: 0.85em; color: var(--text-muted); }
 .lib-version-list .lib-main { flex: 1 1 auto; min-width: 0; }
@@ -549,6 +552,9 @@ html { scroll-behavior: smooth; }
     opacity: 0.6;
 }
 .table-rename-btn:hover { opacity: 1; text-decoration: none; }
+.table-del-form { position: absolute; top: 0.5rem; right: 1.9rem; margin: 0; line-height: 1; }
+.table-del-btn { background: none; border: 0; padding: 0; margin: 0; width: auto; cursor: pointer; font-size: 0.95rem; line-height: 1; color: var(--text-muted); opacity: 0.6; }
+.table-del-btn:hover { opacity: 1; color: var(--danger, #c0392b); }
 .table-rename-form { display: flex; gap: 0.4rem; align-items: center; margin: 0 0 0.75rem; flex-wrap: wrap; }
 .table-rename-form input[type="text"] { max-width: 220px; }
 .add-table-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }

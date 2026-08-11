@@ -15,6 +15,7 @@
         initTabScroll();
         initOptionGroups();
         initSecretFields();
+        initVersionPick();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -696,6 +697,64 @@
                     if (groups[j] !== this && groups[j].open) groups[j].open = false;
                 }
             });
+        }
+    }
+
+    /* 13. "Choose version" on the add-a-game and add-a-candidate forms. The
+     * editions are already in the page, each carrying its title and cover as
+     * data- attributes, so picking one is a local edit: it writes the title into
+     * the name box and the cover into the hidden thumbnail field, then closes.
+     *
+     * Deliberately NOT a round trip. The panel sits inside the game form, and
+     * reloading to apply a choice would throw away whatever the proposer had
+     * already typed into the other fields.
+     *
+     * With JavaScript off the panel simply never opens, and the form works
+     * exactly as it did before the button existed — the name is BGG's, which is
+     * the same result as choosing "no particular edition". */
+    function initVersionPick() {
+        var blocks = document.querySelectorAll('.field-versionpick');
+        for (var i = 0; i < blocks.length; i++) {
+            (function (block) {
+                var panel  = block.querySelector('.verpick');
+                var open   = block.querySelector('.js-verpick-open');
+                var ok     = block.querySelector('.js-verpick-ok');
+                var cancel = block.querySelector('.js-verpick-cancel');
+                if (!panel || !open || !ok) return;
+
+                // The fields it writes into live in the surrounding form, not
+                // in this block.
+                var form = block.closest ? block.closest('form') : null;
+                if (!form) return;
+                var nameField = form.querySelector('input[name="name"]');
+                if (!nameField) return;
+
+                open.addEventListener('click', function () {
+                    panel.hidden = !panel.hidden;
+                });
+                if (cancel) {
+                    cancel.addEventListener('click', function () { panel.hidden = true; });
+                }
+                ok.addEventListener('click', function () {
+                    var chosen = panel.querySelector('input[name="verpick"]:checked');
+                    if (chosen) {
+                        var title = chosen.getAttribute('data-title') || '';
+                        var thumb = chosen.getAttribute('data-thumb') || '';
+                        if (title !== '') nameField.value = title;
+                        /* Only when the form is carrying a locked BGG image —
+                         * a manual game's picture is chosen from the radio grid
+                         * instead, and writing to a field that is not there
+                         * would silently do nothing. */
+                        var thumbField = form.querySelector('input[type="hidden"][name="thumbnail"]');
+                        if (thumbField && thumb !== '') {
+                            thumbField.value = thumb;
+                            var preview = form.querySelector('.field-thumbnail img');
+                            if (preview) preview.src = thumb;
+                        }
+                    }
+                    panel.hidden = true;
+                });
+            })(blocks[i]);
         }
     }
 

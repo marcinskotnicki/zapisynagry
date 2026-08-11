@@ -291,6 +291,11 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php // Optional per-day labels. Off by default; switching it off later
               // hides existing names without deleting them, so it is safe to try. ?>
         <?php $toggle('use_day_names'); ?>
+        <?php // "Choose version" beside the game name when proposing a BGG game,
+              // so a club running a localised copy can label the table with the
+              // title that is actually on the box. ?>
+        <?php $toggle('game_version_pick'); ?>
+        <p class="field-note"><?= e(t('opt_game_version_pick_note')) ?></p>
         <div class="field">
             <label for="day_tab_format"><?= e(t('opt_day_tab_format')) ?></label>
             <select id="day_tab_format" name="day_tab_format">

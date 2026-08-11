@@ -142,6 +142,24 @@ if ($tokenQS === '' && public_archives_enabled()
                     <a class="table-rename-btn" title="<?= e(t('table_rename')) ?>"
                        href="index.php?day=<?= (int)$active_day ?><?= $tokenQS ?>&rename_table=<?= (int)$tbl['id'] ?>#table-<?= (int)$tbl['id'] ?>">&#9998;</a>
                 <?php endif; ?>
+                <?php /* Remove a table nobody has put anything on. Admins only, and
+                       * only when it is COMPLETELY empty — table_is_empty() counts
+                       * rows rather than looking at the rendered list, so a table
+                       * still holding a soft-deleted game keeps its button hidden.
+                       * Deleting cascades, and that history would go with it.
+                       *
+                       * The confirm is worth having even though nothing is lost:
+                       * it sits one pixel from the rename button. */ ?>
+                <?php if (!empty($can_del_tables) && table_is_empty((int)$tbl['id'])): ?>
+                    <form method="post" action="index.php?day=<?= (int)$active_day ?><?= $tokenQS ?>"
+                          class="table-del-form"
+                          onsubmit="return confirm('<?= e(t('table_delete_confirm')) ?>');">
+                        <?= $csrf ?>
+                        <input type="hidden" name="action" value="delete_table">
+                        <input type="hidden" name="table_id" value="<?= (int)$tbl['id'] ?>">
+                        <button type="submit" class="table-del-btn" title="<?= e(t('table_delete')) ?>">&times;</button>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if (empty($tbl['items'])): ?>

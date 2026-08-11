@@ -916,6 +916,26 @@ function rules_tone($code) {
  * @param string $raw
  * @return string
  */
+/**
+ * Is this table completely empty — nothing on it at all?
+ *
+ * Counts rows, INCLUDING soft-deleted games and any polls, rather than asking
+ * whether the rendered card list looks empty. Deleting a table cascades to its
+ * games, so a table still holding a deleted game is not empty: removing it
+ * would destroy that history silently. The rendered list hides those, which is
+ * exactly why it is the wrong thing to ask.
+ *
+ * @param int $tableId
+ * @return bool
+ */
+function table_is_empty($tableId) {
+    $tableId = (int)$tableId;
+    if ($tableId <= 0) return false;
+    if ((int)db_val('SELECT COUNT(*) FROM games WHERE table_id = ?', [$tableId]) > 0) return false;
+    if ((int)db_val('SELECT COUNT(*) FROM polls WHERE table_id = ?', [$tableId]) > 0) return false;
+    return true;
+}
+
 function game_link_sanitize($raw) {
     $raw = trim((string)$raw);
     if ($raw === '') return '';

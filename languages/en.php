@@ -555,6 +555,11 @@ return [
     // ---- Add game -----------------------------------------------------------
     'addgame_title'       => 'Add a game',
     'addgame_name'        => 'Game name',
+    'gvp_button'                    => 'Choose version',
+    'gvp_intro'                     => 'Pick the edition you are bringing. The name and cover follow your choice.',
+    'gvp_ok'                        => 'OK',
+    'opt_game_version_pick'         => 'Allow choosing the game version when proposing a game',
+    'opt_game_version_pick_note'    => 'Adds a "choose version" button beside the name on the add-a-game and poll-candidate forms, for games taken from BoardGameGeek. Useful for clubs playing localised editions.',
     'addgame_from_bgg'    => 'Add game from BGG',
     'addgame_from_club'           => 'Add a game from the club library',
     'addgame_club_title'          => 'Club games',
@@ -875,6 +880,8 @@ The link expires in one hour.',
     'opt_table_names_any'    => 'Anyone can set and edit table names',
     'table_name_label'       => 'Table name (optional)',
     'table_rename'           => 'Edit table name',
+    'table_delete'            => 'Delete this table',
+    'table_delete_confirm'    => 'Delete this empty table?',
 
     // ---- Poll deadline live preview (JS, add_poll.php) --------------------------
     'poll_deadline_preview'   => 'This poll will be automatically resolved on {date} ({weekday}) at {time}.',

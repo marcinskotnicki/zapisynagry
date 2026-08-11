@@ -14,6 +14,7 @@
  *    $table   — the table (id goes in a hidden field).
  *    $game    — prefill values (a defaults array when adding, the row when editing).
  *    $source  — 'manual' or 'bgg'.
+ *    $versions— BGG editions of this game, or [] for none/disabled.
  *    $thumbs  — predefined thumbnails for the manual picker (empty for BGG).
  *    $captcha — captcha HTML, or '' when none is required (e.g. on edit).
  *    $error   — message above the form, or null.
@@ -84,6 +85,17 @@ $captcha = $captcha ?? '';                                       // '' = no capt
             <label for="name"><?= e(t('addgame_name')) ?></label>
             <input type="text" id="name" name="name" value="<?= e($game['name']) ?>" required>
         </div>
+
+        <?php // "Choose version", when the admin offers it and BGG lists more
+              // than one edition of this game. Rendered inline so picking one
+              // does not reload the form and lose the other fields. ?>
+        <?php if (!empty($versions)): ?>
+            <?php tpl_render('game_version_pick', [
+                'versions'    => $versions,
+                'game_name'   => $game['name'],
+                'game_thumb'  => (string)($game['thumbnail'] ?? ''),
+            ]); ?>
+        <?php endif; ?>
 
         <?php // ONE container for every half-width field, not several rows of two.
               // .field-row is a 2-column grid, so the fields flow into it and any

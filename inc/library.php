@@ -248,9 +248,6 @@ function club_shelf_prefill(array $form, array $row) {
     if (!empty($row['bgg_id'])) {
         $form['bgg_id'] = (int)$row['bgg_id'];
         $form['source'] = 'bgg';
-        // The shelf's own thumbnail first, so something shows even if the
-        // lookup below fails.
-        if (!empty($row['thumbnail'])) $form['thumbnail'] = $row['thumbnail'];
 
         require_once __DIR__ . '/bgg.php';
         $detail = bgg_thing((int)$row['bgg_id']);
@@ -258,8 +255,23 @@ function club_shelf_prefill(array $form, array $row) {
             $form['length_minutes'] = $detail['length']     ?: $form['length_minutes'];
             $form['weight']         = $detail['weight']     ?: $form['weight'];
             $form['max_players']    = $detail['maxplayers'] ?: $form['max_players'];
-            // Prefer the full image, as the BGG search path does.
-            $form['thumbnail']      = $detail['image'] ?: ($detail['thumbnail'] ?: $form['thumbnail']);
+        }
+
+        /* THE SHELF'S OWN COVER WINS, and it is applied AFTER the lookup rather
+         * than before it.
+         *
+         * A club row may hold a deliberately chosen edition — somebody picked
+         * the Polish printing, so the row carries that box art and that title.
+         * Overwriting it with BGG's generic game image throws that away, which
+         * is exactly what happened: the cover was set first and then replaced
+         * on the next line, so every pick came through with the default
+         * picture. The name never had this problem, being set once.
+         *
+         * BGG's image is the FALLBACK, for a shelf row with no art of its own. */
+        if (!empty($row['thumbnail'])) {
+            $form['thumbnail'] = $row['thumbnail'];
+        } elseif ($detail) {
+            $form['thumbnail'] = $detail['image'] ?: ($detail['thumbnail'] ?: $form['thumbnail']);
         }
         return $form;
     }
@@ -1045,6 +1057,40 @@ function library_link_field_visible() {
  * The localised titles ("Aura") are on the GAME item instead, as alternate
  * names — bgg_parse_thing() now returns them all — so the chooser offers the
  * title as its own choice rather than inferring one from the edition. */
+
+/**
+ * May a proposer pick which EDITION of a game they are bringing?
+ *
+ * Adds a "choose version" button beside the name on the add-a-game and
+ * add-a-candidate forms. Off by default: it costs an extra BGG request per
+ * proposal, and most clubs do not care which printing is on the table.
+ *
+ * @return bool
+ */
+function game_version_pick_enabled() {
+    return opt_bool('game_version_pick');
+}
+
+/**
+ * The editions to offer beside a game name, or [] when there is nothing to ask.
+ *
+ * Returns nothing unless the admin enabled it, the game came from BGG, and BGG
+ * lists more than one edition — a chooser with a single entry is a button that
+ * does nothing.
+ *
+ * Every caller passes a game's own bgg_id, so a hand-typed game (no id) gets an
+ * empty list without needing to know about the feature.
+ *
+ * @param mixed $bggId
+ * @return array
+ */
+function game_pick_versions($bggId) {
+    $bggId = (int)$bggId;
+    if ($bggId <= 0 || !game_version_pick_enabled()) return [];
+    require_once __DIR__ . '/bgg.php';
+    $versions = bgg_versions($bggId);
+    return count($versions) > 1 ? $versions : [];
+}
 
 /**
  * Apply the edition/title chosen in lib_version_pick to an entry.

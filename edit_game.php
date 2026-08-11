@@ -164,5 +164,7 @@ tpl_render('add_game_form', [
     'action'  => 'edit_game.php?game=' . $gameId,   // form posts mode=save back here
     'is_edit' => true,
     'title'   => t('editgame_title'),
-]);
+
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
 tpl_render('footer');

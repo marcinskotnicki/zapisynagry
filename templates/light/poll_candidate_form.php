@@ -73,6 +73,15 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
             <input type="text" id="name" name="name" value="<?= e($cand['name']) ?>" required>
         </div>
 
+        <?php // "Choose version" — same inline chooser as the game form. ?>
+        <?php if (!empty($versions)): ?>
+            <?php tpl_render('game_version_pick', [
+                'versions'   => $versions,
+                'game_name'  => $cand['name'],
+                'game_thumb' => (string)($cand['thumbnail'] ?? ''),
+            ]); ?>
+        <?php endif; ?>
+
         <?php // ONE container for every half-width field, not several rows of two.
               // .field-row is a 2-column grid, so the fields flow into it and any
               // that are switched off simply close the gap — with separate rows,

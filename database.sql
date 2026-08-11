@@ -161,6 +161,10 @@ INSERT INTO options (key, value) VALUES
     -- Restrict that second box to signed-in members. Only means anything while
     -- signup_proxy_name is on.
     ('signup_proxy_members',  '0'),
+    -- Offer a "choose version" button beside the game name when proposing a
+    -- game from BGG, so a club running a localised copy can label the table
+    -- with the title on the box.
+    ('game_version_pick',     '0'),
     -- Also list the club's own games on the members' library page, credited to
     -- "CLUB". They keep their own tab either way; this only adds them to the
     -- merged list, where a game the club AND members own shows one line with

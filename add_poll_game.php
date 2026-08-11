@@ -96,7 +96,9 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
             'thumbs' => $cand['source'] === 'bgg' ? [] : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
             'error' => t('error_name_required'), 'csrf' => csrf_field(),
-        ]);
+        
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),]);
         tpl_render('footer');
         exit;
     }
@@ -149,7 +151,9 @@ if (isset($_GET['id'])) {
     tpl_render('poll_candidate_form', [
         'table' => $table, 'cand' => $cand, 'source' => 'bgg',
         'thumbs' => [], 'error' => null, 'csrf' => csrf_field(),   // image locked to BGG
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }
@@ -171,7 +175,9 @@ if (isset($_GET['club'])) {
             ? []                                  // image locked to the BGG one
             : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'error' => null, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }
@@ -195,7 +201,9 @@ if ($go === 'manual') {
         'table' => $table, 'cand' => $cand, 'source' => 'manual',
         'thumbs' => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'error' => null, 'csrf' => csrf_field(),
-    ]);
+    
+        // Editions to offer beside the name; [] unless enabled and BGG has several.
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),]);
     tpl_render('footer');
     exit;
 }

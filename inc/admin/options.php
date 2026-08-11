@@ -99,6 +99,7 @@ $OPTION_TOGGLES = [
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
     'club_shelf', 'club_shelf_pick', 'library_show_club', 'library_prefer_club',
     'signup_proxy_name', 'signup_proxy_members',
+    'game_version_pick',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
 
