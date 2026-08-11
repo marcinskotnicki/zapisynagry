@@ -556,6 +556,8 @@ return [
     'addgame_from_club'           => 'Dodaj grę z biblioteki klubu',
     'addgame_club_title'          => 'Gry klubowe',
     'addgame_club_intro'          => 'Wybierz grę, którą posiada klub. Na następnym ekranie zobaczysz zwykły formularz, już wypełniony.',
+    'lib_filter_label'          => 'Filtruj listę',
+    'lib_filter_none'           => 'Żadna gra nie pasuje.',
     'addgame_club_empty'          => 'Klub nie ma jeszcze wpisanych gier — administrator może je dodać w zakładce Gry klubowe w panelu.',
     'addpoll_club_title'          => 'Gry klubowe',
     'opt_club_shelf_pick'         => 'Pozwól dodawać gry bezpośrednio z biblioteki klubu',

@@ -564,6 +564,8 @@ return [
     'addgame_from_club'           => 'Add a game from the club library',
     'addgame_club_title'          => 'Club games',
     'addgame_club_intro'          => 'Pick a game the club owns. The next screen is the usual form, already filled in.',
+    'lib_filter_label'          => 'Filter the list',
+    'lib_filter_none'           => 'No game matches that.',
     'addgame_club_empty'          => 'The club has no games listed yet — an admin can add them under Club games in the admin panel.',
     'addpoll_club_title'          => 'Club games',
     'opt_club_shelf_pick'         => 'Allow adding games directly from the club library',

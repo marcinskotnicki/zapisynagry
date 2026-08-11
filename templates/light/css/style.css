@@ -190,6 +190,8 @@ input[type="checkbox"], input[type="radio"]{width:auto;flex:0 0 auto;}
 .lib-add { margin: 0 0 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.75rem; }
 .lib-add > summary { cursor: pointer; font-weight: 600; }
 .lib-tabs { margin-bottom: 1rem; }
+.club-filter { margin-bottom: 0.75rem; }
+.club-filter input { max-width: 22rem; }
 .club-pick { display: flex; align-items: center; gap: 0.7rem; flex: 1 1 auto; text-decoration: none; color: inherit; min-width: 0; }
 .club-pick:hover { text-decoration: none; }
 .club-pick-list .lib-item:hover { border-color: var(--primary); }

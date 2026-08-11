@@ -25,6 +25,16 @@
         <p class="muted"><?= e(t('addgame_club_empty')) ?></p>
     <?php else: ?>
         <p class="muted"><?= e(t('addgame_club_intro')) ?></p>
+    <?php // Filter, not search: typing hides rows that do not match, so a club
+          // with a big cabinet can find a game without paging. Purely local —
+          // no request, and with JavaScript off the box simply never appears
+          // (it is added by the script) and the full list is still usable. ?>
+    <div class="field club-filter" hidden>
+        <label for="club_filter"><?= e(t('lib_filter_label')) ?></label>
+        <input type="search" id="club_filter" class="js-club-filter" autocomplete="off">
+        <p class="field-note js-club-filter-none" hidden><?= e(t('lib_filter_none')) ?></p>
+    </div>
+
         <ul class="lib-list club-pick-list">
             <?php foreach ($games as $g): ?>
                 <li class="lib-item">

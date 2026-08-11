@@ -50,16 +50,27 @@
             <?php foreach ($versions as $v): ?>
                 <?php
                 $vTitle = $v['title'] !== '' ? $v['title'] : $game_name;
-                // An edition with no art of its own shows the game's, which is
-                // what it would end up with anyway.
-                $vThumb = $v['thumbnail'] !== '' ? $v['thumbnail'] : $game_thumb;
+                /* TWO different URLs on purpose.
+                 *
+                 * BGG gives a version a fit-in/200x150 `thumbnail` and a
+                 * full-size `image`. The list shows the SMALL one — it is a row
+                 * of 40px covers, and pulling originals for all of them would
+                 * be wasteful — but the form stores the LARGE one, because the
+                 * game card displays it big. Storing the small one is why
+                 * version covers came out tiny beside ordinary BGG games,
+                 * which store the original.
+                 *
+                 * An edition with no art of its own falls back to the game's,
+                 * which is what it would end up with anyway. */
+                $vShow  = $v['thumbnail'] !== '' ? $v['thumbnail'] : $game_thumb;
+                $vStore = $v['image'] !== '' ? $v['image'] : $vShow;
                 ?>
                 <li class="lib-item">
                     <label class="lib-version-opt">
                         <input type="radio" name="verpick" value="<?= (int)$v['id'] ?>"
-                               data-title="<?= e($vTitle) ?>" data-thumb="<?= e($vThumb) ?>">
-                        <?php if ($vThumb !== ''): ?>
-                            <img class="lib-thumb" src="<?= e($vThumb) ?>" alt="" loading="lazy">
+                               data-title="<?= e($vTitle) ?>" data-thumb="<?= e($vStore) ?>">
+                        <?php if ($vShow !== ''): ?>
+                            <img class="lib-thumb" src="<?= e($vShow) ?>" alt="" loading="lazy">
                         <?php else: ?>
                             <span class="lib-thumb lib-thumb-none" aria-hidden="true"></span>
                         <?php endif; ?>

@@ -1124,9 +1124,25 @@ function library_apply_version_choice(array $entry, $gameId, array $post) {
              * files a Polish printing as "Aura" rather than "Petrichor", and it
              * overrides the title dropdown because it is the more specific
              * answer: the person picked this exact edition. */
-            if (!empty($v['title']))     $entry['name']      = $v['title'];
-            if (!empty($v['thumbnail'])) $entry['thumbnail'] = $v['thumbnail'];
-            if (!empty($v['year']))      $entry['year']      = $v['year'];
+            if (!empty($v['title'])) $entry['name'] = $v['title'];
+            /* THE FULL-SIZE IMAGE, not the 200x150 thumbnail.
+             *
+             * BGG gives each version both: `thumbnail` is a fit-in/200x150
+             * crop, `image` is the original. The plain-BGG path has always
+             * stored `image`, so a game added the ordinary way gets a big
+             * picture — while a version pick stored the small one and came out
+             * visibly tiny beside it. On a theme like blossom, where the cover
+             * runs the full width of the card, that is the difference between a
+             * cover and a postage stamp.
+             *
+             * The small one stays the fallback for a version that has no
+             * original on file. */
+            if (!empty($v['image'])) {
+                $entry['thumbnail'] = $v['image'];
+            } elseif (!empty($v['thumbnail'])) {
+                $entry['thumbnail'] = $v['thumbnail'];
+            }
+            if (!empty($v['year'])) $entry['year'] = $v['year'];
             break;
         }
     }

@@ -16,6 +16,7 @@
         initOptionGroups();
         initSecretFields();
         initVersionPick();
+        initClubFilter();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -697,6 +698,78 @@
                     if (groups[j] !== this && groups[j].open) groups[j].open = false;
                 }
             });
+        }
+    }
+
+    /* 14. Filter the club shelf when picking a game for a table or a poll.
+     *
+     * Hides rows that do not match what is typed. Local only — no request — so
+     * a club with a cabinet full of games can find one without paging.
+     *
+     * The box is REVEALED here rather than shown by the template: with
+     * JavaScript off it would be a search field that does nothing, which is
+     * worse than no field, and the full list is perfectly usable without it.
+     *
+     * Matching is case- and accent-insensitive where the browser supports it,
+     * because "Zolw" should find "Żółw" — a Polish club typing without
+     * diacritics is the normal case, not an edge one.
+     */
+    function initClubFilter() {
+        var boxes = document.querySelectorAll('.js-club-filter');
+        for (var i = 0; i < boxes.length; i++) {
+            (function (box) {
+                var wrap = box.closest ? box.closest('.club-filter') : null;
+                var list = document.querySelector('.club-pick-list');
+                if (!wrap || !list) return;
+                var none = wrap.querySelector('.js-club-filter-none');
+                var rows = list.querySelectorAll('.lib-item');
+                wrap.hidden = false;
+
+                /* NFD strips combining accents, which covers ą ć ę ń ó ś ź ż —
+                 * but NOT ł, which is its own letter (U+0142) rather than an
+                 * l with a mark, so decomposition leaves it untouched and
+                 * "zolw" would never find "żółw". The same list of Polish
+                 * letters is folded server-side for the library's alphabet
+                 * index; the explicit pairs below are the ones NFD misses. */
+                var FOLD_PAIRS = [['\u0142', 'l'], ['\u0141', 'l'],
+                                  ['\u00f8', 'o'], ['\u00d8', 'o'],
+                                  ['\u00df', 'ss'], ['\u0111', 'd'], ['\u0110', 'd']];
+                function fold(str) {
+                    str = (str || '').toLowerCase();
+                    for (var f = 0; f < FOLD_PAIRS.length; f++) {
+                        str = str.split(FOLD_PAIRS[f][0]).join(FOLD_PAIRS[f][1]);
+                    }
+                    // normalize() is absent on very old browsers; without it the
+                    // filter still works, just accent-sensitively.
+                    if (String.prototype.normalize) {
+                        str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    }
+                    return str;
+                }
+
+                // The name is read once per row rather than on every keystroke.
+                var names = [];
+                for (var r = 0; r < rows.length; r++) {
+                    var nameEl = rows[r].querySelector('.lib-name');
+                    names.push(fold(nameEl ? nameEl.textContent : rows[r].textContent));
+                }
+
+                function apply() {
+                    var q = fold(box.value).trim();
+                    var shown = 0;
+                    for (var r = 0; r < rows.length; r++) {
+                        var hit = (q === '' || names[r].indexOf(q) !== -1);
+                        rows[r].hidden = !hit;
+                        if (hit) shown++;
+                    }
+                    if (none) none.hidden = (shown !== 0);
+                }
+
+                box.addEventListener('input', apply);
+                // 'input' misses nothing modern, but keyup covers older mobile
+                // keyboards that fire it late.
+                box.addEventListener('keyup', apply);
+            })(boxes[i]);
         }
     }
 
