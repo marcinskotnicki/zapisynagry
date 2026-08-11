@@ -250,7 +250,7 @@ body.tpl-blossom {
 .tpl-blossom input, .tpl-blossom select, .tpl-blossom textarea {
     border-radius: 14px;
     border: 2px solid var(--border);
-    background: var(--cream);
+    background-color: var(--cream);
 }
 .tpl-blossom input:focus, .tpl-blossom select:focus, .tpl-blossom textarea:focus {
     outline: none;
