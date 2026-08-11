@@ -31,7 +31,12 @@
           // (it is added by the script) and the full list is still usable. ?>
     <div class="field club-filter" hidden>
         <label for="club_filter"><?= e(t('lib_filter_label')) ?></label>
-        <input type="search" id="club_filter" class="js-club-filter" autocomplete="off">
+        <?php // placeholder=" " is deliberate, not a stray: it makes
+              // :placeholder-shown usable, which is how the magnifying
+              // glass hides itself once there is text — otherwise it
+              // would sit under the browser's own clear button. ?>
+        <input type="search" id="club_filter" class="js-club-filter"
+               autocomplete="off" placeholder=" ">
         <p class="field-note js-club-filter-none" hidden><?= e(t('lib_filter_none')) ?></p>
     </div>
 

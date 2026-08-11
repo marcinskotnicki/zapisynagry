@@ -938,6 +938,20 @@ written before the column existed have `image` NULL and are upgraded on the fly
 where it is safe — when their crop is the GAME's own, no edition was chosen, so
 the size can be raised without changing which picture is shown.
 
+**Rows written before `image` existed are topped up by the SYNC button**, not
+guessed at. The on-the-fly upgrade only recognises a crop that is the GAME's
+own; a row added by picking an edition carries that edition's crop and never
+matches, which is why old entries stayed small after the column was added.
+`library_backfill_images()` fetches the missing originals, capped per run so a
+hundred-game shelf does not hammer BGG in one click, and reports how many are
+left.
+
+`library_pick_backfill_image()` is pure and holds the decision: a row does not
+record WHICH edition was chosen, so its crop is the only link back to one — an
+edition crop is matched against the version list to recover that edition's
+original, and anything unrecognised is left alone. Small-but-right beats
+big-but-wrong.
+
 **The public game list can be split three ways** (`library_pagination`:
 `all` | `pages` | `alpha`, defaulting to `all` so an upgrade changes nothing).
 All three slice the ALREADY-MERGED list in PHP rather than pushing `LIMIT` into

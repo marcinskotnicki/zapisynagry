@@ -67,10 +67,7 @@ najbliższe to oczywisty wybór, ale decyzja należy do Ciebie.
 notatkę ze schroniska. Nikt tego nie będzie sprawdzał. Chodzi o to, żeby koty
 miały co jeść.
 
-Napisz na **koty@zapisynagry.pl** albo **cats@zapisynagry.pl** — oba adresy
-trafiają w to samo miejsce, więc użyj tego, który Ci pasuje. (Angielska wersja
-tego pliku podaje pierwszy z nich; oba są wymienione tutaj, żeby nikt trafiający
-do tych warunków z tamtej strony nie natknął się na adres, którego tu nie ma.)
+Napisz na **koty@zapisynagry.pl** 
 
 ## Informacja w stopce
 

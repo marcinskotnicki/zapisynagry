@@ -191,7 +191,10 @@ input[type="checkbox"], input[type="radio"]{width:auto;flex:0 0 auto;}
 .lib-add > summary { cursor: pointer; font-weight: 600; }
 .lib-tabs { margin-bottom: 1rem; }
 .club-filter { margin-bottom: 0.75rem; }
-.club-filter input { max-width: 22rem; }
+.club-filter input { width: 100%; max-width: none; padding-right: 2.4rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888888' stroke-width='1.6' opacity='.45'%3E%3Ccircle cx='6.8' cy='6.8' r='4.6'/%3E%3Cpath d='M10.2 10.2 L14 14' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.05rem 1.05rem; }
+.club-filter input:not(:placeholder-shown) { background-image: none; }
 .club-pick { display: flex; align-items: center; gap: 0.7rem; flex: 1 1 auto; text-decoration: none; color: inherit; min-width: 0; }
 .club-pick:hover { text-decoration: none; }
 .club-pick-list .lib-item:hover { border-color: var(--primary); }

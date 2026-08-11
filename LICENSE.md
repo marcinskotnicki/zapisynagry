@@ -62,10 +62,7 @@ you like — the nearest one is the obvious choice, but it is your call.
 "Proof" means whatever you would show a friend: a receipt, a photo, a note from
 the shelter. Nobody will audit it. The point is that the cats get fed.
 
-Write to **cats@zapisynagry.pl** or **koty@zapisynagry.pl** — the two addresses
-reach the same place, so use whichever language suits you. (The Polish readme
-gives the second one; both are listed here so nobody following it through to
-these terms finds an address that is not mentioned.)
+Write to **cats@zapisynagry.pl** 
 
 ## The footer notice
 

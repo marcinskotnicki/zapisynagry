@@ -165,6 +165,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     log_action('club_shelf_sync',
                         '+' . $res['added'] . ' -' . $res['removed'] . ' =' . $res['kept']);
                     $flash = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+
+                    /* Also top up the full-size pictures of games added before
+                     * they were recorded, which is why a synced shelf could
+                     * still put miniatures on tables. Capped per run, so the
+                     * message says whether another press is needed. */
+                    $fill = library_backfill_images('club_library_games');
+                    if ($fill['done'] > 0 || $fill['left'] > 0) {
+                        $flash .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
+                    }
                 }
             }
         }

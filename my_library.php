@@ -200,7 +200,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     flash_set(t('lib_sync_failed', $why), 'error');
                 } else {
                     $res = library_sync_from_collection($me['id'], $collection);
-                    flash_set(t('lib_sync_done', $res['added'], $res['removed'], $res['kept']));
+                    $msg = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+                    // Same top-up as the club shelf: fill in full-size pictures
+                    // for games added before those were recorded.
+                    $fill = library_backfill_images('library_games');
+                    if ($fill['done'] > 0 || $fill['left'] > 0) {
+                        $msg .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
+                    }
+                    flash_set($msg);
                 }
             }
         }

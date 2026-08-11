@@ -1072,6 +1072,106 @@ function library_link_field_visible() {
  * title as its own choice rather than inferring one from the edition. */
 
 /**
+ * Which full-size picture belongs to a row whose only art is a small crop.
+ *
+ * PURE, so the matching can be tested without a network — the interesting part
+ * of the backfill is exactly this decision, and it is the part that would
+ * quietly attach the wrong cover.
+ *
+ * A row does not record which EDITION was picked, so its crop is the only link
+ * back to one. Hence:
+ *
+ *   - no crop, or the game's own crop -> the game's original.
+ *   - a crop matching one edition      -> THAT edition's original, so a Polish
+ *                                         printing keeps its own cover instead
+ *                                         of being handed the English one.
+ *   - anything else                    -> '' , meaning leave the row alone. A
+ *                                         small-but-right picture beats a
+ *                                         big-but-wrong one.
+ *
+ * @param string $crop      The row's stored thumbnail.
+ * @param array  $thing     From bgg_thing().
+ * @param array  $versions  From bgg_versions(), or [] when not fetched.
+ * @return string           A URL, or '' for "cannot tell".
+ */
+function library_pick_backfill_image($crop, $thing, array $versions = []) {
+    $crop = (string)$crop;
+    if (!is_array($thing)) return '';
+
+    if ($crop === '' || $crop === (string)($thing['thumbnail'] ?? '')) {
+        return (string)($thing['image'] ?? '');
+    }
+    foreach ($versions as $v) {
+        if ((string)($v['thumbnail'] ?? '') !== $crop) continue;
+        return (string)($v['image'] ?? '');
+    }
+    return '';
+}
+
+/**
+ * Fill in the missing full-size picture on rows added before `image` existed.
+ *
+ * WHY THIS EXISTS: the library used to store only BGG's fit-in/200x150 crop, so
+ * games added back then still reach a table as miniatures. The two URLs cannot
+ * be derived from each other — BGG signs them and the path hash differs between
+ * sizes — so the original has to be fetched.
+ *
+ * MATCHING THE RIGHT PICTURE is the whole difficulty. A row's crop may be the
+ * game's own, or one EDITION's, and the row does not record which edition was
+ * picked. So:
+ *
+ *   1. crop missing, or equal to the game's own -> the game's original.
+ *   2. otherwise, look through the game's editions for the one whose crop is
+ *      exactly this row's, and take THAT edition's original. This recovers the
+ *      Polish printing's cover rather than replacing it with the English one.
+ *   3. no match -> left alone. A row keeps its small-but-correct picture rather
+ *      than gaining a big wrong one.
+ *
+ * CAPPED per run, because each row costs one or two BGG requests and a club
+ * with a hundred games would otherwise hammer them in a single click. The
+ * caller reports how many are left so an admin can press again.
+ *
+ * @param string $table  'club_library_games' or 'library_games'
+ * @param int    $limit  Rows to attempt this run.
+ * @return array ['done' => int, 'left' => int]
+ */
+function library_backfill_images($table, $limit = 25) {
+    if ($table !== 'club_library_games' && $table !== 'library_games') return ['done' => 0, 'left' => 0];
+    require_once __DIR__ . '/bgg.php';
+
+    $rows = db_all(
+        'SELECT id, thumbnail, bgg_id FROM ' . $table . '
+          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')
+          ORDER BY id LIMIT ' . (int)$limit
+    );
+
+    $done = 0;
+    foreach ($rows as $r) {
+        $bggId = (int)$r['bgg_id'];
+        $crop  = (string)($r['thumbnail'] ?? '');
+        $big   = '';
+
+        $thing = bgg_thing($bggId);
+        if (!$thing) continue;                 // BGG unreachable: try again next run
+
+        // Versions are only fetched when the crop is not the game's own, so
+        // the common case costs one request rather than two.
+        $isGameCrop = ($crop === '' || $crop === (string)($thing['thumbnail'] ?? ''));
+        $big = library_pick_backfill_image($crop, $thing, $isGameCrop ? [] : bgg_versions($bggId));
+
+        if ($big === '') continue;             // unknown: leave the row as it is
+        db_run('UPDATE ' . $table . ' SET image = ? WHERE id = ?', [$big, (int)$r['id']]);
+        $done++;
+    }
+
+    $left = (int)db_val(
+        'SELECT COUNT(*) FROM ' . $table . '
+          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')'
+    );
+    return ['done' => $done, 'left' => $left];
+}
+
+/**
  * May a proposer pick which EDITION of a game they are bringing?
  *
  * Adds a "choose version" button beside the name on the add-a-game and
