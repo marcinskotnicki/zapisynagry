@@ -610,7 +610,7 @@ function library_sync_fill_row($table, array $row, array $g) {
  * @param array $g  A collection entry (bgg_id, name, thumbnail, version_id, ...).
  * @return array    The entry, with the edition applied if one was found.
  */
-function library_sync_apply_new_edition(array $g, array $versions = null) {
+function library_sync_apply_new_edition(array $g, ?array $versions = null) {
     $versionId = (int)($g['version_id'] ?? 0);
     if ($versionId <= 0) return $g;
 
@@ -640,7 +640,7 @@ function library_sync_apply_new_edition(array $g, array $versions = null) {
  * @param string $mode
  * @return bool          Whether the row was changed.
  */
-function library_sync_reconcile_edition($table, array $row, array $g, $mode, array $versions = null) {
+function library_sync_reconcile_edition($table, array $row, array $g, $mode, ?array $versions = null) {
     if ($table !== 'club_library_games' && $table !== 'library_games') return false;
 
     $storedVersionId = isset($row['bgg_version_id']) ? $row['bgg_version_id'] : null;

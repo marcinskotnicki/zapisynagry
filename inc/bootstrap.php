@@ -13,6 +13,36 @@
  *  always-needed core only, to keep every request lean.
  * ============================================================================= */
 
+/* ---- 0. Notices must never reach the page ---------------------------------
+ *
+ * A PHP notice printed before a header() call turns "cannot modify header
+ * information" into a BROKEN REDIRECT: the action itself succeeded, but the
+ * browser stays on the POST and a refresh repeats it. That is how one
+ * deprecation notice on PHP 8.4 turned into a visibly broken sync.
+ *
+ * The real defence is not fixing each notice as it appears — a future PHP will
+ * always deprecate something else — but making sure a notice cannot break a
+ * redirect in the first place:
+ *
+ *   - error_reporting stays at E_ALL, so nothing is swept under the carpet and
+ *     the host's error log still records every deprecation and notice. This is
+ *     deliberately NOT lowered: silencing diagnostics would hide the next real
+ *     bug as effectively as it hides this cosmetic one.
+ *   - display_errors is off, so those diagnostics never print INTO the page.
+ *     That is what actually protects the redirect.
+ *   - output buffering means even an unexpected print — from a stray echo, or
+ *     a warning some extension writes directly — cannot commit the response
+ *     before a header() call gets its chance.
+ *
+ * Set here rather than relied on from php.ini, because shared hosts vary and
+ * this app is installed on plenty of them. A host with display_errors ON was
+ * exactly the case that broke; a developer wanting errors on screen can turn
+ * display_errors back on in config.php, which is required just below.
+ */
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+if (!ob_get_level()) ob_start();
+
 // ---- 1. Config -------------------------------------------------------------
 // config.php is written by the installer and is NOT in version control (it
 // holds the DB path + app secret). If it isn't here, the app hasn't been
