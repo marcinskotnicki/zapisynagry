@@ -311,7 +311,7 @@ return [
     'lib_back_to_panel'                 => 'Wróć do panelu',
     'opt_group_library'                 => 'Biblioteka klubu',
     'opt_group_library_note'            => '— dotyczy tylko włączonej biblioteki klubu i/lub kolekcji gier',
-    'opt_club_library'                  => 'Włącz bibliotekę klubu',
+    'opt_club_library'                  => 'Włącz biblioteki gier uczestników',
     'opt_library_show_members'          => 'Pokaż zakładkę członków w bibliotece',
     'opt_library_allow_contact'         => 'Pozwól pisać do członków w sprawie ich gier',
     'opt_note_library_off'              => 'Nie działa, gdy biblioteka klubu jest wyłączona.',
