@@ -336,8 +336,8 @@ function club_shelf_add(array $game) {
     // rowCount(), not lastInsertId(): the latter is connection-wide and stale
     // when INSERT OR IGNORE skips, which made every duplicate report success.
     $stmt = db_run(
-        'INSERT OR IGNORE INTO club_library_games (name, year, bgg_id, link, thumbnail, image)
-         VALUES (?,?,?,?,?,?)',
+        'INSERT OR IGNORE INTO club_library_games (name, year, bgg_id, link, thumbnail, image, bgg_version_id)
+         VALUES (?,?,?,?,?,?,?)',
         [
             $name,
             !empty($game['year']) ? (int)$game['year'] : null,
@@ -346,6 +346,7 @@ function club_shelf_add(array $game) {
             !empty($game['thumbnail']) ? $game['thumbnail'] : null,
             // Full-size counterpart, for when this game reaches a table.
             !empty($game['image']) ? $game['image'] : null,
+            !empty($game['bgg_version_id']) ? (int)$game['bgg_version_id'] : null,
         ]
     );
     return $stmt->rowCount() > 0;
@@ -515,6 +516,70 @@ function library_sync_mode($raw) {
  * @param array  $g      The BGG collection entry.
  * @return bool          Whether anything changed.
  */
+/**
+ * Look up an edition by id among a game's versions, or null.
+ *
+ * PURE — no network — so the decision this drives is testable without BGG.
+ *
+ * @param int   $versionId
+ * @param array $versions   From bgg_versions().
+ * @return array|null
+ */
+function library_find_version($versionId, array $versions) {
+    $versionId = (int)$versionId;
+    if ($versionId <= 0) return null;
+    foreach ($versions as $v) {
+        if ((int)($v['id'] ?? 0) === $versionId) return $v;
+    }
+    return null;
+}
+
+/**
+ * Should a sync adopt the edition BGG's collection now reports for a game
+ * already on the shelf?
+ *
+ * PURE, and this is the decision that was missing entirely — the reported bug
+ * was that correcting a version on BGG and re-syncing left the old title in
+ * place no matter how many times the button was pressed. There was no signal
+ * to notice the correction at all: the collection was fetched without asking
+ * for edition info, so every sync saw the same bare name regardless of which
+ * printing was flagged.
+ *
+ * The signal now available is a version id, and this weighs it against what
+ * the row already reflects:
+ *
+ *   - collection reports NOTHING flagged (0)            -> never adopt. There
+ *     is no information to act on.
+ *   - the row's stored edition MATCHES what BGG reports -> never adopt.
+ *     Nothing changed; any difference in the name is presumably a manual
+ *     correction, and correcting it again would undo that on every sync.
+ *   - the row's stored edition DIFFERS from what BGG reports -> adopt. This
+ *     is a genuine, detected change on BGG's side, which is exactly the case
+ *     that was reported as broken.
+ *   - the row has NO recorded edition (a legacy row, or one added before this
+ *     existed) and BGG reports one -> adopt only in 'full' mode. There is no
+ *     way to tell "never versioned" apart from "renamed by hand" from the row
+ *     alone, so the gentler 'update' mode leaves it — but 'full' is the
+ *     mode a person already opted into and confirmed, on the understanding
+ *     that it reconciles the shelf with BGG.
+ *
+ * @param int|null $storedVersionId  The row's bgg_version_id, or null.
+ * @param int      $collectionVersionId  What library_parse_collection() read.
+ * @param string   $mode  'add' | 'update' | 'full'.
+ * @return bool
+ */
+function library_should_adopt_edition($storedVersionId, $collectionVersionId, $mode) {
+    $collectionVersionId = (int)$collectionVersionId;
+    if ($collectionVersionId <= 0) return false;               // nothing flagged: no signal
+
+    $storedVersionId = $storedVersionId !== null ? (int)$storedVersionId : 0;
+    if ($storedVersionId === $collectionVersionId) return false;   // unchanged
+
+    if ($storedVersionId > 0) return true;                     // a genuine, detected change
+
+    return $mode === 'full';                                   // unknown history: only in full
+}
+
 function library_sync_fill_row($table, array $row, array $g) {
     if ($table !== 'club_library_games' && $table !== 'library_games') return false;
 
@@ -534,9 +599,74 @@ function library_sync_fill_row($table, array $row, array $g) {
     return true;
 }
 
+/**
+ * For a NEW item being added by a sync: adopt the edition BGG's collection
+ * flagged, if any. There is no existing name to protect here, so this always
+ * applies when a match is found — unlike the reconciliation below, which is
+ * deliberately cautious about rows that already exist.
+ *
+ * NETWORK — one request when a version is flagged, none otherwise.
+ *
+ * @param array $g  A collection entry (bgg_id, name, thumbnail, version_id, ...).
+ * @return array    The entry, with the edition applied if one was found.
+ */
+function library_sync_apply_new_edition(array $g, array $versions = null) {
+    $versionId = (int)($g['version_id'] ?? 0);
+    if ($versionId <= 0) return $g;
+
+    if ($versions === null) {
+        require_once __DIR__ . '/bgg.php';
+        $versions = bgg_versions((int)$g['bgg_id']);
+    }
+    $v = library_find_version($versionId, $versions);
+    if (!$v) return $g;                   // unmatched: the collection's own name stands
+
+    if (!empty($v['title']))     $g['name']      = $v['title'];
+    if (!empty($v['image']))     $g['image']     = $v['image'];
+    elseif (!empty($v['thumbnail'])) $g['image'] = $v['thumbnail'];
+    if (!empty($v['thumbnail'])) $g['thumbnail'] = $v['thumbnail'];
+    $g['bgg_version_id'] = $versionId;
+    return $g;
+}
+
+/**
+ * For an EXISTING row: reconcile it against BGG's currently flagged edition,
+ * per library_should_adopt_edition(). NETWORK — one request only when the
+ * decision says to adopt.
+ *
+ * @param string $table  'club_library_games' or 'library_games'
+ * @param array  $row    The existing row.
+ * @param array  $g      The collection entry.
+ * @param string $mode
+ * @return bool          Whether the row was changed.
+ */
+function library_sync_reconcile_edition($table, array $row, array $g, $mode, array $versions = null) {
+    if ($table !== 'club_library_games' && $table !== 'library_games') return false;
+
+    $storedVersionId = isset($row['bgg_version_id']) ? $row['bgg_version_id'] : null;
+    if (!library_should_adopt_edition($storedVersionId, $g['version_id'] ?? 0, $mode)) return false;
+
+    /* $versions is injectable so this path can be exercised without a network,
+     * which this project's test environment does not have. The sync loop passes
+     * nothing and the live fetch happens here. */
+    if ($versions === null) {
+        require_once __DIR__ . '/bgg.php';
+        $versions = bgg_versions((int)$row['bgg_id']);
+    }
+    $v = library_find_version((int)$g['version_id'], $versions);
+    if (!$v) return false;                // could not confirm the match: leave the row as it is
+
+    $name  = !empty($v['title']) ? $v['title'] : $row['name'];
+    $thumb = !empty($v['thumbnail']) ? $v['thumbnail'] : ($row['thumbnail'] ?? null);
+    $image = !empty($v['image']) ? $v['image'] : (!empty($v['thumbnail']) ? $v['thumbnail'] : ($row['image'] ?? null));
+    db_run('UPDATE ' . $table . ' SET name = ?, thumbnail = ?, image = ?, bgg_version_id = ? WHERE id = ?',
+           [$name, $thumb, $image, (int)$v['id'], (int)$row['id']]);
+    return true;
+}
+
 function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
     $mode = library_sync_mode($mode);
-    $haveRows = db_all('SELECT id, bgg_id, year, thumbnail, image, link
+    $haveRows = db_all('SELECT id, name, bgg_id, year, thumbnail, image, link, bgg_version_id
                           FROM club_library_games WHERE bgg_id IS NOT NULL');
     $have = [];
     $rows = [];
@@ -556,12 +686,19 @@ function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
         foreach ($wanted as $id => $g) {
             if (isset($have[$id])) {
                 // Only 'add' leaves existing rows completely untouched.
-                if ($mode !== 'add' && library_sync_fill_row('club_library_games', $rows[$id], $g)) {
-                    $updated++;
+                if ($mode !== 'add') {
+                    /* Two separate jobs, and the order matters: adopting a
+                     * changed edition rewrites name/thumbnail/image outright,
+                     * so it runs FIRST and the gap-filler then has nothing left
+                     * to fill. Reversed, the filler would populate fields the
+                     * adoption is about to replace anyway. */
+                    $changed = library_sync_reconcile_edition('club_library_games', $rows[$id], $g, $mode);
+                    if (library_sync_fill_row('club_library_games', $rows[$id], $g)) $changed = true;
+                    if ($changed) $updated++;
                 }
                 continue;
             }
-            if (club_shelf_add($g)) $added++;
+            if (club_shelf_add(library_sync_apply_new_edition($g))) $added++;
         }
         // DELETION IS THE ONE DESTRUCTIVE STEP, and only the full mode does it.
         if ($mode === 'full') {
@@ -960,8 +1097,8 @@ function library_add($userId, array $game) {
      * never written. library_sync_from_collection() counts additions with this
      * return value, and would have overreported every re-sync. */
     $stmt = db_run(
-        'INSERT OR IGNORE INTO library_games (user_id, name, year, bgg_id, link, thumbnail, image)
-         VALUES (?,?,?,?,?,?,?)',
+        'INSERT OR IGNORE INTO library_games (user_id, name, year, bgg_id, link, thumbnail, image, bgg_version_id)
+         VALUES (?,?,?,?,?,?,?,?)',
         [
             (int)$userId,
             $name,
@@ -970,6 +1107,7 @@ function library_add($userId, array $game) {
             !empty($game['link']) ? $game['link'] : null,
             !empty($game['thumbnail']) ? $game['thumbnail'] : null,
             !empty($game['image']) ? $game['image'] : null,
+            !empty($game['bgg_version_id']) ? (int)$game['bgg_version_id'] : null,
         ]
     );
     return $stmt->rowCount() > 0;
@@ -1310,6 +1448,10 @@ function library_apply_version_choice(array $entry, $gameId, array $post) {
     if ($wantVersion > 0) {
         foreach (bgg_versions((int)$gameId) as $v) {
             if ((int)$v['id'] !== $wantVersion) continue;
+            /* Recorded so a later sync can tell "BGG's flagged edition changed"
+             * apart from "this name was chosen on purpose" — see
+             * library_collection_edition(). */
+            $entry['bgg_version_id'] = (int)$v['id'];
             /* The edition's OWN title, from BGG's canonicalname — this is what
              * files a Polish printing as "Aura" rather than "Petrichor", and it
              * overrides the title dropdown because it is the more specific
@@ -1557,6 +1699,14 @@ function library_parse_collection($xmlString) {
             'name'      => $name,
             'year'      => (int)($item->yearpublished ?? 0),
             'thumbnail' => trim((string)$item->thumbnail),
+            /* WHICH EDITION this member has flagged as theirs in their BGG
+             * collection, when the fetch asked for it (see
+             * library_fetch_collection()) and BGG has one on file — 0 when
+             * nothing is flagged. This is <item> WITHIN a <version> wrapper, an
+             * unrelated nesting from the <versions> block on a thing response;
+             * only the id is trusted from here, never a name — see
+             * library_collection_edition() for why. */
+            'version_id' => (int)($item->version->item['id'] ?? 0),
         ];
     }
     return $out;
@@ -1580,8 +1730,14 @@ function library_fetch_collection($username, &$why = null) {
     /* own=1 asks for owned items only; excludesubtype drops expansions so a
      * library lists games rather than the boxes that go with them. The
      * response is filtered again in the parser regardless. */
+    /* version=1 is what makes a corrected edition on BGG's side visible to a
+     * sync at all: without it, BGG never says which printing a member flagged
+     * as theirs, and this member's collection response is otherwise identical
+     * whichever edition they own. Without this parameter the two are
+     * indistinguishable, which is why fixing the edition on BGG previously had
+     * no effect here no matter how many times somebody synced. */
     $url = BGG_BASE . 'collection?username=' . rawurlencode($username)
-         . '&own=1&excludesubtype=boardgameexpansion';
+         . '&own=1&excludesubtype=boardgameexpansion&version=1';
 
     // Reuses inc/bgg.php's fetcher, which already retries BGG's 202 "queued"
     // response — a collection request is the one most likely to be queued,
@@ -1616,7 +1772,7 @@ function library_sync_from_collection($userId, array $collection, $mode = 'full'
     $userId = (int)$userId;
     $mode   = library_sync_mode($mode);
 
-    $haveRows = db_all('SELECT id, bgg_id, year, thumbnail, image, link
+    $haveRows = db_all('SELECT id, name, bgg_id, year, thumbnail, image, link, bgg_version_id
                           FROM library_games WHERE user_id = ? AND bgg_id IS NOT NULL', [$userId]);
     $have = [];
     $rows = [];
@@ -1635,12 +1791,15 @@ function library_sync_from_collection($userId, array $collection, $mode = 'full'
     try {
         foreach ($wanted as $id => $g) {
             if (isset($have[$id])) {
-                if ($mode !== 'add' && library_sync_fill_row('library_games', $rows[$id], $g)) {
-                    $updated++;
+                if ($mode !== 'add') {
+                    // Adoption first, then gap-filling — see the club shelf.
+                    $changed = library_sync_reconcile_edition('library_games', $rows[$id], $g, $mode);
+                    if (library_sync_fill_row('library_games', $rows[$id], $g)) $changed = true;
+                    if ($changed) $updated++;
                 }
                 continue;
             }
-            if (library_add($userId, $g)) $added++;
+            if (library_add($userId, library_sync_apply_new_edition($g))) $added++;
         }
         // Only the full mode removes anything.
         if ($mode === 'full') {

@@ -663,6 +663,11 @@ CREATE TABLE library_games (
     -- cannot be derived from each other — BGG signs them, and the path hash
     -- differs between sizes — so both are stored.
     image      TEXT,
+    -- Which BGG edition the name/thumbnail/image above reflect, when known.
+    -- NULL means "the game's own name" (no particular edition chosen, or a
+    -- row from before this existed). Lets a later sync tell "BGG's flagged
+    -- edition changed" apart from "somebody renamed this on purpose".
+    bgg_version_id INTEGER,
     -- 0 hides the game from the PUBLIC library while leaving it in the owner's
     -- own list: lent to a friend, left at a parent's house, in a box in the
     -- loft. Defaults to 1 so nothing a member already added disappears when an
@@ -704,6 +709,7 @@ CREATE TABLE club_library_games (
     link       TEXT,
     thumbnail  TEXT,
     image      TEXT,               -- full-size counterpart; see library_games
+    bgg_version_id INTEGER,        -- edition these fields reflect; see library_games
     is_active  INTEGER NOT NULL DEFAULT 1,   -- 0 hides it from the public view
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

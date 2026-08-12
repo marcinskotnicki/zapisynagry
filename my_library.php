@@ -176,11 +176,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('lib_edit_failed'), 'error');
         } else {
             $chosen = library_apply_version_choice(
-                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail']],
+                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail'],
+                 'image' => $row['image'] ?? ''],
                 (int)$row['bgg_id'], $_POST);
-            db_run('UPDATE library_games SET name = ?, year = ?, thumbnail = ? WHERE id = ?',
+            // image and bgg_version_id too, or a re-pick through this screen
+            // would drop the full-size picture and the edition record it just
+            // set moments ago in library_apply_version_choice().
+            db_run('UPDATE library_games SET name = ?, year = ?, thumbnail = ?, image = ?, bgg_version_id = ? WHERE id = ?',
                    [$chosen['name'], !empty($chosen['year']) ? (int)$chosen['year'] : null,
-                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null, $rowId]);
+                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null,
+                    !empty($chosen['image']) ? $chosen['image'] : null,
+                    !empty($chosen['bgg_version_id']) ? (int)$chosen['bgg_version_id'] : null,
+                    $rowId]);
             flash_set(t('lib_edit_renamed', $chosen['name']));
         }
 

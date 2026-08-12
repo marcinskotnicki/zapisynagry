@@ -133,11 +133,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flashKind = 'error';
         } else {
             $chosen = library_apply_version_choice(
-                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail']],
+                ['name' => $row['name'], 'year' => $row['year'], 'thumbnail' => $row['thumbnail'],
+                 'image' => $row['image'] ?? ''],
                 (int)$row['bgg_id'], $_POST);
-            db_run('UPDATE club_library_games SET name = ?, year = ?, thumbnail = ? WHERE id = ?',
+            db_run('UPDATE club_library_games SET name = ?, year = ?, thumbnail = ?, image = ?, bgg_version_id = ? WHERE id = ?',
                    [$chosen['name'], !empty($chosen['year']) ? (int)$chosen['year'] : null,
-                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null, (int)$row['id']]);
+                    $chosen['thumbnail'] !== '' ? $chosen['thumbnail'] : null,
+                    !empty($chosen['image']) ? $chosen['image'] : null,
+                    !empty($chosen['bgg_version_id']) ? (int)$chosen['bgg_version_id'] : null,
+                    (int)$row['id']]);
             log_action('club_shelf_edit', 'edition chosen for #' . (int)$row['id']);
             $flash = t('lib_edit_renamed', $chosen['name']);
         }

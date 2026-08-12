@@ -938,6 +938,20 @@ written before the column existed have `image` NULL and are upgraded on the fly
 where it is safe — when their crop is the GAME's own, no edition was chosen, so
 the size can be raised without changing which picture is shown.
 
+**A row records WHICH BGG edition it reflects** (`bgg_version_id`), and the
+collection is fetched with `&version=1`. Without that parameter BGG never says
+which printing a member flagged, so their response is identical whichever
+edition they own — correcting a version on BGG and re-syncing therefore did
+nothing at all, which is exactly what was reported. New imports only appeared to
+work when a game's own primary name on BGG happened to be the non-English one.
+
+`library_should_adopt_edition()` is pure and holds the rule: adopt when the
+reported edition DIFFERS from the one the row records; never when they match
+(any name difference is presumably a manual correction, and re-applying BGG's
+would undo it on every sync); and for a legacy row with no recorded edition,
+only in 'full' mode, since "never versioned" and "renamed by hand" are
+indistinguishable from the row alone.
+
 **A sync has three modes** (`library_sync_mode()`): add only, add and fill
 gaps, or a full sync that also DELETES what is no longer on BGG. Only the last
 is destructive, so only it demands the confirmation checkbox — the other two
