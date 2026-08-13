@@ -726,6 +726,15 @@
                  * cannot drift out of step with what the server demands. */
                 var danger = (wrap.getAttribute('data-danger-modes') || 'full').split(' ');
 
+                /* The warning above the form is written per mode, so it says
+                 * what THIS choice will actually do rather than describing the
+                 * most destructive possibility to everybody. */
+                var warns = form.querySelectorAll('.js-sync-warn [data-mode]');
+                /* "filling in details never overwrites your corrections" is
+                 * simply untrue of a purge, which replaces everything on
+                 * purpose — so it goes away for that mode. */
+                var fillNote = form.querySelector('.js-sync-fillnote');
+
                 function apply() {
                     var risky = (danger.indexOf(select.value) !== -1);
                     wrap.hidden = !risky;
@@ -733,6 +742,11 @@
                     // Unticked when hidden, so a previous choice cannot be
                     // carried invisibly into a later submission.
                     if (!risky) check.checked = false;
+
+                    for (var w = 0; w < warns.length; w++) {
+                        warns[w].hidden = (warns[w].getAttribute('data-mode') !== select.value);
+                    }
+                    if (fillNote) fillNote.hidden = (select.value === 'purge');
                 }
                 select.addEventListener('change', apply);
                 apply();

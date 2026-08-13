@@ -144,7 +144,19 @@
         <?php // The warning is the point of this block: a sync DELETES games that
               // are no longer in the BGG collection. Stated before the field, not
               // after the button. ?>
-        <p class="field-warn"><?= e(t('club_shelf_sync_warning')) ?></p>
+        <?php /* One paragraph per mode, all rendered and all but the current one
+              * hidden by the script. Rendered rather than swapped in by JS so the
+              * wording still comes from the language files, and so a browser with
+              * no JS shows the ADD text — which matches the mode the form is
+              * preselected to, rather than warning about deletions that will not
+              * happen. */ ?>
+        <div class="js-sync-warn">
+            <?php foreach (library_sync_modes() as $swMode): ?>
+                <p class="field-warn" data-mode="<?= e($swMode) ?>"<?= $swMode === 'add' ? '' : ' hidden' ?>>
+                    <?= e(t('club_shelf_sync_warn_' . $swMode)) ?>
+                </p>
+            <?php endforeach; ?>
+        </div>
         <div class="field field-bgg_user">
             <label for="cs_bgg_user"><?= e(t('club_shelf_sync_user_label')) ?></label>
             <input type="text" id="cs_bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…" required>
@@ -163,7 +175,9 @@
                     </option>
                 <?php endforeach; ?>
             </select>
-            <p class="field-note"><?= e(t('lib_sync_mode_note')) ?></p>
+            <?php // Untrue of a purge, which overwrites everything by design —
+                  // so the script hides it for that mode. ?>
+            <p class="field-note js-sync-fillnote"><?= e(t('lib_sync_mode_note')) ?></p>
         </div>
         <?php // Still required, but only the deleting option is worth confirming;
               // the script unticks and hides this for the other two. ?>
