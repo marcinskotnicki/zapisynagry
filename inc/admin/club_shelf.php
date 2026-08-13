@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * client can simply not send — and an unrecognised mode falls back to
          * the safest one, so a mangled request cannot become a full wipe. */
         $syncMode = library_sync_mode($_POST['mode'] ?? '');
-        if ($syncMode === 'full' && empty($_POST['confirm'])) {
+        if (in_array($syncMode, library_sync_destructive_modes(), true) && empty($_POST['confirm'])) {
             $flash = t('lib_sync_confirm_required');
             $flashKind = 'error';
         } else {
@@ -172,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         . ' +' . $res['added'] . ' -' . $res['removed'] . ' =' . $res['kept']
                         . ' ~' . $res['updated']);
                     $flash = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+                    if (!empty($res['purged']))  $flash .= ' ' . t('lib_sync_purged', $res['purged']);
                     if (!empty($res['updated'])) $flash .= ' ' . t('lib_sync_updated', $res['updated']);
 
                     /* Also top up the full-size pictures of games added before

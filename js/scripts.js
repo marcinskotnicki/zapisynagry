@@ -721,10 +721,13 @@
                 var select = form.querySelector('select[name="mode"]');
                 var check  = wrap.querySelector('input[type="checkbox"]');
                 if (!select || !check) return;
-                var danger = wrap.getAttribute('data-danger-mode') || 'full';
+                /* A LIST now, not a single mode: both the full sync and the
+                 * purge destroy something. It comes from the server so this
+                 * cannot drift out of step with what the server demands. */
+                var danger = (wrap.getAttribute('data-danger-modes') || 'full').split(' ');
 
                 function apply() {
-                    var risky = (select.value === danger);
+                    var risky = (danger.indexOf(select.value) !== -1);
                     wrap.hidden = !risky;
                     check.required = risky;
                     // Unticked when hidden, so a previous choice cannot be

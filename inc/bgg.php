@@ -147,7 +147,7 @@ function bgg_parse_thing($xmlString) {
      * stored as one. */
     $names = [];
     foreach ($item->name as $n) {
-        $val = trim((string)$n['value']);
+        $val = bgg_unescape(trim((string)$n['value']));
         if ($val === '') continue;
         if ((string)$n['type'] === 'primary') {
             $name = $val;
@@ -303,6 +303,25 @@ function bgg_search($query) {
  * @return array  List of ['id','name','nickname','names','year','thumbnail',
  *                'image','languages'], newest first. Empty when there are none.
  */
+/**
+ * Undo escaping that arrived inside a BGG value.
+ *
+ * Some BGG records carry a literal backslash before an apostrophe —
+ * "Summoner\\'s Isle" — an artifact of their own storage rather than part of
+ * the title. It shows up in edition `canonicalname` values in particular, which
+ * is why ordinary game names look fine and only some editions are affected.
+ *
+ * Deliberately NARROW: only a backslash directly before a quote is removed.
+ * Stripping backslashes generally would corrupt a title that legitimately
+ * contains one, and this is display data, not something to be clever with.
+ *
+ * @param string $value
+ * @return string
+ */
+function bgg_unescape($value) {
+    return str_replace(["\\'", '\\"'], ["'", '"'], (string)$value);
+}
+
 function bgg_parse_versions($xmlString) {
     if (!is_string($xmlString) || trim($xmlString) === '') return [];
 
@@ -330,10 +349,10 @@ function bgg_parse_versions($xmlString) {
         $nickname = '';
         foreach ($v->name ?? [] as $n) {
             if ((string)($n['type'] ?? '') !== 'primary') continue;
-            $nickname = trim((string)($n['value'] ?? ''));
+            $nickname = bgg_unescape(trim((string)($n['value'] ?? '')));
             break;
         }
-        $title = trim((string)($v->canonicalname['value'] ?? ''));
+        $title = bgg_unescape(trim((string)($v->canonicalname['value'] ?? '')));
 
         // Languages, so an English edition can be preselected for people who
         // do not care which one they get.

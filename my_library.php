@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * client can simply not send — and an unrecognised mode falls back to
          * the safest one, so a mangled request cannot become a full wipe. */
         $syncMode = library_sync_mode($_POST['mode'] ?? '');
-        if ($syncMode === 'full' && empty($_POST['confirm'])) {
+        if (in_array($syncMode, library_sync_destructive_modes(), true) && empty($_POST['confirm'])) {
             flash_set(t('lib_sync_confirm_required'), 'error');
         } else {
             $user = library_bgg_user_from_input($_POST['bgg_user'] ?? '');
@@ -211,6 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $res = library_sync_from_collection($me['id'], $collection, $syncMode);
                     $msg = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
+                    if (!empty($res['purged']))  $msg .= ' ' . t('lib_sync_purged', $res['purged']);
                     if (!empty($res['updated'])) $msg .= ' ' . t('lib_sync_updated', $res['updated']);
                     // Same top-up as the club shelf: fill in full-size pictures
                     // for games added before those were recorded.

@@ -297,6 +297,8 @@ return [
     'lib_sync_mode_add'             => 'Tylko dodaj nowe gry',
     'lib_sync_mode_update'          => 'Dodaj nowe gry i uzupełnij brakujące dane',
     'lib_sync_mode_full'            => 'Pełna synchronizacja — usuń też gry, których nie ma już na BoardGameGeek',
+    'lib_sync_mode_purge'           => 'Zacznij od nowa — wyczyść tę bibliotekę i pobierz wszystko ponownie z BoardGameGeek',
+    'lib_sync_purged'               => 'Wyczyszczono i pobrano od nowa: usunięto najpierw %d.',
     'lib_sync_mode_note'            => 'Uzupełnianie danych nigdy nie nadpisuje poprawionego tytułu ani wybranej okładki.',
     'lib_sync_updated'              => 'Uzupełnione dane: %d.',
     'lib_sync_confirm_required'         => 'Potwierdź przed synchronizacją.',

@@ -961,7 +961,19 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
-**A sync has three modes** (`library_sync_mode()`): add only, add and fill
+**A sync has four modes**, the last being `purge`: empty the library entirely
+and re-import from BGG. The escape hatch for when reconciliation has gone wrong
+in some unanticipated way — it discards hand-added games and corrected titles,
+which is the point. It empties and then falls through to the ordinary import, so
+there is no second rebuild path to keep in step.
+
+`library_purge()` REQUIRES a member id for `library_games` and refuses to run
+without one: a missing id deletes nothing rather than everything. The club shelf
+has no owner and purges unscoped. `library_sync_destructive_modes()` is the one
+list driving both the server-side confirmation and the form, so the checkbox
+cannot appear for a different set of modes than the server demands it for.
+
+**Formerly three modes** (`library_sync_mode()`): add only, add and fill
 gaps, or a full sync that also DELETES what is no longer on BGG. Only the last
 is destructive, so only it demands the confirmation checkbox — the other two
 used to make people tick a warning about removal that did not apply. An

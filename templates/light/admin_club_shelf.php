@@ -167,7 +167,8 @@
         </div>
         <?php // Still required, but only the deleting option is worth confirming;
               // the script unticks and hides this for the other two. ?>
-        <div class="field field-check field-confirm js-sync-confirm" data-danger-mode="full">
+        <div class="field field-check field-confirm js-sync-confirm"
+             data-danger-modes="<?= e(implode(' ', library_sync_destructive_modes())) ?>">
             <label>
                 <input type="checkbox" name="confirm" value="1" required>
                 <?= e(t('lib_sync_confirm')) ?>

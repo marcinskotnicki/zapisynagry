@@ -490,7 +490,55 @@ const LIBRARY_SYNC_FETCH_BUDGET = 12;
  * @return array
  */
 function library_sync_modes() {
-    return ['add', 'update', 'full'];
+    // 'purge' last: it is the most destructive, and a dropdown people scan
+    // top-down should not have it anywhere near the safe options.
+    return ['add', 'update', 'full', 'purge'];
+}
+
+/**
+ * Empty a library completely, so a sync can rebuild it from nothing.
+ *
+ * The escape hatch for when reconciliation has gone wrong in some way nobody
+ * anticipated: throw the shelf away and take BGG's word for all of it. That
+ * includes hand-added games and corrected titles, which is the whole point and
+ * also why it is the one mode that says so in as many words on the form.
+ *
+ * SCOPED. On the members' table a user id is REQUIRED and the delete carries
+ * it, so one member's purge can never reach another's shelf. Passing no id for
+ * that table deletes nothing at all rather than everything — the failure mode
+ * of a mistake here is far too expensive to leave to a caller remembering.
+ *
+ * @param string   $table   'club_library_games' or 'library_games'
+ * @param int|null $userId  Required for library_games; ignored for the club shelf.
+ * @return int              Rows removed.
+ */
+function library_purge($table, $userId = null) {
+    if ($table === 'club_library_games') {
+        $n = (int)db_val('SELECT COUNT(*) FROM club_library_games');
+        db_run('DELETE FROM club_library_games');
+        return $n;
+    }
+    if ($table !== 'library_games') return 0;
+
+    // No id means no purge. Never "delete everything" by omission.
+    $userId = (int)$userId;
+    if ($userId <= 0) return 0;
+
+    $n = (int)db_val('SELECT COUNT(*) FROM library_games WHERE user_id = ?', [$userId]);
+    db_run('DELETE FROM library_games WHERE user_id = ?', [$userId]);
+    return $n;
+}
+
+/**
+ * The modes that DESTROY something and therefore need confirming.
+ *
+ * One list, asked by both controllers and rendered into the form, so the box
+ * cannot appear for one set of modes while the server demands it for another.
+ *
+ * @return array
+ */
+function library_sync_destructive_modes() {
+    return ['full', 'purge'];
 }
 
 /**
@@ -717,6 +765,14 @@ function library_sync_reconcile_edition($table, array $row, array $g, $mode, ?ar
 
 function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
     $mode = library_sync_mode($mode);
+
+    /* PURGE: empty the shelf, then fall through and let the ordinary import
+     * rebuild it. Everything below then sees an empty shelf and treats every
+     * game as new, so there is no second code path to keep in step — the
+     * rebuild IS the normal add path. */
+    $purged = 0;
+    if ($mode === 'purge') $purged = library_purge('club_library_games');
+
     $haveRows = db_all('SELECT id, name, bgg_id, year, thumbnail, image, link, bgg_version_id
                           FROM club_library_games WHERE bgg_id IS NOT NULL');
     $have = [];
@@ -755,7 +811,9 @@ function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
             }
             if (club_shelf_add(library_sync_apply_new_edition($g, null, $fetchBudget))) $added++;
         }
-        // DELETION IS THE ONE DESTRUCTIVE STEP, and only the full mode does it.
+        /* DELETION IS THE DESTRUCTIVE STEP, and only the full mode does it here.
+         * A purge has already emptied the shelf, so there is nothing left for
+         * this loop to find. */
         if ($mode === 'full') {
             foreach ($have as $id => $rowId) {
                 if (isset($wanted[$id])) continue;
@@ -769,8 +827,10 @@ function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
         throw $e;
     }
 
-    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed,
-            'updated' => $updated];
+    // A purge reports what it threw away as removed: from the admin's point of
+    // view those games are gone, whatever the mechanism.
+    return ['added' => $added, 'removed' => $removed + $purged, 'kept' => count($have) - $removed,
+            'updated' => $updated, 'purged' => $purged];
 }
 
 /**
@@ -1745,6 +1805,9 @@ function library_bgg_user_from_input($raw) {
  *                     the payload is not parseable as a collection at all.
  */
 function library_parse_collection($xmlString) {
+    // bgg_unescape() lives in bgg.php, which this function may run before.
+    require_once __DIR__ . '/bgg.php';
+
     if (!is_string($xmlString) || trim($xmlString) === '') return null;
 
     $prev = libxml_use_internal_errors(true);
@@ -1763,7 +1826,7 @@ function library_parse_collection($xmlString) {
         if ((string)($item->status['own'] ?? '0') !== '1') continue;   // owned only
         $id = (int)($item['objectid'] ?? 0);
         if ($id <= 0) continue;
-        $name = trim((string)$item->name);
+        $name = bgg_unescape(trim((string)$item->name));
         if ($name === '') continue;
         $out[] = [
             'bgg_id'    => $id,
@@ -1787,7 +1850,7 @@ function library_parse_collection($xmlString) {
              * the title stays empty and the caller looks the edition up
              * properly rather than guessing. */
             'version_id'        => (int)($item->version->item['id'] ?? 0),
-            'version_title'     => trim((string)($item->version->item->canonicalname['value'] ?? '')),
+            'version_title'     => bgg_unescape(trim((string)($item->version->item->canonicalname['value'] ?? ''))),
             'version_thumbnail' => trim((string)($item->version->item->thumbnail ?? '')),
             'version_image'     => trim((string)($item->version->item->image ?? '')),
             'version_year'      => (int)($item->version->item->yearpublished['value'] ?? 0),
@@ -1856,6 +1919,13 @@ function library_sync_from_collection($userId, array $collection, $mode = 'full'
     $userId = (int)$userId;
     $mode   = library_sync_mode($mode);
 
+    /* PURGE, scoped to THIS member — library_purge() carries the id and refuses
+     * to run without one, so a purge cannot reach anybody else's shelf. The
+     * rebuild below is the ordinary import: with the shelf empty, every game
+     * simply looks new. */
+    $purged = 0;
+    if ($mode === 'purge') $purged = library_purge('library_games', $userId);
+
     $haveRows = db_all('SELECT id, name, bgg_id, year, thumbnail, image, link, bgg_version_id
                           FROM library_games WHERE user_id = ? AND bgg_id IS NOT NULL', [$userId]);
     $have = [];
@@ -1901,6 +1971,6 @@ function library_sync_from_collection($userId, array $collection, $mode = 'full'
         throw $e;
     }
 
-    return ['added' => $added, 'removed' => $removed, 'kept' => count($have) - $removed,
-            'updated' => $updated];
+    return ['added' => $added, 'removed' => $removed + $purged, 'kept' => count($have) - $removed,
+            'updated' => $updated, 'purged' => $purged];
 }

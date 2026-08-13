@@ -305,6 +305,8 @@ return [
     'lib_sync_mode_add'             => 'Only add new games',
     'lib_sync_mode_update'          => 'Add new games and fill in missing details',
     'lib_sync_mode_full'            => 'Full sync — also remove games no longer on BoardGameGeek',
+    'lib_sync_mode_purge'           => 'Start over — erase this library and re-import everything from BoardGameGeek',
+    'lib_sync_purged'               => 'Erased and re-imported: %d removed first.',
     'lib_sync_mode_note'            => 'Filling in missing details never overwrites a title you corrected or a cover you chose.',
     'lib_sync_updated'              => 'Details filled in: %d.',
     'lib_sync_confirm_required'         => 'Please confirm before synchronising.',
