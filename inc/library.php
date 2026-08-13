@@ -1405,14 +1405,29 @@ function library_pick_backfill_image($crop, $thing, array $versions = []) {
  * @param int    $limit  Rows to attempt this run.
  * @return array ['done' => int, 'left' => int]
  */
-function library_backfill_images($table, $limit = 25) {
+function library_backfill_images($table, $limit = 25, $userId = null) {
     if ($table !== 'club_library_games' && $table !== 'library_games') return ['done' => 0, 'left' => 0];
     require_once __DIR__ . '/bgg.php';
 
+    /* SCOPED TO ONE MEMBER on the members' table. Without this a member's sync
+     * walked EVERY member's rows: it counted them ("657 left" on a 93-game
+     * shelf), spent its budget fetching pictures for games belonging to other
+     * people, and could never finish because the queue was the whole site's.
+     *
+     * The club shelf has no owner, so it passes no id and stays unscoped —
+     * which is correct there, and why the club side never showed this. */
+    $scope = '';
+    $args  = [];
+    if ($table === 'library_games' && $userId !== null) {
+        $scope = ' AND user_id = ?';
+        $args[] = (int)$userId;
+    }
+
     $rows = db_all(
         'SELECT id, thumbnail, bgg_id FROM ' . $table . '
-          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')
-          ORDER BY id LIMIT ' . (int)$limit
+          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')' . $scope . '
+          ORDER BY id LIMIT ' . (int)$limit,
+        $args
     );
 
     $done = 0;
@@ -1436,7 +1451,8 @@ function library_backfill_images($table, $limit = 25) {
 
     $left = (int)db_val(
         'SELECT COUNT(*) FROM ' . $table . '
-          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')'
+          WHERE bgg_id IS NOT NULL AND (image IS NULL OR image = \'\')' . $scope,
+        $args
     );
     return ['done' => $done, 'left' => $left];
 }

@@ -981,6 +981,12 @@ matches, which is why old entries stayed small after the column was added.
 hundred-game shelf does not hammer BGG in one click, and reports how many are
 left.
 
+**The backfill is scoped to one member** on `library_games`. Unscoped, a
+member's sync walked every member's rows: it reported a queue larger than their
+own collection ("657 left" on a 93-game shelf) and spent its budget fetching
+pictures for games belonging to other people. The club shelf has no owner and
+stays unscoped, which is why it never showed this.
+
 `library_pick_backfill_image()` is pure and holds the decision: a row does not
 record WHICH edition was chosen, so its crop is the only link back to one — an
 edition crop is matched against the version list to recover that edition's

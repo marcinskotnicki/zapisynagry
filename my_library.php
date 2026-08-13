@@ -214,7 +214,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!empty($res['updated'])) $msg .= ' ' . t('lib_sync_updated', $res['updated']);
                     // Same top-up as the club shelf: fill in full-size pictures
                     // for games added before those were recorded.
-                    $fill = library_backfill_images('library_games');
+                    // This member's own rows only — see library_backfill_images().
+                    $fill = library_backfill_images('library_games', 25, $me['id']);
                     // "sync again" only when there is actually more to do.
                     if ($fill['left'] > 0) {
                         $msg .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
