@@ -475,6 +475,15 @@ function club_shelf_relink_bgg($rowId, $link, $name = null) {
  * @param array $collection  From library_parse_collection().
  * @return array  ['added'=>int, 'removed'=>int, 'kept'=>int]
  */
+/* How many editions ONE sync run may look up individually.
+ *
+ * Only reached for an edition the collection response did not fully describe;
+ * the normal case costs nothing extra, because the collection already carries
+ * the title and art. Capped anyway so a collection full of odd entries cannot
+ * fire a request per game and be throttled into doing almost nothing — which
+ * is what a 93-game shelf did before the collection data was used. */
+const LIBRARY_SYNC_FETCH_BUDGET = 12;
+
 /**
  * The three ways a sync may treat what is already on a shelf.
  *
@@ -583,14 +592,22 @@ function library_should_adopt_edition($storedVersionId, $collectionVersionId, $m
 function library_sync_fill_row($table, array $row, array $g) {
     if ($table !== 'club_library_games' && $table !== 'library_games') return false;
 
+    /* The collection carries no full-size picture for a GAME, but it does for
+     * the EDITION a member flagged — so a row can usually get its `image`
+     * filled from the response the sync already has, instead of joining the
+     * queue of rows the backfill has to fetch one at a time. That queue is
+     * what made a big shelf report "still to do" for several runs. */
+    $from = $g;
+    if (empty($from['image']) && !empty($g['version_image'])) $from['image'] = $g['version_image'];
+
     $set = [];
     $args = [];
     foreach (['year', 'thumbnail', 'image', 'link'] as $col) {
         if (!array_key_exists($col, $row)) continue;          // column not selected
         if (!empty($row[$col])) continue;                     // already set: leave it
-        if (empty($g[$col])) continue;                        // nothing to fill it with
+        if (empty($from[$col])) continue;                     // nothing to fill it with
         $set[] = $col . ' = ?';
-        $args[] = ($col === 'year') ? (int)$g[$col] : $g[$col];
+        $args[] = ($col === 'year') ? (int)$from[$col] : $from[$col];
     }
     if (!$set) return false;
 
@@ -610,15 +627,28 @@ function library_sync_fill_row($table, array $row, array $g) {
  * @param array $g  A collection entry (bgg_id, name, thumbnail, version_id, ...).
  * @return array    The entry, with the edition applied if one was found.
  */
-function library_sync_apply_new_edition(array $g, ?array $versions = null) {
+function library_sync_apply_new_edition(array $g, ?array $versions = null, &$fetchBudget = null) {
     $versionId = (int)($g['version_id'] ?? 0);
     if ($versionId <= 0) return $g;
 
-    if ($versions === null) {
-        require_once __DIR__ . '/bgg.php';
-        $versions = bgg_versions((int)$g['bgg_id']);
+    /* Same as the reconciler: prefer what the collection already told us, and
+     * only look the edition up when it withheld a title. */
+    if (!empty($g['version_title'])) {
+        $v = [
+            'id'        => $versionId,
+            'title'     => $g['version_title'],
+            'thumbnail' => $g['version_thumbnail'] ?? '',
+            'image'     => $g['version_image'] ?? '',
+        ];
+    } else {
+        if ($versions === null && $fetchBudget !== null && $fetchBudget <= 0) return $g;
+        if ($versions === null) {
+            require_once __DIR__ . '/bgg.php';
+            if ($fetchBudget !== null) $fetchBudget--;
+            $versions = bgg_versions((int)$g['bgg_id']);
+        }
+        $v = library_find_version($versionId, $versions);
     }
-    $v = library_find_version($versionId, $versions);
     if (!$v) return $g;                   // unmatched: the collection's own name stands
 
     if (!empty($v['title']))     $g['name']      = $v['title'];
@@ -640,20 +670,41 @@ function library_sync_apply_new_edition(array $g, ?array $versions = null) {
  * @param string $mode
  * @return bool          Whether the row was changed.
  */
-function library_sync_reconcile_edition($table, array $row, array $g, $mode, ?array $versions = null) {
+function library_sync_reconcile_edition($table, array $row, array $g, $mode, ?array $versions = null,
+                                        &$fetchBudget = null) {
     if ($table !== 'club_library_games' && $table !== 'library_games') return false;
 
     $storedVersionId = isset($row['bgg_version_id']) ? $row['bgg_version_id'] : null;
     if (!library_should_adopt_edition($storedVersionId, $g['version_id'] ?? 0, $mode)) return false;
 
-    /* $versions is injectable so this path can be exercised without a network,
-     * which this project's test environment does not have. The sync loop passes
-     * nothing and the live fetch happens here. */
-    if ($versions === null) {
-        require_once __DIR__ . '/bgg.php';
-        $versions = bgg_versions((int)$row['bgg_id']);
+    /* THE COLLECTION USUALLY ALREADY SAYS EVERYTHING NEEDED, and using it costs
+     * nothing: no request, no throttling, and every changed game handled in the
+     * single response the sync already fetched. Looking each edition up
+     * separately is what made a large shelf take several runs.
+     *
+     * The lookup below is the fallback for the one case the collection cannot
+     * answer: no canonicalname, so no title we would trust. */
+    $v = null;
+    if (!empty($g['version_title'])) {
+        $v = [
+            'id'        => (int)$g['version_id'],
+            'title'     => $g['version_title'],
+            'thumbnail' => $g['version_thumbnail'] ?? '',
+            'image'     => $g['version_image'] ?? '',
+        ];
+    } else {
+        /* BUDGETED. This is the slow path, and on a big shelf it is the one
+         * that used to make a sync take several runs — so it is capped, and
+         * what it cannot reach this time is simply picked up next time. The
+         * fast path above is not budgeted, because it costs nothing. */
+        if ($versions === null && $fetchBudget !== null && $fetchBudget <= 0) return false;
+        if ($versions === null) {
+            require_once __DIR__ . '/bgg.php';
+            if ($fetchBudget !== null) $fetchBudget--;
+            $versions = bgg_versions((int)$row['bgg_id']);
+        }
+        $v = library_find_version((int)$g['version_id'], $versions);
     }
-    $v = library_find_version((int)$g['version_id'], $versions);
     if (!$v) return false;                // could not confirm the match: leave the row as it is
 
     $name  = !empty($v['title']) ? $v['title'] : $row['name'];
@@ -681,6 +732,9 @@ function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
     $added = 0;
     $removed = 0;
     $updated = 0;
+    /* Requests this run may spend on editions the collection did not fully
+     * describe. Most syncs spend none, because the collection answers already. */
+    $fetchBudget = LIBRARY_SYNC_FETCH_BUDGET;
     db()->beginTransaction();
     try {
         foreach ($wanted as $id => $g) {
@@ -692,13 +746,14 @@ function club_shelf_sync_from_collection(array $collection, $mode = 'full') {
                      * so it runs FIRST and the gap-filler then has nothing left
                      * to fill. Reversed, the filler would populate fields the
                      * adoption is about to replace anyway. */
-                    $changed = library_sync_reconcile_edition('club_library_games', $rows[$id], $g, $mode);
+                    $changed = library_sync_reconcile_edition('club_library_games', $rows[$id], $g, $mode,
+                                                              null, $fetchBudget);
                     if (library_sync_fill_row('club_library_games', $rows[$id], $g)) $changed = true;
                     if ($changed) $updated++;
                 }
                 continue;
             }
-            if (club_shelf_add(library_sync_apply_new_edition($g))) $added++;
+            if (club_shelf_add(library_sync_apply_new_edition($g, null, $fetchBudget))) $added++;
         }
         // DELETION IS THE ONE DESTRUCTIVE STEP, and only the full mode does it.
         if ($mode === 'full') {
@@ -1699,14 +1754,27 @@ function library_parse_collection($xmlString) {
             'name'      => $name,
             'year'      => (int)($item->yearpublished ?? 0),
             'thumbnail' => trim((string)$item->thumbnail),
-            /* WHICH EDITION this member has flagged as theirs in their BGG
-             * collection, when the fetch asked for it (see
-             * library_fetch_collection()) and BGG has one on file — 0 when
-             * nothing is flagged. This is <item> WITHIN a <version> wrapper, an
-             * unrelated nesting from the <versions> block on a thing response;
-             * only the id is trusted from here, never a name — see
-             * library_collection_edition() for why. */
-            'version_id' => (int)($item->version->item['id'] ?? 0),
+            /* WHICH EDITION this member has flagged as theirs, and everything
+             * BGG tells us about it IN THIS SAME RESPONSE.
+             *
+             * Taking the details here rather than looking each edition up
+             * separately is what makes a sync finish in ONE request instead of
+             * one per game: a 93-game shelf was firing 93 lookups, most of
+             * which BGG throttled, so only a handful of changes landed per run
+             * and the rest needed the button pressing again.
+             *
+             * <item> WITHIN <version> — an unrelated nesting from the
+             * <versions> block of a thing response, though the fields inside
+             * match. `canonicalname` is the TITLE the edition is published
+             * under; <name> is its nickname ("Polish edition") and is
+             * deliberately NOT read as a title. When canonicalname is absent
+             * the title stays empty and the caller looks the edition up
+             * properly rather than guessing. */
+            'version_id'        => (int)($item->version->item['id'] ?? 0),
+            'version_title'     => trim((string)($item->version->item->canonicalname['value'] ?? '')),
+            'version_thumbnail' => trim((string)($item->version->item->thumbnail ?? '')),
+            'version_image'     => trim((string)($item->version->item->image ?? '')),
+            'version_year'      => (int)($item->version->item->yearpublished['value'] ?? 0),
         ];
     }
     return $out;
@@ -1787,19 +1855,21 @@ function library_sync_from_collection($userId, array $collection, $mode = 'full'
     $added = 0;
     $removed = 0;
     $updated = 0;
+    $fetchBudget = LIBRARY_SYNC_FETCH_BUDGET;
     db()->beginTransaction();
     try {
         foreach ($wanted as $id => $g) {
             if (isset($have[$id])) {
                 if ($mode !== 'add') {
                     // Adoption first, then gap-filling — see the club shelf.
-                    $changed = library_sync_reconcile_edition('library_games', $rows[$id], $g, $mode);
+                    $changed = library_sync_reconcile_edition('library_games', $rows[$id], $g, $mode,
+                                                              null, $fetchBudget);
                     if (library_sync_fill_row('library_games', $rows[$id], $g)) $changed = true;
                     if ($changed) $updated++;
                 }
                 continue;
             }
-            if (library_add($userId, library_sync_apply_new_edition($g))) $added++;
+            if (library_add($userId, library_sync_apply_new_edition($g, null, $fetchBudget))) $added++;
         }
         // Only the full mode removes anything.
         if ($mode === 'full') {

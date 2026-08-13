@@ -945,6 +945,15 @@ edition they own — correcting a version on BGG and re-syncing therefore did
 nothing at all, which is exactly what was reported. New imports only appeared to
 work when a game's own primary name on BGG happened to be the non-English one.
 
+**The collection response describes each flagged edition in full** — title
+(`canonicalname`), thumbnail, image, year — so a sync needs NO per-game lookup.
+It briefly did one per row, and a 93-game shelf therefore fired 93 requests,
+was throttled, and needed the button pressing three times before two changed
+editions showed up. Reading the details from the response the sync already has
+makes it one request whatever the shelf size. The lookup survives only as a
+fallback for an edition with no `canonicalname`, and is budgeted
+(`LIBRARY_SYNC_FETCH_BUDGET`) so it can never go back to one-per-row.
+
 `library_should_adopt_edition()` is pure and holds the rule: adopt when the
 reported edition DIFFERS from the one the row records; never when they match
 (any name difference is presumably a manual correction, and re-applying BGG's

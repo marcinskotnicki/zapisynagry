@@ -215,8 +215,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Same top-up as the club shelf: fill in full-size pictures
                     // for games added before those were recorded.
                     $fill = library_backfill_images('library_games');
-                    if ($fill['done'] > 0 || $fill['left'] > 0) {
+                    // "sync again" only when there is actually more to do.
+                    if ($fill['left'] > 0) {
                         $msg .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
+                    } elseif ($fill['done'] > 0) {
+                        $msg .= ' ' . t('lib_images_done', $fill['done']);
                     }
                     flash_set($msg);
                 }

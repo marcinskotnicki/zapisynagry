@@ -179,8 +179,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      * still put miniatures on tables. Capped per run, so the
                      * message says whether another press is needed. */
                     $fill = library_backfill_images('club_library_games');
-                    if ($fill['done'] > 0 || $fill['left'] > 0) {
+                    // "sync again" only when there is actually more to do.
+                    if ($fill['left'] > 0) {
                         $flash .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
+                    } elseif ($fill['done'] > 0) {
+                        $flash .= ' ' . t('lib_images_done', $fill['done']);
                     }
                 }
             }
