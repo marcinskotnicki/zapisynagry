@@ -949,6 +949,13 @@ body.chat-open .chat-toggle-close { display: inline; }
     margin:2px;
 }
 
+#footercopyright{
+    padding:20px;
+    text-align:center;
+    font-size:0.8rem;
+
+}
+
 @media (prefers-reduced-motion: reduce) {
     .chat-panel, .chat-panel.is-open, .chat-toggle { transition: none; }
 
