@@ -1,0 +1,2 @@
+<div id="footercopyright"><div><span>(C) 2026 <a href="https://github.com/marcinskotnicki/zapisynagry" target="_blank">Marcin Skotnicki</a> we współpracy z KGP&nbsp;</span><a href="https://klubygierplanszowych.pl" target="_blank"><img src="inc/kgp.png" alt="Kluby Gier Planszowych"/></a></div>
+<div><a href="https://github.com/marcinskotnicki/zapisynagry/blob/main/LICENSE.pl.md">Zasady używania</a></div></div>
