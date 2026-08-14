@@ -950,10 +950,15 @@ body.chat-open .chat-toggle-close { display: inline; }
 }
 
 #footercopyright{
-    padding:20px;
-    text-align:center;
+    padding:10px;
     font-size:0.8rem;
+}
 
+#footercopyright div{
+    display:flex;
+    padding:5px;
+    justify-content:center;
+    align-items:center;
 }
 
 @media (prefers-reduced-motion: reduce) {
