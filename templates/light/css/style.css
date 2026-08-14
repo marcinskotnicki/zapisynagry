@@ -926,7 +926,7 @@ body.chat-open .chat-toggle-close { display: inline; }
 .tab-scroll.can-scroll-right::after,
 .tab-scroll.can-scroll-left::before { opacity: 1; }
 
-.opt-group { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.6rem; background: var(--surface); }
+.opt-group { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.6rem; background: var(--surface); overflow:hidden;}
 .opt-group-head {
     cursor: pointer;
     padding: 0.7rem 0.9rem;

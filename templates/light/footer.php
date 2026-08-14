@@ -147,7 +147,12 @@ if (is_file(__DIR__ . '/../../' . $jsRel)):
  * whatever wrapper it wants rather than inherit one it cannot change.
  */
 $copyrightFile = __DIR__ . '/../../inc/copyright.php';
-if (is_file($copyrightFile)) include_once $copyrightFile;
+$copyrightFileOverride = __DIR__ . '/../../inc/copyright_override.php';
+if (is_file($copyrightFileOverride)){
+    include_once $copyrightFileOverride;
+}elseif (is_file($copyrightFile)){
+    include_once $copyrightFile;
+}
 ?>
 </body>
 </html>
