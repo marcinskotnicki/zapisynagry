@@ -64,6 +64,11 @@ tpl_render('admin_shell', [
     'tab_body'   => $tab_body,
     'flash'      => $flash,
     'flash_kind' => $flashKind,
+    /* Checked at most once a day and cached: it is an outbound HTTP request, so
+     * it must not run on every admin page load. Cached as a timestamp + state
+     * rather than a bare flag, so a fixed install stops warning by itself on
+     * the next check rather than needing anything cleared. */
+    'db_exposed' => db_exposure_is_exposed(),
     // A tab controller sets $needs_editor when its screen contains a rich-text
     // field, so the editor's assets load only where they are used.
     'needs_editor' => !empty($needs_editor),

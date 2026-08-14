@@ -29,6 +29,13 @@
  *  require login, or to allow anyone. Registered content is simply owner-only.
  * ============================================================================= */
 
+/* Wrong guesses allowed against one emailed code before it is thrown away.
+ * Low on purpose: somebody reading their own code out of an email gets it
+ * right, and a handful of retries covers a mistyped digit. Destroying the code
+ * rather than locking the account out is deliberate — the owner can always
+ * request a fresh one by mail, which an attacker cannot read. */
+const VERIFY_MAX_ATTEMPTS = 5;
+
 /**
  * Current user's id, or null.
  * Thin wrapper so the rest of the file reads cleanly.
@@ -143,15 +150,37 @@ function verify_send_code($targetType, $targetId, $email) {
  * @return bool
  */
 function verify_check_code($targetType, $targetId, $email, $code) {
+    /* The candidate row is fetched WITHOUT matching on the code, so that a
+     * wrong guess can be counted. Matching on it in the query — as this used
+     * to — meant a miss simply returned nothing, with nowhere to record that it
+     * had happened: six digits inside a thirty-minute window, guessable at
+     * moderate request volume, and this is the gate that protects other
+     * people's entries. */
     $row = db_one(
-        'SELECT id FROM verification_codes
-         WHERE target_type = ? AND target_id = ? AND email = ? AND code = ? AND expires_at >= ?',
-        [$targetType, $targetId, $email, trim((string)$code), gmdate('Y-m-d H:i:s')]
+        'SELECT id, code, attempts FROM verification_codes
+         WHERE target_type = ? AND target_id = ? AND email = ? AND expires_at >= ?',
+        [$targetType, $targetId, $email, gmdate('Y-m-d H:i:s')]
     );
     if (!$row) return false;
-    db_run('DELETE FROM verification_codes WHERE target_type = ? AND target_id = ?',
-           [$targetType, $targetId]);                    // one-shot: consume on success
-    return true;
+
+    // hash_equals: the comparison should not leak the answer through timing.
+    if (hash_equals((string)$row['code'], trim((string)$code))) {
+        db_run('DELETE FROM verification_codes WHERE target_type = ? AND target_id = ?',
+               [$targetType, $targetId]);                // one-shot: consume on success
+        return true;
+    }
+
+    /* A wrong guess. Past the limit the code is DESTROYED rather than merely
+     * locked out: the owner can ask for a fresh one by mail, which is exactly
+     * what an attacker cannot do. */
+    $attempts = (int)$row['attempts'] + 1;
+    if ($attempts >= VERIFY_MAX_ATTEMPTS) {
+        db_run('DELETE FROM verification_codes WHERE target_type = ? AND target_id = ?',
+               [$targetType, $targetId]);
+    } else {
+        db_run('UPDATE verification_codes SET attempts = ? WHERE id = ?', [$attempts, (int)$row['id']]);
+    }
+    return false;
 }
 
 /**

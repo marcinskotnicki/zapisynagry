@@ -550,6 +550,12 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php // Only meaningful once wording exists, so it sits directly under it. ?>
         <?php $toggle('gdpr_prefill'); ?>
         <p class="field-note"><?= e(t('opt_gdpr_prefill_note')) ?></p>
+
+        <?php // Beside the consent wording, since it answers the same question
+              // from the other side: consent says what they agreed to, this
+              // says whether the address was ever shown to be theirs. ?>
+        <?php $toggle('mailing_double_optin'); ?>
+        <p class="field-note"><?= e(t('opt_mailing_double_optin_note')) ?></p>
         <?php /* Offers the checkbox in the user panel. Independent of the
                  mailing list above: this one goes to ACCOUNTS that asked for
                  it, so a club can run it without running a public list. */ ?>

@@ -176,7 +176,12 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->commit();
         } catch (Throwable $ex) {
             if (db()->inTransaction()) db()->rollBack();
-            $error = $ex->getMessage();
+            /* The MESSAGE is logged, never shown. A PDO exception carries table
+             * and column names, constraint names and SQLite's own wording —
+             * a free description of the schema to whoever provoked it, and
+             * meaningless to the visitor either way. */
+            log_action('error', 'save failed: ' . $ex->getMessage());
+            $error = t('error_save_failed');
         }
 
         if ($error === null) {

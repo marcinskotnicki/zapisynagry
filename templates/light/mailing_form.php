@@ -29,6 +29,9 @@
 
     <form method="post" action="subscribe.php" class="mailing-form">
         <?= $csrf ?>
+        <?php // As on every other public form — this one signs up an address
+              // the visitor types, so it is the last place to leave open. ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="day" value="<?= (int)$active_day ?>">
         <div class="mailing-row">
             <label class="sr-only" for="ml_email"><?= e(t('ml_email_label')) ?></label>

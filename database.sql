@@ -155,6 +155,14 @@ INSERT INTO options (key, value) VALUES
     -- screen instead of sitting under the search, and the club tab opens by
     -- default on the library page. For clubs whose cabinet is the usual source.
     ('library_prefer_club',   '0'),
+    -- Cached result of the "is the database downloadable?" self-test, so the
+    -- outbound request runs about once a day rather than on every admin page.
+    ('db_exposure_cache',     ''),
+    -- Make new mailing-list subscribers confirm their address by email before
+    -- they receive anything. Off by default: it is the right thing for a club
+    -- collecting addresses in public, and unnecessary friction for one whose
+    -- members sign up in the room.
+    ('mailing_double_optin',  '0'),
     -- Offer a second name box on the sign-up form, so one person can enter
     -- another (a parent booking a seat for a child).
     ('signup_proxy_name',     '0'),
@@ -496,6 +504,17 @@ CREATE TABLE mail_subscribers (
     email        TEXT NOT NULL,
     token        TEXT NOT NULL,               -- unguessable; the unsubscribe link
     consent_text TEXT,                        -- what they agreed to, verbatim
+    -- Has this address been confirmed by whoever owns it?
+    --
+    -- DEFAULT 1, deliberately. Under single opt-in there is nothing to confirm,
+    -- so a row is confirmed the moment it is made; and when this column is
+    -- added to an existing install, every subscriber already on the list
+    -- inherits the 1 and keeps receiving mail. A default of 0 would silently
+    -- mute an entire live mailing list on upgrade.
+    confirmed    INTEGER NOT NULL DEFAULT 1,
+    -- Set only while a confirmation is outstanding; cleared once used, so a
+    -- link cannot be replayed.
+    confirm_token TEXT,
     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );
@@ -778,6 +797,11 @@ CREATE TABLE verification_codes (
     target_id   INTEGER NOT NULL,
     email       TEXT NOT NULL,
     code        TEXT NOT NULL,                    -- 6 digits
+    -- Wrong guesses against this code. A 6-digit code is a million
+    -- possibilities, which sounds ample until you notice nothing was counting:
+    -- with a 30-minute window and no limit, guessing was a matter of request
+    -- volume. The code is destroyed after a few misses.
+    attempts    INTEGER NOT NULL DEFAULT 0,
     expires_at  TEXT NOT NULL,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );

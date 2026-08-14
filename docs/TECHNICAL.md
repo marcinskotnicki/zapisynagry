@@ -961,6 +961,21 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
+**Mailing list double opt-in** (`mailing_double_optin`, off by default). A new
+subscriber is stored with `confirmed = 0` and a one-shot `confirm_token`; the
+link in the confirmation mail is a GET, because a mail client cannot POST, and
+that is safe because the token IS the authorisation — unguessable, cleared on
+use, scoped to one subscription.
+
+`MAILING_CONFIRMED` is appended to every query that CHOOSES AN ADDRESS TO WRITE
+TO, rather than being checked by each caller: mailing an unconfirmed address
+once would make the feature theatre, so a new send path cannot forget it.
+
+The column DEFAULTS TO 1. Under single opt-in there is nothing to confirm, and
+on upgrade every subscriber already on a live list inherits it and keeps
+receiving mail — a default of 0 would silently mute an entire mailing list with
+nothing visibly broken to explain it.
+
 **A sync has four modes**, the last being `purge`: empty the library entirely
 and re-import from BGG. The escape hatch for when reconciliation has gone wrong
 in some unanticipated way — it discards hand-added games and corrected titles,

@@ -77,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'send'
         // person's own unsubscribe link. Participants who never subscribed
         // have no token and simply get no footer — there is nothing to leave.
         $tokens = [];
-        foreach (db_all('SELECT email, token FROM mail_subscribers WHERE event_id = ?', [$eventId]) as $r) {
+        foreach (db_all('SELECT email, token FROM mail_subscribers WHERE event_id = ?' . MAILING_CONFIRMED,
+                        [$eventId]) as $r) {
             $tokens[strtolower($r['email'])] = $r['token'];
         }
         // Counts recipients written to, not deliveries confirmed — see
@@ -107,6 +108,11 @@ foreach ($AUDIENCES as $a) {
 $tab_body = tpl_capture('admin_mailing', [
     'draft'     => $draft,
     'counts'    => $counts,
+    /* Addresses that have been asked to confirm and have not yet. They are
+     * excluded from every count above, so without stating the number an admin
+     * seeing "12 recipients" after 15 signups has no way to tell whether
+     * something is broken. */
+    'pending'   => (int)db_val('SELECT COUNT(*) FROM mail_subscribers WHERE confirmed = 0'),
     'audiences' => $AUDIENCES,
     'enabled'   => mailing_enabled(),
     'error'     => $error,

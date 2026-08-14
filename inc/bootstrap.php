@@ -86,6 +86,31 @@ require __DIR__ . '/chat.php';      // chat_enabled() is asked on every page ren
 //  - options_load() runs BEFORE auth_init(): the session restore inside
 //    auth_init() reads opt_int('login_days'); with a cold cache it would see
 //    the default 0 and mis-set every token/cookie lifetime to the 1-day floor.
+/* ---- Security headers ------------------------------------------------------
+ *
+ * Sent before anything else can commit the response. Three cheap ones that
+ * carry no compatibility risk:
+ *
+ *   X-Content-Type-Options  stops a browser second-guessing a file's type and
+ *                           running an uploaded thumbnail as script.
+ *   X-Frame-Options         stops the site being framed and clickjacked — an
+ *                           invisible frame over a "delete" button is the
+ *                           classic use.
+ *   Referrer-Policy         keeps event tokens in the URL from leaking to
+ *                           whatever a game's BGG link points at.
+ *
+ * Deliberately NOT here: a Content-Security-Policy, which would need every
+ * inline handler in the templates removing first and is a change with real
+ * regression risk; and HSTS, which stays off on purpose — an expired
+ * certificate with HSTS set means no way back into the site through the
+ * browser, and these installs are looked after by club volunteers.
+ */
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+}
+
 date_default_timezone_set('UTC');   // safe baseline until the options are readable
 options_load();     // pull settings into memory (opt* now usable)
 app_timezone_init();// switch to the venue's own clock (needs opt(), so not earlier)

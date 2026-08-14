@@ -180,3 +180,89 @@ function db_val($sql, $params = []) {
     $v = db_run($sql, $params)->fetchColumn();
     return $v === false ? null : $v;
 }
+
+/**
+ * The cached answer to db_exposure_state(), rechecked at most once a day.
+ *
+ * The check makes an outbound HTTP request, so it cannot run on every admin
+ * page load. Only a confirmed 'exposed' is treated as a warning: 'unknown'
+ * stays quiet, because crying wolf at an admin who cannot reproduce it is how
+ * a real warning gets ignored later.
+ *
+ * @return bool
+ */
+function db_exposure_is_exposed() {
+    $cache = json_decode((string)opt('db_exposure_cache', ''), true);
+    $age   = is_array($cache) ? (time() - (int)($cache['at'] ?? 0)) : PHP_INT_MAX;
+
+    if ($age < 86400 && isset($cache['state'])) {
+        return $cache['state'] === 'exposed';
+    }
+
+    $state = db_exposure_state();
+    opt_set('db_exposure_cache', json_encode(['state' => $state, 'at' => time()]));
+    return $state === 'exposed';
+}
+
+/**
+ * Is the database file downloadable over HTTP?
+ *
+ * WHY THIS EXISTS: the database — password hashes, email addresses, every
+ * sign-up — sits inside the web root, protected only by .htaccess. Apache
+ * honours that; Nginx, Caddy and IIS silently ignore it, and the whole file
+ * becomes a URL anybody can fetch. Nothing in the application noticed, so a
+ * misconfigured deployment looked exactly like a correct one.
+ *
+ * This does not fix the exposure — only moving the file out of the web root
+ * does that — but it turns a silent catastrophe into a visible warning.
+ *
+ * Returns one of:
+ *   'exposed'  — fetched it, and it really is the database. Act now.
+ *   'blocked'  — the server refused, as it should.
+ *   'unknown'  — could not tell (no curl, no reachable URL, request failed).
+ *
+ * Deliberately cheap and cached: this runs behind an admin page, not on every
+ * request, and a wrong answer must never be alarming — 'unknown' is reported
+ * as "could not check", never as "you are safe".
+ *
+ * @return string
+ */
+function db_exposure_state() {
+    if (!defined('DB_PATH')) return 'unknown';
+    if (!function_exists('curl_init')) return 'unknown';
+
+    $base = site_base_url();
+    if ($base === '') return 'unknown';
+
+    /* The DB has to actually live under the web root for a URL to exist. If an
+     * admin has moved it out — the real fix — there is nothing to test. */
+    $root = realpath(dirname(__DIR__));
+    $db   = realpath(DB_PATH);
+    if ($root === false || $db === false) return 'unknown';
+    if (strpos($db, $root . DIRECTORY_SEPARATOR) !== 0) return 'blocked';   // outside the web root
+
+    $rel = str_replace('\\', '/', substr($db, strlen($root) + 1));
+    $url = rtrim($base, '/') . '/' . $rel;
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+    // Only the first bytes are needed to recognise the file.
+    curl_setopt($ch, CURLOPT_RANGE, '0-63');
+    $body = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($body === false) return 'unknown';          // network refused us, not proof of anything
+    if ($code === 403 || $code === 404) return 'blocked';
+    if ($code < 200 || $code >= 300) return 'unknown';
+
+    /* A 200 is not enough on its own: some hosts answer everything with a
+     * friendly error page. Every SQLite file opens with this exact string, so
+     * seeing it means we really did just download the database. */
+    return strpos((string)$body, 'SQLite format 3') === 0 ? 'exposed' : 'unknown';
+}
+

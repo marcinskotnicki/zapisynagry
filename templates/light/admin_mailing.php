@@ -72,6 +72,12 @@
                 <?php endforeach; ?>
             </select>
             <p class="field-note"><?= e(t('ml_admin_audience_note')) ?></p>
+            <?php // Stated only when there are any: the counts above exclude
+                  // them, so an admin seeing fewer recipients than signups
+                  // would otherwise have no explanation for the difference. ?>
+            <?php if (!empty($pending)): ?>
+                <p class="field-note"><?= e(t('ml_admin_pending', (int)$pending)) ?></p>
+            <?php endif; ?>
         </div>
 
         <div class="field">

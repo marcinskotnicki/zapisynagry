@@ -60,9 +60,49 @@ function mailing_subscribe($eventId, $email, $consent = '') {
                        [$eventId, $email]);
     if ($existing) return $existing;
 
-    db_run('INSERT INTO mail_subscribers (event_id, email, token, consent_text) VALUES (?,?,?,?)',
-           [$eventId, $email, bin2hex(random_bytes(16)), $consent !== '' ? $consent : null]);
+    /* UNDER DOUBLE OPT-IN the row starts unconfirmed and carries a token; the
+     * confirmation mail is sent by the caller, which knows how to build a link.
+     * Otherwise it is confirmed on the spot, because there is nothing to
+     * confirm — that is what single opt-in means. */
+    $double  = mailing_double_optin();
+    $confirm = $double ? bin2hex(random_bytes(16)) : null;
+
+    db_run('INSERT INTO mail_subscribers (event_id, email, token, consent_text, confirmed, confirm_token)
+            VALUES (?,?,?,?,?,?)',
+           [$eventId, $email, bin2hex(random_bytes(16)), $consent !== '' ? $consent : null,
+            $double ? 0 : 1, $confirm]);
     return db_one('SELECT * FROM mail_subscribers WHERE id = ?', [(int)db()->lastInsertId()]);
+}
+
+/**
+ * Must a new subscriber prove they own the address before receiving anything?
+ *
+ * @return bool
+ */
+function mailing_double_optin() {
+    return opt_bool('mailing_double_optin');
+}
+
+/**
+ * Confirm a subscription from the link in the confirmation email.
+ *
+ * The token is CLEARED on success, so the link is one-shot and cannot be
+ * replayed. An unknown or already-used token returns null rather than saying
+ * which — there is nothing useful to tell a stranger holding a bad link.
+ *
+ * @param string $token
+ * @return array|null  The confirmed row, or null.
+ */
+function mailing_confirm($token) {
+    $token = trim((string)$token);
+    if ($token === '') return null;
+
+    $row = db_one('SELECT * FROM mail_subscribers WHERE confirm_token = ?', [$token]);
+    if (!$row) return null;
+
+    db_run('UPDATE mail_subscribers SET confirmed = 1, confirm_token = NULL WHERE id = ?',
+           [(int)$row['id']]);
+    return db_one('SELECT * FROM mail_subscribers WHERE id = ?', [(int)$row['id']]);
 }
 
 /**
@@ -102,14 +142,28 @@ function mailing_unsub_url($token) {
  *  overlapping combination.
  * ------------------------------------------------------------------------- */
 
+/* CONFIRMED ONLY, everywhere an address is chosen to be written to.
+ *
+ * An address awaiting confirmation has not been shown to belong to whoever
+ * typed it — mailing it is the very thing double opt-in exists to prevent, and
+ * doing it once would make the whole feature theatre. The filter therefore
+ * lives in the queries rather than in the callers, so a new send path cannot
+ * forget it.
+ *
+ * Under single opt-in every row is confirmed on creation, so this changes
+ * nothing for a club that leaves the option off. */
+const MAILING_CONFIRMED = ' AND confirmed = 1';
+
 /** Everyone subscribed to ONE event. @param int $eventId @return string[] */
 function mailing_subscriber_emails($eventId) {
-    return mailing_clean(db_all('SELECT email FROM mail_subscribers WHERE event_id = ?', [$eventId]));
+    return mailing_clean(db_all(
+        'SELECT email FROM mail_subscribers WHERE event_id = ?' . MAILING_CONFIRMED, [$eventId]));
 }
 
 /** Everyone who ever subscribed, to any event. @return string[] */
 function mailing_all_subscriber_emails() {
-    return mailing_clean(db_all('SELECT DISTINCT email FROM mail_subscribers'));
+    return mailing_clean(db_all(
+        'SELECT DISTINCT email FROM mail_subscribers WHERE confirmed = 1'));
 }
 
 /**
@@ -207,7 +261,8 @@ function mailing_notify_new_item($eventId, $name, $dayId, $startTime, $anchor, $
 
     $link = mailing_item_url((int)$day['day_index'], $anchor);
     $sent = 0;
-    foreach (db_all('SELECT * FROM mail_subscribers WHERE event_id = ?', [$eventId]) as $sub) {
+    foreach (db_all('SELECT * FROM mail_subscribers WHERE event_id = ?' . MAILING_CONFIRMED,
+                    [$eventId]) as $sub) {
         $body = t($isPoll ? 'ml_new_poll_body' : 'ml_new_game_body', $name, $when);
         if ($link !== '') $body .= "\n\n" . $link;
         $body .= mailing_unsub_footer($sub['token']);

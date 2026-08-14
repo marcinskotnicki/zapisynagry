@@ -51,6 +51,16 @@ if (club_shelf_enabled()) {
 <div class="admin">
     <h1><?= e(t('admin_panel')) ?></h1>
 
+    <?php /* THE DATABASE IS DOWNLOADABLE. Shown on every admin screen and not
+           * dismissable, because it means every password hash and email address
+           * on the site can be fetched by anyone who guesses the URL. The
+           * .htaccess that normally prevents this is an Apache file; Nginx,
+           * Caddy and IIS ignore it without a word, so a wrongly-served install
+           * looked identical to a correct one until now. */ ?>
+    <?php if (!empty($db_exposed)): ?>
+        <p class="msg msg-error admin-dbwarn"><?= e(t('admin_db_exposed')) ?></p>
+    <?php endif; ?>
+
     <?php if (!empty($flash)): ?>
         <?php // 'error' as well as 'warn': anything not explicitly listed used to
               // fold to green, so a refusal read as a success. Same bug the

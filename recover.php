@@ -38,6 +38,11 @@ $token  = $_GET['token'] ?? $_POST['token'] ?? '';
 /* ---- Step 1: request a reset link ---------------------------------------- */
 if ($action === 'request' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    /* This endpoint SENDS MAIL to an address the visitor chooses, so it needs
+     * the same gate as every other public form. Without it, it can be scripted
+     * to bomb somebody's inbox from this venue's address — the damage lands on
+     * the victim and on the venue's sending reputation. */
+    antibot_check('form');
     $email = trim($_POST['email'] ?? '');
     $user  = $email !== '' ? db_one('SELECT * FROM users WHERE email = ?', [$email]) : null;
     if ($user) {

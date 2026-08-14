@@ -271,10 +271,35 @@ function update_columns($pdo, $table) {
  */
 function update_repo_url() {
     $custom = trim((string)opt('github_url'));
-    if ($custom !== '' && preg_match('#^https?://#i', $custom)) {
+    /* PINNED TO github.com, not merely "is this a URL".
+     *
+     * update_remote_commit() has always checked this, but it only READS a
+     * version number. The path that DOWNLOADS AND OVERLAYS CODE came through
+     * here, where any http(s) address passed — so the host restriction was
+     * enforced for the harmless call and not for the destructive one. A
+     * github_url pointed elsewhere (a tampered config, a compromised admin
+     * session) meant the next update deployed unverified code from that host.
+     *
+     * An address that is not github.com now falls back to the built-in repo
+     * rather than being used: refusing to update is a far better failure than
+     * updating from somewhere unintended. */
+    if ($custom !== '' && update_is_github_url($custom)) {
         return rtrim($custom, '/');
     }
     return 'https://github.com/' . GITHUB_USER . '/' . GITHUB_REPO;
+}
+
+/**
+ * Is this a github.com address?
+ *
+ * One definition, used by every caller, so the read-only check and the
+ * code-deploying one can never again disagree about what is acceptable.
+ *
+ * @param string $url
+ * @return bool
+ */
+function update_is_github_url($url) {
+    return (bool)preg_match('#^https://(?:www\.)?github\.com/[^/]+/[^/]+#i', trim((string)$url));
 }
 
 /**
@@ -408,10 +433,13 @@ function update_remote_commit(&$why = null, $allowFetch = true) {
 
     if (!function_exists('curl_init')) return $fail('no curl');
 
-    /* Only github.com has the endpoints this speaks. An admin who pointed
-     * github_url at some other host gets no line rather than a wrong one. */
+    /* Only github.com has the endpoints this speaks. Belt and braces now —
+     * update_repo_url() already refuses anything else — but kept so this still
+     * fails cleanly rather than building a nonsense API path if that ever
+     * changes. The owner/repo capture below needs the match anyway. */
     $repo = update_repo_url();
-    if (!preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) {
+    if (!update_is_github_url($repo)
+        || !preg_match('#^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)#i', $repo, $m)) {
         return $fail('not a github.com source');
     }
     $owner = rawurlencode($m[1]);

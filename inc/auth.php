@@ -23,6 +23,25 @@
  */
 function auth_init() {
     if (session_status() !== PHP_SESSION_ACTIVE) {
+        /* HARDEN THE SESSION COOKIE BEFORE STARTING, not after — the cookie is
+         * emitted by session_start() and cannot be changed afterwards.
+         *
+         * The remember-me and CSRF cookies have always set these flags
+         * explicitly; the session cookie itself was left to php.ini, which on
+         * shared hosting — this app's usual home — frequently ships with
+         * HttpOnly off. That makes the session id readable by any script on
+         * the page, which is the whole prize behind an XSS.
+         *
+         * Secure only on HTTPS, matching the other cookies: setting it on a
+         * plain-HTTP install would mean the browser never sends the cookie and
+         * nobody could stay logged in at all. */
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        ]);
         session_start();
     }
     // Shared hosting garbage-collects session files aggressively (often after

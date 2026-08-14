@@ -24,6 +24,9 @@
         <p class="muted"><?= e(t('recover_intro')) ?></p>
         <form method="post" action="recover.php">
             <?= $csrf ?>
+            <?php // As on every other public form. Without it this endpoint
+                  // could be scripted to mail an arbitrary address repeatedly. ?>
+            <?= antibot_field() ?>
             <input type="hidden" name="action" value="request">
             <div class="field field-email">
                 <label for="email"><?= e(t('recover_email')) ?></label>
