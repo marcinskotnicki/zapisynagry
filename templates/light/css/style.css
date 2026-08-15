@@ -611,7 +611,7 @@ html { scroll-behavior: smooth; }
     color: var(--text-muted);
 }
 .bgg_logo{display:block;text-align:center;padding:20px 10px;}
-.bgg_logo img{width:60%;max-width:300px;height:auto;}
+.bgg_logo img{width:60%;max-width:200px;height:auto;}
 
 .topbar-prefs { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.6rem; }
 .topbar-prefs-item { display: inline-flex; align-items: center; }
@@ -959,11 +959,12 @@ body.chat-open .chat-toggle-close { display: inline; }
     padding:5px;
     justify-content:center;
     align-items:center;
+    flex-direction:column;
 }
 
 #footercopyright img{
     width:auto;
-    max-height:30px;
+    max-height:70px;
 }
 
 #footercopyright a{
