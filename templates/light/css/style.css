@@ -952,6 +952,7 @@ body.chat-open .chat-toggle-close { display: inline; }
 #footercopyright{
     padding:10px;
     font-size:0.8rem;
+    text-align:center;
 }
 
 #footercopyright div{
