@@ -425,6 +425,11 @@ function club_shelf_update_manual($rowId, $name, $year, $link = null) {
  * @return array
  */
 function club_shelf_relink_bgg($rowId, $link, $name = null) {
+    // Same split as library_relink_bgg(): renaming needs nothing, relinking
+    // needs a lookup.
+    if (trim((string)$link) !== '' && !bgg_configured()) {
+        return ['ok' => false, 'why' => 'bgg_off'];
+    }
     $row = db_one('SELECT * FROM club_library_games WHERE id = ? AND bgg_id IS NOT NULL', [(int)$rowId]);
     if (!$row) return ['ok' => false, 'why' => 'not_editable'];
 
@@ -1272,6 +1277,13 @@ function library_remove($userId, $gameId) {
  * @return array
  */
 function library_relink_bgg($rowId, $link, $userId = 0, $name = null) {
+    /* A RENAME still works without BGG — it touches nothing but the stored
+     * name. Swapping the row to a DIFFERENT game does not: that needs a lookup
+     * to find out what the new game is. Checked here rather than only in the
+     * template, so a stale form cannot half-apply it. */
+    if (trim((string)$link) !== '' && !bgg_configured()) {
+        return ['ok' => false, 'why' => 'bgg_off'];
+    }
     $where = 'id = ? AND bgg_id IS NOT NULL';
     $args  = [(int)$rowId];
     if ($userId > 0) { $where .= ' AND user_id = ?'; $args[] = (int)$userId; }
@@ -1361,7 +1373,11 @@ function library_flash_edit(array $res) {
         return;
     }
     $why = $res['why'] ?? '';
-    if ($why === 'not_bgg') {
+    if ($why === 'bgg_off') {
+        // Says WHY rather than "that failed": nothing is wrong with the link,
+        // the site simply has no BoardGameGeek code configured.
+        flash_set(t('lib_bgg_disabled'), 'error');
+    } elseif ($why === 'not_bgg') {
         flash_set(t('lib_relink_not_bgg'), 'error');
     } elseif ($why === 'bgg_lookup') {
         // The link looked like BGG but could not be checked, so nothing was
@@ -1527,7 +1543,8 @@ function library_backfill_images($table, $limit = 25, $userId = null) {
  * @return bool
  */
 function game_version_pick_enabled() {
-    return opt_bool('game_version_pick');
+    // Needs BGG to list the editions, so the option alone is not enough.
+    return opt_bool('game_version_pick') && bgg_configured();
 }
 
 /**

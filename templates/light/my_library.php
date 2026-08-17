@@ -121,12 +121,18 @@
                                     <label for="lib_n2_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
                                     <input type="text" id="lib_n2_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>">
                                 </div>
+                                <?php // Swapping the row to a different game needs a
+                                      // lookup, so it goes when BGG is off. Renaming
+                                      // above still works — it touches nothing but the
+                                      // stored name. ?>
+                                <?php if (bgg_configured()): ?>
                                 <div class="field field-link">
                                     <label for="lib_r_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
                                     <input type="url" id="lib_r_<?= (int)$g['id'] ?>" name="link"
                                            placeholder="https://boardgamegeek.com/boardgame/...">
                                     <p class="field-note"><?= e(t('lib_relink_hint')) ?></p>
                                 </div>
+                                <?php endif; ?>
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
                                 </div>
@@ -193,6 +199,10 @@
 
     <h2><?= e(t('lib_add_title')) ?></h2>
 
+    <?php /* Both BGG routes vanish without a code: there is nothing to look a
+           * game up in, and nothing to sync against. Adding by hand still works,
+           * which is the whole point of the club library existing. */ ?>
+    <?php if (bgg_configured()): ?>
     <details class="lib-add">
         <summary><?= e(t('lib_add_bgg')) ?></summary>
         <form method="post" action="my_library.php">
@@ -208,6 +218,7 @@
             </div>
         </form>
     </details>
+    <?php endif; ?>
 
     <details class="lib-add">
         <summary><?= e(t('lib_add_manual')) ?></summary>
@@ -243,6 +254,8 @@
         </form>
     </details>
 
+    <?php // Nothing to sync against without a code. ?>
+    <?php if (bgg_configured()): ?>
     <details class="lib-add lib-add-sync">
         <summary><?= e(t('lib_sync')) ?></summary>
         <form method="post" action="my_library.php">
@@ -300,6 +313,7 @@
             </div>
         </form>
     </details>
+    <?php endif; ?>
 
     <div class="form-actions">
         <a class="btn" href="user.php"><?= e(t('lib_back_to_panel')) ?></a>

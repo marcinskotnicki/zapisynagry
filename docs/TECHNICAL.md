@@ -961,6 +961,25 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
+**BGG IS OPTIONAL.** With no `bgg_api_code` configured, `bgg_configured()` is
+false and every BGG route is HIDDEN rather than left to fail: the add-from-BGG
+button and its search box, add-from-BGG and sync on both libraries, relinking an
+entry to a different game, and the edition chooser. A site keeps its own club
+library and manual entry, which is what makes this viable at all.
+
+Renaming a BGG-sourced row still works without a code — it touches nothing but
+the stored name. Relinking does not, and is refused in `library_relink_bgg()`
+rather than only hidden in the template, so a stale form cannot half-apply it.
+
+`bgg_configured()` lives in helpers.php, not bgg.php: it reads one option and is
+asked while rendering ordinary pages, so keeping it in the client would load
+that client on every request — see the lazy-require note in library.php.
+
+The TEST HARNESS configures a code by default. Every suite written before this
+assumes the BGG UI is present, and a blank code would fail dozens of assertions
+that still describe correct behaviour; `test_bgg_optional.php` clears it to
+exercise the other side.
+
 **Mailing list double opt-in** (`mailing_double_optin`, off by default). A new
 subscriber is stored with `confirmed = 0` and a one-shot `confirm_token`; the
 link in the confirmation mail is a GET, because a mail client cannot POST, and

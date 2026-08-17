@@ -52,15 +52,26 @@ $title      = $title     ?? t('addgame_title');
             </div>
         <?php endif; ?>
 
-        <div class="field field-game_name">
-            <label for="game_name"><?= e(t('addgame_name')) ?></label>
-            <input type="text" id="game_name" name="name"<?= (club_shelf_pick_enabled() && library_prefer_club()) ? '' : ' autofocus' ?>>
-        </div>
+        <?php /* WITHOUT A BGG CODE there is nothing to search, so the name box
+               * and its button both go. The box exists ONLY to feed that search
+               * — leaving it would ask for a name and then have nowhere to send
+               * it, and the manual route below asks for the name again anyway.
+               *
+               * Everything else on this screen still works: a game can be typed
+               * in by hand, or picked from the club's own shelf. */ ?>
+        <?php if (bgg_configured()): ?>
+            <div class="field field-game_name">
+                <label for="game_name"><?= e(t('addgame_name')) ?></label>
+                <input type="text" id="game_name" name="name"<?= (club_shelf_pick_enabled() && library_prefer_club()) ? '' : ' autofocus' ?>>
+            </div>
+        <?php endif; ?>
 
         <div class="gate-buttons">
-            <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
-                <?= e(t('addgame_from_bgg')) ?>
-            </button>
+            <?php if (bgg_configured()): ?>
+                <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
+                    <?= e(t('addgame_from_bgg')) ?>
+                </button>
+            <?php endif; ?>
             <?php // NOT preferred: under the BGG button, as a second option. ?>
             <?php if (club_shelf_pick_enabled() && !library_prefer_club()): ?>
                 <button type="submit" name="go" value="club" class="btn btn-primary btn-big" formnovalidate>

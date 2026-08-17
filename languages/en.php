@@ -253,6 +253,7 @@ return [
     'lib_relink_label'                  => 'Link to the correct game on BoardGameGeek',
     'lib_relink_hint'                   => 'Paste a different BoardGameGeek address to replace this entry with that game. Its name, year and cover come from BoardGameGeek, so there is nothing else to edit here.',
     'lib_relink_not_bgg'                => 'That is not a BoardGameGeek game address — nothing was changed.',
+    'lib_bgg_disabled'              => 'BoardGameGeek is not set up on this site, so games cannot be looked up there. You can still add and edit games by hand.',
     'opt_library_pagination'            => 'How to split the game list',
     'opt_library_pagination_all'        => 'Keep all games on one page',
     'opt_library_pagination_pages'      => 'Split into pages',

@@ -474,6 +474,25 @@ function player_signed_up_by($p) {
 }
 
 /**
+ * Is the BoardGameGeek integration usable at all?
+ *
+ * The endpoint this app talks to needs a bearer code, so with none configured
+ * every lookup returns nothing — which used to look identical to "that game
+ * does not exist". Everything that OFFERS a BGG route asks this first, so a
+ * site without a code shows no BGG buttons at all rather than buttons that
+ * quietly fail.
+ *
+ * Lives in helpers.php, not bgg.php: it reads one option and is asked on
+ * ordinary page renders, so requiring the BGG client for it would load that
+ * client on every request.
+ *
+ * @return bool
+ */
+function bgg_configured() {
+    return trim((string)opt('bgg_api_code')) !== '';
+}
+
+/**
  * May one person sign another up, with a second name box on the form?
  *
  * A parent entering a child, most often. Off by default: an extra field on the

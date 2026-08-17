@@ -140,12 +140,15 @@ function lib_render_row(array $g, $owners = null, $manage = false, $csrf = '', $
                                 <label for="libn_<?= (int)$g['id'] ?>"><?= e(t('lib_add_manual_name')) ?></label>
                                 <input type="text" id="libn_<?= (int)$g['id'] ?>" name="name" value="<?= e($g['name']) ?>">
                             </div>
+                            <?php // Needs a lookup — see my_library.php. ?>
+                            <?php if (bgg_configured()): ?>
                             <div class="field field-link">
                                 <label for="libr_<?= (int)$g['id'] ?>"><?= e(t('lib_relink_label')) ?></label>
                                 <input type="url" id="libr_<?= (int)$g['id'] ?>" name="link"
                                        placeholder="https://boardgamegeek.com/boardgame/...">
                                 <p class="field-note"><?= e(t('lib_relink_hint')) ?></p>
                             </div>
+                            <?php endif; ?>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-small btn-primary"><?= e(t('save')) ?></button>
                             </div>

@@ -90,6 +90,8 @@
 
 <h3><?= e(t('lib_add_title')) ?></h3>
 
+<?php // No BGG code, no BGG routes — see my_library.php. ?>
+<?php if (bgg_configured()): ?>
 <details class="lib-add">
     <summary><?= e(t('lib_add_bgg')) ?></summary>
     <form method="post" action="admin.php?tab=club_shelf">
@@ -105,6 +107,7 @@
         </div>
     </form>
 </details>
+<?php endif; ?>
 
 <details class="lib-add">
     <summary><?= e(t('lib_add_manual')) ?></summary>
@@ -136,6 +139,8 @@
     </form>
 </details>
 
+<?php // Nothing to sync against without a code. ?>
+<?php if (bgg_configured()): ?>
 <details class="lib-add lib-add-sync">
     <summary><?= e(t('lib_sync')) ?></summary>
     <form method="post" action="admin.php?tab=club_shelf">
@@ -193,3 +198,4 @@
         </div>
     </form>
 </details>
+<?php endif; ?>

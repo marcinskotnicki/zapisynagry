@@ -139,6 +139,12 @@ if (is_file(__DIR__ . '/../../' . $jsRel)):
  * and never deletes files the release does not contain, so a file that exists
  * only on this site is left alone. (Verified — not assumed.)
  *
+ * TWO FILES, one precedence: inc/copyright_override.php wins when present,
+ * inc/copyright.php is the fallback. This is what lets a unified default
+ * notice ship as copyright.php while a site's own customisation survives in
+ * the override file — an update can safely replace the former without ever
+ * touching the latter.
+ *
  * include_once, because footer.php can legitimately render more than once in a
  * single request (an admin preview inside a page), and a copyright file that
  * declares a helper would fatal on the second pass with a plain include.

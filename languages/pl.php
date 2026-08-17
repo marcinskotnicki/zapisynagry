@@ -245,6 +245,7 @@ return [
     'lib_relink_label'                  => 'Link do właściwej gry na BoardGameGeek',
     'lib_relink_hint'                   => 'Wklej inny adres z BoardGameGeek, aby zastąpić ten wpis tamtą grą. Nazwa, rok i okładka pochodzą z BoardGameGeek, więc nie ma tu nic więcej do edycji.',
     'lib_relink_not_bgg'                => 'To nie jest adres gry w serwisie BoardGameGeek — nic nie zostało zmienione.',
+    'lib_bgg_disabled'              => 'BoardGameGeek nie jest skonfigurowany na tej stronie, więc nie można stamtąd pobierać gier. Nadal możesz dodawać i edytować gry ręcznie.',
     'opt_library_pagination'            => 'Sposób dzielenia listy gier',
     'opt_library_pagination_all'        => 'Wszystkie gry na jednej stronie',
     'opt_library_pagination_pages'      => 'Podziel na strony',

@@ -199,16 +199,12 @@ function bgg_parse_thing($xmlString) {
  * @param string $query  User's search text.
  * @return array  List of matches; empty on network/HTTP failure.
  */
-/**
- * Is the BGG integration usable at all? The endpoint this app talks to needs a
- * bearer code, so with none configured every search returns nothing — which used
- * to look identical to "that game doesn't exist". Callers check this first so
- * they can say WHY there are no results.
- * @return bool
- */
-function bgg_configured() {
-    return trim((string)opt('bgg_api_code')) !== '';
-}
+/* bgg_configured() used to live here. It moved to helpers.php: it answers a
+ * CONFIGURATION question rather than talking to BGG, and it is now asked while
+ * rendering ordinary pages — every template that decides whether to offer a
+ * BGG route calls it. Keeping it here would have meant loading the whole BGG
+ * client on every request just to read one option, which is exactly what the
+ * lazy-require note in library.php exists to avoid. */
 
 /**
  * Does /thing say this specific entry is something OTHER than a plain board
