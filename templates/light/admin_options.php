@@ -333,6 +333,20 @@ $groupEnd = function () { echo '</div></details>'; };
             </select>
             <p class="field-note"><?= e(t('opt_header_brand_note')) ?></p>
         </div>
+
+        <?php /* Custom CSS. Sits at the tail of Appearance now, not Advanced —
+                 it IS an appearance setting, and Advanced is meant for things
+                 that can break the site if touched carelessly, which this
+                 mostly cannot: it is deliberately NOT applied to this panel, so
+                 a rule that hides everything can always be undone from here.
+                 The point of the feature is styling a site without FTP, and
+                 without that exclusion a bad paste would need FTP to fix. */ ?>
+        <div class="field field-custom_css">
+            <label for="custom_css"><?= e(t('opt_custom_css')) ?></label>
+            <textarea id="custom_css" name="custom_css" rows="10" spellcheck="false"
+                      class="code-area"><?= e(opt('custom_css')) ?></textarea>
+            <p class="field-note"><?= e(t('opt_custom_css_note')) ?></p>
+        </div>
     <?php $groupEnd(); ?>
 
     <?php /* 3. CUSTOM TEXTS */ ?>
@@ -656,16 +670,6 @@ $groupEnd = function () { echo '</div></details>'; };
             <input type="number" id="log_retention_days" name="log_retention_days" min="0"
                    value="<?= (int)opt('log_retention_days') ?>">
             <p class="field-note"><?= e(t('opt_log_retention_days_note')) ?></p>
-        </div>
-        <?php /* Custom CSS. Deliberately NOT applied to this panel, so a rule
-                 that hides everything can always be undone from here — the
-                 point of the feature is styling a site without FTP, and
-                 without that exclusion a bad paste would need FTP to fix. */ ?>
-        <div class="field field-custom_css">
-            <label for="custom_css"><?= e(t('opt_custom_css')) ?></label>
-            <textarea id="custom_css" name="custom_css" rows="10" spellcheck="false"
-                      class="code-area"><?= e(opt('custom_css')) ?></textarea>
-            <p class="field-note"><?= e(t('opt_custom_css_note')) ?></p>
         </div>
         <?php
         ?>

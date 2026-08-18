@@ -30,10 +30,20 @@ $tabs = [
     'logs'       => 'tab_logs',
     'texts'      => 'tab_texts',
     'users'      => 'tab_users',
-    'mailing'    => 'tab_mailing',
     'update'     => 'tab_update',
 ];
 // Same condition as admin.php's whitelist: no tab for a feature that is off.
+// mailing used to sit in the array above unconditionally, with the screen
+// itself saying "not enabled" when an admin clicked it — the same pattern
+// chat and club_shelf are deliberately moved away from below, so it now
+// follows their lead instead of being the exception.
+if (mailing_enabled()) {
+    // Inserted before Update, which stays last.
+    $pos  = array_search('update', array_keys($tabs), true);
+    $tabs = array_slice($tabs, 0, $pos, true)
+          + ['mailing' => 'tab_mailing']
+          + array_slice($tabs, $pos, null, true);
+}
 if (chat_enabled()) {
     // Inserted before Update, which stays last.
     $pos  = array_search('update', array_keys($tabs), true);

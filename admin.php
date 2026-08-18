@@ -15,6 +15,16 @@
 require __DIR__ . '/inc/bootstrap.php';
 require_admin();                       // everything here is admin-only
 
+/* mailing_enabled() is needed below, to decide whether the Mailing tab exists
+ * at all — but inc/mailing.php is not bootstrapped globally (see its own
+ * header: the rest of the app plain-`require`s it, and a require_once
+ * upstream would make that later plain require fatal on redeclaration).
+ * require_once here is safe because admin.php is never loaded in the same
+ * request as a page that plain-requires it — each is its own top-level
+ * script — and inc/admin/mailing.php's own require_once of the same file,
+ * later in this same request, is then simply a no-op. */
+require_once __DIR__ . '/inc/mailing.php';
+
 $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (uploads, updater)
 
 // Whitelist of tabs => controller file. The whitelist also blocks path tricks.
@@ -26,7 +36,14 @@ $APP_ROOT = __DIR__;   // controllers (in inc/admin/) use this for file paths (u
 // the events list, because creating an event is an action taken from that list
 // rather than somewhere to browse to.
 $TABS = ['archive', 'new_event', 'thumbnails', 'options', 'logs',
-         'texts', 'users', 'mailing'];
+         'texts', 'users'];
+// Same reasoning as chat and club_shelf below: removed from the whitelist
+// rather than merely hidden, so ?tab=mailing on a site with the mailing list
+// switched off falls through to the default instead of rendering a compose
+// screen for a feature that is not running. (It used to stay in the whitelist
+// and rely on the screen itself saying "not enabled" when clicked — the same
+// pattern chat and club_shelf were deliberately moved away from.)
+if (mailing_enabled()) $TABS[] = 'mailing';
 // The chat tab exists only while the feature does. Removed from the whitelist
 // rather than merely hidden in the nav, so ?tab=chat on a site with the chat
 // switched off falls through to the default rather than rendering a moderation

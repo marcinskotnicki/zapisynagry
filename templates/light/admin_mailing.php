@@ -2,11 +2,14 @@
 /* =============================================================================
  *  templates/light/admin_mailing.php — Mailing tab body. Presentation only.
  * -----------------------------------------------------------------------------
+ *  Reached only while mailing_enabled() — the tab is removed from the
+ *  whitelist otherwise (see admin.php) — so this has nothing to say about the
+ *  feature being off, the same way the chat and club-shelf tabs do not.
+ *
  *  RENDER VARS:
  *    $draft     — ['audience','subject','body'] to repopulate after an error.
  *    $counts    — audience key => number of addresses, shown beside each option.
  *    $audiences — the allowed keys, in display order.
- *    $enabled   — whether the feature is switched on at all.
  *    $error     — message above the form, or null.
  *    $events    — active events to choose between; the selector is SKIPPED
  *                 when there are fewer than two, since there is no choice.
@@ -17,16 +20,11 @@
 ?>
 <h2><?= e(t('ml_admin_title')) ?></h2>
 
-<?php if (!$enabled): ?>
-    <?php // The form is useless with the feature off, so say why rather than
-          // letting someone write a message that can't be sent. ?>
-    <p class="msg msg-error"><?= e(t('ml_admin_disabled')) ?></p>
-<?php else: ?>
-    <?php if (!empty($error)): ?>
-        <p class="msg msg-error"><?= e($error) ?></p>
-    <?php endif; ?>
+<?php if (!empty($error)): ?>
+    <p class="msg msg-error"><?= e($error) ?></p>
+<?php endif; ?>
 
-    <p class="muted"><?= e(t('ml_admin_intro')) ?></p>
+<p class="muted"><?= e(t('ml_admin_intro')) ?></p>
 
     <?php if (count($events) > 1): ?>
         <?php /* Its own GET form, like the Logs tab's scope picker: changing the
@@ -94,4 +92,3 @@
             <button type="submit" class="btn btn-primary"><?= e(t('ml_admin_send')) ?></button>
         </div>
     </form>
-<?php endif; ?>

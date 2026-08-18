@@ -114,7 +114,6 @@ $tab_body = tpl_capture('admin_mailing', [
      * something is broken. */
     'pending'   => (int)db_val('SELECT COUNT(*) FROM mail_subscribers WHERE confirmed = 0'),
     'audiences' => $AUDIENCES,
-    'enabled'   => mailing_enabled(),
     'error'     => $error,
     'event'     => $event,
     // The selector is skipped entirely when there is nothing to choose between.
