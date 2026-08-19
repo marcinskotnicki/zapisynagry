@@ -11,6 +11,8 @@
  *  doesn't resubmit.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+// user_has_password(): an account that signs in with Google may have none.
+require __DIR__ . '/inc/google.php';
 require_login();                       // panel is for logged-in users only
 
 $u     = current_user();
@@ -55,8 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cur  = (string)($_POST['current_password'] ?? '');
         $new  = (string)($_POST['new_password'] ?? '');
         $new2 = (string)($_POST['new_password2'] ?? '');
-        // Require the current password (defence if a session is left open).
-        if (!password_verify($cur, $u['password_hash'])) {
+        /* Require the current password — defence if a session is left open.
+         *
+         * EXCEPT when there is no password to require. An account created
+         * through Google has none, and password_verify() against '' is always
+         * false, so this check would make setting a first password impossible
+         * — and switching Google login off would then lock that person out
+         * with no way back. They are already authenticated by the session,
+         * which is the same thing the check is standing in for. */
+        if (user_has_password($u) && !password_verify($cur, $u['password_hash'])) {
             flash_set(t('up_password_wrong'), 'error');
         } elseif (strlen($new) < 6) {
             flash_set(t('up_password_short'), 'error');
@@ -95,6 +104,9 @@ $playedEvent = $eventId ? (int)db_val(
 tpl_render('header', ['page_title' => t('up_title')]);
 tpl_render('user_panel', [
     'user'          => $u,
+    // No password here at all — signs in with Google. The form asks for no
+    // current password, and offers a quiet word about setting one as a backup.
+    'no_password'   => !user_has_password($u),
     'flash'         => flash_get(),
     // Read after flash_get(), which clears the text — see flash_kind().
     'flash_kind'    => flash_kind(),

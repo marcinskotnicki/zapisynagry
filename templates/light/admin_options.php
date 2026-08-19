@@ -413,6 +413,8 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('club_shelf_pick'); ?>
         <p class="field-note"><?= e(t('opt_club_shelf_pick_note')) ?></p>
 
+        <?php $toggle('library_show_member_games'); ?>
+        <p class="field-note"><?= e(t('opt_library_show_member_games_note')) ?></p>
         <?php $toggle('library_show_common'); ?>
         <p class="field-note"><?= e(t('opt_library_show_common_note')) ?></p>
 
@@ -485,6 +487,40 @@ $groupEnd = function () { echo '</div></details>'; };
             </select>
             <p class="field-note"><?= e(t('opt_registration_mode_note')) ?></p>
         </div>
+
+        <?php /* SIGNING IN WITH GOOGLE. Sits right under the registration mode
+               * because it is the other answer to "how do people get in", and
+               * because guest-only mode makes it moot — there are no member
+               * accounts to sign in to. */ ?>
+        <?php $toggle('google_login'); ?>
+        <p class="field-note"><?= e(t('opt_google_login_note')) ?></p>
+        <?php /* WARNS BEFORE IT BITES. Switching this off locks out anybody who
+               * has no password here, and nothing else on this screen would say
+               * so. Only shown when there is somebody to lose. */ ?>
+        <?php if (!empty($google_only_count)): ?>
+            <p class="field-note field-warn"><?= e(t('opt_google_warn_lockout', (int)$google_only_count)) ?></p>
+        <?php endif; ?>
+        <div class="field field-google_client_id">
+            <label for="google_client_id"><?= e(t('opt_google_client_id')) ?></label>
+            <input type="text" id="google_client_id" name="google_client_id"
+                   value="<?= e(opt('google_client_id')) ?>" autocomplete="off" spellcheck="false">
+        </div>
+        <?php /* Rendered by the same helper as every other secret, so it is
+               * masked and gets its own "clear" checkbox rather than being
+               * echoed back into the page. */ ?>
+        <?php $secret('google_client_secret'); ?>
+        <?php /* The redirect URI, spelled out. Google matches it literally —
+               * no wildcards, not even across subdomains — so an admin needs
+               * the exact string rather than a description of it. */ ?>
+        <?php $gRedirect = google_redirect_uri(); ?>
+        <?php if ($gRedirect !== ''): ?>
+            <p class="field-note"><?= e(t('opt_google_setup_note', $gRedirect)) ?></p>
+        <?php else: ?>
+            <?php // No site address to build it from, so there is no exact
+                  // string to hand over — say what to fix rather than printing
+                  // a note with a hole in it. ?>
+            <p class="field-note"><?= e(t('opt_google_need_site_url')) ?></p>
+        <?php endif; ?>
         <?php
         /* Guest permissions. Two kinds are marked below:
          *   INERT   — guest-only mode short-circuits the check entirely, so the
@@ -634,6 +670,30 @@ $groupEnd = function () { echo '</div></details>'; };
 
     <?php /* 9. ADVANCED */ ?>
     <?php $group('opt_group_advanced', false, 'opt_group_advanced_note'); ?>
+        <?php /* TEXT OVERRIDES, one field per installed language.
+               *
+               * In Advanced because a typo here changes wording across the
+               * site — but only the wording: overrides are escaped on output
+               * like every other string, and lang_parse_overrides() refuses a
+               * key that does not exist or one whose %-placeholders do not
+               * match, so a mistake shows wrong words rather than breaking a
+               * page.
+               *
+               * Each field links to the language file it overrides, because
+               * the keys are only discoverable by reading it. */ ?>
+        <?php foreach (lang_available() as $oLang): ?>
+            <?php $oKey = 'lang_override_' . $oLang; ?>
+            <div class="field field-<?= e($oKey) ?>">
+                <label for="<?= e($oKey) ?>"><?= e(t('opt_lang_override', strtoupper($oLang))) ?></label>
+                <textarea id="<?= e($oKey) ?>" name="<?= e($oKey) ?>" rows="6"
+                          class="code-area" spellcheck="false"><?= e(opt($oKey)) ?></textarea>
+                <p class="field-note"><?= e(t('opt_lang_override_note')) ?></p>
+                <p class="field-note">
+                    <a href="<?= e(update_repo_url()) ?>/blob/main/languages/<?= e($oLang) ?>.php"
+                       target="_blank" rel="noopener"><?= e(t('opt_lang_override_link', $oLang . '.php')) ?></a>
+                </p>
+            </div>
+        <?php endforeach; ?>
         <?php
         $secret('bgg_api_code');
         $text('captcha_site_key');

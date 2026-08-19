@@ -130,7 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * games would look broken. */
 $showMembers = library_enabled() && library_members_tab_enabled();
 $showClub    = club_shelf_enabled();
-$showMemberGames = library_enabled();
+/* The flat list of every member's games. Its own switch now: a club that finds
+ * it redundant beside the combined view can drop just this one, and the
+ * per-member browse and the combined list are unaffected. */
+$showMemberGames = library_enabled() && opt_bool('library_show_member_games');
 $showCommon  = library_show_common();
 
 /* THE TAB ORDER, and with it the default view.

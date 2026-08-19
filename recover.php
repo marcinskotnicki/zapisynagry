@@ -15,6 +15,8 @@
  *  request form.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+// user_has_password(): a Google-only account has none to reset.
+require __DIR__ . '/inc/google.php';
 require __DIR__ . '/inc/mail.php';
 
 // Already logged in? No need to recover.
@@ -45,7 +47,18 @@ if ($action === 'request' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     antibot_check('form');
     $email = trim($_POST['email'] ?? '');
     $user  = $email !== '' ? db_one('SELECT * FROM users WHERE email = ?', [$email]) : null;
-    if ($user) {
+    if ($user && !user_has_password($user)) {
+        /* AN ACCOUNT THAT SIGNS IN WITH GOOGLE has no password to reset, and a
+         * reset link would set one silently — turning "I forgot how to get in"
+         * into a changed account.
+         *
+         * Told by EMAIL, not on screen: the page deliberately says the same
+         * thing whether or not the address is registered, and saying "this one
+         * uses Google" would tell a stranger it exists. The mailbox reaches
+         * only the person who actually owns it. */
+        send_mail($user['email'], t('recover_email_subject'), t('google_recover_email_body'));
+
+    } elseif ($user) {
         // Only generate + email a token if the account exists — but we DON'T
         // reveal that to the visitor (same "sent" screen either way).
         $tok     = bin2hex(random_bytes(32));

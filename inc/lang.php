@@ -100,8 +100,108 @@ function lang_load() {
  * @return string
  */
 function t($key, ...$args) {
-    $s = $GLOBALS['LANG'][$key] ?? $key;          // fall back to the key text
-    return $args ? vsprintf($s, $args) : $s;       // only format when args given
+    /* An admin's own wording wins, when they have set one for this key. Read
+     * from the parsed map rather than the option text, so the parse happens
+     * once per request and not once per string. */
+    $over = lang_overrides();
+    $s = $over[$key] ?? ($GLOBALS['LANG'][$key] ?? $key);   // fall back to the key text
+    return $args ? vsprintf($s, $args) : $s;                 // only format when args given
+}
+
+/**
+ * The admin's text overrides for the CURRENT language, parsed and checked.
+ *
+ * Cached per request: t() is called hundreds of times per page and the option
+ * text would otherwise be re-parsed for every one of them.
+ *
+ * @return array  key => replacement text.
+ */
+function lang_overrides() {
+    static $cache = null;
+    static $forKey = null;
+
+    $lang = (string)($GLOBALS['LANG_CODE'] ?? '');
+    if ($lang === '' || !function_exists('opt')) return [];
+
+    $raw = (string)opt('lang_override_' . $lang, '');
+
+    /* Keyed on the language AND the text itself, not the language alone. Both
+     * can change within one process — the Options screen previews another
+     * language, and saving the field changes the text — and a cache that only
+     * watched the language would keep serving the parse from before the
+     * change. Hashed rather than kept whole so the key stays small. */
+    $key = $lang . ':' . md5($raw);
+    if ($cache !== null && $forKey === $key) return $cache;
+
+    $forKey = $key;
+    $cache = trim($raw) === '' ? [] : lang_parse_overrides($raw, $GLOBALS['LANG'] ?? []);
+    return $cache;
+}
+
+/**
+ * Parse an admin's override text into a key => value map.
+ *
+ * PURE, so the parsing and — more importantly — the REFUSALS can be tested
+ * without a request around them.
+ *
+ * Format is `key = value`, one per line, split on the FIRST '=' only so a
+ * value may itself contain one. Blank lines and lines starting '#' are
+ * ignored. A line that makes no sense is skipped rather than fatal: this field
+ * lives in Advanced options, and a typo there must not take the site down.
+ *
+ * TWO THINGS ARE REFUSED, both of which would otherwise break a page:
+ *
+ *   - a key that does not exist. Silently doing nothing beats inventing a
+ *     string that nothing reads.
+ *   - a value whose printf placeholders do not match the original's. Several
+ *     strings are filled in with vsprintf() — "added %d, removed %d" — and an
+ *     override that drops or adds one produces a PHP error or nonsense where a
+ *     number should be. The built-in wording is kept for that key instead.
+ *
+ * Overrides are escaped on output exactly like any other string, so the worst
+ * a mistake can do is show the wrong words.
+ *
+ * @param string $raw       The admin's text.
+ * @param array  $existing  The language map, for validating keys and placeholders.
+ * @return array
+ */
+function lang_parse_overrides($raw, array $existing = []) {
+    $out = [];
+    foreach (preg_split('/\r\n|\r|\n/', (string)$raw) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') continue;      // blank or comment
+
+        $pos = strpos($line, '=');
+        if ($pos === false || $pos === 0) continue;          // no key, or no '='
+
+        $key = trim(substr($line, 0, $pos));
+        $val = trim(substr($line, $pos + 1));
+        if ($key === '' || $val === '') continue;
+
+        // Only keys that actually exist; an unknown one does nothing.
+        if ($existing && !array_key_exists($key, $existing)) continue;
+
+        // Placeholders must survive, or vsprintf() breaks on the way out.
+        if ($existing && lang_placeholder_count($existing[$key]) !== lang_placeholder_count($val)) continue;
+
+        $out[$key] = $val;
+    }
+    return $out;
+}
+
+/**
+ * How many printf placeholders a string takes.
+ *
+ * '%%' is an escaped literal per cent and consumes no argument, so it must not
+ * be counted — a string containing "100%%" would otherwise look like it needs
+ * an argument it never uses.
+ *
+ * @param string $s
+ * @return int
+ */
+function lang_placeholder_count($s) {
+    $s = str_replace('%%', '', (string)$s);
+    return preg_match_all('/%[0-9]*\$?[-+ 0#]*[0-9]*(?:\.[0-9]+)?[bcdeEfFgGosuxX]/', $s);
 }
 
 /**

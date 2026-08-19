@@ -163,6 +163,16 @@ INSERT INTO options (key, value) VALUES
     -- collecting addresses in public, and unnecessary friction for one whose
     -- members sign up in the room.
     ('mailing_double_optin',  '0'),
+    -- Offer "Sign in with Google" as well as the usual email and password.
+    -- Strictly ADDITIVE: email/password stays the main route and keeps working
+    -- whatever this is set to, because not everyone has a Google account.
+    --
+    -- Needs credentials from the club's own Google Cloud project (below); the
+    -- button stays hidden until both are filled in, so switching this on
+    -- half-configured shows nothing rather than a button that errors.
+    ('google_login',          '0'),
+    ('google_client_id',      ''),
+    ('google_client_secret',  ''),
     -- Offer a second name box on the sign-up form, so one person can enter
     -- another (a parent booking a seat for a child).
     ('signup_proxy_name',     '0'),
@@ -184,6 +194,11 @@ INSERT INTO options (key, value) VALUES
     -- combination a tab of its own. An upgraded install keeps the old row
     -- harmlessly unused.)
     ('library_show_common',   '1'),
+    -- Offer the tab listing every member's games merged into one list. Off
+    -- hides just that tab: the club's shelf, the combined view and the
+    -- per-member browse are unaffected, so a club that finds the flat list
+    -- redundant next to the combined one can drop it.
+    ('library_show_member_games', '1'),
     -- Where a "contact CLUB about this game" message goes. Empty means no
     -- contact button for the club — there is nowhere to send it.
     ('library_club_email',    ''),
@@ -797,6 +812,25 @@ CREATE TABLE predefined_thumbnails (
 --  verification method. Tied to the target item + email; checked then consumed.
 --  target_type: 'game' or 'player'.
 -- =============================================================================
+-- Third-party sign-ins linked to an account.
+--
+-- Keyed on (provider, provider_uid), NOT on email: a person can change the
+-- address on their Google account and must not lose the link, and two people
+-- must never collide because they once shared one.
+--
+-- A row here is the ONLY thing that lets a provider log somebody in. Deleting
+-- it unlinks; deleting the user cascades.
+CREATE TABLE user_identities (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL,
+    provider      TEXT    NOT NULL,          -- 'google' for now
+    provider_uid  TEXT    NOT NULL,          -- the provider's own stable id ('sub')
+    email         TEXT,                      -- what they had there when linked; informational
+    created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (provider, provider_uid),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE verification_codes (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     target_type TEXT NOT NULL,                    -- 'game' | 'player'

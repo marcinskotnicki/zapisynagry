@@ -74,10 +74,22 @@
             <?= $csrf ?>
             <input type="hidden" name="action" value="password">
             <h3><?= e(t('up_change_password')) ?></h3>
+            <?php /* A GENTLE NUDGE, not a nag: somebody who signs in with
+                   * Google has no password here, and setting one is optional.
+                   * It is worth saying once, because it is their way back in
+                   * if they ever lose the Google account — or if the club
+                   * switches Google sign-in off. */ ?>
+            <?php if (!empty($no_password)): ?>
+                <p class="field-note"><?= e(t('google_set_password_hint')) ?></p>
+            <?php endif; ?>
+            <?php // Nothing to ask for when there is no password yet, and
+                  // asking would make setting a first one impossible. ?>
+            <?php if (empty($no_password)): ?>
             <div class="field field-current_password">
                 <label for="current_password"><?= e(t('up_current_password')) ?></label>
                 <input type="password" id="current_password" name="current_password" required>
             </div>
+            <?php endif; ?>
             <div class="field field-new_password">
                 <label for="new_password"><?= e(t('up_new_password')) ?></label>
                 <input type="password" id="new_password" name="new_password" required>

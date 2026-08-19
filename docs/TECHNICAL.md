@@ -961,6 +961,55 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
+**ADMINS CAN OVERRIDE ANY STRING** from Advanced options, one field per
+installed language (`lang_override_<code>`, generated from lang_available() so
+a new language file brings its own field). Format is `key = text`, one per
+line, split on the FIRST `=` so a value may contain one; blank lines and `#`
+comments are skipped.
+
+`t()` is the single funnel, so hooking in there covers the whole app.
+`lang_parse_overrides()` is pure and holds the REFUSALS, which matter more than
+the acceptances: an unknown key does nothing, and wording whose %-placeholder
+count differs from the original is dropped — several strings go through
+vsprintf(), where a missing placeholder is a PHP error rather than a typo.
+`%%` is an escaped literal and is deliberately not counted.
+
+Overrides are escaped on output like any other string, so a mistake shows the
+wrong WORDS and cannot inject markup — that is what makes the field safe to
+expose at all, and why it is a text option rather than an included PHP file.
+The parse is cached per request, keyed on the language AND a hash of the text,
+because both can change within one request.
+
+**"Sign in with Google" is optional and per club** (`google_login` plus
+`google_client_id` / `google_client_secret`). STRICTLY ADDITIVE: email and
+password stays the main route and keeps working whatever this is set to.
+`google_login_enabled()` requires the switch AND both credentials, so a club
+that ticks the box and stops gets no button rather than one that errors.
+
+CREDENTIALS ARE PER CLUB because Google matches redirect URIs literally, with
+no wildcards — not even across subdomains. One shared client would mean every
+club's callback URL registered centrally; each club uses its own Google Cloud
+project instead. The admin screen prints the exact URI to register.
+
+`google_may_autolink()` is pure and holds the security: an address must be
+VERIFIED by Google (otherwise this reduces to "anyone who can make a provider
+assert an address owns that account"), and an ADMIN account is never linked
+automatically — the blast radius differs in kind, so an admin links it from
+inside their own session.
+
+NO PASSWORD is stored as `''`, not NULL: `password_verify()` against an empty
+hash is always false, so the marker can never satisfy a login and no live
+install needed a NOT NULL constraint loosened. `user_has_password()` is the one
+place that asks. A passwordless member can set a first password without
+supplying an old one — the session is the authentication, and without this,
+switching Google off would lock them out permanently. The options screen counts
+those members (`google_only_user_count()`) and warns before that happens.
+
+Password RECOVERY for such an account is answered BY EMAIL, not on screen: the
+recover page deliberately looks identical whether or not an address is
+registered, and saying "this one uses Google" would tell a stranger it exists.
+No reset token is issued, since a reset link would silently set a password.
+
 **THE LIBRARY PAGE HAS FOUR TABS**: the club shelf, the members collections,
 both together, and the member list. `library_show_common` (ON by default)
 decides whether the combined one exists; it needs BOTH libraries switched on,

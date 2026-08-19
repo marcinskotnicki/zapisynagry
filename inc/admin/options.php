@@ -33,7 +33,7 @@ require_once __DIR__ . '/../htaccess.php'; // the managed HTTPS-redirect block
 // than "clear it", so saving the form for any other reason cannot wipe them.
 // Clearing is possible, but has to be asked for explicitly — see the
 // '<key>__clear' checkbox below.
-$OPTION_SECRETS = ['email_password', 'bgg_api_code', 'captcha_secret_key'];
+$OPTION_SECRETS = ['email_password', 'bgg_api_code', 'captcha_secret_key', 'google_client_secret'];
 
 $OPTION_VALUES = [
     'venue_name', 'email_address', 'email_login',
@@ -69,6 +69,9 @@ $OPTION_VALUES = [
     // A text field, NOT a toggle: listed among the checkboxes it would be
     // rewritten to '0' by every save, since an absent checkbox reads as off.
     'library_club_email',
+    // Same reason: text fields, not toggles. google_client_secret is also in
+    // $OPTION_SECRETS above, which masks it and gives it a __clear checkbox.
+    'google_client_id', 'google_client_secret',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
@@ -84,6 +87,14 @@ foreach (custom_msg_keys() as $__msgKey) {
 }
 unset($__msgKey, $__lang);
 
+/* Text overrides, one field per installed language, for the same reason: which
+ * languages exist is not a fixed list. Generated from lang_available() so a
+ * field the Options screen renders is always one the save handler accepts. */
+foreach (lang_available() as $__oLang) {
+    $OPTION_VALUES[] = 'lang_override_' . $__oLang;
+}
+unset($__oLang);
+
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'send_emails', 'allow_polls', 'allow_discussions',
@@ -97,9 +108,10 @@ $OPTION_TOGGLES = [
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
-    'club_shelf', 'club_shelf_pick', 'library_show_common', 'library_prefer_club',
+    'club_shelf', 'club_shelf_pick', 'library_show_common', 'library_show_member_games', 'library_prefer_club',
     'signup_proxy_name', 'signup_proxy_members',
     'mailing_double_optin',
+    'google_login',
     'game_version_pick',
     'switcher_show_user_template', 'switcher_show_user_language',
 ];
@@ -493,4 +505,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
 }
 
 // Render the form. opt() reads the (now possibly updated) in-memory settings.
-$tab_body = tpl_capture('admin_options', ['csrf' => csrf_field()]);
+require_once __DIR__ . '/../google.php';
+$tab_body = tpl_capture('admin_options', [
+    'csrf' => csrf_field(),
+    // How many people would be locked out by switching Google login off. The
+    // screen warns with the number; zero means say nothing.
+    'google_only_count' => google_only_user_count(),
+]);

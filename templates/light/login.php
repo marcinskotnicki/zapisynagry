@@ -39,6 +39,18 @@
         </div>
     </form>
 
+    <?php /* BELOW the password form, not above it: email and password is the
+           * main way in and stays that way, and this is the alternative. Shown
+           * only when the club has both switched it on and finished
+           * configuring it — google_login_enabled() answers both, so a
+           * half-set-up club shows no button rather than one that fails. */ ?>
+    <?php if (function_exists('google_login_enabled') && google_login_enabled()): ?>
+        <p class="login-alt-sep muted"><?= e(t('google_or')) ?></p>
+        <p class="form-actions">
+            <a class="btn btn-google" href="google_auth.php"><?= e(t('google_sign_in')) ?></a>
+        </p>
+    <?php endif; ?>
+
     <p class="muted"><a href="recover.php"><?= e(t('forgot_password')) ?></a></p>
     <?php if (opt('registration_mode') === 'registration'): // self-registration entry point ?>
         <p class="muted"><a href="register.php"><?= e(t('reg_link')) ?></a></p>

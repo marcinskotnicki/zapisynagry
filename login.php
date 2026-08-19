@@ -7,6 +7,8 @@
  *  guard like require_login() can bounce the user here and back again.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+// google_login_enabled() decides whether the alternative button is offered.
+require __DIR__ . '/inc/google.php';
 
 // Already logged in? Nothing to do here.
 if (is_logged_in()) redirect('index.php');
