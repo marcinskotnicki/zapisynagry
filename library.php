@@ -131,24 +131,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $showMembers = library_enabled() && library_members_tab_enabled();
 $showClub    = club_shelf_enabled();
 $showMemberGames = library_enabled();
+$showCommon  = library_show_common();
 
-/* Which view opens when the address names none. The club shelf leads when the
- * admin prefers it, or when it is the only thing switched on — landing on an
- * empty "games" view while the club has a cabinet full of games would look
- * broken either way. */
-$defaultTab = ($showClub && (library_prefer_club() || !$showMemberGames)) ? 'club' : 'games';
+/* THE TAB ORDER, and with it the default view.
+ *
+ * Four views now: the club's own shelf, the members' collections, both
+ * together, and the list of members. Which leads is the admin's call —
+ * "offer club games first" flips the whole order rather than only moving one
+ * tab, so a club whose cabinet is the usual source reads its own shelf first
+ * and everything else follows in the same spirit.
+ *
+ * The member LIST is last either way: it is a way of browsing people, not
+ * games, and nobody arrives at a library page looking for it first.
+ *
+ * Built as a list rather than as a pile of conditionals so the strip, the
+ * default and the fallback below all read from one place and cannot disagree
+ * about what exists. */
+$tabOrder = library_prefer_club()
+    ? ['club', 'games', 'common', 'members']
+    : ['common', 'games', 'club', 'members'];
+$available = [];
+foreach ($tabOrder as $t) {
+    if ($t === 'club'    && !$showClub)        continue;
+    if ($t === 'games'   && !$showMemberGames) continue;
+    if ($t === 'common'  && !$showCommon)      continue;
+    if ($t === 'members' && !$showMembers)     continue;
+    $available[] = $t;
+}
+
+/* Which view opens when the address names none: simply the first that exists.
+ * Landing on an empty members' view while the club has a cabinet full of games
+ * would look broken, and this cannot do that — an absent tab is never first. */
+$defaultTab = $available ? $available[0] : 'games';
+
 $tab = $_GET['tab'] ?? $defaultTab;
-// A tab that does not exist in this configuration falls back rather than
-// 404ing — a bookmark made while a switch was on should still show something
-// useful after it is turned off.
-if ($tab === 'members' && !$showMembers)    $tab = $defaultTab;
-if ($tab === 'club' && !$showClub)         $tab = 'games';
-if ($tab === 'games' && !$showMemberGames) $tab = 'club';
-if ($tab !== 'members' && $tab !== 'club' && $tab !== 'games') $tab = $defaultTab;
+/* A tab that does not exist in this configuration falls back rather than
+ * 404ing — a bookmark made while a switch was on should still show something
+ * useful after it is turned off. This also catches ?tab=common on a site that
+ * has since switched the combined view off. */
+if (!in_array($tab, $available, true)) $tab = $defaultTab;
 
 /* A tab strip for a single tab is noise, so it appears only when there is
  * genuinely more than one view to move between. */
-$tabCount = ($showMemberGames ? 1 : 0) + ($showMembers ? 1 : 0) + ($showClub ? 1 : 0);
+$tabCount = count($available);
 
 $memberId = (int)($_GET['member'] ?? 0);
 $member = null;
@@ -186,7 +211,15 @@ if ($tab === 'members' && $memberId > 0) {
  * this list, and a $games built at render time would discard every slice made
  * above it. (It was written that way first, and all three modes silently showed
  * the full list.) */
-$games     = $tab === 'games' ? library_all_games() : [];
+/* TWO views come from this one function, told explicitly which they are:
+ *   'games'  — the members' collections alone.
+ *   'common' — those plus the club's shelf, merged, a game owned by both
+ *              showing as one line with CLUB first among the owners.
+ * Passing it rather than letting the function consult an option is what keeps
+ * the members' tab meaning the same thing whatever the combined view is set to. */
+$games = in_array($tab, ['games', 'common'], true)
+    ? library_all_games($tab === 'common')
+    : [];
 /* The club's own games. Active-only for visitors; an admin sees hidden rows
  * too, since this is the screen the manage controls live on — the same split
  * a member's shelf makes. */
@@ -200,8 +233,8 @@ $pageCount = 1;
 
 // Bound by reference so one block can page either list in place.
 $paged = null;
-if ($tab === 'games')     $paged = &$games;
-elseif ($tab === 'club')  $paged = &$clubGames;
+if ($tab === 'games' || $tab === 'common') $paged = &$games;
+elseif ($tab === 'club')                  $paged = &$clubGames;
 
 if ($paged !== null && $paged) {
     if ($mode === 'alpha') {
@@ -238,6 +271,10 @@ tpl_render('library', [
     'tab'          => $tab,
     'show_members' => $showMembers,
     'show_games'   => $showMemberGames,
+    'show_common'  => $showCommon,
+    // The strip renders straight from this, so it can never list a tab the
+    // controller would refuse or order them differently from the fallback.
+    'tab_order'    => $available,
     // Draw the club tab first when the admin prefers that source.
     'club_first'   => library_prefer_club(),
     'show_club'    => $showClub,

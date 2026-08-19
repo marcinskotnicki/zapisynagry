@@ -401,11 +401,11 @@ $groupEnd = function () { echo '</div></details>'; };
         // The two master switches are in Basic, with the other feature
         // switches — everything here only tunes them, and does nothing at all
         // until one of them is on, which the group note says.
-        $toggle('library_show_members', 'opt_note_library_off');
-        $toggle('library_allow_contact', 'opt_note_library_off');
+        $toggle('library_show_members');
+        $toggle('library_allow_contact');
         ?>
         <p class="field-note"><?= e(t('opt_library_contact_note')) ?></p>
-        <?php $toggle('library_mail_venue', 'opt_note_library_off'); ?>
+        <?php $toggle('library_mail_venue'); ?>
         <p class="field-note"><?= e(t('opt_library_mail_venue_note')) ?></p>
 
         <?php // Depends on the club's shelf rather than on the members' library,
@@ -413,8 +413,8 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('club_shelf_pick'); ?>
         <p class="field-note"><?= e(t('opt_club_shelf_pick_note')) ?></p>
 
-        <?php $toggle('library_show_club'); ?>
-        <p class="field-note"><?= e(t('opt_library_show_club_note')) ?></p>
+        <?php $toggle('library_show_common'); ?>
+        <p class="field-note"><?= e(t('opt_library_show_common_note')) ?></p>
 
         <?php $toggle('library_prefer_club'); ?>
         <p class="field-note"><?= e(t('opt_library_prefer_club_note')) ?></p>
@@ -433,7 +433,6 @@ $groupEnd = function () { echo '</div></details>'; };
                     </option>
                 <?php endforeach; ?>
             </select>
-            <p class="field-note"><?= e(t('opt_note_library_off')) ?></p>
         </div>
         <?php // Only does anything in 'pages' mode; the note says so rather than
               // the field disappearing, so an admin can set it before switching. ?>

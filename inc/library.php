@@ -158,15 +158,18 @@ function library_any_enabled() {
 }
 
 /**
- * Should the club's games also appear on the members' library page?
+ * Should the COMBINED list — members' games and the club's together — be shown?
  *
- * They keep their own tab regardless; this only adds them to the merged list.
- * Needs the shelf itself, or there would be nothing to merge.
+ * It is one of four tabs, not a change to another one: the club's shelf and the
+ * members' collections each stay viewable on their own, and this adds the view
+ * that puts them together, where a game owned by both shows as a single line.
  *
  * @return bool
  */
-function library_show_club_games() {
-    return club_shelf_enabled() && opt_bool('library_show_club');
+function library_show_common() {
+    /* The combined view needs BOTH halves to be worth showing: with only one
+     * library switched on it would duplicate that library's own tab exactly. */
+    return club_shelf_enabled() && library_enabled() && opt_bool('library_show_common');
 }
 
 /**
@@ -1041,7 +1044,18 @@ function library_update_manual($rowId, $name, $year, $userId = 0, $link = null) 
  *
  * @return array  List of ['name','year','bgg_id','link','thumbnail','owners'].
  */
-function library_all_games() {
+function library_all_games($includeClub = null) {
+    /* WHICH LIST this is, decided by the caller rather than by an option.
+     *
+     * There are now two views built from this: the members' collections on
+     * their own, and the combined list that also carries the club's shelf. The
+     * option only decides whether that second TAB exists — it must not silently
+     * change what the first one contains, which is what happened while a single
+     * merged list served both purposes.
+     *
+     * null keeps the old behaviour for any caller that has not been told which
+     * it wants. */
+    if ($includeClub === null) $includeClub = library_show_common();
     $rows = db_all(
         'SELECT g.*, u.id AS owner_id, u.display_name AS owner_name,
                 u.library_contact_ok AS owner_contact_ok, u.is_blocked AS owner_blocked
@@ -1098,7 +1112,7 @@ function library_all_games() {
      *
      * CLUB goes FIRST among the owners of a game: it is the copy anyone can
      * count on being in the building, so it is the useful one to read first. */
-    if (library_show_club_games()) {
+    if ($includeClub) {
         foreach (club_shelf_all(true) as $c) {
             $key = !empty($c['bgg_id'])
                 ? 'b' . (int)$c['bgg_id']

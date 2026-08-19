@@ -961,6 +961,24 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
+**THE LIBRARY PAGE HAS FOUR TABS**: the club shelf, the members collections,
+both together, and the member list. `library_show_common` (ON by default)
+decides whether the combined one exists; it needs BOTH libraries switched on,
+since with one it would duplicate that one exactly.
+
+It replaces `library_show_club`, which merged the club games INTO the members
+list — so "members library" meant two different things depending on a setting,
+and the members collections could not be read on their own. `library_all_games()`
+now takes the merge as a PARAMETER, decided by which tab is open, so an option
+can no longer change what another tab contains. An upgraded install keeps the
+old option row, unused.
+
+`library_prefer_club` flips the whole ORDER, not just one tab: club / members /
+common / list, or common / members / club / list. The controller builds one
+ordered array of available tabs; the strip, the default view and the fallback
+for an unknown `?tab=` all read it, so they cannot disagree. The member list is
+last either way — it browses people, not games.
+
 **BGG IS OPTIONAL.** With no `bgg_api_code` configured, `bgg_configured()` is
 false and every BGG route is HIDDEN rather than left to fail: the add-from-BGG
 button and its search box, add-from-BGG and sync on both libraries, relinking an

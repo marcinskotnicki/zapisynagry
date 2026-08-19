@@ -236,21 +236,16 @@ endif;
           // own shelf. ?>
     <?php if (($tab_count ?? 0) > 1): ?>
         <nav class="day-tabs lib-tabs">
-            <?php // The club tab leads when the admin prefers that source, so the
-                  // strip matches which view actually opens by default —
-                  // otherwise the first tab and the landing view disagree. ?>
-            <?php if (!empty($show_club) && !empty($club_first)): ?>
-                <a class="day-tab<?= $tab === 'club' ? ' day-tab-active' : '' ?>" href="library.php?tab=club"><?= e(t('lib_tab_club')) ?></a>
-            <?php endif; ?>
-            <?php if (!empty($show_games)): ?>
-                <a class="day-tab<?= $tab === 'games' ? ' day-tab-active' : '' ?>" href="library.php?tab=games"><?= e(t('lib_tab_games')) ?></a>
-            <?php endif; ?>
-            <?php if (!empty($show_members)): ?>
-                <a class="day-tab<?= $tab === 'members' ? ' day-tab-active' : '' ?>" href="library.php?tab=members"><?= e(t('lib_tab_members')) ?></a>
-            <?php endif; ?>
-            <?php if (!empty($show_club) && empty($club_first)): ?>
-                <a class="day-tab<?= $tab === 'club' ? ' day-tab-active' : '' ?>" href="library.php?tab=club"><?= e(t('lib_tab_club')) ?></a>
-            <?php endif; ?>
+            <?php /* Rendered straight from the controller's own ordered list,
+                   * not rebuilt here. The strip, the default view and the
+                   * fallback for an unknown ?tab= all read the same array, so
+                   * they cannot disagree about what exists or what comes first
+                   * — which they could when each tab had its own condition and
+                   * the club one was written out twice to move it. */ ?>
+            <?php foreach (($tab_order ?? []) as $lt): ?>
+                <a class="day-tab<?= $tab === $lt ? ' day-tab-active' : '' ?>"
+                   href="library.php?tab=<?= e($lt) ?>"><?= e(t('lib_tab_' . $lt)) ?></a>
+            <?php endforeach; ?>
         </nav>
     <?php endif; ?>
 
@@ -311,7 +306,13 @@ endif;
             <?php endif; ?>
         <?php endif; ?>
 
-    <?php elseif ($tab === 'games'): ?>
+    <?php elseif ($tab === 'games' || $tab === 'common'): ?>
+        <?php /* ONE branch for two tabs. The members' collections and the
+               * combined list differ only in whether the club's shelf was
+               * merged into $games — which the CONTROLLER decided — so the
+               * rendering is identical and every link below has to point back
+               * at whichever tab is actually open, not at a hardcoded one. */ ?>
+        <?php $selfTab = rawurlencode($tab); ?>
         <?php // ALPHABETICAL INDEX. With no letter chosen this is the whole
               // page: a strip of letters that actually have games behind them,
               // so nothing leads to an empty list. ?>
@@ -319,14 +320,14 @@ endif;
             <nav class="lib-alpha">
                 <?php foreach ($letters as $l => $count): ?>
                     <a class="btn btn-small lib-alpha-btn<?= ($letter ?? '') === (string)$l ? ' lib-alpha-active' : '' ?>"
-                       href="library.php?tab=games&amp;letter=<?= rawurlencode((string)$l) ?>"><?= e($l) ?>
+                       href="library.php?tab=<?= $selfTab ?>&amp;letter=<?= rawurlencode((string)$l) ?>"><?= e($l) ?>
                         <span class="lib-alpha-count"><?= (int)$count ?></span>
                     </a>
                 <?php endforeach; ?>
             </nav>
             <?php if (($letter ?? '') !== ''): ?>
                 <p class="lib-alpha-back">
-                    <a class="btn btn-small" href="library.php?tab=games"><?= e(t('lib_all_letters')) ?></a>
+                    <a class="btn btn-small" href="library.php?tab=<?= $selfTab ?>"><?= e(t('lib_all_letters')) ?></a>
                 </p>
             <?php endif; ?>
         <?php endif; ?>
@@ -350,11 +351,11 @@ endif;
             <?php if (($mode ?? 'all') === 'pages' && ($page_count ?? 1) > 1): ?>
                 <nav class="pager">
                     <?php if (($page ?? 1) > 1): ?>
-                        <a class="btn btn-small" href="library.php?tab=games&amp;page=<?= (int)$page - 1 ?>"><?= e(t('pager_prev')) ?></a>
+                        <a class="btn btn-small" href="library.php?tab=<?= $selfTab ?>&amp;page=<?= (int)$page - 1 ?>"><?= e(t('pager_prev')) ?></a>
                     <?php endif; ?>
                     <span class="pager-pos"><?= e(t('pager_position', (int)$page, (int)$page_count)) ?></span>
                     <?php if (($page ?? 1) < ($page_count ?? 1)): ?>
-                        <a class="btn btn-small" href="library.php?tab=games&amp;page=<?= (int)$page + 1 ?>"><?= e(t('pager_next')) ?></a>
+                        <a class="btn btn-small" href="library.php?tab=<?= $selfTab ?>&amp;page=<?= (int)$page + 1 ?>"><?= e(t('pager_next')) ?></a>
                     <?php endif; ?>
                 </nav>
             <?php endif; ?>

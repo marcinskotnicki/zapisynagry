@@ -173,11 +173,17 @@ INSERT INTO options (key, value) VALUES
     -- game from BGG, so a club running a localised copy can label the table
     -- with the title on the box.
     ('game_version_pick',     '0'),
-    -- Also list the club's own games on the members' library page, credited to
-    -- "CLUB". They keep their own tab either way; this only adds them to the
-    -- merged list, where a game the club AND members own shows one line with
-    -- CLUB first among the owners.
-    ('library_show_club',     '0'),
+    -- Offer the COMBINED list — every member's games and the club's own in one
+    -- place, a game owned by both showing as one line with CLUB first among the
+    -- owners. Its own tab, alongside the club's shelf and the members'
+    -- collections, which each remain viewable on their own.
+    --
+    -- ON by default: with both libraries switched on, all four tabs are there
+    -- unless somebody decides otherwise. (Replaces library_show_club, which
+    -- merged the club's games INTO the members' list rather than giving the
+    -- combination a tab of its own. An upgraded install keeps the old row
+    -- harmlessly unused.)
+    ('library_show_common',   '1'),
     -- Where a "contact CLUB about this game" message goes. Empty means no
     -- contact button for the club — there is nowhere to send it.
     ('library_club_email',    ''),
