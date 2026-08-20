@@ -42,7 +42,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 // Admin only, live event only. Checked server-side rather than trusting that
 // the button is merely hidden for everyone else.
 if (!is_admin() || !$event || (int)$event['is_archived'] === 1) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 // Candidate destinations: every OTHER table on the same day.
@@ -53,7 +53,7 @@ $tables = db_all(
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     if (($_POST['choice'] ?? '') === 'back') {
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
     antibot_check('click');
 
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $table = $kind === 'poll' ? 'polls' : 'games';
         db_run("UPDATE $table SET table_id = ? WHERE id = ?", [$target, $id]);
         log_action($kind . '_move', ($row['name'] ?? ('#' . $id)) . ' -> table #' . $target);
-        redirect('index.php?day=' . $activeDay . '#' . $kind . '-' . $id);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#') . $kind . '-' . $id);
     }
     $error = t('move_invalid');
 }

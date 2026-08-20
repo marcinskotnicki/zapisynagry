@@ -29,7 +29,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 
 // Only when discussions are on and the event is live.
 if (!opt_bool('allow_discussions') || !$event || (int)$event['is_archived'] === 1) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,5 +59,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-redirect('index.php?day=' . $activeDay
+redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))
          . ($kind === 'poll' ? '#poll-' . $pollId : '#game-' . $gameId));

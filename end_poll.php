@@ -29,7 +29,7 @@ $u = current_user();
 $isOwner = ((int)$poll['proposer_user_id'] !== 0
             && (int)$poll['proposer_user_id'] === (int)$u['id']);
 if (!$event || (int)$event['is_archived'] === 1 || (!$isOwner && !is_admin())) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newGameId = poll_force_resolve($pollId);
     log_action('poll_ended_early', 'Poll #' . $pollId . ($newGameId ? ' -> game #' . $newGameId : ' (no winner)'));
     if ($newGameId) {
-        redirect('index.php?day=' . $activeDay . '#game-' . $newGameId);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId);
     }
-    redirect('index.php?day=' . $activeDay);       // pathological: poll had no candidates
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));       // pathological: poll had no candidates
 }
 
 tpl_render('header', ['page_title' => t('poll_end_title')]);

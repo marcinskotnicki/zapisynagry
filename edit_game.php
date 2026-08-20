@@ -35,11 +35,11 @@ $activeDay = (int)($day['day_index'] ?? 1);
 // Only active games on the live event are editable (also re-checks the button rule).
 if (!$event || (int)$event['is_archived'] === 1 || (int)$game['is_archived'] === 1
     || !verify_can_show_buttons($game['added_by_user_id'])) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 $decision = verify_decision($game['added_by_user_id'], $game['brings_email']);
-if ($decision === 'deny') { redirect('index.php?day=' . $activeDay); }
+if ($decision === 'deny') { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))); }
 
 // GET = the edit button was clicked: leave a trace right away, so even an
 // attempt that's abandoned (or fails the challenge later) shows in the logs.
@@ -67,7 +67,7 @@ if (($_POST['action'] ?? '') === 'verify' && $_SERVER['REQUEST_METHOD'] === 'POS
 if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     antibot_check('form');
-    if (!$unlocked) { redirect('index.php?day=' . $activeDay); }   // never save while locked
+    if (!$unlocked) { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))); }   // never save while locked
 
     $start = trim($_POST['start_time'] ?? '');
     if (!is_valid_time($start)) $start = $game['start_time'];      // keep old time if invalid
@@ -125,7 +125,7 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         unset($_SESSION['edit_ok'][$gameId]);          // consume the unlock after a successful save
         log_action('game_edit', $name);
         if ($startChanged) notify_starttime_changed($game, $start);   // tell signed-up players
-        redirect('index.php?day=' . $activeDay . '#game-' . $gameId);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $gameId);
     }
 }
 

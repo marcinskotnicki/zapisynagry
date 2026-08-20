@@ -35,11 +35,11 @@ $activeDay = (int)($day['day_index'] ?? 1);
 // HIDES the button — the guard has to live here).
 if (!$event || (int)$event['is_archived'] === 1
     || !verify_can_show_buttons($poll['proposer_user_id'])) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 $decision = verify_decision($poll['proposer_user_id'], $poll['proposer_email']);
-if ($decision === 'deny') { redirect('index.php?day=' . $activeDay); }
+if ($decision === 'deny') { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))); }
 
 $error = null;
 
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $choice = $_POST['choice'] ?? 'back';
 
     if ($choice === 'back') {
-        redirect('index.php?day=' . $activeDay);       // bail out, no challenge needed
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));       // bail out, no challenge needed
     }
     antibot_check('click');
     if (!verify_passes($decision, 'poll', $pollId, $poll['proposer_email'], $_POST)) {
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_SESSION['poll_live_edit']);
         }
         unset($_SESSION['poll_edit_ok'][$pollId]);      // no point remembering a passed gate
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
 }
 

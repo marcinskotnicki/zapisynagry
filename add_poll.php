@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } elseif ($do === 'cancel') {
         unset($_SESSION['poll_draft']);                    // discard the whole draft
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 
     } elseif ($do === 'finish') {
         antibot_check('form');
@@ -215,9 +215,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // then jump to the game card; otherwise jump to the new poll.
                 $newGameId = poll_check_resolve($pollId);
                 if ($newGameId) {
-                    redirect('index.php?day=' . $activeDay . '#game-' . $newGameId);
+                    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId);
                 }
-                redirect('index.php?day=' . $activeDay . '#poll-' . $pollId);
+                redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . $pollId);
             }
         }
     }

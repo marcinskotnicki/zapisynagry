@@ -961,6 +961,22 @@ would undo it on every sync); and for a legacy row with no recorded edition,
 only in 'full' mode, since "never versioned" and "renamed by hand" are
 indistinguishable from the row alone.
 
+**EVERY POST-ACTION REDIRECT GOES THROUGH `front_url($day, $eventId, $anchor)`.**
+They used to build `index.php?day=N` by hand — fifteen files, fifty-odd sites —
+and index.php then resolved the event with `current_event()`, the EARLIEST open
+one. With public archives on and two events running, adding a game or a table
+on the second one redirected to day N of the FIRST: the day survived the round
+trip, the event did not.
+
+The event id is appended only when it is needed — archives off means at most
+one live event, and naming the current event is redundant since index.php lands
+there anyway — so the common case keeps clean, shareable URLs.
+
+`subscribe.php` is deliberately exempt: it resolves its event with
+`current_event()` by design, so the plain URL is already right there. A test
+guards that no other page reintroduces a hand-built one, comparing against
+comment-stripped source since several of those files explain the bug in prose.
+
 **ADMINS CAN OVERRIDE ANY STRING** from Advanced options, one field per
 installed language (`lang_override_<code>`, generated from lang_available() so
 a new language file brings its own field). Format is `key = text`, one per

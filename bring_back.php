@@ -22,7 +22,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 
 // Only meaningful for an archived game on the live event.
 if (!$event || (int)$event['is_archived'] === 1 || (int)$game['is_archived'] !== 1) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 // Prefill from the logged-in user, if any (a guest types their own details).
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_action('game_bringback', $game['name'] . ' -> ' . $form['name']
                    . ($form['start_time'] !== $game['start_time'] ? ' @ ' . $form['start_time'] : ''));
         notify_game_undeleted($game);   // tell players still attached it's back
-        redirect('index.php?day=' . $activeDay . '#game-' . $gameId);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $gameId);
     }
 }
 

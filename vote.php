@@ -22,7 +22,9 @@ if (!$cand) { redirect('index.php'); }
 
 $poll  = db_one('SELECT * FROM polls WHERE id = ?', [$cand['poll_id']]);
 $event = $poll ? db_one('SELECT * FROM events WHERE id = ?', [$poll['event_id']]) : null;
-$day   = $poll ? db_one('SELECT day_index FROM event_days WHERE id = ?', [$poll['day_id']]) : null;
+// event_id too — see front_url(); without it the redirect can land on a
+// different event's day of the same number.
+$day   = $poll ? db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$poll['day_id']]) : null;
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Live event + permitted to sign up (voting == joining a potential game).
@@ -52,13 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run('DELETE FROM poll_votes WHERE poll_game_id = ? AND user_id = ?', [$pgId, $uid]);
             log_action('poll_unvote', $cand['name']);
         }
-        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . (int)$cand['poll_id']);
     }
 
     // Recording a vote: a logged-in user can't vote twice for the same candidate.
     antibot_check('click');
     if ($uid && poll_user_voted($pgId, $uid)) {
-        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);   // already voted; no duplicate
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . (int)$cand['poll_id']);   // already voted; no duplicate
     }
 
     $form['name']  = trim((string)$form['name']);
@@ -101,9 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Did this vote push the candidate over its threshold? If so it's now a game.
         $newGameId = poll_check_resolve($cand['poll_id']);
         if ($newGameId) {
-            redirect('index.php?day=' . $activeDay . '#game-' . $newGameId);
+            redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId);
         }
-        redirect('index.php?day=' . $activeDay . '#poll-' . (int)$cand['poll_id']);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . (int)$cand['poll_id']);
     }
 }
 

@@ -26,7 +26,9 @@ if (!$player) { redirect('index.php'); }
 // Load the game/event/day around this player (for permission + redirect target).
 $game  = db_one('SELECT * FROM games WHERE id = ?', [$player['game_id']]);
 $event = $game ? db_one('SELECT * FROM events WHERE id = ?', [$game['event_id']]) : null;
-$day   = $game ? db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]) : null;
+// event_id too: the redirect back has to name the event when more than one
+// is live, or it lands on the wrong one. See front_url().
+$day   = $game ? db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$game['day_id']]) : null;
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // No edits on archived events.
@@ -37,13 +39,13 @@ if (!$game || !$event || (int)$event['is_archived'] === 1) {
 // Buttons shouldn't have been shown if this is true, but enforce server-side
 // (never trust that the UI hid the link).
 if (!verify_can_show_buttons($player['user_id'])) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 // What (if anything) must the actor prove? 'deny' shouldn't reach the form.
 $decision = verify_decision($player['user_id'], $player['email']);
 if ($decision === 'deny') {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 $error = null;
@@ -67,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         log_action('player_delete', $player['name'] . ' <- ' . $game['name']);
-        redirect('index.php?day=' . $activeDay . '#game-' . $player['game_id']);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $player['game_id']);
     }
 }
 

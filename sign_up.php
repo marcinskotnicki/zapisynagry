@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         consent_remember();
         guest_identity_remember($form['name'], $form['email']);   // prefill next time
         notify_signup($game, $form['name']);                     // no-op unless notifications on
-        redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to the card
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $gameId);   // PRG + jump to the card
     }
 }
 

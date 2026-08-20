@@ -474,6 +474,41 @@ function player_signed_up_by($p) {
 }
 
 /**
+ * The front-page URL to return to after an action, on the RIGHT event.
+ *
+ * WHY THIS EXISTS: every redirect after adding a game, creating a table,
+ * voting and so on used to build 'index.php?day=N' by hand. index.php then
+ * resolved the event with current_event() — the EARLIEST open one — so with
+ * public archives on and more than one event live, somebody working in the
+ * second event was thrown back to day N of the first. The day survived the
+ * round trip; the event did not.
+ *
+ * The event id is appended only when it is needed:
+ *   - public archives off  -> at most one event is live, so there is nothing
+ *     to disambiguate and the plain URL is right.
+ *   - it IS the current event -> index.php would land there anyway, and a
+ *     bare ?day= keeps the common case's links clean and shareable.
+ *   - otherwise -> named explicitly, because nothing else would find it.
+ *
+ * @param int    $day      1-based day index.
+ * @param int    $eventId  The event the action happened on. 0 = don't care.
+ * @param string $anchor   Optional '#fragment', including the hash.
+ * @return string
+ */
+function front_url($day, $eventId = 0, $anchor = '') {
+    $url = 'index.php?day=' . (int)$day;
+
+    $eventId = (int)$eventId;
+    if ($eventId > 0 && public_archives_enabled()) {
+        $current = current_event();
+        if ((int)($current['id'] ?? 0) !== $eventId) {
+            $url .= '&event=' . $eventId;
+        }
+    }
+    return $url . $anchor;
+}
+
+/**
  * Is the BoardGameGeek integration usable at all?
  *
  * The endpoint this app talks to needs a bearer code, so with none configured

@@ -36,11 +36,11 @@ $activeDay = (int)($day['day_index'] ?? 1);
 // Live event only, and the same button rule the poll card uses.
 if (!$event || (int)$event['is_archived'] === 1
     || !verify_can_show_buttons($poll['proposer_user_id'])) {
-    redirect('index.php?day=' . $activeDay);
+    redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
 $decision = verify_decision($poll['proposer_user_id'], $poll['proposer_email']);
-if ($decision === 'deny') { redirect('index.php?day=' . $activeDay); }
+if ($decision === 'deny') { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))); }
 
 // Clicking edit is logged straight away, so an abandoned or failed attempt
 // still leaves a trace (mirrors game/player edit attempts).
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             notify_poll_changed($poll, t('ntf_pollchg_removed', $cand['name']), $emails);
             // Fewer options can leave a survivor already over its threshold.
             $newGameId = poll_check_resolve($pollId);
-            if ($newGameId) { redirect('index.php?day=' . $activeDay . '#game-' . $newGameId); }
+            if ($newGameId) { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId); }
             redirect('edit_poll.php?poll=' . $pollId);
         }
 
@@ -225,9 +225,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // leaving — otherwise the poll would sit full until the next vote.
             if ($error === null) {
                 $newGameId = poll_check_resolve($pollId);
-                if ($newGameId) { redirect('index.php?day=' . $activeDay . '#game-' . $newGameId); }
+                if ($newGameId) { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId); }
             }
-            redirect('index.php?day=' . $activeDay . '#poll-' . $pollId);
+            redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . $pollId);
         }
     }
 }

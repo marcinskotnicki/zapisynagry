@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Back where the message was started from: the library, or the event.
         redirect(($libraryMember || $libraryClub)
             ? ($libraryClub ? 'library.php?tab=club' : 'library.php')
-            : ('index.php?day=' . $activeDay . $backAnchor));
+            : (front_url($activeDay, (int)($day['event_id'] ?? 0)) . $backAnchor));
     }
 }
 

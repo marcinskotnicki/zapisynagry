@@ -38,17 +38,17 @@ $purge = ((int)$game['is_archived'] === 1);
 if ($purge) {
     // Archived game: admin-only, no verification challenge (admins always pass).
     if (!$event || (int)$event['is_archived'] === 1 || !is_admin()) {
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
     $decision = 'allow';
 } else {
     // Live event + active game only, and re-check the button rule server-side.
     if (!$event || (int)$event['is_archived'] === 1
         || !verify_can_show_buttons($game['added_by_user_id'])) {
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
     $decision = verify_decision($game['added_by_user_id'], $game['brings_email']);
-    if ($decision === 'deny') { redirect('index.php?day=' . $activeDay); }
+    if ($decision === 'deny') { redirect(front_url($activeDay, (int)($day['event_id'] ?? 0))); }
 }
 
 $error = null;
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $choice = $_POST['choice'] ?? 'back';
 
     if ($choice === 'back') {
-        redirect('index.php?day=' . $activeDay);          // bail out, no challenge needed
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));          // bail out, no challenge needed
     }
     antibot_check('click');
     // The admin's game_deletion setting decides which choices exist at all.
@@ -84,14 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // so they still receive the message about their own game.
         $droppedSelf = game_drop_bringer_signup($game);
         log_action('game_archive', $game['name'] . ($droppedSelf ? ' (bringer sign-up removed)' : ''));
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     } elseif ($choice === 'everything') {
         // Players were already notified when the game was soft-deleted, so a
         // purge of an archived game skips the (duplicate) deletion email.
         if (!$purge) { notify_game_deleted($game); }   // gather + notify before the cascade removes players
         db_run('DELETE FROM games WHERE id = ?', [$gameId]);   // cascades players + comments
         log_action('game_delete', $game['name']);
-        redirect('index.php?day=' . $activeDay);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
 }
 

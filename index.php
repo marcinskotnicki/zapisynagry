@@ -87,7 +87,9 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
             log_action('table_add', 'Table #' . $num . ' (day ' . $activeDay . ')');
         }
     }
-    redirect('index.php?day=' . $activeDay);              // PRG: avoid resubmit on refresh
+    // front_url(), not a hand-built URL: with more than one event live this
+    // page must come back to the SAME one, not the earliest open one.
+    redirect(front_url($activeDay, (int)$event['id']));      // PRG: avoid resubmit on refresh
 }
 
 /* ---- Rename a table (POST, interactive view only) ------------------------ */
@@ -112,7 +114,7 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
             log_action('table_delete', 'Table #' . $delRow['table_number']);
         }
     }
-    redirect('index.php?day=' . $activeDay);   // PRG: a refresh must not repeat it
+    redirect(front_url($activeDay, (int)$event['id']));   // PRG: a refresh must not repeat it
 }
 
 // ?rename_table= handling below); this is where that form lands. An empty
@@ -137,7 +139,7 @@ if (!$readonly && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
     // PRG back to the table's anchor (#table-<id>) so a successful save doesn't
     // scroll the page to the top. $tblId is safe here: it's an int, and if it
     // was a bad/foreign id the fragment simply matches nothing (harmless).
-    redirect('index.php?day=' . $activeDay . '#table-' . (int)($_POST['table_id'] ?? 0));
+    redirect(front_url($activeDay, (int)$event['id'], '#table-' . (int)($_POST['table_id'] ?? 0)));
 }
 
 // Build the day's tables (with nested games + players, polls, comments).

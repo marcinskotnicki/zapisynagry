@@ -195,7 +195,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             // outside the transaction so slow SMTP doesn't hold a write lock.
             mailing_notify_new_item((int)$event['id'], $form['name'], (int)$day['id'],
                                     $form['start_time'], 'game-' . $gameId);
-            redirect('index.php?day=' . $activeDay . '#game-' . $gameId);   // PRG + jump to card
+            redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $gameId);   // PRG + jump to card
         }
     }
 
