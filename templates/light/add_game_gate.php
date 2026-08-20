@@ -52,40 +52,47 @@ $title      = $title     ?? t('addgame_title');
             </div>
         <?php endif; ?>
 
-        <?php /* WITHOUT A BGG CODE there is nothing to search, so the name box
-               * and its button both go. The box exists ONLY to feed that search
-               * — leaving it would ask for a name and then have nowhere to send
-               * it, and the manual route below asks for the name again anyway.
+        <?php /* ABOVE the name box, because it does not use it: picking from a
+               * library is choosing a game, not searching for one, and a button
+               * sitting under a field it ignores reads as though it needs it
+               * filled in first.
                *
-               * Everything else on this screen still works: a game can be typed
-               * in by hand, or picked from the club's own shelf. */ ?>
+               * For somebody who keeps a library the game they are bringing is
+               * almost always already in it, so this is the shortest route and
+               * goes first. Only shown when they have one with games in it —
+               * otherwise it is a dead end, and they are the only person who
+               * could tell it was empty. */ ?>
+        <?php if (!empty($own_pick)): ?>
+            <div class="gate-buttons">
+                <button type="submit" name="go" value="mine" class="btn btn-primary btn-big" formnovalidate>
+                    <?= e(t('addgame_from_own')) ?>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <?php /* THE SEARCH BOX AND ITS BUTTON, boxed together because they are
+               * one action in two parts and the only pair on this screen that
+               * belongs to each other — every other button here ignores the
+               * field entirely.
+               *
+               * WITHOUT A BGG CODE the whole group goes: the box exists only to
+               * feed that search, and leaving it would ask for a name with
+               * nowhere to send it. Everything else still works — a game can be
+               * typed in by hand or picked from a library. */ ?>
         <?php if (bgg_configured()): ?>
-            <div class="field field-game_name">
-                <label for="game_name"><?= e(t('addgame_name')) ?></label>
-                <input type="text" id="game_name" name="name"<?= (club_shelf_pick_enabled() && library_prefer_club()) ? '' : ' autofocus' ?>>
+            <div class="gate-search">
+                <div class="field field-game_name">
+                    <label for="game_name"><?= e(t('addgame_name')) ?></label>
+                    <input type="text" id="game_name" name="name"<?= (club_shelf_pick_enabled() && library_prefer_club()) ? '' : ' autofocus' ?>>
+                </div>
+                <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
+                    <?= e(t('addgame_from_bgg')) ?>
+                </button>
             </div>
         <?php endif; ?>
 
         <div class="gate-buttons">
-            <?php /* THE MEMBER'S OWN LIBRARY, first among the shortcuts: for
-                   * somebody who keeps one, the game they are bringing is
-                   * almost always already in it, and searching BGG for a game
-                   * you have already catalogued is the long way round.
-                   *
-                   * Only shown when they have one with something in it — the
-                   * button is a dead end otherwise, and they are the only
-                   * person who could tell it was empty. */ ?>
-            <?php if (!empty($own_pick)): ?>
-                <button type="submit" name="go" value="mine" class="btn btn-primary btn-big" formnovalidate>
-                    <?= e(t('addgame_from_own')) ?>
-                </button>
-            <?php endif; ?>
-            <?php if (bgg_configured()): ?>
-                <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
-                    <?= e(t('addgame_from_bgg')) ?>
-                </button>
-            <?php endif; ?>
-            <?php // NOT preferred: under the BGG button, as a second option. ?>
+            <?php // NOT preferred: under the BGG group, as a second option. ?>
             <?php if (club_shelf_pick_enabled() && !library_prefer_club()): ?>
                 <button type="submit" name="go" value="club" class="btn btn-primary btn-big" formnovalidate>
                     <?= e(t('addgame_from_club')) ?>
