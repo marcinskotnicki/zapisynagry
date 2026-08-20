@@ -25,7 +25,7 @@ if (!$target) { redirect('index.php'); }
 $game = $target;   // legacy name used further down for the log line
 
 $event = db_one('SELECT is_archived FROM events WHERE id = ?', [$target['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$target['day_id']]);
+$day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$target['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Only when discussions are on and the event is live.

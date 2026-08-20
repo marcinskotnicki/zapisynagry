@@ -127,7 +127,7 @@ if ($libraryMember || $libraryClub) {
         redirect('index.php');
     }
     $parentDayId = $game['day_id'] ?? $poll['day_id'];
-    $day = db_one('SELECT day_index FROM event_days WHERE id = ?', [$parentDayId]);
+    $day = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$parentDayId]);
     $activeDay = (int)($day['day_index'] ?? 1);
     // Where "back" leads: the game card or the poll card.
     $backAnchor = $game ? ('#game-' . (int)$game['id']) : ('#poll-' . (int)$poll['id']);

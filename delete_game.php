@@ -27,7 +27,7 @@ $game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null
 if (!$game) { redirect('index.php'); }
 
 $event = db_one('SELECT * FROM events WHERE id = ?', [$game['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$game['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // PURGE MODE: a soft-deleted game may be removed PERMANENTLY, but only by an

@@ -28,7 +28,7 @@ $poll   = $pollId ? db_one('SELECT * FROM polls WHERE id = ?', [$pollId]) : null
 if (!$poll) { redirect('index.php'); }
 
 $event = db_one('SELECT * FROM events WHERE id = ?', [$poll['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$poll['day_id']]);
+$day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$poll['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Live event only, and re-check the button rule server-side (the card only

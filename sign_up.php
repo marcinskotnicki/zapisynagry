@@ -19,7 +19,7 @@ $game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null
 if (!$game) { http_response_code(404); exit('Unknown game.'); }
 
 $event = db_one('SELECT * FROM events WHERE id = ?', [$game['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$game['day_id']]);
+$day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$game['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);   // for redirecting back to the right day tab
 
 // Signups only on the live event, and only if permitted by the access rules.

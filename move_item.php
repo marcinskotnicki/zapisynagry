@@ -36,7 +36,7 @@ if ($pollId) {
 if (!$row) { redirect('index.php'); }
 
 $event = db_one('SELECT * FROM events WHERE id = ?', [$row['event_id']]);
-$day   = db_one('SELECT day_index FROM event_days WHERE id = ?', [$row['day_id']]);
+$day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$row['day_id']]);
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Admin only, live event only. Checked server-side rather than trusting that
