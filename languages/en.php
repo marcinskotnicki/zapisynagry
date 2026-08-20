@@ -593,7 +593,7 @@ return [
     'opt_game_version_pick_note'    => 'Adds a "choose version" button beside the name on the add-a-game and poll-candidate forms, for games taken from BoardGameGeek. Useful for clubs playing localised editions.',
     'addgame_from_bgg'    => 'Add game from BGG',
     'addgame_from_club'           => 'Add a game from the club library',
-    'addgame_from_own'                => 'From my library',
+    'addgame_from_own'                => 'Add from my library',
     'addgame_own_title'               => 'Pick a game from your library',
     'addgame_own_empty'               => 'Your library is empty. Add some games to it first, or choose another way.',
     'addgame_club_title'          => 'Club games',

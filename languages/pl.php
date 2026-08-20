@@ -585,7 +585,7 @@ return [
     'opt_game_version_pick_note'    => 'Dodaje przycisk „wybierz wydanie” obok nazwy w formularzach dodawania gry i kandydata do ankiety, dla gier pobranych z BoardGameGeek. Przydatne w klubach grających na wydaniach lokalnych.',
     'addgame_from_bgg'    => 'Dodaj grę z BGG',
     'addgame_from_club'           => 'Dodaj grę z biblioteki klubu',
-    'addgame_from_own'                => 'Z mojej biblioteki',
+    'addgame_from_own'                => 'Dodaj z mojej biblioteki',
     'addgame_own_title'               => 'Wybierz grę ze swojej biblioteki',
     'addgame_own_empty'               => 'Twoja biblioteka jest pusta. Dodaj do niej najpierw gry albo wybierz inny sposób.',
     'addgame_club_title'          => 'Gry klubowe',

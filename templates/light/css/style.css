@@ -765,9 +765,9 @@ body.chat-open .chat-toggle-close { display: inline; }
 
 .gate-buttons-lead { margin-bottom: 1.25rem; }
 .login-alt-sep { text-align: center; margin: 1rem 0 0; }
-.gate-search { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem; margin-bottom: 0.6rem; }
+.gate-search { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem; margin-bottom: 0.6rem; margin-top:1rem;}
 .gate-search .field { margin-bottom: 0.6rem; }
-.gate-search .btn { margin-top: 0; }
+.gate-search .btn { margin-top: 0; width:100%;}
 .poll-opt-voters { flex: 0 0 100%; font-size: 0.82rem; color: var(--text-muted); margin: 0.1rem 0 0; }
 .btn-verify { background: #1f7d4f; border-color: #1a6b43; color: #fff; }
 .btn-verify:hover { background: #24915c; }
