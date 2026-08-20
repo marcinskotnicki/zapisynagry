@@ -562,7 +562,14 @@ $groupEnd = function () { echo '</div></details>'; };
                * the exact string rather than a description of it. */ ?>
         <?php $gRedirect = google_redirect_uri(); ?>
         <?php if ($gRedirect !== ''): ?>
-            <p class="field-note"><?= e(t('opt_google_setup_note', $gRedirect)) ?></p>
+            <?php /* The two halves are escaped SEPARATELY so the address can be
+                   * bold: the note text through e(), then the already-escaped
+                   * address substituted into its %s wrapped in <strong>.
+                   * Escaping the finished sentence instead would print the
+                   * tags; not escaping it would trust an admin-overridable
+                   * string with raw HTML. */ ?>
+            <p class="field-note"><?= sprintf(e(t('opt_google_setup_note')),
+                                              '<strong>' . e($gRedirect) . '</strong>') ?></p>
         <?php else: ?>
             <?php // No site address to build it from, so there is no exact
                   // string to hand over — say what to fix rather than printing
