@@ -70,6 +70,7 @@ $OPTION_VALUES = [
     // rewritten to '0' by every save, since an absent checkbox reads as off.
     'library_club_email',
     'account_activation',
+    'archive_views',
     // A text field, not a toggle. google_client_SECRET is deliberately NOT here:
     // it belongs to $OPTION_SECRETS alone, which knows that a blank or an
     // all-asterisk submission means "unchanged". Listing it here as well made
@@ -119,6 +120,7 @@ $OPTION_TOGGLES = [
     'mailing_double_optin',
     'captcha_on_register', 'captcha_on_add_game', 'captcha_on_signup',
     'captcha_on_message', 'captcha_on_comment', 'captcha_on_mailing',
+    'nav_hide_current',
     'require_login',
     'google_login', 'google_admin_autolink',
     'game_version_pick',

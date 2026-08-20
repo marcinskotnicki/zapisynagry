@@ -681,6 +681,43 @@ function public_archives_enabled() {
     return opt_bool('public_archives');
 }
 
+/**
+ * Which public views of past events are offered: 'both' | 'archive' | 'calendar'.
+ *
+ * Anything unrecognised reads as 'both' — the behaviour from before the setting
+ * existed. A garbled option should not silently remove a section of the site.
+ *
+ * Lives here rather than in events.php for the same reason as the function
+ * above: the HEADER asks it on every page, including ones that never load
+ * event data.
+ *
+ * @return string
+ */
+function archive_views_mode() {
+    $m = (string)opt('archive_views', 'both');
+    return in_array($m, ['both', 'archive', 'calendar'], true) ? $m : 'both';
+}
+
+/**
+ * Is the LIST view of past events available?
+ *
+ * Needs the archives switched on at all: this setting chooses between the two
+ * shapes, it does not turn the feature on.
+ *
+ * @return bool
+ */
+function archive_list_enabled() {
+    return public_archives_enabled() && archive_views_mode() !== 'calendar';
+}
+
+/**
+ * Is the CALENDAR view available?
+ * @return bool
+ */
+function archive_calendar_enabled() {
+    return public_archives_enabled() && archive_views_mode() !== 'archive';
+}
+
 function current_event() {
     // $cache starts at false ("not looked up yet"); null is a *valid* cached
     // result (no event), so we can't use null as the sentinel.

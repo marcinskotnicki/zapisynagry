@@ -334,6 +334,12 @@ $groupEnd = function () { echo '</div></details>'; };
             <p class="field-note"><?= e(t('opt_header_brand_note')) ?></p>
         </div>
 
+        <?php /* Whether the nav drops the link for the page you are on. On by
+               * default — it saves a slot on a narrow screen — but some clubs
+               * would rather the nav kept the same shape everywhere. */ ?>
+        <?php $toggle('nav_hide_current'); ?>
+        <p class="field-note"><?= e(t('opt_nav_hide_current_note')) ?></p>
+
         <?php /* Custom CSS. Sits at the tail of Appearance now, not Advanced —
                  it IS an appearance setting, and Advanced is meant for things
                  that can break the site if touched carelessly, which this
@@ -389,6 +395,20 @@ $groupEnd = function () { echo '</div></details>'; };
     <?php /* 4. ARCHIVE — the title says when these matter, rather than the
              group vanishing and leaving an admin hunting for a setting. */ ?>
     <?php $group('opt_group_archive', false, 'opt_group_archive_note'); ?>
+        <?php /* WHICH SHAPE, or both. The list and the calendar are the same
+               * events presented differently, so a club that only wants one
+               * need not carry a nav link and a page for the other. */ ?>
+        <div class="field field-archive_views">
+            <label for="archive_views"><?= e(t('opt_archive_views')) ?></label>
+            <select id="archive_views" name="archive_views">
+                <?php foreach (['both', 'archive', 'calendar'] as $avMode): ?>
+                    <option value="<?= e($avMode) ?>"<?= archive_views_mode() === $avMode ? ' selected' : '' ?>>
+                        <?= e(t('opt_archive_views_' . $avMode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_archive_views_note')) ?></p>
+        </div>
         <?php
         $text('archive_per_page', 'number');   // events per page on the public list
         $text('auto_archive_days', 'number');  // 0 = never auto-archive

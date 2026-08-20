@@ -127,28 +127,38 @@ $page_title = $page_title ?? t('app_name');
 // a guest on a sub-page still keeps Home, in exactly the same configuration.
 // Hard-coding the option check would strand people on sub-pages with no way back.
 $here = current_page();
+/* WHETHER TO DROP THE LINK for the page you are already on.
+ *
+ * On by default, which is how this behaved before the setting existed: it saves
+ * a slot on a narrow screen, and a link to where you already are does nothing.
+ * Some clubs would rather the nav stayed the same shape on every page, so it is
+ * a choice — one place, used by every link below, so they cannot disagree. */
+$hideCurrent = opt_bool('nav_hide_current');
+$hideHere = function ($page) use ($here, $hideCurrent) {
+    return !$hideCurrent || $here !== $page;
+};
 ob_start();
     // Home, except on the home page. nav_link() applies the icon/text option.
-    if ($here !== 'index.php') {
+    if ($hideHere('index.php')) {
         echo nav_link('index.php', 'home', t('nav_home'));
     }
-    // Public archive list, when the feature is on and we're not already on it.
-    if (public_archives_enabled() && $here !== 'archive.php') {
+    // Public archive list, when that VIEW is offered and we're not already on it.
+    if (archive_list_enabled() && $hideHere('archive.php')) {
         echo nav_link('archive.php', 'archive', t('archive_title'));
     }
-    if (public_archives_enabled() && $here !== 'calendar.php') {
+    if (archive_calendar_enabled() && $hideHere('calendar.php')) {
         echo nav_link('calendar.php', 'calendar', t('calendar_title'));
     }
     // The club library, when the admin has switched it on. Public, like the
     // archive above it — the whole point is that anyone can see who owns what.
-    if (library_any_enabled() && $here !== 'library.php') {
+    if (library_any_enabled() && $hideHere('library.php')) {
         echo nav_link('library.php', 'library', t('lib_title'));
     }
-    if (is_admin() && $here !== 'admin.php') {          // admins: the panel link
+    if (is_admin() && $hideHere('admin.php')) {         // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'));
     }
     if (is_logged_in()) {                               // panel (unless on it) + logout
-        if ($here !== 'user.php') {
+        if ($hideHere('user.php')) {
             echo nav_link('user.php', 'user', t('user_panel'));
         }
         echo nav_link('logout.php', 'logout', t('logout'));

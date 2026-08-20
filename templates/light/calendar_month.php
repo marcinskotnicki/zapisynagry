@@ -67,6 +67,10 @@
     </table>
 
     <p class="cal-foot">
-        <a href="archive.php"><?= e(t('calendar_to_list')) ?></a>
+        <?php // Only when that view is offered — otherwise this is a link to
+              // a page that now refuses to load. ?>
+        <?php if (archive_list_enabled()): ?>
+            <a href="archive.php"><?= e(t('calendar_to_list')) ?></a>
+        <?php endif; ?>
     </p>
 </div>

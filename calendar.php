@@ -9,7 +9,9 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 
-if (!public_archives_enabled()) {
+// This view specifically, not just the archives as a whole: a club may
+// offer only the other shape, and typing the URL should not bypass that.
+if (!archive_calendar_enabled()) {
     redirect('index.php');
 }
 

@@ -12,7 +12,10 @@
 <div class="card archive-page">
     <div class="archive-head">
         <h1><?= e(t('archive_title')) ?></h1>
-        <a class="btn btn-small" href="calendar.php"><?= e(t('archive_to_calendar')) ?></a>
+        <?php // Same: a club showing only the list has no calendar to link to. ?>
+        <?php if (archive_calendar_enabled()): ?>
+            <a class="btn btn-small" href="calendar.php"><?= e(t('archive_to_calendar')) ?></a>
+        <?php endif; ?>
     </div>
 
     <?php if (!$events): ?>

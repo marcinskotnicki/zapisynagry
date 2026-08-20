@@ -186,6 +186,17 @@ INSERT INTO options (key, value) VALUES
     -- Google sign-in, and the admin-written pages where the rules and privacy
     -- policy usually live — stay open, or this would lock out the very people
     -- it is meant to admit. See inc/bootstrap.php.
+    -- Hide the header link for the page you are already on. ON by default,
+    -- which is how this behaved before the setting existed: it saves a slot on
+    -- a narrow screen, and a link to where you already are does nothing.
+    ('nav_hide_current',      '1'),
+    -- Which of the two public views of past events to offer:
+    --   'both'     — list and calendar (the default, and what this did before)
+    --   'archive'  — the list only
+    --   'calendar' — the calendar only
+    -- Both are the same data in a different shape, so a club that only wants
+    -- one need not carry a nav link and a page for the other.
+    ('archive_views',         'both'),
     ('require_login',         '0'),
     ('account_activation',    'auto'),
     ('captcha_on_register',   '1'),
