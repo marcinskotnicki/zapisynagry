@@ -55,6 +55,7 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'add_self'      => 1,
         'require_email' => 0,           // per-poll email rule (shown only in option mode 2)
         'allow_others'  => 0,           // opt-in: let anyone add candidate games
+        'show_results'  => 0,           // opt-in: show who voted for what
         'wait_deadline' => 0,           // opt-in: run to the deadline instead of ending on the first full candidate
         // Voting closes this many hours BEFORE the poll's start; admin default,
         // overridable per poll on the form. 0 = no automatic deadline.
@@ -88,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Per-poll email rule: only meaningful (and only on the form) in mode 2.
     $draft['require_email'] = (email_require_mode() === 2 && isset($_POST['require_email'])) ? 1 : 0;
     $draft['allow_others']  = isset($_POST['allow_others']) ? 1 : 0;
+    $draft['show_results']  = isset($_POST['show_results']) ? 1 : 0;
     $draft['wait_deadline'] = isset($_POST['wait_deadline']) ? 1 : 0;
     $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
 
@@ -133,8 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,require_email,allow_others_add,add_self,wait_for_deadline,deadline)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,add_self,wait_for_deadline,deadline)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -142,7 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $u['id'] ?? null,
                         $draft['comment'] !== '' ? $draft['comment'] : null,
                         $draft['start_time'], $draft['explain_rules'],
-                        (int)$draft['require_email'], (int)$draft['allow_others'], $draft['add_self'],
+                        (int)$draft['require_email'], (int)$draft['allow_others'],
+                        (int)$draft['show_results'], $draft['add_self'],
                         (int)$draft['wait_deadline'],
                         $deadline,
                     ]

@@ -127,6 +127,12 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
                     <?php // The gauge: a ruled bar with its own scale, the way a
                           // track on these boards carries tick marks. ?>
                     <span class="poll-opt-bar<?= $full ? ' is-full' : '' ?>" aria-hidden="true"><span style="width: <?= $pct ?>%"></span></span>
+                <?php /* WHO voted, when the proposer asked for it. Names only —
+                       * the email a guest gave when voting is not the club's to
+                       * publish, and nothing here needs it. */ ?>
+                <?php if (!empty($poll['show_results']) && !empty($c['voters'])): ?>
+                    <span class="poll-opt-voters"><?= e(implode(', ', $c['voters'])) ?></span>
+                <?php endif; ?>
                     <?php if (!$readonly): ?>
                         <?php if ($mine): ?>
                             <form method="post" action="vote.php?poll_game=<?= (int)$c['id'] ?>" class="inline">

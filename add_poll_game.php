@@ -162,6 +162,29 @@ if (isset($_GET['id'])) {
 /* Same shape as the BGG detail branch above: this replaces the SEARCH step, so
  * everything after it is unchanged. club_shelf_prefill() does the filling for
  * both flows, which is what keeps the two consistent. */
+if (isset($_GET['mine'])) {
+    // The member's own library — same step as the club shelf, same form after.
+    // Scoped to whoever is signed in, so a row id from another member's
+    // library does not resolve.
+    $meNow = current_user();
+    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
+    $mineRow = library_own_entry((int)$_GET['mine'], (int)$meNow['id']);
+    if (!$mineRow) redirect('add_poll_game.php');
+
+    $cand = club_shelf_prefill(poll_candidate_defaults(), $mineRow);
+    tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
+    tpl_render('poll_candidate_form', [
+        'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
+        'thumbs' => $cand['source'] === 'bgg'
+            ? []
+            : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
+        'error' => null, 'csrf' => csrf_field(),
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if (isset($_GET['club'])) {
     if (!club_shelf_pick_enabled()) redirect('index.php');
     $shelfRow = club_shelf_entry((int)$_GET['club']);
@@ -182,7 +205,19 @@ if (isset($_GET['club'])) {
     exit;
 }
 
-/* ---- Gate buttons (manual / bgg / club) ---------------------------------- */
+/* ---- Gate buttons (manual / bgg / club / own library) --------------------- */
+if ($go === 'mine') {
+    $meNow = current_user();
+    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
+    tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
+    tpl_render('add_poll_own_list', [
+        'table' => $table,
+        'games' => library_own_all((int)$meNow['id']),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if ($go === 'club' && club_shelf_pick_enabled()) {
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('add_poll_club_list', [
@@ -236,6 +271,8 @@ tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
 tpl_render('add_game_gate', [
     'table'     => $table,
     'csrf'      => csrf_field(),
+    // Offer their own library when they keep one with games in it.
+    'own_pick'  => library_own_pick_enabled((int)(current_user()['id'] ?? 0)),
     'action'    => 'add_poll_game.php',
     'show_poll' => false,            // no nested-poll button when adding a candidate
     'title'     => t('addpoll_candidate_title'),

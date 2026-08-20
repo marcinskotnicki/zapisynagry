@@ -765,6 +765,10 @@ body.chat-open .chat-toggle-close { display: inline; }
 
 .gate-buttons-lead { margin-bottom: 1.25rem; }
 .login-alt-sep { text-align: center; margin: 1rem 0 0; }
+.poll-opt-voters { display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem; }
+.btn-verify { background: #1f7d4f; border-color: #1a6b43; color: #fff; }
+.btn-verify:hover { background: #24915c; }
+.badge-pending { background: #fbeccd; color: #7a5800; }
 .admin-dbwarn { font-weight: 600; }
 .admin-newevent { margin: 0 0 1.25rem; }
 .archive-row-dates { display: block; font-size: 0.85em; color: var(--text-muted); }

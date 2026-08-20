@@ -166,6 +166,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run('UPDATE polls SET allow_others_add = ? WHERE id = ?', [$allowOthers, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' allow_others_add -> ' . $allowOthers);
             }
+            /* Showing the votes. Always on the form, so an absent key genuinely
+             * means unticked — unlike the box above, which is hidden in some
+             * states and therefore needs the poll_optin_relevant() dance. */
+            $showResults = isset($_POST['show_results']) ? 1 : 0;
+            if ($showResults !== (int)($poll['show_results'] ?? 0)) {
+                db_run('UPDATE polls SET show_results = ? WHERE id = ?', [$showResults, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' show_results -> ' . $showResults);
+            }
             // "Run to the deadline" — same treatment: this checkbox is always on
             // the form, so an absent key genuinely means unticked. Changing it
             // can END the poll on the spot: switching it OFF while a candidate is

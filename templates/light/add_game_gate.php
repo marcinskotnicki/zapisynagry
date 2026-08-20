@@ -67,6 +67,19 @@ $title      = $title     ?? t('addgame_title');
         <?php endif; ?>
 
         <div class="gate-buttons">
+            <?php /* THE MEMBER'S OWN LIBRARY, first among the shortcuts: for
+                   * somebody who keeps one, the game they are bringing is
+                   * almost always already in it, and searching BGG for a game
+                   * you have already catalogued is the long way round.
+                   *
+                   * Only shown when they have one with something in it — the
+                   * button is a dead end otherwise, and they are the only
+                   * person who could tell it was empty. */ ?>
+            <?php if (!empty($own_pick)): ?>
+                <button type="submit" name="go" value="mine" class="btn btn-primary btn-big" formnovalidate>
+                    <?= e(t('addgame_from_own')) ?>
+                </button>
+            <?php endif; ?>
             <?php if (bgg_configured()): ?>
                 <button type="submit" name="go" value="bgg" class="btn btn-primary btn-big">
                     <?= e(t('addgame_from_bgg')) ?>

@@ -158,6 +158,12 @@ $canVote = !$readonly && can_signup();
                           // states this, so announcing it twice just adds noise. ?>
                     <span class="poll-opt-bar<?= $full ? ' is-full' : '' ?>" aria-hidden="true"><span style="width: <?= $pct ?>%"></span></span>
                 <?php endif; ?>
+                <?php /* WHO voted, when the proposer asked for it. Names only —
+                       * the email a guest gave when voting is not the club's to
+                       * publish, and nothing here needs it. */ ?>
+                <?php if (!empty($poll['show_results']) && !empty($c['voters'])): ?>
+                    <span class="poll-opt-voters"><?= e(implode(', ', $c['voters'])) ?></span>
+                <?php endif; ?>
                 <?php if ($canVote): ?>
                     <?php if (!empty($c['voted'])): // already voted -> offer to cancel (inline POST) ?>
                         <form method="post" action="vote.php?poll_game=<?= (int)$c['id'] ?>" class="inline">

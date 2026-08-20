@@ -105,6 +105,17 @@
             </div>
         <?php endif; ?>
 
+        <?php /* OUTSIDE the block above on purpose: showing the votes has
+               * nothing to do with who may add candidates, so it is offered
+               * whatever that one is set to. */ ?>
+        <div class="field field-check field-show_results">
+            <label>
+                <input type="checkbox" name="show_results" value="1" <?= (int)($draft['show_results'] ?? 0) === 1 ? 'checked' : '' ?>>
+                <?= e(t('poll_show_results')) ?>
+            </label>
+            <p class="field-note"><?= e(t('poll_show_results_note')) ?></p>
+        </div>
+
         <?php // Normally the first candidate to reach its player count ends the
               // poll for everyone. Ticking this lets every option keep gathering
               // votes until the deadline instead. Needs a deadline to mean

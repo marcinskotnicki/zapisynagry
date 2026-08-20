@@ -640,12 +640,42 @@ function update_run($root) {
     // server owns (settings, data, uploads) and things the release ships but
     // shouldn't deploy (docs, tests).
     $skip = array_merge(update_protected_paths(), update_skipped_paths());
+
+    /* THE HTTPS REDIRECT IS A SETTING THAT LIVES IN A SHIPPED FILE.
+     *
+     * .htaccess is deliberately NOT protected — it also carries the rules that
+     * keep data/ out of the web, and a release improving those has to be able
+     * to land. But the release copy has no managed block in it, so overlaying
+     * it silently switched "force HTTPS" off on every update, and nothing said
+     * so: the checkbox reads the file, so it agreed with the file and reported
+     * the setting as off.
+     *
+     * Remembered here and re-applied after the overlay, so the release's own
+     * .htaccess changes arrive AND the admin's choice survives them. */
+    require_once __DIR__ . '/htaccess.php';
+    $sslWasOn = htaccess_ssl_enabled();
+
     $failed = [];
     $changed = [];
     foreach (scandir($src) as $item) {
         if ($item === '.' || $item === '..') continue;
         if (in_array($item, $skip, true)) continue;
         update_rcopy($src . '/' . $item, $root . '/' . $item, $failed, $changed);
+    }
+
+    /* Put the HTTPS redirect back, before anything else can go wrong — an
+     * admin whose site was forcing HTTPS a minute ago must not be left serving
+     * plain HTTP because they pressed Update.
+     *
+     * Only when it was on: this restores a choice, it never makes one. */
+    if ($sslWasOn && !htaccess_ssl_enabled()) {
+        if (htaccess_ssl_set(true)) {
+            log_action('update_htaccess', 'HTTPS redirect restored after update');
+        } else {
+            // Worth saying out loud rather than leaving them to notice: the
+            // site is now reachable over plain HTTP and they did not choose it.
+            $results[] = t('update_ssl_lost');
+        }
     }
 
     // STOP HERE if anything failed to land. A partially-overlaid tree is the

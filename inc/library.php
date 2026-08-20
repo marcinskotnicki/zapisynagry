@@ -313,6 +313,59 @@ function club_shelf_all($activeOnly = false) {
 }
 
 /**
+ * One member's own library, for picking a game to bring.
+ *
+ * The same shape as club_shelf_all(), and the club shelf's row format, so
+ * club_shelf_prefill() fills a form from either without knowing which it got —
+ * the two libraries store the same columns and a picked game is a picked game.
+ *
+ * @param int $userId
+ * @return array
+ */
+function library_own_all($userId) {
+    $userId = (int)$userId;
+    if ($userId <= 0) return [];
+    return db_all(
+        'SELECT * FROM library_games WHERE user_id = ? AND is_active = 1
+          ORDER BY name COLLATE NOCASE ASC, year ASC',
+        [$userId]
+    );
+}
+
+/**
+ * One row from a member's OWN library, or null.
+ *
+ * Scoped to the member: a row id from somebody else's library must not resolve,
+ * or the picker would become a way to read another member's collection.
+ *
+ * @param int $rowId
+ * @param int $userId
+ * @return array|null
+ */
+function library_own_entry($rowId, $userId) {
+    $rowId = (int)$rowId;
+    $userId = (int)$userId;
+    if ($rowId <= 0 || $userId <= 0) return null;
+    return db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?', [$rowId, $userId]);
+}
+
+/**
+ * Has this member got anything to pick from?
+ *
+ * Gates the button: offering "choose from my library" to somebody with an empty
+ * one is a dead end, and they are the only person who can tell it is empty.
+ *
+ * @param int $userId
+ * @return bool
+ */
+function library_own_pick_enabled($userId) {
+    return library_enabled()
+        && (int)$userId > 0
+        && (int)db_val('SELECT COUNT(*) FROM library_games WHERE user_id = ? AND is_active = 1',
+                       [(int)$userId]) > 0;
+}
+
+/**
  * One row from the club's shelf, or null.
  * @param int $rowId
  * @return array|null

@@ -122,3 +122,43 @@ auth_init();        // start session (current_user(), csrf_*, flash all need it)
 csrf_token();
 lang_load();        // pick + load language strings (t() now usable)
 tpl_init();         // pick active theme (tpl_render() now usable)
+
+/* ---- Members-only site --------------------------------------------------- *
+ *
+ * Optional, off by default: with it on, a visitor who is not signed in sees the
+ * login page instead of anything else.
+ *
+ * AFTER lang_load() and tpl_init(), because the login page it sends people to
+ * needs both. Before any page does its own work, because the point is that no
+ * page does.
+ *
+ * The allow-list is the whole of the design, and it is deliberately generous:
+ * every route somebody needs in order to BECOME able to sign in has to stay
+ * open, or the setting locks out the very people it is meant to admit. */
+if (opt_bool('require_login') && !is_logged_in()) {
+    $selfScript = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+    $openToAll = [
+        'login.php',        // the way in
+        'register.php',     // and the way to get an account at all
+        'recover.php',      // forgotten passwords — needed BEFORE signing in
+        'verify.php',       // the confirmation link from a registration email
+        'google_auth.php',  // the other way in; blocking it breaks Google sign-in
+        'page.php',         // admin-written pages: rules, privacy policy, joining
+        'prefs.php',        // the footer language/theme switcher, used on the login page
+        'unsubscribe.php',  // a mailing-list link must work without an account
+        'install.php',      // never reached (see above) but never worth blocking
+        'logout.php',       // signing out must not need to be signed in first
+    ];
+    /* No SAPI check here on purpose. There is no CLI entry point in this app —
+     * every file above is a page — so excluding the CLI would only have made
+     * the setting untestable while protecting nothing. */
+    if (!in_array($selfScript, $openToAll, true)) {
+        /* Carry where they were going, so signing in lands them there rather
+         * than on the front page. safe_next() in login.php validates it. */
+        $back = basename((string)($_SERVER['SCRIPT_NAME'] ?? 'index.php'));
+        $qs   = (string)($_SERVER['QUERY_STRING'] ?? '');
+        header('Location: login.php?next=' . rawurlencode($back . ($qs !== '' ? '?' . $qs : '')));
+        exit;
+    }
+    unset($selfScript, $openToAll, $back, $qs);
+}

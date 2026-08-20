@@ -40,9 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_action('login', 'User logged in');
         redirect($next);                         // success -> where they were headed
     }
-    $error = $result === 'blocked'
-        ? t('login_blocked')                     // only shown after a CORRECT password
-        : t('login_failed');                     // generic (doesn't reveal which field was wrong)
+    /* Both of the specific messages are only ever reached after a CORRECT
+     * password, so neither reveals anything to somebody guessing. The wording
+     * for a pending account depends on WHO they are waiting for — there is
+     * nothing to re-send when an admin has to act. */
+    if ($result === 'blocked') {
+        $error = t('login_blocked');
+    } elseif ($result === 'unverified') {
+        $error = account_activation_mode() === 'admin'
+            ? t('login_pending_admin')
+            : t('login_pending_email');
+    } else {
+        $error = t('login_failed');              // generic (doesn't reveal which field was wrong)
+    }
 }
 
 /* A message left by somewhere that redirected HERE — a failed Google sign-in

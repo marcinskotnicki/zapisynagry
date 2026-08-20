@@ -104,11 +104,16 @@ if (!$user) {
         if (opt('registration_mode') !== 'registration') $fail('no account for that address and self-registration is off');
 
         $name = $identity['name'] !== '' ? $identity['name'] : strtok($identity['email'], '@');
+        /* A Google account skips EMAIL confirmation — Google has already proven
+         * the address, and asking twice is friction with nothing behind it —
+         * but not ADMIN approval, which is not about the address at all. */
+        $gStartsOk = account_google_starts_verified();
         db_run(
-            'INSERT INTO users (email, password_hash, display_name) VALUES (?,?,?)',
-            [$identity['email'], '', mb_substr($name, 0, 60)]
+            'INSERT INTO users (email, password_hash, display_name, is_verified) VALUES (?,?,?,?)',
+            [$identity['email'], '', mb_substr($name, 0, 60), $gStartsOk ? 1 : 0]
         );
         $newId = (int)db()->lastInsertId();
+        $justRegistered = true;   // so the admins are told, once, below
         google_link_identity($newId, $identity);
         log_action('google_register', 'User #' . $newId);
         $user = db_one('SELECT * FROM users WHERE id = ?', [$newId]);
@@ -119,6 +124,17 @@ if (!$user) {
 // A blocked account is blocked whichever door it arrives at.
 if (!empty($user['is_blocked'])) {
     flash_set(t('login_blocked'), 'error');
+    redirect('login.php');
+}
+/* And an account still waiting to be approved cannot come in through this door
+ * either. Checked on EVERY route in, or the whole setting would be decorative
+ * for anyone with a Google account. */
+if (!account_is_usable($user)) {
+    // Freshly created and awaiting approval: tell the admins somebody is here.
+    if (!empty($justRegistered)) {
+        account_notify_admins_pending((string)$user['display_name'], (string)$user['email']);
+    }
+    flash_set(t('login_pending_admin'), 'error');
     redirect('login.php');
 }
 

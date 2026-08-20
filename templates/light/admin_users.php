@@ -56,6 +56,11 @@
             <td data-label="<?= e(t('users_name')) ?>"><?= e($u['email']) ?></td>
             <td data-label="<?= e(t('users_role')) ?>">
                 <?= (int)$u['is_admin'] === 1 ? e(t('users_admin')) : e(t('users_user')) ?>
+                <?php if (!empty($activation_on) && (int)($u['is_verified'] ?? 1) !== 1): ?>
+                    <?php // Says WHY they cannot sign in; without it an admin
+                          // has no way to see who is waiting. ?>
+                    <span class="badge badge-pending"><?= e(t('users_pending_badge')) ?></span>
+                <?php endif; ?>
                 <?php if ((int)$u['is_blocked'] === 1): // blocked accounts get a badge next to the role ?>
                     <span class="badge badge-blocked"><?= e(t('users_blocked_badge')) ?></span>
                 <?php endif; ?>
@@ -111,6 +116,35 @@
                             <input type="hidden" name="action" value="block">
                             <button class="btn btn-small btn-danger"><?= e(t('users_block')) ?></button>
                         <?php endif; ?>
+                    </form>
+
+                    <?php /* Approving only means anything while accounts have to
+                           * be approved — under 'auto' every account is usable
+                           * the moment it exists, so the button would be a
+                           * control with nothing to control. */ ?>
+                    <?php if (!empty($activation_on)): ?>
+                        <form method="post" action="admin.php?tab=users" class="inline">
+                            <?= $csrf ?>
+                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                            <?php if ((int)($u['is_verified'] ?? 1) === 1): ?>
+                                <input type="hidden" name="action" value="unverify">
+                                <button class="btn btn-small btn-danger"><?= e(t('users_unverify')) ?></button>
+                            <?php else: ?>
+                                <input type="hidden" name="action" value="verify">
+                                <button class="btn btn-small btn-verify"><?= e(t('users_verify')) ?></button>
+                            <?php endif; ?>
+                        </form>
+                    <?php endif; ?>
+
+                    <?php /* Deleting is final and the confirm says what survives
+                           * it, because "delete account" reads as though the
+                           * games and seats go too — they do not. */ ?>
+                    <form method="post" action="admin.php?tab=users" class="inline"
+                          onsubmit="return confirm('<?= e(t('users_delete_confirm', $u['display_name'])) ?>');">
+                        <?= $csrf ?>
+                        <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                        <input type="hidden" name="action" value="delete_user">
+                        <button class="btn btn-small btn-danger"><?= e(t('users_delete')) ?></button>
                     </form>
                 <?php else: ?>
                     <span class="muted users-self"><?= e(t('users_you')) ?></span>

@@ -119,6 +119,14 @@
                 </label>
             </div>
         <?php endif; ?>
+        <?php // Always shown, so an absent key genuinely means unticked. ?>
+        <div class="field field-check field-show_results">
+            <label>
+                <input type="checkbox" name="show_results" value="1" <?= (int)($poll['show_results'] ?? 0) === 1 ? 'checked' : '' ?>>
+                <?= e(t('poll_show_results')) ?>
+            </label>
+            <p class="field-note"><?= e(t('poll_show_results_note')) ?></p>
+        </div>
         <?php // Run to the deadline instead of ending on the first full candidate. ?>
         <div class="field field-check field-wait_deadline">
             <label>

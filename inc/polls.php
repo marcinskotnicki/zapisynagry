@@ -128,6 +128,43 @@ function poll_resolve_candidate($poll, $cand) {
         if (!empty($poll['proposer_email'])) $notifyEmails[] = $poll['proposer_email'];
 
         // 3) Removing the poll cascades its candidates and votes away.
+        /* THE FINAL TALLY, as the first comment on the game.
+         *
+         * Written as a comment rather than into the game card because every one
+         * of the fourteen themes forks that card: a new field would mean
+         * fourteen edits and fourteen chances to get one wrong, for something
+         * that is a few lines of text. The comment thread already renders
+         * everywhere, in every theme, and already survives resolution.
+         *
+         * FIRST, before the discussion is moved across, so it heads the thread
+         * rather than being buried under whatever was said while voting.
+         *
+         * Read BEFORE the delete below: removing the poll cascades its
+         * candidates and votes away, so this is the last moment the numbers
+         * exist at all. */
+        if (!empty($poll['show_results'])) {
+            $tally = db_all(
+                'SELECT g.name AS name, COUNT(v.id) AS votes
+                   FROM poll_games g
+                   LEFT JOIN poll_votes v ON v.poll_game_id = g.id
+                  WHERE g.poll_id = ?
+                  GROUP BY g.id
+                  ORDER BY votes DESC, g.name COLLATE NOCASE ASC',
+                [$poll['id']]
+            );
+            if ($tally) {
+                $lines = [];
+                foreach ($tally as $row) {
+                    $lines[] = $row['name'] . ' — ' . (int)$row['votes'];
+                }
+                /* No user_id, and the name left blank: nobody said this, and
+                 * attributing it to the proposer would put words in their
+                 * mouth. The templates already cope with an empty name. */
+                db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
+                       [$gameId, '', null, t('poll_results_heading') . "\n" . implode("\n", $lines)]);
+            }
+        }
+
         // Move the poll's discussion onto the game it became, so the thread
         // isn't lost when the poll row (and its cascade) goes away.
         foreach (db_all('SELECT * FROM poll_comments WHERE poll_id = ? ORDER BY id', [$poll['id']]) as $pc) {
@@ -213,9 +250,19 @@ function poll_can_add_candidate($poll) {
 function poll_full($pollRow) {
     $uid = current_user()['id'] ?? null;
     $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollRow['id']]);
+    $showVoters = !empty($pollRow['show_results']);
     foreach ($cands as &$c) {
         $c['votes'] = poll_candidate_votes($c['id']);
         $c['voted'] = poll_user_voted($c['id'], $uid);
+        /* Only fetched when the proposer asked for it — otherwise the names
+         * would sit in the render data for a template to leak by accident, and
+         * they are the one part of a poll that is nobody else's business by
+         * default. Names only; the email a guest gave when voting is not the
+         * club's to publish. */
+        $c['voters'] = $showVoters
+            ? array_column(db_all('SELECT name FROM poll_votes WHERE poll_game_id = ? ORDER BY id',
+                                  [$c['id']]), 'name')
+            : [];
     }
     unset($c);                                    // break the reference from the loop
     $pollRow['games'] = $cands;

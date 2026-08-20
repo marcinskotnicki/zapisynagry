@@ -173,6 +173,21 @@ INSERT INTO options (key, value) VALUES
     -- WHERE the captcha appears, once use_captcha is on. Each defaults to 1, so
     -- turning the feature on protects everything unless a club unticks a place
     -- it finds too much friction — which is what the single switch used to mean.
+    -- What happens when somebody finishes the registration form:
+    --   'auto'  — the account works straight away (the default, and how this
+    --             behaved before the setting existed).
+    --   'email' — they must click a link sent to the address first. A Google
+    --             sign-in skips it: Google has already proven the address.
+    --   'admin' — nobody is let in until an admin says so, Google included.
+    --             The admins are emailed; the member is not.
+    -- Show nothing to a visitor who is not signed in: every page sends them to
+    -- the login screen instead. Off by default. The pages needed to GET an
+    -- account — login, register, password recovery, the confirmation link,
+    -- Google sign-in, and the admin-written pages where the rules and privacy
+    -- policy usually live — stay open, or this would lock out the very people
+    -- it is meant to admit. See inc/bootstrap.php.
+    ('require_login',         '0'),
+    ('account_activation',    'auto'),
     ('captcha_on_register',   '1'),
     ('captcha_on_add_game',   '1'),
     ('captcha_on_signup',     '1'),
@@ -380,6 +395,16 @@ CREATE TABLE users (
     -- while the admin's library_allow_contact option is on — so the default
     -- never exposes anyone until an admin deliberately enables the feature.
     library_contact_ok INTEGER NOT NULL DEFAULT 1,
+    -- Is this account usable, or still waiting to be let in?
+    --
+    -- DEFAULT 1, deliberately. Under the default 'auto' policy there is nothing
+    -- to wait for; and when this column is added to an existing install, every
+    -- account already on it inherits the 1 and keeps working. A default of 0
+    -- would lock out a whole club's membership on upgrade, silently.
+    is_verified        INTEGER NOT NULL DEFAULT 1,
+    -- Set only while an email verification is outstanding; cleared once used,
+    -- so the link cannot be replayed.
+    verify_token       TEXT,
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -677,6 +702,10 @@ CREATE TABLE polls (
     explain_rules    INTEGER NOT NULL DEFAULT 0,
     require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; votes need an email (only honoured when option require_email = 2); carried into the resolved game
     allow_others_add INTEGER NOT NULL DEFAULT 0,  -- 0/1; proposer opted in to letting anyone add candidate games (they can still remove them)
+    -- 0/1; show who voted for what while the poll runs, and record the final
+    -- tally on the game it becomes. OFF by default: a poll is a small vote
+    -- among people who know each other, and not every club wants it public.
+    show_results     INTEGER NOT NULL DEFAULT 0,
     add_self         INTEGER NOT NULL DEFAULT 1,
     wait_for_deadline INTEGER NOT NULL DEFAULT 0, -- 0/1; 1 = ignore the "a candidate hit its player count" trigger and run to the deadline, so every option keeps collecting votes. Only honoured when a deadline is actually set (see poll_check_resolve), or the poll could never end.
     deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never

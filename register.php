@@ -16,6 +16,8 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/captcha.php';
+// send_mail(): the verification link, and the note to admins.
+require __DIR__ . '/inc/mail.php';
 // google_login_enabled() decides whether the alternative button is offered.
 require __DIR__ . '/inc/google.php';
 
@@ -57,20 +59,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!captcha_verify('register')) {
         $error = t('error_captcha');               // no-op when captcha is off
     } else {
-        db_run('INSERT INTO users (email, password_hash, display_name, is_admin) VALUES (?,?,?,0)',
-               [$form['email'], password_hash($pass1, PASSWORD_DEFAULT), $form['name']]);
+        /* WHETHER THE ACCOUNT WORKS YET depends on the club's policy. Under
+         * 'auto' it does and they are signed straight in, as before; the other
+         * two hold it back, and signing them in would defeat the point. */
+        $startsOk  = account_starts_verified();
+        $verifyTok = $startsOk ? null : bin2hex(random_bytes(16));
+
+        db_run('INSERT INTO users (email, password_hash, display_name, is_admin, is_verified, verify_token)
+                VALUES (?,?,?,0,?,?)',
+               [$form['email'], password_hash($pass1, PASSWORD_DEFAULT), $form['name'],
+                $startsOk ? 1 : 0, $verifyTok]);
         $newId = (int)db()->lastInsertId();
         log_action('register', $form['name'] . ' <' . $form['email'] . '>');
         // Remember the agreement so the next form starts ticked. Only after a
         // successful submission, so the cookie can never record consent for
         // something that was refused.
         consent_remember();
-        // Log the fresh account straight in (same steps as auth_login).
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = $newId;
-        auth_remember_issue($newId);               // persistent login, option-gated
-        flash_set(t('reg_done'));
-        redirect('index.php');
+
+        if ($startsOk) {
+            // Log the fresh account straight in (same steps as auth_login).
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $newId;
+            auth_remember_issue($newId);           // persistent login, option-gated
+            flash_set(t('reg_done'));
+            redirect('index.php');
+        }
+
+        if (account_activation_mode() === 'email') {
+            $link = rtrim(site_base_url(), '/') . '/verify.php?token=' . rawurlencode($verifyTok);
+            send_mail($form['email'], t('verify_subject'), t('verify_body', $link));
+            flash_set(t('reg_check_email'));
+        } else {
+            /* 'admin': the MEMBER is told to wait and the ADMINS are told there
+             * is somebody waiting. Mailing the member a link would be wrong —
+             * there is nothing for them to click, the decision is not theirs. */
+            account_notify_admins_pending($form['name'], $form['email']);
+            flash_set(t('reg_pending_admin'));
+        }
+        redirect('login.php');
     }
 }
 

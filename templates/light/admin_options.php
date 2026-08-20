@@ -488,6 +488,22 @@ $groupEnd = function () { echo '</div></details>'; };
             <p class="field-note"><?= e(t('opt_registration_mode_note')) ?></p>
         </div>
 
+        <?php /* Under the registration mode, because it answers the next
+               * question: having decided people may register, this decides
+               * whether registering is enough. Inert in guest-only mode, where
+               * nobody registers at all. */ ?>
+        <div class="field field-account_activation">
+            <label for="account_activation"><?= e(t('opt_account_activation')) ?></label>
+            <select id="account_activation" name="account_activation">
+                <?php foreach (['auto', 'email', 'admin'] as $aMode): ?>
+                    <option value="<?= e($aMode) ?>"<?= account_activation_mode() === $aMode ? ' selected' : '' ?>>
+                        <?= e(t('opt_account_activation_' . $aMode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_account_activation_note')) ?></p>
+        </div>
+
         <?php
         /* Guest permissions. Two kinds are marked below:
          *   INERT   — guest-only mode short-circuits the check entirely, so the
@@ -527,6 +543,13 @@ $groupEnd = function () { echo '</div></details>'; };
             </div>
         <?php endforeach; ?>
         <p class="field-note"><?= e(t('opt_switcher_show_user_note')) ?></p>
+
+        <?php /* MEMBERS ONLY. Above the sign-in options because it decides
+               * whether anyone who is not signed in sees the site at all.
+               * Everything needed to GET an account stays reachable — see the
+               * allow-list in inc/bootstrap.php. */ ?>
+        <?php $toggle('require_login'); ?>
+        <p class="field-note"><?= e(t('opt_require_login_note')) ?></p>
 
         <?php /* SIGNING IN WITH GOOGLE, last in the group: the other answer to
                * "how do people get in" belongs with the rest of this section,

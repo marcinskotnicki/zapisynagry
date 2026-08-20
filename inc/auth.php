@@ -74,6 +74,14 @@ function auth_login($email, $password) {
         if ((int)($user['is_blocked'] ?? 0) === 1) {
             return 'blocked';                      // right password, blocked account
         }
+        /* Right password, but the account has not been let in yet — waiting on
+         * a verification link or on an admin. Told apart from a wrong password
+         * on purpose: they typed it correctly and deserve to know what is
+         * actually holding them up. Safe to say, because they have just proved
+         * the password. */
+        if (!account_is_usable($user)) {
+            return 'unverified';
+        }
         // Regenerate the id on privilege change to thwart session fixation, and
         // mint a fresh CSRF token to match (it outlives the session otherwise —
         // see the mirror cookie in csrf_token()).
@@ -84,6 +92,157 @@ function auth_login($email, $password) {
         return true;
     }
     return false;
+}
+
+/**
+ * How a new account becomes usable: 'auto' | 'email' | 'admin'.
+ *
+ * Anything unrecognised reads as 'auto' — the behaviour from before the
+ * setting existed. A garbled option must not lock a club out of its own site.
+ *
+ * @return string
+ */
+function account_activation_mode() {
+    $m = (string)opt('account_activation', 'auto');
+    return in_array($m, ['auto', 'email', 'admin'], true) ? $m : 'auto';
+}
+
+/**
+ * Does a NEW account start out usable?
+ *
+ * Only under 'auto'. Both other policies exist precisely to hold it back.
+ *
+ * @return bool
+ */
+function account_starts_verified() {
+    return account_activation_mode() === 'auto';
+}
+
+/**
+ * Does a new account made through GOOGLE start out usable?
+ *
+ * Under 'email' it does: the point of that policy is proving the address
+ * belongs to whoever registered, and Google has already done exactly that —
+ * asking them to prove it twice is friction with nothing behind it.
+ *
+ * Under 'admin' it does NOT. That policy is not about the address at all; it
+ * is about an admin deciding who joins, and a Google sign-in says nothing
+ * about that.
+ *
+ * @return bool
+ */
+function account_google_starts_verified() {
+    return account_activation_mode() !== 'admin';
+}
+
+/**
+ * May this account be signed in to?
+ *
+ * Checked on EVERY route in, not just the password form — an unverified
+ * account that could still get in through Google would make the whole setting
+ * decorative.
+ *
+ * @param array $user
+ * @return bool
+ */
+function account_is_usable(array $user) {
+    if (!empty($user['is_blocked'])) return false;
+    // Missing column on a half-upgraded install reads as verified, matching the
+    // schema default: the failure direction has to be "keeps working".
+    return !array_key_exists('is_verified', $user) || (int)$user['is_verified'] === 1;
+}
+
+/**
+ * Tell the admins that somebody is waiting to be let in.
+ *
+ * Only under the 'admin' policy, where nothing else would tell them — the
+ * member cannot act, so if this does not arrive the account simply sits there
+ * unnoticed until an admin happens to open the users tab.
+ *
+ * Sent to every admin, because "the admin" is not a single person at a club
+ * and whoever reads mail first should be able to act.
+ *
+ * @param string $name
+ * @param string $email
+ * @return void
+ */
+function account_notify_admins_pending($name, $email) {
+    if (!opt_bool('send_emails')) return;
+    require_once __DIR__ . '/mail.php';
+
+    $link = rtrim(site_base_url(), '/') . '/admin.php?tab=users';
+    foreach (db_all('SELECT email FROM users WHERE is_admin = 1 AND is_blocked = 0') as $a) {
+        if (trim((string)$a['email']) === '') continue;
+        send_mail($a['email'], t('verify_admin_subject'),
+                  t('verify_admin_body', $name, $email, $link));
+    }
+}
+
+/**
+ * Confirm an account from the link in its verification email.
+ *
+ * The token is CLEARED on success, so a forwarded or logged link is inert.
+ *
+ * @param string $token
+ * @return array|null  The account, or null.
+ */
+function account_verify_by_token($token) {
+    $token = trim((string)$token);
+    if ($token === '') return null;
+
+    $user = db_one('SELECT * FROM users WHERE verify_token = ?', [$token]);
+    if (!$user) return null;
+
+    db_run('UPDATE users SET is_verified = 1, verify_token = NULL WHERE id = ?', [(int)$user['id']]);
+    return db_one('SELECT * FROM users WHERE id = ?', [(int)$user['id']]);
+}
+
+/**
+ * Delete an account WITHOUT deleting what that person did.
+ *
+ * Games they proposed, seats they took, votes they cast and comments they left
+ * all stay exactly where they are, under the same name — as though they had
+ * taken part without ever registering. An event that already happened must not
+ * quietly rewrite itself because somebody left the club.
+ *
+ * That works because every one of those tables already stores a NAME beside
+ * its user_id: the account was only ever a link to a person, never the record
+ * of what they did. Detaching the link is enough, and each row keeps the name
+ * it was created with.
+ *
+ * What DOES go with the account is anything that only makes sense while it
+ * exists: login tokens, and any linked third-party sign-in (that one by
+ * cascade). Their own library entries go too — a library belongs to a member,
+ * and there is no un-registered version of one to leave behind.
+ *
+ * @param int $userId
+ * @return void
+ */
+function user_delete_keeping_history($userId) {
+    $userId = (int)$userId;
+    if ($userId <= 0) return;
+
+    db()->beginTransaction();
+    try {
+        // Detach, keeping the name each row already carries.
+        db_run('UPDATE games      SET brings_user_id  = NULL WHERE brings_user_id  = ?', [$userId]);
+        db_run('UPDATE games      SET added_by_user_id = NULL WHERE added_by_user_id = ?', [$userId]);
+        db_run('UPDATE players    SET user_id = NULL WHERE user_id = ?', [$userId]);
+        db_run('UPDATE polls      SET proposer_user_id = NULL WHERE proposer_user_id = ?', [$userId]);
+        db_run('UPDATE poll_votes SET user_id = NULL WHERE user_id = ?', [$userId]);
+        db_run('UPDATE comments   SET user_id = NULL WHERE user_id = ?', [$userId]);
+
+        // Things that only mean anything while the account does.
+        db_run('DELETE FROM auth_tokens   WHERE user_id = ?', [$userId]);
+        db_run('DELETE FROM library_games WHERE user_id = ?', [$userId]);
+
+        // user_identities goes by cascade; see its foreign key.
+        db_run('DELETE FROM users WHERE id = ?', [$userId]);
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) db()->rollBack();
+        throw $e;
+    }
 }
 
 /**

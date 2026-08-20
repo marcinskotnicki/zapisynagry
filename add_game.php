@@ -247,6 +247,33 @@ if (isset($_GET['id'])) {
  *  same as choosing a search result, which is why nothing below this had to
  *  change.
  * ============================================================================= */
+if (isset($_GET['mine'])) {
+    /* THE MEMBER'S OWN LIBRARY, the same step as the club shelf and reaching
+     * the same form afterwards — a picked game is a picked game.
+     *
+     * Scoped to whoever is signed in: library_own_entry() takes the user id, so
+     * a row id belonging to somebody else does not resolve and the picker
+     * cannot become a way to read another member's collection. */
+    $meNow = current_user();
+    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
+    $mineRow = library_own_entry((int)$_GET['mine'], (int)$meNow['id']);
+    if (!$mineRow) redirect('add_game.php?table=' . (int)$table['id']);
+
+    // Both libraries store the same columns, so the club prefill fits this too.
+    $form = club_shelf_prefill(game_form_defaults($table, $day), $mineRow);
+    tpl_render('header', ['page_title' => t('addgame_title')]);
+    tpl_render('add_game_form', [
+        'table'   => $table, 'game' => $form, 'source' => $form['source'],
+        'thumbs'  => $form['source'] === 'bgg'
+            ? []
+            : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
+        'captcha' => captcha_html('add_game'), 'error' => null, 'csrf' => csrf_field(),
+        'versions' => game_pick_versions($form['bgg_id'] ?? 0),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if (isset($_GET['club'])) {
     // Re-checked rather than trusting that the button was only rendered when
     // allowed, and again that the row is really on the shelf.
@@ -274,6 +301,18 @@ if (isset($_GET['club'])) {
 /* =============================================================================
  *  GATE BUTTONS  (manual / bgg / club) — which path the user picked on the gate.
  * ============================================================================= */
+if ($go === 'mine') {
+    $meNow = current_user();
+    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
+    tpl_render('header', ['page_title' => t('addgame_title')]);
+    tpl_render('add_game_own_list', [
+        'table' => $table,
+        'games' => library_own_all((int)$meNow['id']),
+    ]);
+    tpl_render('footer');
+    exit;
+}
+
 if ($go === 'club' && club_shelf_pick_enabled()) {
     // The shelf, for picking from: active games only — a game marked as lent
     // out should not be offered for a table tonight.
@@ -333,6 +372,8 @@ tpl_render('header', ['page_title' => t('addgame_title')]);
 tpl_render('add_game_gate', [
     'table'     => $table,
     'csrf'      => csrf_field(),
+    // Offer their own library when they keep one with games in it.
+    'own_pick'  => library_own_pick_enabled((int)(current_user()['id'] ?? 0)),
     'action'    => 'add_game.php',
     'show_poll' => true,             // the poll button shows here (add_poll reuses this gate)
 ]);

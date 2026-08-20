@@ -127,6 +127,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 log_action('user_unblock', $target['email']);
                 $flash = t('users_updated');
                 break;
+
+            case 'verify':
+                // Approving also consumes any outstanding link, so a token left
+                // in an old email cannot be used afterwards.
+                db_run('UPDATE users SET is_verified = 1, verify_token = NULL WHERE id = ?', [$userId]);
+                log_action('user_verify', $target['email']);
+                $flash = t('users_updated');
+                break;
+
+            case 'unverify':
+                /* The same two lockout guards as blocking, for the same reason:
+                 * an unverified account cannot sign in, so this is a block by
+                 * another name and can strand you or the club just as easily. */
+                $me = current_user();
+                $usableAdmins = (int)db_val(
+                    'SELECT COUNT(*) FROM users WHERE is_admin = 1 AND is_blocked = 0 AND is_verified = 1');
+                if ($me && (int)$me['id'] === $userId) {
+                    $flash = t('users_cannot_block_self');
+                } elseif ((int)$target['is_admin'] === 1 && (int)$target['is_verified'] === 1 && $usableAdmins <= 1) {
+                    $flash = t('users_last_admin');
+                } else {
+                    db_run('UPDATE users SET is_verified = 0 WHERE id = ?', [$userId]);
+                    // As with blocking: a persistent cookie must not outlive it.
+                    db_run('DELETE FROM auth_tokens WHERE user_id = ?', [$userId]);
+                    log_action('user_unverify', $target['email']);
+                    $flash = t('users_updated');
+                }
+                break;
+
+            case 'delete_user':
+                /* THE ACCOUNT GOES, THE HISTORY STAYS. Games somebody proposed
+                 * and seats they took remain on the board under the same name,
+                 * as though they had never had an account — deleting a member
+                 * must not silently rewrite an event that already happened.
+                 *
+                 * Same guards again: this is the most final version of losing
+                 * access, so it must not be able to remove you or the last
+                 * admin. */
+                $me = current_user();
+                $usableAdmins = (int)db_val(
+                    'SELECT COUNT(*) FROM users WHERE is_admin = 1 AND is_blocked = 0 AND is_verified = 1');
+                if ($me && (int)$me['id'] === $userId) {
+                    $flash = t('users_cannot_delete_self');
+                } elseif ((int)$target['is_admin'] === 1 && $usableAdmins <= 1) {
+                    $flash = t('users_last_admin');
+                } else {
+                    user_delete_keeping_history($userId);
+                    log_action('user_delete', $target['email']);
+                    $flash = t('users_deleted');
+                }
+                break;
         }
     }
     }   // end: actions targeting an existing user
@@ -140,7 +191,9 @@ $total   = (int)db_val('SELECT COUNT(*) FROM users');
 $pages   = max(1, (int)ceil($total / $perPage));
 $page    = max(1, min($pages, (int)($_GET['page'] ?? 1)));
 $users   = db_all(
-    'SELECT id, email, display_name, is_admin, is_blocked, created_at
+    // is_verified too, or the template's ?? 1 fallback reads every pending
+    // account as approved and shows the wrong button on every row.
+    'SELECT id, email, display_name, is_admin, is_blocked, is_verified, created_at
        FROM users ORDER BY display_name COLLATE NOCASE LIMIT ? OFFSET ?',
     [$perPage, ($page - 1) * $perPage]);
 
@@ -150,6 +203,8 @@ $tab_body = tpl_capture('admin_users', [
     // So the template can withhold the self-targeting controls.
     'me_id' => $me ? (int)$me['id'] : 0,
     'users' => $users,
+    // Approving is only meaningful while accounts have to be approved.
+    'activation_on' => account_activation_mode() !== 'auto',
     'page'  => $page,
     'pages' => $pages,
 ]);
