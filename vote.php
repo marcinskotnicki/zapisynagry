@@ -12,6 +12,7 @@
  *  it's tied to an account.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
 require __DIR__ . '/inc/notify.php';   // poll_check_resolve() may send the conclusion email
@@ -59,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Recording a vote: a logged-in user can't vote twice for the same candidate.
     antibot_check('click');
+    if (!captcha_verify('signup')) { flash_set(t('error_captcha'), 'error'); redirect('index.php'); }
     if ($uid && poll_user_voted($pgId, $uid)) {
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#poll-') . (int)$cand['poll_id']);   // already voted; no duplicate
     }

@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('up_password_short');           // same 6-char rule as the user panel
     } elseif ($pass1 !== $pass2) {
         $error = t('up_password_mismatch');
-    } elseif (!captcha_verify()) {
+    } elseif (!captcha_verify('register')) {
         $error = t('error_captcha');               // no-op when captcha is off
     } else {
         db_run('INSERT INTO users (email, password_hash, display_name, is_admin) VALUES (?,?,?,0)',
@@ -78,7 +78,7 @@ tpl_render('header', ['page_title' => t('reg_title')]);
 tpl_render('register_form', [
     'form'    => $form,
     'error'   => $error,
-    'captcha' => captcha_html(),
+    'captcha' => captcha_html('register'),
     'csrf'    => csrf_field(),
 ]);
 tpl_render('footer');

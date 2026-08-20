@@ -32,10 +32,37 @@
  *
  * @return bool
  */
-function captcha_required() {
+function captcha_required($context = null) {
     if (!opt_bool('use_captcha')) return false;   // feature off entirely
     if (is_logged_in()) return false;             // registered account -> trusted
+
+    /* WHERE, not just whether. One switch used to mean "everywhere", which
+     * forced a club wanting a captcha on registration to put one in front of
+     * signing up for a game as well — far more friction, on the action people
+     * take most often.
+     *
+     * Each place defaults to on, so turning the feature on still protects
+     * everything and a club unticks what it finds too much.
+     *
+     * A context with NO option row at all counts as ON: opt() returns '' for a
+     * missing key, and treating that as "off" would leave a newly added form
+     * quietly unprotected on any install that had not yet been seeded — the
+     * failure would be silent and in the wrong direction. Only an explicit '0'
+     * switches a place off. */
+    if ($context !== null && opt('captcha_on_' . $context, '1') === '0') return false;
+
     return true;
+}
+
+/**
+ * The places a captcha can be asked for, in the order the Options screen shows
+ * them. One list, so the screen and the save handler cannot disagree about
+ * which exist.
+ *
+ * @return array
+ */
+function captcha_contexts() {
+    return ['register', 'add_game', 'signup', 'message', 'comment', 'mailing'];
 }
 
 /**
@@ -83,8 +110,11 @@ function captcha_v3_threshold() {
  *
  * @return string  HTML (possibly empty).
  */
-function captcha_html() {
-    if (!captcha_required()) return '';
+function captcha_html($context = null) {
+    // Same context the verify uses, or the form and the check disagree: a field
+    // rendered where none is verified is theatre, and a check with no field to
+    // fill in refuses every real visitor.
+    if (!captcha_required($context)) return '';
 
     if (captcha_is_recaptcha()) {
         $key = e(opt('captcha_site_key'));
@@ -121,8 +151,8 @@ function captcha_html() {
  * Returns false on any failure (missing answer, wrong answer, reCAPTCHA reject).
  * @return bool
  */
-function captcha_verify() {
-    if (!captcha_required()) return true;
+function captcha_verify($context = null) {
+    if (!captcha_required($context)) return true;
 
     if (captcha_is_recaptcha()) {
         // Ask Google's siteverify endpoint whether the token the browser got is

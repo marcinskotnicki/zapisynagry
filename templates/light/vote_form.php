@@ -29,6 +29,7 @@
     <form method="post" action="vote.php?poll_game=<?= (int)$cand['id'] ?>">
         <?= $csrf ?>
         <?= antibot_field() ?>
+        <?= captcha_html('signup') ?>
         <input type="hidden" name="poll_game" value="<?= (int)$cand['id'] ?>">
 
         <div class="field field-name">

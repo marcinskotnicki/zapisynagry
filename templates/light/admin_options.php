@@ -659,6 +659,18 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php endif; ?>
 
         <?php $toggle('use_captcha'); ?>
+        <?php /* WHERE it appears. One switch used to mean everywhere, which
+               * forced a club wanting a captcha on registration to put one in
+               * front of signing up for a game too — the action people take
+               * most often, and where friction costs the most.
+               *
+               * All on by default, so switching the feature on still protects
+               * everything and a club unticks what it finds too much. Rendered
+               * from captcha_contexts() so this screen and the save handler
+               * cannot disagree about which places exist. */ ?>
+        <?php foreach (captcha_contexts() as $cCtx): ?>
+            <?php $toggle('captcha_on_' . $cCtx, 'opt_note_captcha_off'); ?>
+        <?php endforeach; ?>
         <?php // A lightweight companion to captcha: reject a form that comes back
               // faster than a human plausibly could have filled it in. Each
               // guarded form carries a hidden render timestamp; 0 disables that

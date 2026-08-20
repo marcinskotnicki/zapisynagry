@@ -170,6 +170,15 @@ INSERT INTO options (key, value) VALUES
     -- Needs credentials from the club's own Google Cloud project (below); the
     -- button stays hidden until both are filled in, so switching this on
     -- half-configured shows nothing rather than a button that errors.
+    -- WHERE the captcha appears, once use_captcha is on. Each defaults to 1, so
+    -- turning the feature on protects everything unless a club unticks a place
+    -- it finds too much friction — which is what the single switch used to mean.
+    ('captcha_on_register',   '1'),
+    ('captcha_on_add_game',   '1'),
+    ('captcha_on_signup',     '1'),
+    ('captcha_on_message',    '1'),
+    ('captcha_on_comment',    '1'),
+    ('captcha_on_mailing',    '1'),
     ('google_login',          '0'),
     ('google_client_id',      ''),
     ('google_client_secret',  ''),

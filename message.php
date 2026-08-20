@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_email_required');           // guests always need a reply path
     } elseif (!$me && !email_valid($senderEmail)) {
         $error = t('error_email_invalid');
-    } elseif (!$me && !captcha_verify()) {
+    } elseif (!$me && !captcha_verify('message')) {
         $error = t('error_captcha');                  // no-op when captcha is off
     } else {
         // From = venue (set in send_mail); Reply-To = the sender, so a reply
@@ -218,7 +218,7 @@ tpl_render('message_form', [
     'is_guest'     => $me === null,
     'sender_name'  => $senderName,
     'sender_email' => $senderEmail,
-    'captcha'      => $me === null ? captcha_html() : '',
+    'captcha'      => $me === null ? captcha_html('message') : '',
     'error'        => $error,
     'csrf'         => csrf_field(),
 ]);

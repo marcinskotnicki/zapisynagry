@@ -194,6 +194,7 @@ $canVote = !$readonly && can_signup();
                         <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
                         <input type="text" name="name" placeholder="<?= e(t('comment_name')) ?>" value="<?= e(current_user()['display_name'] ?? guest_identity()['name']) ?>">
                         <textarea name="comment" rows="2" placeholder="<?= e(t('comment_text')) ?>" required></textarea>
+                        <?= captcha_html('comment') ?>
                         <button type="submit" class="btn btn-small btn-primary"><?= e(t('comment_submit')) ?></button>
                     </form>
                 </details>

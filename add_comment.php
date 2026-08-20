@@ -7,6 +7,7 @@
  *  lives in the game card); always redirects back to the game.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/events.php';
 
 // One endpoint serves both discussions: a comment belongs either to a game or
@@ -35,6 +36,7 @@ if (!opt_bool('allow_discussions') || !$event || (int)$event['is_archived'] === 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     antibot_check('form');
+    if (!captcha_verify('comment')) { flash_set(t('error_captcha'), 'error'); redirect('index.php'); }
     $u       = current_user();
     // Use the typed name, or fall back to the logged-in display name.
     $name    = trim($_POST['name'] ?? '') ?: ($u['display_name'] ?? '');

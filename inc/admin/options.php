@@ -116,6 +116,8 @@ $OPTION_TOGGLES = [
     'club_shelf', 'club_shelf_pick', 'library_show_common', 'library_show_member_games', 'library_prefer_club',
     'signup_proxy_name', 'signup_proxy_members',
     'mailing_double_optin',
+    'captcha_on_register', 'captcha_on_add_game', 'captcha_on_signup',
+    'captcha_on_message', 'captcha_on_comment', 'captcha_on_mailing',
     'google_login', 'google_admin_autolink',
     'game_version_pick',
     'switcher_show_user_template', 'switcher_show_user_language',

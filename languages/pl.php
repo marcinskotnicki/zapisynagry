@@ -209,6 +209,13 @@ return [
     'opt_allow_polls'                  => 'Zezwól na głosowania',
     'opt_allow_discussions'            => 'Zezwól na dyskusje',
     'opt_use_captcha'                  => 'Używaj captcha',
+    'opt_captcha_on_register'         => 'Captcha na stronie rejestracji',
+    'opt_captcha_on_add_game'         => 'Captcha przy dodawaniu gry lub ankiety',
+    'opt_captcha_on_signup'           => 'Captcha przy zapisie na grę lub głosowaniu w ankiecie',
+    'opt_captcha_on_message'          => 'Captcha przy wysyłaniu wiadomości',
+    'opt_captcha_on_comment'          => 'Captcha przy dodawaniu komentarza',
+    'opt_captcha_on_mailing'          => 'Captcha przy zapisie do newslettera',
+    'opt_note_captcha_off'            => 'Nie działa, gdy captcha powyżej jest wyłączona.',
     'opt_allow_messaging'              => 'Zezwól na wiadomości do graczy',
 
     // ---- Admin: updater -----------------------------------------------------

@@ -133,7 +133,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_email_required');
     } elseif ($form['brings_email'] !== '' && !email_valid($form['brings_email'])) {
         $error = t('error_email_invalid');   // non-empty but not X@Y.Z-shaped
-    } elseif (!captcha_verify()) {
+    } elseif (!captcha_verify('add_game')) {
         $error = t('error_captcha');
     }
 
@@ -204,7 +204,7 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     tpl_render('add_game_form', [
         'table'   => $table, 'game' => $form, 'source' => $form['source'],
         'thumbs'  => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
-        'captcha' => captcha_html(), 'error' => $error, 'csrf' => csrf_field(),
+        'captcha' => captcha_html('add_game'), 'error' => $error, 'csrf' => csrf_field(),
     
         // Editions to offer beside the name; [] unless enabled and BGG has several.
         'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
@@ -232,7 +232,7 @@ if (isset($_GET['id'])) {
     tpl_render('add_game_form', [
         'table'   => $table, 'game' => $form, 'source' => 'bgg',
         'thumbs'  => [],                 // empty: the image is locked to the BGG one
-        'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
+        'captcha' => captcha_html('add_game'), 'error' => null, 'csrf' => csrf_field(),
     
         // Editions to offer beside the name; [] unless enabled and BGG has several.
         'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
@@ -263,7 +263,7 @@ if (isset($_GET['club'])) {
         'thumbs'  => $form['source'] === 'bgg'
             ? []
             : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
-        'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
+        'captcha' => captcha_html('add_game'), 'error' => null, 'csrf' => csrf_field(),
     
         // Editions to offer beside the name; [] unless enabled and BGG has several.
         'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);
@@ -294,7 +294,7 @@ if ($go === 'manual') {
     tpl_render('add_game_form', [
         'table'   => $table, 'game' => $form, 'source' => 'manual',
         'thumbs'  => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
-        'captcha' => captcha_html(), 'error' => null, 'csrf' => csrf_field(),
+        'captcha' => captcha_html('add_game'), 'error' => null, 'csrf' => csrf_field(),
     
         // Editions to offer beside the name; [] unless enabled and BGG has several.
         'versions' => game_pick_versions($form['bgg_id'] ?? 0),]);

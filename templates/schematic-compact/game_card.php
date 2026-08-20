@@ -237,6 +237,7 @@
                                 <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                                 <input type="text" name="name" placeholder="<?= e(t('comment_name')) ?>" value="<?= e(current_user()['display_name'] ?? '') ?>">
                                 <textarea name="comment" rows="2" placeholder="<?= e(t('comment_text')) ?>" required></textarea>
+                                <?= captcha_html('comment') ?>
                                 <button type="submit" class="btn btn-small btn-primary"><?= e(t('comment_submit')) ?></button>
                             </form>
                         <?php endif; ?>

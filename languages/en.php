@@ -217,6 +217,13 @@ return [
     'opt_allow_polls'                  => 'Allow polls',
     'opt_allow_discussions'            => 'Allow discussions',
     'opt_use_captcha'                  => 'Use captcha',
+    'opt_captcha_on_register'         => 'Captcha on the registration page',
+    'opt_captcha_on_add_game'         => 'Captcha when adding a game or a poll',
+    'opt_captcha_on_signup'           => 'Captcha when signing up for a game or voting in a poll',
+    'opt_captcha_on_message'          => 'Captcha when sending a message',
+    'opt_captcha_on_comment'          => 'Captcha when adding a comment',
+    'opt_captcha_on_mailing'          => 'Captcha on the newsletter signup',
+    'opt_note_captcha_off'            => 'Has no effect while the captcha above is switched off.',
     'opt_allow_messaging'              => 'Allow messaging players',
 
     // ---- Admin: updater -----------------------------------------------------

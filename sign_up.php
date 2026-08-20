@@ -9,6 +9,7 @@
  *  On a confirmed signup the game's bringer gets a notification email.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -41,6 +42,9 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     antibot_check('form');
+    // The form renders one for this context; without the matching check it
+    // would be decoration.
+    if (!captcha_verify('signup')) { flash_set(t('error_captcha'), 'error'); redirect('index.php'); }
     $form['name']  = trim((string)$form['name']);
     $form['email'] = trim((string)$form['email']);
     // Only accepted when the field was actually offered, so a hand-built POST

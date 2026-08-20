@@ -53,8 +53,8 @@
             </div>
         <?php endif; ?>
 
-        <?php if (captcha_required()): ?>
-            <div class="mailing-captcha"><?= captcha_html() ?></div>
+        <?php if (captcha_required('mailing')): ?>
+            <div class="mailing-captcha"><?= captcha_html('mailing') ?></div>
         <?php endif; ?>
     </form>
 </section>
