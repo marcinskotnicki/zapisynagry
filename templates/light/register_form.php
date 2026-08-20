@@ -48,5 +48,19 @@
         </div>
     </form>
 
+    <?php /* Same placement and the same gate as on the login page: below the
+           * form, because filling it in is still the main route, and only when
+           * google_login_enabled() says a click would actually work.
+           *
+           * The endpoint creates the account when no such address exists, so
+           * this really is "register with Google" and not just a sign-in link
+           * on the wrong page. */ ?>
+    <?php if (function_exists('google_login_enabled') && google_login_enabled()): ?>
+        <p class="login-alt-sep muted"><?= e(t('google_or')) ?></p>
+        <p class="form-actions">
+            <a class="btn btn-google" href="google_auth.php"><?= e(t('google_sign_in')) ?></a>
+        </p>
+    <?php endif; ?>
+
     <p class="muted"><a href="login.php"><?= e(t('reg_have_account')) ?></a></p>
 </div>

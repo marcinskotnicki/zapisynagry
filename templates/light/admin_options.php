@@ -536,6 +536,12 @@ $groupEnd = function () { echo '</div></details>'; };
                * created or reached in the first place. */ ?>
         <?php $toggle('google_login'); ?>
         <p class="field-note"><?= e(t('opt_google_login_note')) ?></p>
+        <?php /* Directly under the switch it depends on, as the other paired
+               * options are. Off by default — the address is verified by
+               * Google either way, but an admin account is worth more than a
+               * member's, so linking one deliberately is the safe default. */ ?>
+        <?php $toggle('google_admin_autolink'); ?>
+        <p class="field-note"><?= e(t('opt_google_admin_autolink_note')) ?></p>
         <?php /* WARNS BEFORE IT BITES. Switching this off locks out anybody who
                * has no password here, and nothing else on this screen would say
                * so. Only shown when there is somebody to lose. */ ?>

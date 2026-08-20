@@ -173,6 +173,15 @@ INSERT INTO options (key, value) VALUES
     ('google_login',          '0'),
     ('google_client_id',      ''),
     ('google_client_secret',  ''),
+    -- Let an ADMIN account be linked to a Google sign-in automatically, on a
+    -- verified matching address, the same way a member's is.
+    --
+    -- OFF by default. The address still has to be one Google has verified, so
+    -- this is not reckless — but an admin account is worth more than a
+    -- member's, and the safe default is that an admin links it deliberately
+    -- while already signed in. A club that would rather not bother can switch
+    -- this on knowingly.
+    ('google_admin_autolink', '0'),
     -- Offer a second name box on the sign-up form, so one person can enter
     -- another (a parent booking a seat for a child).
     ('signup_proxy_name',     '0'),

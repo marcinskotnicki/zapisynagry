@@ -190,8 +190,17 @@ function google_find_linked_user($sub) {
  * @return bool
  */
 function google_may_autolink(array $user, array $identity) {
+    /* NOT NEGOTIABLE, whatever the options say: Google must have verified the
+     * address. Everything else here is about how much that verification is
+     * trusted to be worth; without it there is nothing to weigh at all. */
     if (empty($identity['email_verified'])) return false;
-    if (!empty($user['is_admin']))          return false;
+
+    /* An admin account only when a club has said so. The default is that an
+     * admin links Google deliberately, from inside their own session — the
+     * address is verified either way, but an admin account is worth more than
+     * a member's and the cost of the safe default is one click, made once. */
+    if (!empty($user['is_admin']) && !opt_bool('google_admin_autolink')) return false;
+
     return true;
 }
 

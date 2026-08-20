@@ -16,6 +16,8 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/captcha.php';
+// google_login_enabled() decides whether the alternative button is offered.
+require __DIR__ . '/inc/google.php';
 
 // Feature gate + no re-registering while logged in.
 if (opt('registration_mode') === 'guest_only') redirect('index.php');

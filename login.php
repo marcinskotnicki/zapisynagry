@@ -45,6 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         : t('login_failed');                     // generic (doesn't reveal which field was wrong)
 }
 
+/* A message left by somewhere that redirected HERE — a failed Google sign-in
+ * is the one that matters, since google_auth.php has no screen of its own.
+ *
+ * This page never read the flash before, so the message sat in the session
+ * until whatever the visitor opened next happened to render one. The reported
+ * symptom was a Google error appearing later, on the front page, next to the
+ * newsletter box.
+ *
+ * A POST error from this page's own form wins: it describes what was just
+ * typed, which is more immediate than anything carried over. */
+if ($error === null) {
+    $flashed = flash_get();
+    if ($flashed !== '' && $flashed !== null) $error = $flashed;
+}
+
 // Render: header + login card + footer.
 tpl_render('header', ['page_title' => t('login')]);
 tpl_render('login', ['error' => $error, 'next' => $next, 'csrf' => csrf_field()]);

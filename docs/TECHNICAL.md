@@ -1007,11 +1007,23 @@ no wildcards — not even across subdomains. One shared client would mean every
 club's callback URL registered centrally; each club uses its own Google Cloud
 project instead. The admin screen prints the exact URI to register.
 
+LOGIN.PHP READS THE FLASH. google_auth.php has no screen of its own, so it
+flashes and redirects there; login.php never read one, so a failed sign-in sat
+in the session until some later page rendered it — it surfaced on the front
+page beside the newsletter box. A POST error from the login form still wins
+over a carried-over flash.
+
+The button appears on BOTH login and register, gated the same way: the endpoint
+creates the account when no such address exists, so it really is "register with
+Google" on that page.
+
 `google_may_autolink()` is pure and holds the security: an address must be
 VERIFIED by Google (otherwise this reduces to "anyone who can make a provider
-assert an address owns that account"), and an ADMIN account is never linked
-automatically — the blast radius differs in kind, so an admin links it from
-inside their own session.
+assert an address owns that account"), and an ADMIN account is linked
+automatically only when `google_admin_autolink` says so — OFF by default,
+because the blast radius differs in kind, so by default an admin links it from
+inside their own session. The verified-address requirement is not negotiable by
+that option: an unverified address is refused for an admin even with it on.
 
 NO PASSWORD is stored as `''`, not NULL: `password_verify()` against an empty
 hash is always false, so the marker can never satisfy a login and no live
