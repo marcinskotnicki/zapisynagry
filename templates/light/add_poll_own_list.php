@@ -30,7 +30,10 @@
                                  ? t('addgame_owner_empty', $library_owner)
                                  : t('addgame_own_empty')) ?></p>
     <?php else: ?>
-        <p class="muted"><?= e(t('addgame_club_intro')) ?></p>
+        <?php // Whose games these are decides the wording, same as the heading. ?>
+        <p class="muted"><?= e(!empty($library_owner)
+                                 ? t('addgame_owner_intro')
+                                 : t('addgame_own_intro')) ?></p>
     <?php // Filter, not search: typing hides rows that do not match, so a club
           // with a big cabinet can find a game without paging. Purely local —
           // no request, and with JavaScript off the box simply never appears

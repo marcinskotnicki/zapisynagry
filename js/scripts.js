@@ -18,6 +18,7 @@
         initVersionPick();
         initClubFilter();
         initSyncMode();
+        initPollOthersLibrary();
     });
 
     // 1. New-event date cascade: fill in consecutive days from the first.
@@ -699,6 +700,37 @@
                     if (groups[j] !== this && groups[j].open) groups[j].open = false;
                 }
             });
+        }
+    }
+
+    /* 16. "Only from my library" depends on "let others add games".
+     *
+     * With nobody else allowed to add, restricting what they may add says
+     * nothing — so the box is hidden until the one above it is ticked, rather
+     * than sitting there looking like a setting that does something.
+     *
+     * Unticked as well as hidden: a box the proposer cannot see must not go on
+     * quietly carrying a choice they made and then reversed. The server does
+     * not rely on this — poll_others_from_library() checks allow_others_add
+     * itself, whatever the form sent.
+     */
+    function initPollOthersLibrary() {
+        var boxes = document.querySelectorAll('.field-others_library');
+        for (var i = 0; i < boxes.length; i++) {
+            (function (wrap) {
+                var form = wrap.closest ? wrap.closest('form') : null;
+                if (!form) return;
+                var master = form.querySelector('input[name="allow_others"]');
+                var check  = wrap.querySelector('input[name="others_library"]');
+                if (!master || !check) return;
+
+                function apply() {
+                    wrap.hidden = !master.checked;
+                    if (!master.checked) check.checked = false;
+                }
+                master.addEventListener('change', apply);
+                apply();
+            })(boxes[i]);
         }
     }
 

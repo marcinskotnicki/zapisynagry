@@ -157,11 +157,18 @@ function poll_resolve_candidate($poll, $cand) {
                 foreach ($tally as $row) {
                     $lines[] = $row['name'] . ' — ' . (int)$row['votes'];
                 }
-                /* No user_id, and the name left blank: nobody said this, and
-                 * attributing it to the proposer would put words in their
-                 * mouth. The templates already cope with an empty name. */
+                /* THE HEADING GOES IN THE NAME FIELD, not the body.
+                 *
+                 * Still no user_id — nobody said this, and attributing it to
+                 * the proposer would put words in their mouth. But a blank name
+                 * left the templates printing the separator that normally
+                 * follows one, so the comment opened with a stray ": ".
+                 *
+                 * Putting the heading where a name goes fixes that without a
+                 * special case in fourteen forked templates: it reads as
+                 * "Poll results: Aura — 2", which is what it is. */
                 db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
-                       [$gameId, '', null, t('poll_results_heading') . "\n" . implode("\n", $lines)]);
+                       [$gameId, t('poll_results_heading'), null, implode("\n", $lines)]);
             }
         }
 
@@ -183,7 +190,24 @@ function poll_resolve_candidate($poll, $cand) {
     // a committed resolution). function_exists guard: notify.php may not be loaded
     // in every entry point that can resolve a poll.
     if (function_exists('notify_poll_concluded')) {
-        notify_poll_concluded($notifyEmails, $cand['name']);
+        /* WHEN it is, so somebody who voted in several polls at a club running
+         * more than one event knows which evening to turn up for. Built from
+         * the day the poll sat on plus the start time it resolved to.
+         *
+         * Assembled defensively: a missing day row gives an empty string and
+         * the shorter wording, rather than a sentence with a gap in it. */
+        $whenText = '';
+        $dayRow = db_one('SELECT * FROM event_days WHERE id = ?', [$poll['day_id']]);
+        if ($dayRow) {
+            require_once __DIR__ . '/events.php';
+            $weekday = function_exists('day_weekday_label') ? trim((string)day_weekday_label($dayRow)) : '';
+            $date    = trim((string)($dayRow['day_date'] ?? ''));
+            $whenText = trim($weekday . ' ' . $date);
+            if ($poll['start_time'] !== '' && $poll['start_time'] !== null) {
+                $whenText = trim($whenText . ' ' . substr((string)$poll['start_time'], 0, 5));
+            }
+        }
+        notify_poll_concluded($notifyEmails, $cand['name'], $whenText);
     }
     return $gameId;
 }

@@ -122,10 +122,19 @@ function notify_promoted($playerEmail, $gameName) {
  * @param string[] $emails    Voter emails + proposer email (may contain dups/blanks).
  * @param string   $gameName  The game the poll resolved into.
  */
-function notify_poll_concluded($emails, $gameName) {
+function notify_poll_concluded($emails, $gameName, $when = '') {
     if (!notify_enabled()) return;
+    /* WHEN, not just what. Somebody at a club running several events may have
+     * voted in more than one poll, and "the game X is now scheduled" tells them
+     * nothing about which evening to turn up for.
+     *
+     * Falls back to the shorter wording when the caller has no date to give,
+     * so an older call site cannot produce a sentence with a hole in it. */
+    $body = $when !== ''
+        ? t('ntf_poll_body_when', $gameName, $when)
+        : t('ntf_poll_body', $gameName);
     foreach (array_unique(array_filter($emails)) as $to) {   // drop blanks, de-dup
-        send_mail($to, t('ntf_poll_subject', $gameName), t('ntf_poll_body', $gameName));
+        send_mail($to, t('ntf_poll_subject', $gameName), $body);
     }
 }
 
