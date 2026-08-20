@@ -28,7 +28,15 @@ if (opt('registration_mode') === 'guest_only') redirect('index.php');
 // confuse whoever is holding the session.
 if (is_logged_in()) redirect('user.php');
 
-$fail = function () {
+/* THE VISITOR ALWAYS SEES THE SAME THING — distinguishing "no such account"
+ * from "that address is taken" would let a stranger test which addresses are
+ * registered here. But the ADMIN needs to know which of seven things went
+ * wrong, so the reason goes to the audit log, which only they can read.
+ *
+ * Without this, every failure was one identical sentence and the only way to
+ * tell them apart was to read the source. */
+$fail = function ($why) {
+    log_action('google_login_failed', $why);
     flash_set(t('google_failed'), 'error');
     redirect('login.php');
 };
@@ -36,7 +44,7 @@ $fail = function () {
 /* ---- 1. Starting out ------------------------------------------------------ */
 if (!isset($_GET['code']) && !isset($_GET['error'])) {
     $start = google_auth_start();
-    if ($start['url'] === '') $fail();
+    if ($start['url'] === '') $fail('cannot build the authorise URL (is site address set?)');
     // The state lives in the SESSION, never in a cookie: a value the browser
     // carries is a value an attacker can plant, and this is the one thing
     // proving the login was started from here.
@@ -54,14 +62,20 @@ $known = (string)($_SESSION['google_state'] ?? '');
 // One-shot: cleared before anything else can go wrong, so a replayed callback
 // has no state left to match.
 unset($_SESSION['google_state']);
-if ($known === '' || !hash_equals($known, $state)) $fail();
+if ($known === '' || !hash_equals($known, $state)) {
+    /* Nearly always the session being lost between leaving for Google and
+     * coming back — most often because the site address configured here is on
+     * a different host from the one being browsed (www versus not), so the
+     * session cookie is not sent on the return trip. */
+    $fail($known === '' ? 'no state in session (session lost on the way back?)' : 'state mismatch');
+}
 
 $identity = google_exchange_code((string)($_GET['code'] ?? ''));
-if (!$identity) $fail();
+if (!$identity) $fail('token exchange with Google failed (client secret, redirect URI, or no curl)');
 
 /* An address Google has not verified proves nothing about who is holding it,
  * and this is the whole basis on which an account gets matched below. */
-if (empty($identity['email_verified']) || $identity['email'] === '') $fail();
+if (empty($identity['email_verified']) || $identity['email'] === '') $fail('Google did not return a verified email address');
 
 /* ---- 3. Who is this? ------------------------------------------------------ */
 $user = google_find_linked_user($identity['sub']);
@@ -75,7 +89,11 @@ if (!$user) {
          * inside their own session instead. Telling the visitor exactly that
          * would confirm the address belongs to an admin, so this is simply a
          * failure like any other. */
-        if (!google_may_autolink($existing, $identity)) $fail();
+        if (!google_may_autolink($existing, $identity)) {
+            $fail(!empty($existing['is_admin'])
+                ? 'admin account, and google_admin_autolink is off'
+                : 'auto-link refused');
+        }
         google_link_identity((int)$existing['id'], $identity);
         $user = $existing;
 
@@ -83,7 +101,7 @@ if (!$user) {
         // Nobody here yet: create the account. No password is set, and none is
         // invented — '' can never satisfy password_verify(), so the only way in
         // is Google until they choose to add one.
-        if (opt('registration_mode') !== 'registration') $fail();
+        if (opt('registration_mode') !== 'registration') $fail('no account for that address and self-registration is off');
 
         $name = $identity['name'] !== '' ? $identity['name'] : strtok($identity['email'], '@');
         db_run(
@@ -94,7 +112,7 @@ if (!$user) {
         google_link_identity($newId, $identity);
         log_action('google_register', 'User #' . $newId);
         $user = db_one('SELECT * FROM users WHERE id = ?', [$newId]);
-        if (!$user) $fail();
+        if (!$user) $fail('account row vanished right after being created');
     }
 }
 

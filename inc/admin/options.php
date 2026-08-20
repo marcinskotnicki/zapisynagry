@@ -69,9 +69,14 @@ $OPTION_VALUES = [
     // A text field, NOT a toggle: listed among the checkboxes it would be
     // rewritten to '0' by every save, since an absent checkbox reads as off.
     'library_club_email',
-    // Same reason: text fields, not toggles. google_client_secret is also in
-    // $OPTION_SECRETS above, which masks it and gives it a __clear checkbox.
-    'google_client_id', 'google_client_secret',
+    // A text field, not a toggle. google_client_SECRET is deliberately NOT here:
+    // it belongs to $OPTION_SECRETS alone, which knows that a blank or an
+    // all-asterisk submission means "unchanged". Listing it here as well made
+    // this loop run afterwards and overwrite the stored credential with the
+    // row of stars the form had just echoed back — so it survived the save it
+    // was typed into and was destroyed by the next one, which is exactly as
+    // confusing to diagnose as it sounds. bgg_api_code was never in both.
+    'google_client_id',
 ];
 /* The six custom messages are stored one row PER LANGUAGE (msg_voting_en, …),
  * so their keys can't be a fixed list — they depend on which language files
