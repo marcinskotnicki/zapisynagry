@@ -488,39 +488,6 @@ $groupEnd = function () { echo '</div></details>'; };
             <p class="field-note"><?= e(t('opt_registration_mode_note')) ?></p>
         </div>
 
-        <?php /* SIGNING IN WITH GOOGLE. Sits right under the registration mode
-               * because it is the other answer to "how do people get in", and
-               * because guest-only mode makes it moot — there are no member
-               * accounts to sign in to. */ ?>
-        <?php $toggle('google_login'); ?>
-        <p class="field-note"><?= e(t('opt_google_login_note')) ?></p>
-        <?php /* WARNS BEFORE IT BITES. Switching this off locks out anybody who
-               * has no password here, and nothing else on this screen would say
-               * so. Only shown when there is somebody to lose. */ ?>
-        <?php if (!empty($google_only_count)): ?>
-            <p class="field-note field-warn"><?= e(t('opt_google_warn_lockout', (int)$google_only_count)) ?></p>
-        <?php endif; ?>
-        <div class="field field-google_client_id">
-            <label for="google_client_id"><?= e(t('opt_google_client_id')) ?></label>
-            <input type="text" id="google_client_id" name="google_client_id"
-                   value="<?= e(opt('google_client_id')) ?>" autocomplete="off" spellcheck="false">
-        </div>
-        <?php /* Rendered by the same helper as every other secret, so it is
-               * masked and gets its own "clear" checkbox rather than being
-               * echoed back into the page. */ ?>
-        <?php $secret('google_client_secret'); ?>
-        <?php /* The redirect URI, spelled out. Google matches it literally —
-               * no wildcards, not even across subdomains — so an admin needs
-               * the exact string rather than a description of it. */ ?>
-        <?php $gRedirect = google_redirect_uri(); ?>
-        <?php if ($gRedirect !== ''): ?>
-            <p class="field-note"><?= e(t('opt_google_setup_note', $gRedirect)) ?></p>
-        <?php else: ?>
-            <?php // No site address to build it from, so there is no exact
-                  // string to hand over — say what to fix rather than printing
-                  // a note with a hole in it. ?>
-            <p class="field-note"><?= e(t('opt_google_need_site_url')) ?></p>
-        <?php endif; ?>
         <?php
         /* Guest permissions. Two kinds are marked below:
          *   INERT   — guest-only mode short-circuits the check entirely, so the
@@ -560,6 +527,42 @@ $groupEnd = function () { echo '</div></details>'; };
             </div>
         <?php endforeach; ?>
         <p class="field-note"><?= e(t('opt_switcher_show_user_note')) ?></p>
+
+        <?php /* SIGNING IN WITH GOOGLE, last in the group: the other answer to
+               * "how do people get in" belongs with the rest of this section,
+               * but at the bottom rather than straight under the registration
+               * mode — everything above it is about permissions for the
+               * accounts this creates, and Google is about how one gets
+               * created or reached in the first place. */ ?>
+        <?php $toggle('google_login'); ?>
+        <p class="field-note"><?= e(t('opt_google_login_note')) ?></p>
+        <?php /* WARNS BEFORE IT BITES. Switching this off locks out anybody who
+               * has no password here, and nothing else on this screen would say
+               * so. Only shown when there is somebody to lose. */ ?>
+        <?php if (!empty($google_only_count)): ?>
+            <p class="field-note field-warn"><?= e(t('opt_google_warn_lockout', (int)$google_only_count)) ?></p>
+        <?php endif; ?>
+        <div class="field field-google_client_id">
+            <label for="google_client_id"><?= e(t('opt_google_client_id')) ?></label>
+            <input type="text" id="google_client_id" name="google_client_id"
+                   value="<?= e(opt('google_client_id')) ?>" autocomplete="off" spellcheck="false">
+        </div>
+        <?php /* Rendered by the same helper as every other secret, so it is
+               * masked and gets its own "clear" checkbox rather than being
+               * echoed back into the page. */ ?>
+        <?php $secret('google_client_secret'); ?>
+        <?php /* The redirect URI, spelled out. Google matches it literally —
+               * no wildcards, not even across subdomains — so an admin needs
+               * the exact string rather than a description of it. */ ?>
+        <?php $gRedirect = google_redirect_uri(); ?>
+        <?php if ($gRedirect !== ''): ?>
+            <p class="field-note"><?= e(t('opt_google_setup_note', $gRedirect)) ?></p>
+        <?php else: ?>
+            <?php // No site address to build it from, so there is no exact
+                  // string to hand over — say what to fix rather than printing
+                  // a note with a hole in it. ?>
+            <p class="field-note"><?= e(t('opt_google_need_site_url')) ?></p>
+        <?php endif; ?>
     <?php $groupEnd(); ?>
 
     <?php /* 7. EMAIL */ ?>
