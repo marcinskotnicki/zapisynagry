@@ -140,31 +140,31 @@ $hideHere = function ($page) use ($here, $hideCurrent) {
 ob_start();
     // Home, except on the home page. nav_link() applies the icon/text option.
     if ($hideHere('index.php')) {
-        echo nav_link('index.php', 'home', t('nav_home'));
+        echo nav_link('index.php', 'home', t('nav_home'), $here === 'index.php');
     }
     // Public archive list, when that VIEW is offered and we're not already on it.
     if (archive_list_enabled() && $hideHere('archive.php')) {
-        echo nav_link('archive.php', 'archive', t('archive_title'));
+        echo nav_link('archive.php', 'archive', t('archive_title'), $here === 'archive.php');
     }
     if (archive_calendar_enabled() && $hideHere('calendar.php')) {
-        echo nav_link('calendar.php', 'calendar', t('calendar_title'));
+        echo nav_link('calendar.php', 'calendar', t('calendar_title'), $here === 'calendar.php');
     }
     // The club library, when the admin has switched it on. Public, like the
     // archive above it — the whole point is that anyone can see who owns what.
     if (library_any_enabled() && $hideHere('library.php')) {
-        echo nav_link('library.php', 'library', t('lib_title'));
+        echo nav_link('library.php', 'library', t('lib_title'), $here === 'library.php');
     }
     if (is_admin() && $hideHere('admin.php')) {         // admins: the panel link
-        echo nav_link('admin.php', 'admin', t('admin'));
+        echo nav_link('admin.php', 'admin', t('admin'), $here === 'admin.php');
     }
     if (is_logged_in()) {                               // panel (unless on it) + logout
         if ($hideHere('user.php')) {
-            echo nav_link('user.php', 'user', t('user_panel'));
+            echo nav_link('user.php', 'user', t('user_panel'), $here === 'user.php');
         }
         echo nav_link('logout.php', 'logout', t('logout'));
     } elseif (opt('registration_mode') !== 'guest_only') {   // guest-only hides login
-        echo nav_link('login.php', 'login', t('login'));
-        echo nav_link('register.php', 'register', t('register'));
+        echo nav_link('login.php', 'login', t('login'), $here === 'login.php');
+        echo nav_link('register.php', 'register', t('register'), $here === 'register.php');
     }
 $topnav   = trim(ob_get_clean());
 // 'auto' | 'both' | 'none' — see header_brand_mode(). $showName stays as the

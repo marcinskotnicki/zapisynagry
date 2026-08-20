@@ -764,6 +764,7 @@ body.chat-open .chat-toggle-close { display: inline; }
 .pager-pos { color: var(--text-muted); font-size: 0.85rem; }
 
 .gate-buttons-lead { margin-bottom: 1.25rem; }
+.nav-active { text-decoration: underline; }
 .login-alt-sep { text-align: center; margin: 1rem 0 0; }
 .gate-search { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem; margin-bottom: 0.6rem; margin-top:1rem;}
 .gate-search .field { margin-bottom: 0.6rem; }

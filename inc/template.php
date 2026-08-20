@@ -324,20 +324,39 @@ function current_page() {
  * @param string $label  Already-translated visible text.
  * @return string        HTML <a> element.
  */
-function nav_link($href, $key, $label) {
+function nav_link($href, $key, $label, $active = false) {
     $style = opt('header_button_style');
     $icon  = nav_icon_svg($key);   // '' for an unknown key
+
+    /* MARKS THE PAGE YOU ARE ON, when the link for it is shown at all — a club
+     * that switched off nav_hide_current gets a menu with a link to where they
+     * already are, and nothing distinguishing it would read as a menu that
+     * simply repeats itself.
+     *
+     * Built as a list because the icon-only branch below already carries a
+     * class of its own; appending would produce two class attributes, of which
+     * a browser keeps only the first.
+     *
+     * aria-current="page" alongside it: the underline says "you are here" to
+     * somebody looking at the screen, and this says the same to somebody who is
+     * not. */
+    $classes = [];
+    $aria    = $active ? ' aria-current="page"' : '';
+    if ($active) $classes[] = 'nav-active';
+
     if ($icon === '' || $style === 'text') {
         $inner = e($label);
     } elseif ($style === 'icon') {
         // Icon-only: keep the text as an accessible label / tooltip.
         $inner = '<span class="nav-ic" aria-hidden="true">' . $icon . '</span>';
-        return '<a href="' . e($href) . '" class="nav-icononly" title="' . e($label)
-             . '" aria-label="' . e($label) . '">' . $inner . '</a>';
+        $classes[] = 'nav-icononly';
+        return '<a href="' . e($href) . '" class="' . e(implode(' ', $classes)) . '" title="' . e($label)
+             . '" aria-label="' . e($label) . '"' . $aria . '>' . $inner . '</a>';
     } else { // 'both'
         $inner = '<span class="nav-ic" aria-hidden="true">' . $icon . '</span> ' . e($label);
     }
-    return '<a href="' . e($href) . '">' . $inner . '</a>';
+    $cls = $classes ? ' class="' . e(implode(' ', $classes)) . '"' : '';
+    return '<a href="' . e($href) . '"' . $cls . $aria . '>' . $inner . '</a>';
 }
 
 /**
