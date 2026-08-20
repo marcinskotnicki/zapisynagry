@@ -247,6 +247,9 @@ if ($go === 'mine') {
     tpl_render('add_poll_own_list', [
         'table' => $table,
         'games' => library_own_all($pickOwner),
+        // Same reason as the button: the heading must not say "your library"
+        // while listing somebody else's.
+        'library_owner' => !empty($libraryOnly) ? (string)($livePoll['proposer_name'] ?? '') : '',
     ]);
     tpl_render('footer');
     exit;
@@ -313,6 +316,12 @@ tpl_render('add_game_gate', [
                        !empty($libraryOnly) ? (int)$livePoll['proposer_user_id']
                                             : (int)(current_user()['id'] ?? 0)),
     'library_only' => !empty($libraryOnly),
+    /* WHOSE library, for the button's wording. On a restricted poll it is
+     * somebody else's, and calling it "my library" would be plainly wrong to
+     * everyone but the proposer. Empty means it really is the visitor's own. */
+    'library_owner' => !empty($libraryOnly)
+        ? (string)($livePoll['proposer_name'] ?? '')
+        : '',
     'action'    => 'add_poll_game.php',
     'show_poll' => false,            // no nested-poll button when adding a candidate
     'title'     => t('addpoll_candidate_title'),

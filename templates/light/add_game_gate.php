@@ -65,7 +65,12 @@ $title      = $title     ?? t('addgame_title');
         <?php if (!empty($own_pick)): ?>
             <div class="gate-buttons">
                 <button type="submit" name="go" value="mine" class="btn btn-primary btn-big" formnovalidate>
-                    <?= e(t('addgame_from_own')) ?>
+                    <?php /* Named when the library is somebody else's — on a
+                           * poll restricted to the proposer's shelf, "my
+                           * library" is wrong for everyone but them. */ ?>
+                    <?= e(!empty($library_owner)
+                            ? t('addgame_from_owner', $library_owner)
+                            : t('addgame_from_own')) ?>
                 </button>
             </div>
         <?php endif; ?>

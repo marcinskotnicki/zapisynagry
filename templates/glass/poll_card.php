@@ -134,7 +134,7 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
                        * the email a guest gave when voting is not the club's to
                        * publish, and nothing here needs it. */ ?>
                 <?php if (!empty($poll['show_results']) && !empty($c['voters'])): ?>
-                    <span class="poll-opt-voters"><?= e(implode(', ', $c['voters'])) ?></span>
+                    <span class="poll-opt-voters"><span class="poll-opt-voters-label"><?= e(t('poll_voters_label')) ?></span> <?= e(implode(', ', $c['voters'])) ?></span>
                 <?php endif; ?>
                     <?php if (!$readonly): ?>
                         <?php if ($mine): ?>

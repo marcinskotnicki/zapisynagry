@@ -16,13 +16,19 @@
  * ============================================================================= */
 ?>
 <div class="card">
-    <h1><?= e(t('addgame_own_title')) ?></h1>
+    <?php /* Named when it is somebody else's — a heading reading "your
+           * library" over another member's games is simply untrue. */ ?>
+    <h1><?= e(!empty($library_owner)
+                ? t('addgame_owner_title', $library_owner)
+                : t('addgame_own_title')) ?></h1>
 
     <?php if (empty($games)): ?>
         <?php // Distinct from "no search results": there is nothing on the
               // shelf at all, and the fix is an admin adding some, not a
               // different search term. ?>
-        <p class="muted"><?= e(t('addgame_own_empty')) ?></p>
+        <p class="muted"><?= e(!empty($library_owner)
+                                 ? t('addgame_owner_empty', $library_owner)
+                                 : t('addgame_own_empty')) ?></p>
     <?php else: ?>
         <p class="muted"><?= e(t('addgame_club_intro')) ?></p>
     <?php // Filter, not search: typing hides rows that do not match, so a club
