@@ -239,6 +239,51 @@ function poll_optin_relevant($poll = null) {
     return true;
 }
 
+/**
+ * Is this poll restricted to the proposer's own library?
+ *
+ * Three things have to hold, and each removes a way for the setting to be a
+ * dead end rather than a restriction:
+ *
+ *   - the proposer opted in to letting others add at all. Restricting a door
+ *     nobody may use says nothing.
+ *   - they asked for it.
+ *   - they still have an ACCOUNT with a library that has games in it. A poll
+ *     proposed by a guest has no library to draw on, and one whose owner
+ *     emptied theirs since would leave everybody else with nothing to pick —
+ *     which reads as the site being broken rather than as a rule.
+ *
+ * The last is checked live rather than trusted from the poll row, because a
+ * library changes long after the poll is made.
+ *
+ * @param array $poll
+ * @return bool
+ */
+function poll_others_from_library($poll) {
+    if ((int)($poll['allow_others_add'] ?? 0) !== 1)    return false;
+    if ((int)($poll['others_from_library'] ?? 0) !== 1) return false;
+
+    require_once __DIR__ . '/library.php';
+    $owner = (int)($poll['proposer_user_id'] ?? 0);
+    return $owner > 0 && library_own_pick_enabled($owner);
+}
+
+/**
+ * May the proposer be OFFERED that restriction?
+ *
+ * Same conditions minus the setting itself — used by the forms, so the
+ * checkbox appears only where ticking it would mean something.
+ *
+ * @param array|null $poll     Existing poll, or null while creating one.
+ * @param int        $userId   Who is proposing.
+ * @return bool
+ */
+function poll_can_restrict_to_library($poll, $userId) {
+    require_once __DIR__ . '/library.php';
+    $owner = $poll !== null ? (int)($poll['proposer_user_id'] ?? 0) : (int)$userId;
+    return $owner > 0 && library_own_pick_enabled($owner);
+}
+
 function poll_can_add_candidate($poll) {
     require_once __DIR__ . '/verify.php';   // verify_decision()
     require_once __DIR__ . '/events.php';   // can_add_games()

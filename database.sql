@@ -706,6 +706,10 @@ CREATE TABLE polls (
     -- tally on the game it becomes. OFF by default: a poll is a small vote
     -- among people who know each other, and not every club wants it public.
     show_results     INTEGER NOT NULL DEFAULT 0,
+    -- 0/1; when others may add candidates, restrict them to games from the
+    -- PROPOSER's own library. Only meaningful alongside allow_others_add, and
+    -- only for a poll whose proposer has an account with a library to draw on.
+    others_from_library INTEGER NOT NULL DEFAULT 0,
     add_self         INTEGER NOT NULL DEFAULT 1,
     wait_for_deadline INTEGER NOT NULL DEFAULT 0, -- 0/1; 1 = ignore the "a candidate hit its player count" trigger and run to the deadline, so every option keeps collecting votes. Only honoured when a deadline is actually set (see poll_check_resolve), or the poll could never end.
     deadline         TEXT,                       -- 'Y-m-d H:i:s' (server time); poll auto-resolves once passed; NULL = never

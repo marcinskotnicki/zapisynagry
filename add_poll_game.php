@@ -38,6 +38,28 @@ if ($livePoll) {
         redirect('index.php');
     }
     $tableId = (int)$livePoll['table_id'];
+
+    /* RESTRICTED TO THE PROPOSER'S LIBRARY, when they asked for it.
+     *
+     * The proposer themself is exempt: it is their poll and their library, and
+     * the restriction exists to shape what OTHERS may add. Somebody who has
+     * verified as the owner this session counts as them.
+     *
+     * Enforced here, not merely by hiding routes, because every other way in
+     * (?go=bgg, ?go=manual, a bookmarked ?club=) is a plain GET that anybody
+     * could type. */
+    require_once __DIR__ . '/inc/verify.php';
+    $ownerHere = verify_decision($livePoll['proposer_user_id'], $livePoll['proposer_email']) === 'allow'
+              || !empty($_SESSION['poll_edit_ok'][(int)$livePoll['id']]);
+    $libraryOnly = !$ownerHere && poll_others_from_library($livePoll);
+    if ($libraryOnly) {
+        /* $go is read here rather than reusing the one set further down: this
+         * check has to happen before any route branches on it, and reading the
+         * POST directly keeps the two from drifting apart. */
+        $goNow = (string)($_POST['go'] ?? '');
+        $allowed = isset($_GET['mine']) || $goNow === 'mine' || $goNow === '';
+        if (!$allowed) redirect('add_poll_game.php');
+    }
 } else {
     // Draft mode: a poll being built (the draft holds the target table).
     if (!isset($_SESSION['poll_draft'])) { redirect('index.php'); }
@@ -66,6 +88,8 @@ function poll_candidate_defaults() {
 
 $mode = $_POST['mode'] ?? '';
 $go   = $_POST['go'] ?? '';
+// Only a LIVE poll can restrict; a draft is still the proposer's own.
+$libraryOnly = $libraryOnly ?? false;
 
 /* ---- SAVE: append the candidate to the draft ----------------------------- */
 if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -166,9 +190,16 @@ if (isset($_GET['mine'])) {
     // The member's own library — same step as the club shelf, same form after.
     // Scoped to whoever is signed in, so a row id from another member's
     // library does not resolve.
-    $meNow = current_user();
-    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
-    $mineRow = library_own_entry((int)$_GET['mine'], (int)$meNow['id']);
+    /* WHOSE library this reads.
+     *
+     * Normally your own. But on a poll restricted to the proposer's library it
+     * is THEIRS — that is the whole point, and reading the visitor's instead
+     * would let anybody add anything by simply having it in their own list. */
+    $pickOwner = !empty($libraryOnly)
+        ? (int)$livePoll['proposer_user_id']
+        : (int)(current_user()['id'] ?? 0);
+    if (!library_own_pick_enabled($pickOwner)) redirect('index.php');
+    $mineRow = library_own_entry((int)$_GET['mine'], $pickOwner);
     if (!$mineRow) redirect('add_poll_game.php');
 
     $cand = club_shelf_prefill(poll_candidate_defaults(), $mineRow);
@@ -207,12 +238,15 @@ if (isset($_GET['club'])) {
 
 /* ---- Gate buttons (manual / bgg / club / own library) --------------------- */
 if ($go === 'mine') {
-    $meNow = current_user();
-    if (!$meNow || !library_own_pick_enabled((int)$meNow['id'])) redirect('index.php');
+    // Same rule as the pick above: the proposer's list when restricted.
+    $pickOwner = !empty($libraryOnly)
+        ? (int)$livePoll['proposer_user_id']
+        : (int)(current_user()['id'] ?? 0);
+    if (!library_own_pick_enabled($pickOwner)) redirect('index.php');
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('add_poll_own_list', [
         'table' => $table,
-        'games' => library_own_all((int)$meNow['id']),
+        'games' => library_own_all($pickOwner),
     ]);
     tpl_render('footer');
     exit;
@@ -271,8 +305,14 @@ tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
 tpl_render('add_game_gate', [
     'table'     => $table,
     'csrf'      => csrf_field(),
-    // Offer their own library when they keep one with games in it.
-    'own_pick'  => library_own_pick_enabled((int)(current_user()['id'] ?? 0)),
+    /* Whose library the button offers, and whether it is the ONLY route.
+     * On a restricted poll everything else is hidden AND refused server-side —
+     * see the check near the top; hiding alone would only make the other routes
+     * harder to find, not unavailable. */
+    'own_pick'  => library_own_pick_enabled(
+                       !empty($libraryOnly) ? (int)$livePoll['proposer_user_id']
+                                            : (int)(current_user()['id'] ?? 0)),
+    'library_only' => !empty($libraryOnly),
     'action'    => 'add_poll_game.php',
     'show_poll' => false,            // no nested-poll button when adding a candidate
     'title'     => t('addpoll_candidate_title'),

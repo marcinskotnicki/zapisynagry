@@ -169,6 +169,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* Showing the votes. Always on the form, so an absent key genuinely
              * means unticked — unlike the box above, which is hidden in some
              * states and therefore needs the poll_optin_relevant() dance. */
+            /* Only meaningful while others may add at all, and only while the
+             * box was on the form — hidden and unticked look identical in
+             * POST, and a hidden one must not wipe what the proposer set. */
+            $othersLib = poll_can_restrict_to_library($poll, (int)($poll['proposer_user_id'] ?? 0))
+                ? (isset($_POST['others_library']) ? 1 : 0)
+                : (int)($poll['others_from_library'] ?? 0);
+            if ($othersLib !== (int)($poll['others_from_library'] ?? 0)) {
+                db_run('UPDATE polls SET others_from_library = ? WHERE id = ?', [$othersLib, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' others_from_library -> ' . $othersLib);
+            }
             $showResults = isset($_POST['show_results']) ? 1 : 0;
             if ($showResults !== (int)($poll['show_results'] ?? 0)) {
                 db_run('UPDATE polls SET show_results = ? WHERE id = ?', [$showResults, $pollId]);
@@ -250,6 +260,8 @@ $pollNow = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
 
 tpl_render('header', ['page_title' => t('poll_edit_title')]);
 tpl_render('edit_poll', [
+    // Same gate as on the add form; keyed on the POLL's proposer, not the viewer.
+    'can_restrict_library' => poll_can_restrict_to_library($poll, 0),
     'poll'   => $pollNow,
     'cands'  => $cands,
     'day'    => $day,

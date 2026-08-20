@@ -79,6 +79,10 @@ $title      = $title     ?? t('addgame_title');
                * feed that search, and leaving it would ask for a name with
                * nowhere to send it. Everything else still works — a game can be
                * typed in by hand or picked from a library. */ ?>
+        <?php /* A poll restricted to the proposer's library offers ONE route.
+               * Everything below is hidden — and refused server-side, so this
+               * is presentation rather than the rule itself. */ ?>
+        <?php if (empty($library_only)): ?>
         <?php if (bgg_configured()): ?>
             <div class="gate-search">
                 <div class="field field-game_name">
@@ -99,6 +103,7 @@ $title      = $title     ?? t('addgame_title');
                 </button>
             <?php endif; ?>
         </div>
+        <?php endif; // library_only ?>
     </form>
 
     <?php if ($show_poll && opt_bool('allow_polls')): // medium: start a poll instead ?>
@@ -107,11 +112,14 @@ $title      = $title     ?? t('addgame_title');
         </p>
     <?php endif; ?>
 
-    <p class="gate-manual">
-        <button type="submit" form="gate-form" name="go" value="manual" class="btn btn-secondary btn-small-gate">
-            <?= e(t('addgame_manual')) ?>
-        </button>
-    </p>
+    <?php // Also a route into the poll, so it goes when restricted. ?>
+    <?php if (empty($library_only)): ?>
+        <p class="gate-manual">
+            <button type="submit" form="gate-form" name="go" value="manual" class="btn btn-secondary btn-small-gate">
+                <?= e(t('addgame_manual')) ?>
+            </button>
+        </p>
+    <?php endif; ?>
 
     <p><a class="btn" href="index.php"><?= e(t('back')) ?></a></p>
 </div>

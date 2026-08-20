@@ -56,6 +56,7 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'require_email' => 0,           // per-poll email rule (shown only in option mode 2)
         'allow_others'  => 0,           // opt-in: let anyone add candidate games
         'show_results'  => 0,           // opt-in: show who voted for what
+        'others_library'=> 0,           // opt-in: others may only add from MY library
         'wait_deadline' => 0,           // opt-in: run to the deadline instead of ending on the first full candidate
         // Voting closes this many hours BEFORE the poll's start; admin default,
         // overridable per poll on the form. 0 = no automatic deadline.
@@ -90,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $draft['require_email'] = (email_require_mode() === 2 && isset($_POST['require_email'])) ? 1 : 0;
     $draft['allow_others']  = isset($_POST['allow_others']) ? 1 : 0;
     $draft['show_results']  = isset($_POST['show_results']) ? 1 : 0;
+    $draft['others_library'] = isset($_POST['others_library']) ? 1 : 0;
     $draft['wait_deadline'] = isset($_POST['wait_deadline']) ? 1 : 0;
     $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
 
@@ -135,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,add_self,wait_for_deadline,deadline)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -145,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $draft['comment'] !== '' ? $draft['comment'] : null,
                         $draft['start_time'], $draft['explain_rules'],
                         (int)$draft['require_email'], (int)$draft['allow_others'],
-                        (int)$draft['show_results'], $draft['add_self'],
+                        (int)$draft['show_results'], (int)$draft['others_library'], $draft['add_self'],
                         (int)$draft['wait_deadline'],
                         $deadline,
                     ]
@@ -228,6 +230,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 tpl_render('header', ['page_title' => t('addpoll_title')]);
 tpl_render('poll_main', [
+    // Offer the restriction only to a proposer who has a library to restrict to.
+    'can_restrict_library' => poll_can_restrict_to_library(null, (int)(current_user()['id'] ?? 0)),
     'table' => $table,
     'draft' => $draft,
     'error' => $error,

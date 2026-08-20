@@ -103,6 +103,19 @@
                     <?= e(t('poll_allow_others')) ?>
                 </label>
             </div>
+            <?php /* NESTED under it, because it only shapes what OTHERS may
+                   * add — with nobody else allowed to add, it restricts
+                   * nothing. Shown only to a proposer who HAS a library, or it
+                   * would leave everyone else with nothing to pick. */ ?>
+            <?php if (!empty($can_restrict_library)): ?>
+                <div class="field field-check field-others_library">
+                    <label>
+                        <input type="checkbox" name="others_library" value="1" <?= (int)($draft['others_library'] ?? 0) === 1 ? 'checked' : '' ?>>
+                        <?= e(t('poll_others_library')) ?>
+                    </label>
+                    <p class="field-note"><?= e(t('poll_others_library_note')) ?></p>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <?php /* OUTSIDE the block above on purpose: showing the votes has
