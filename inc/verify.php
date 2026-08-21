@@ -131,7 +131,28 @@ function verify_check_email($storedEmail, $inputEmail) {
  * @return bool
  */
 function verify_code_requested($targetType, $targetId) {
-    return !empty($_SESSION['verify_requested'][$targetType . ':' . (int)$targetId]);
+    // Did this visitor ask?
+    if (empty($_SESSION['verify_requested'][$targetType . ':' . (int)$targetId])) return false;
+
+    /* AND IS THERE STILL A CODE TO TYPE IN? The session flag alone was not
+     * enough: it survives the code being used or expiring, which left the page
+     * showing a code box for a code that no longer existed and no way to ask
+     * for another. Reported as "it asks for a code but never sends one".
+     *
+     * The two also share a key across pages — edit_game and delete_game both
+     * mark 'game:N', which is right while a code is live (the same code
+     * authorises both) and wrong once it is gone.
+     *
+     * Checking the row makes the step self-correcting: no live code, back to
+     * the asking step. */
+    return (int)db_val(
+        'SELECT COUNT(*) FROM verification_codes
+          WHERE target_type = ? AND target_id = ? AND expires_at > ?',
+        // gmdate, not date: expires_at is written in UTC (see verify_send_code),
+        // and comparing it against local time made a fresh code look expired
+        // wherever the server is not on UTC.
+        [$targetType, (int)$targetId, gmdate('Y-m-d H:i:s')]
+    ) > 0;
 }
 
 /**
@@ -208,6 +229,11 @@ function verify_check_code($targetType, $targetId, $email, $code) {
     if (hash_equals((string)$row['code'], trim((string)$code))) {
         db_run('DELETE FROM verification_codes WHERE target_type = ? AND target_id = ?',
                [$targetType, $targetId]);                // one-shot: consume on success
+        /* And forget that a code was asked for. The step check tolerates a
+         * stale flag — it also requires a live code — but leaving one behind
+         * means the session accumulates markers for every target ever touched,
+         * for no reason. */
+        verify_clear_requested($targetType, $targetId);
         return true;
     }
 
@@ -218,6 +244,9 @@ function verify_check_code($targetType, $targetId, $email, $code) {
     if ($attempts >= VERIFY_MAX_ATTEMPTS) {
         db_run('DELETE FROM verification_codes WHERE target_type = ? AND target_id = ?',
                [$targetType, $targetId]);
+        // Destroyed, so there is nothing left to type: put the ask step back
+        // rather than leaving a box that cannot be satisfied.
+        verify_clear_requested($targetType, $targetId);
     } else {
         db_run('UPDATE verification_codes SET attempts = ? WHERE id = ?', [$attempts, (int)$row['id']]);
     }
