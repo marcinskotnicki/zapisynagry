@@ -468,6 +468,14 @@ body.tpl-ironworks {
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
 
+.tpl-ironworks .poll-card> <.game-comment{
+    color:var(--parchment-3);
+}
+.tpl-ironworks .poll-opt-voters{
+    color:var(--parchment-3);
+}
+
+
 
 @media (max-width: 860px) {
     .tpl-ironworks .game-list { gap: 1.6rem; }

@@ -272,6 +272,7 @@ body.tpl-corkboard {
     background: #f6efdd;
     border: 1px solid var(--card-edge);
     border-radius: 2px;
+    padding:3px;
 }
 
 .tpl-corkboard .tabs { border-bottom: none; gap: 0.35rem; }
