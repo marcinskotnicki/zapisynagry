@@ -23,6 +23,7 @@ require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
 require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/notify.php';
 
 $pollId = (int)($_GET['poll'] ?? $_POST['poll'] ?? 0);
@@ -54,7 +55,16 @@ $error    = null;
 
 if (!$unlocked && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'verify') {
     csrf_check();
-    if (verify_passes($decision, 'poll', $pollId, $poll['proposer_email'], $_POST)) {
+    antibot_check('form');
+    /* ASKING FOR A CODE is its own step and the only thing that sends mail. */
+    if (($_POST['choice'] ?? '') === 'send_code') {
+        if (captcha_verify('verify')) {
+            verify_send_code('poll', $pollId, $poll['proposer_email']);
+            verify_mark_requested('poll', $pollId);
+        } else {
+            $error = t('error_captcha');
+        }
+    } elseif (verify_passes($decision, 'poll', $pollId, $poll['proposer_email'], $_POST)) {
         $_SESSION['poll_edit_ok'][$pollId] = true;   // remember for the follow-up actions
         $unlocked = true;
     } else {
@@ -63,14 +73,16 @@ if (!$unlocked && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 
 }
 
 if (!$unlocked) {
-    if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        verify_send_code('poll', $pollId, $poll['proposer_email']);   // email the code on first view
-    }
+    /* NOTHING SENT ON A GET: the gate is reached by following a link, and a
+     * crawler follows every link. The code goes out from the gate POST that
+     * asks for it — see the 'send_code' branch above. */
     tpl_render('header', ['page_title' => t('poll_edit_title')]);
     tpl_render('verify_challenge', [
         'decision' => $decision,
         'title'    => t('poll_edit_title'),
         'error'    => $error,
+        'code_sent' => verify_code_requested('poll', $pollId),
+        'captcha'   => captcha_html('verify'),
         // The poll id rides in the query string, so the POST keeps it.
         'action'   => 'edit_poll.php?poll=' . $pollId,
         'csrf'     => csrf_field(),

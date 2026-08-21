@@ -49,14 +49,14 @@ $canVote = !$readonly && can_signup();
         <div class="poll-actions">
             <?php if ($canEditPoll): ?>
                 <?php // delete_poll.php re-checks this — the button only hides. ?>
-                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_delete')) ?></a>
-                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_edit')) ?></a>
+                <a class="btn btn-small btn-danger poll-del-btn" href="delete_poll.php?poll=<?= (int)$poll['id'] ?>" rel="nofollow"><?= e(t('poll_delete')) ?></a>
+                <a class="btn btn-small" href="edit_poll.php?poll=<?= (int)$poll['id'] ?>" rel="nofollow"><?= e(t('poll_edit')) ?></a>
                 <?php if (is_admin()): // move this poll to another table on the same day ?>
-                    <a class="btn btn-small" href="move_item.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('move_btn')) ?></a>
+                    <a class="btn btn-small" href="move_item.php?poll=<?= (int)$poll['id'] ?>" rel="nofollow"><?= e(t('move_btn')) ?></a>
                 <?php endif; ?>
             <?php endif; ?>
             <?php if ($canEnd): ?>
-                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_end_now')) ?></a>
+                <a class="btn btn-small poll-end-btn" href="end_poll.php?poll=<?= (int)$poll['id'] ?>" rel="nofollow"><?= e(t('poll_end_now')) ?></a>
             <?php endif; ?>
             <?php // Shown to anyone allowed to add — the proposer, an admin, or
                   // everyone when the proposer opted in. ?>
@@ -173,7 +173,7 @@ $canVote = !$readonly && can_signup();
                             <button type="submit" class="btn btn-small"><?= e(t('poll_cancel_vote')) ?></button>
                         </form>
                     <?php else: // not voted -> link to the vote form ?>
-                        <a class="btn btn-small btn-primary" href="vote.php?poll_game=<?= (int)$c['id'] ?>"><?= e(t('poll_vote')) ?></a>
+                        <a class="btn btn-small btn-primary" href="vote.php?poll_game=<?= (int)$c['id'] ?>" rel="nofollow"><?= e(t('poll_vote')) ?></a>
                     <?php endif; ?>
                 <?php endif; ?>
             </li>

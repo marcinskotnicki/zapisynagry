@@ -9,6 +9,13 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/notify.php';
+// The honeypot/timing check and the optional captcha. This form had CSRF only:
+// enough to stop another site posting to it, nothing against a bot filling it
+// in directly.
+// require_once: bootstrap already pulls antibot.php in, and a plain require
+// would redeclare its functions.
+require_once __DIR__ . '/inc/antibot.php';
+require_once __DIR__ . '/inc/captcha.php';
 
 $gameId = (int)($_GET['game'] ?? $_POST['game'] ?? 0);
 $game   = $gameId ? db_one('SELECT * FROM games WHERE id = ?', [$gameId]) : null;
@@ -38,13 +45,21 @@ $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    /* Same gate as every other form a stranger can reach. Restoring a game is
+     * a write like any other, and this page had none of it. */
+    antibot_check('form');
     $form['name']  = trim((string)$form['name']);
     $form['email'] = trim((string)$form['email']);
     // A blank or malformed time falls back to the game's existing slot, the
     // same way add_game.php falls back rather than rejecting the whole form.
     if (!is_valid_time($form['start_time'])) $form['start_time'] = $game['start_time'];
 
-    if (!consent_ok()) {
+    /* FIRST in the chain, not a separate statement before it: every branch
+     * below assigns $error, so a captcha failure set on its own line would be
+     * overwritten by the next check and the restore would go through. */
+    if (!captcha_verify('restore')) {
+        $error = t('error_captcha');
+    } elseif (!consent_ok()) {
         $error = t('gdpr_required');
     } elseif ($form['name'] === '') {
         $error = t('error_name_required');
@@ -79,5 +94,6 @@ tpl_render('bring_back', [
     'form'  => $form,
     'error' => $error,
     'csrf'  => csrf_field(),
+    'captcha' => captcha_html('restore'),
 ]);
 tpl_render('footer');

@@ -16,6 +16,8 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/verify.php';
+// captcha_html()/captcha_verify() for the optional challenge on the ask step.
+require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -53,7 +55,22 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     antibot_check('click');
-    if (!verify_passes($decision, 'player', $playerId, $player['email'], $_POST)) {
+
+    /* ASKING FOR A CODE is its own step, and the only thing here that sends
+     * mail. It ends the POST: the screen re-renders with the code box, and
+     * nothing is removed yet.
+     *
+     * Same reason as on delete_game.php — the remove-player control is an
+     * <a href>, so anything walking the site used to send a verification email
+     * to somebody who had clicked nothing. */
+    if (($_POST['choice'] ?? '') === 'send_code') {
+        if (captcha_verify('verify')) {
+            verify_send_code('player', $playerId, $player['email']);
+            verify_mark_requested('player', $playerId);
+        } else {
+            $error = t('error_captcha');
+        }
+    } elseif (!verify_passes($decision, 'player', $playerId, $player['email'], $_POST)) {
         $error = t('verify_failed');             // wrong/missing challenge -> re-show the form
     } else {
         $wasConfirmed = ((int)$player['is_reserve'] === 0);
@@ -79,11 +96,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     log_action('player_delete_attempt', $player['name'] . ' <- ' . $game['name']);
 }
-// GET (or failed POST): for email_code, (re)issue a code now so it's waiting
-// in the user's inbox when the confirm screen renders.
-if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    verify_send_code('player', $playerId, $player['email']);
-}
+/* NOTHING IS SENT HERE. This page used to email the code the moment the remove
+ * link was followed; GET is defined as SAFE and must not send anything. The
+ * code now goes out from the POST branch above, on the one choice that asks
+ * for it. */
 
 tpl_render('header', ['page_title' => t('delplayer_title')]);
 tpl_render('player_confirm', [
@@ -91,6 +107,9 @@ tpl_render('player_confirm', [
     'game'     => $game,
     'decision' => $decision,
     'error'    => $error,
-    'csrf'     => csrf_field(),
+    // Which half of the code path to render: ask for one, or take one.
+    'code_sent' => verify_code_requested('player', $playerId),
+    'captcha'   => captcha_html('verify'),
+    'csrf'      => csrf_field(),
 ]);
 tpl_render('footer');

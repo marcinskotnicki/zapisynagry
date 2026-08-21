@@ -192,9 +192,9 @@ if ($tokenQS === '' && public_archives_enabled()
                                         <?php // The way back is offered here rather than
                                               // inside the card, which is read-only. ?>
                                         <?php if (!$readonly): ?>
-                                            <a class="btn btn-small" href="bring_back.php?game=<?= (int)$item['data']['id'] ?>"><?= e(t('bringback_button')) ?></a>
+                                            <a class="btn btn-small" href="bring_back.php?game=<?= (int)$item['data']['id'] ?>" rel="nofollow"><?= e(t('bringback_button')) ?></a>
                                             <?php if (is_admin()): ?>
-                                                <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$item['data']['id'] ?>"><?= e(t('game_purge_button')) ?></a>
+                                                <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$item['data']['id'] ?>" rel="nofollow"><?= e(t('game_purge_button')) ?></a>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     </p>

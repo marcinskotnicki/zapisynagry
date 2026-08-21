@@ -32,16 +32,32 @@
                 <label for="vemail"><?= e(t('verify_email_label')) ?></label>
                 <input type="email" id="vemail" name="vemail" required autofocus>
             </div>
-        <?php elseif ($decision === 'email_code'): // enter the emailed code ?>
-            <p class="muted"><?= e(t('verify_code_sent')) ?></p>
-            <div class="field field-vcode">
-                <label for="vcode"><?= e(t('verify_code_label')) ?></label>
-                <input type="text" id="vcode" name="vcode" inputmode="numeric" required autofocus>
-            </div>
+        <?php elseif ($decision === 'email_code'): ?>
+            <?php if (empty($code_sent)): ?>
+                <?php /* STEP ONE: nothing sent yet. Arriving here must not email
+                       * anybody — following a link is not a decision, and a
+                       * crawler follows every link it finds. */ ?>
+                <p class="muted"><?= e(t('verify_code_intro')) ?></p>
+                <?= $captcha ?>
+            <?php else: ?>
+                <p class="muted"><?= e(t('verify_code_sent')) ?></p>
+                <div class="field field-vcode">
+                    <label for="vcode"><?= e(t('verify_code_label')) ?></label>
+                    <input type="text" id="vcode" name="vcode" inputmode="numeric" required autofocus>
+                </div>
+            <?php endif; ?>
         <?php endif; // 'allow' -> no challenge inputs, just the buttons ?>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-danger"><?= e(t('delplayer_yes')) ?></button>
+            <?php /* On step one the only way forward is asking for the code —
+                   * there is nothing to authorise the removal with yet. */ ?>
+            <?php if ($decision === 'email_code' && empty($code_sent)): ?>
+                <button type="submit" name="choice" value="send_code" class="btn btn-primary">
+                    <?= e(t('verify_code_send')) ?>
+                </button>
+            <?php else: ?>
+                <button type="submit" class="btn btn-danger"><?= e(t('delplayer_yes')) ?></button>
+            <?php endif; ?>
             <a class="btn" href="index.php"><?= e(t('delplayer_no')) ?></a>
         </div>
     </form>

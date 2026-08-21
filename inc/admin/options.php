@@ -120,6 +120,7 @@ $OPTION_TOGGLES = [
     'mailing_double_optin',
     'captcha_on_register', 'captcha_on_add_game', 'captcha_on_signup',
     'captcha_on_message', 'captcha_on_comment', 'captcha_on_mailing',
+    'captcha_on_verify', 'captcha_on_restore',
     'nav_hide_current',
     'require_login',
     'google_login', 'google_admin_autolink',

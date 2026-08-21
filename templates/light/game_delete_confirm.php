@@ -38,16 +38,34 @@ $purge = !empty($purge);
                 <label for="vemail"><?= e(t('verify_email_label')) ?></label>
                 <input type="email" id="vemail" name="vemail" required>
             </div>
-        <?php elseif ($decision === 'email_code'): // enter the emailed code ?>
-            <p class="muted"><?= e(t('verify_code_sent')) ?></p>
-            <div class="field field-vcode">
-                <label for="vcode"><?= e(t('verify_code_label')) ?></label>
-                <input type="text" id="vcode" name="vcode" inputmode="numeric" required>
-            </div>
+        <?php elseif ($decision === 'email_code'): ?>
+            <?php if (empty($code_sent)): ?>
+                <?php /* STEP ONE of the code path: nothing has been sent yet.
+                       * Reaching this page must not email anybody — following
+                       * a link is not a decision, and a crawler follows every
+                       * link it finds. The code goes out only when the button
+                       * below is pressed. */ ?>
+                <p class="muted"><?= e(t('verify_code_intro')) ?></p>
+                <?= $captcha ?>
+            <?php else: ?>
+                <p class="muted"><?= e(t('verify_code_sent')) ?></p>
+                <div class="field field-vcode">
+                    <label for="vcode"><?= e(t('verify_code_label')) ?></label>
+                    <input type="text" id="vcode" name="vcode" inputmode="numeric" required>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <div class="delgame-buttons">
             <button type="submit" name="choice" value="back" class="btn"><?= e(t('delgame_back')) ?></button>
+            <?php /* On step one the only way forward is asking for the code, so
+                   * the removal buttons are not offered yet — there is nothing
+                   * to authorise them with. */ ?>
+            <?php if ($decision === 'email_code' && empty($code_sent)): ?>
+                <button type="submit" name="choice" value="send_code" class="btn btn-primary">
+                    <?= e(t('verify_code_send')) ?>
+                </button>
+            <?php else: ?>
             <?php // Which removals are offered follows the admin's game_deletion
                   // setting. The controller enforces it too — a hidden button is
                   // not a restriction. An admin purging an ALREADY soft-deleted
@@ -60,6 +78,7 @@ $purge = !empty($purge);
             <?php endif; ?>
             <?php if ($canHard): ?>
                 <button type="submit" name="choice" value="everything" class="btn btn-danger"><?= e(t('delgame_everything')) ?></button>
+            <?php endif; ?>
             <?php endif; ?>
         </div>
     </form>

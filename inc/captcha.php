@@ -62,7 +62,7 @@ function captcha_required($context = null) {
  * @return array
  */
 function captcha_contexts() {
-    return ['register', 'add_game', 'signup', 'message', 'comment', 'mailing'];
+    return ['register', 'add_game', 'signup', 'message', 'comment', 'mailing', 'verify', 'restore'];
 }
 
 /**

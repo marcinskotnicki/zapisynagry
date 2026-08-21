@@ -22,6 +22,7 @@
 
     <form method="post" action="bring_back.php?game=<?= (int)$game['id'] ?>">
         <?= $csrf ?>
+        <?= antibot_field() ?>
         <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
 
         <div class="field field-name">
@@ -48,6 +49,7 @@
         <?php // Consent, when the admin configured wording and this is a guest. ?>
         <?= consent_field() ?>
         <div class="form-actions">
+            <?= $captcha ?>
             <button type="submit" class="btn btn-primary"><?= e(t('bringback_submit')) ?></button>
             <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
         </div>

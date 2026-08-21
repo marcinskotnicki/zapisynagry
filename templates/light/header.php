@@ -29,6 +29,16 @@ $page_title = $page_title ?? t('app_name');
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php /* KEEP CRAWLERS OUT. A club's sign-up board has nothing anybody
+           * searches for, and every delete, edit and vote control is a URL — a
+           * crawler walking them sends verification emails to members who
+           * never clicked anything.
+           *
+           * robots.txt asks; this tells a crawler that fetched the page
+           * anyway, and "nofollow" stops it walking outward from here. Belt
+           * and braces, because the two are honoured by different crawlers to
+           * different degrees and neither binds anything malicious. */ ?>
+    <meta name="robots" content="noindex, nofollow">
     <title><?= e($page_title) ?> — <?= e(opt('venue_name') ?: t('app_name')) ?></title>
     <?php
     // Site icon links, only when the admin uploaded one (Thumbnails tab). The

@@ -37,9 +37,9 @@
             <div class="gc-band gc-row"><?= e(t('game_archived_note')) ?></div>
             <?php if (!$readonly): ?>
                 <div class="gc-band">
-                    <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>"><?= e(t('bringback_button')) ?></a>
+                    <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('bringback_button')) ?></a>
                     <?php if (is_admin()): ?>
-                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('game_purge_button')) ?></a>
+                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('game_purge_button')) ?></a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -70,13 +70,13 @@
         <div class="gc-info">
             <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): ?>
                 <div class="gc-tabs">
-                    <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
-                    <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
+                    <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
+                    <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
                     <?php // Admin-only: move this game to another table on the same day.
                           // Guarded again server-side in move_item.php — hiding a button
                           // is a UI courtesy, not a permission check. ?>
                     <?php if (is_admin()): ?>
-                        <a class="gc-tab" href="move_item.php?game=<?= (int)$g['id'] ?>"><?= e(t('move_btn')) ?></a>
+                        <a class="gc-tab" href="move_item.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('move_btn')) ?></a>
                     <?php endif; ?>
                     <?php if ($canMsg): ?>
                         <a class="msg-icon msg-icon-all" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msgbtn_game_all')) ?>" aria-label="<?= e(t('msgbtn_game_all')) ?>">&#9993;</a>
@@ -185,7 +185,7 @@
                             <span class="p-signedby"><?= e(t('player_signed_by', $signedBy)) ?></span>
                         <?php endif; ?>
                         <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
+                            <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                         <?php endif; ?>
                     </div>
                 <?php else: // an empty berth ?>
@@ -208,7 +208,7 @@
                         <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>
                     <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                        <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>"><?= e(t('delete')) ?></a>
+                        <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>

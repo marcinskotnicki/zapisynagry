@@ -20,6 +20,8 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/verify.php';
+// captcha_html()/captcha_verify() for the optional challenge on the ask step.
+require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -48,10 +50,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $choice = $_POST['choice'] ?? 'back';
 
     if ($choice === 'back') {
+        verify_clear_requested('poll', $pollId);   // forget any code step in progress
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));       // bail out, no challenge needed
     }
     antibot_check('click');
-    if (!verify_passes($decision, 'poll', $pollId, $poll['proposer_email'], $_POST)) {
+
+    /* ASKING FOR A CODE is its own step, and the only thing here that sends
+     * mail. It ends the POST: the screen re-renders with the code box and
+     * nothing is deleted. Same reason as the other two — the delete control is
+     * an <a href>, so anything walking the site used to send a verification
+     * email to somebody who had clicked nothing. */
+    if ($choice === 'send_code') {
+        if (captcha_verify('verify')) {
+            verify_send_code('poll', $pollId, $poll['proposer_email']);
+            verify_mark_requested('poll', $pollId);
+        } else {
+            $error = t('error_captcha');
+        }
+    } elseif (!verify_passes($decision, 'poll', $pollId, $poll['proposer_email'], $_POST)) {
         $error = t('verify_failed');                    // failed challenge -> re-show confirm
     } elseif ($choice === 'everything') {
         notify_poll_deleted($poll);                     // before the cascade loses the voters
@@ -73,15 +89,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     log_action('poll_delete_attempt', 'Poll #' . $pollId);
 }
-if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    verify_send_code('poll', $pollId, $poll['proposer_email']);
-}
+/* NOTHING IS SENT HERE. GET is defined as SAFE: it must not send anything. The
+ * code goes out from the POST branch above, on the one choice that asks. */
 
 tpl_render('header', ['page_title' => t('delpoll_title')]);
 tpl_render('poll_delete_confirm', [
     'poll'     => $poll,
     'decision' => $decision,
     'error'    => $error,
-    'csrf'     => csrf_field(),
+    // Which half of the code path to render: ask for one, or take one.
+    'code_sent' => verify_code_requested('poll', $pollId),
+    'captcha'   => captcha_html('verify'),
+    'csrf'      => csrf_field(),
 ]);
 tpl_render('footer');

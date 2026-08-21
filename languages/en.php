@@ -666,6 +666,8 @@ return [
     'verify_email_label'  => 'Enter the email you used',
     'verify_code_label'   => 'Enter the 6-digit code',
     'verify_code_sent'    => 'We sent a code to the email on file.',
+    'verify_code_intro'           => 'To confirm this is you, we can email a short code to the address on this entry.',
+    'verify_code_send'            => 'Email me a code',
     'verify_failed'       => 'Verification failed.',
     'verify_email_subject'=> 'Your verification code',
     'verify_email_body'   => "Your verification code is: %s\n\nIt expires in 30 minutes.",

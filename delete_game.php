@@ -19,6 +19,9 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/verify.php';
+// captcha_html()/captcha_verify(): the optional challenge on the step that
+// asks for a code. Loaded here because that step lives on this page.
+require __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -58,9 +61,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $choice = $_POST['choice'] ?? 'back';
 
     if ($choice === 'back') {
-        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));          // bail out, no challenge needed
+        // Bail out, no challenge needed — and forget any code step in progress.
+        verify_clear_requested('game', $gameId);
+        redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
     antibot_check('click');
+
+    /* ASKING FOR A CODE is its own step, and the ONLY thing that sends mail.
+     *
+     * It ends the POST here rather than falling through — everything below is
+     * the deletion itself, and this step has not asked for one yet. A captcha
+     * can be put in front of it, which is worth having only for a site being
+     * walked by something that ignores robots.txt, hence off by default. */
+    if ($choice === 'send_code') {
+        if (captcha_verify('verify')) {
+            verify_send_code('game', $gameId, $game['brings_email']);
+            verify_mark_requested('game', $gameId);
+        } else {
+            $error = t('error_captcha');
+        }
+        $sendStep = true;   // skip the deletion below; render the next screen
+    }
+
+    /* Everything from here is the deletion itself, and only runs when this POST
+     * was asking for one. Guarded as a block rather than condition by
+     * condition: the challenge check below would otherwise run for a request
+     * that has not been challenged yet and report a failure that did not
+     * happen. */
+    if (empty($sendStep)) {
+
     // The admin's game_deletion setting decides which choices exist at all.
     // Applied HERE rather than only by hiding buttons, since a posted choice is
     // just a form field. An admin purging an already-soft-deleted game is
@@ -93,6 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_action('game_delete', $game['name']);
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
+
+    }   // end: this POST was asking for a deletion
 }
 
 // GET = the delete button was clicked: leave a trace right away, so even an
@@ -101,10 +132,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     log_action('game_delete_attempt', $game['name']);
 }
-// GET (or failed POST): issue a code if needed, then render the confirm screen.
-if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    verify_send_code('game', $gameId, $game['brings_email']);
-}
+/* NO EMAIL ON A GET, which is why nothing is sent here.
+ *
+ * This page used to mail the code the moment the delete link was followed —
+ * and that link is an <a href>, so anything walking the site sent a
+ * verification email to a member who had clicked nothing. A crawler cannot
+ * finish the deletion, but it never needed to in order to be a nuisance.
+ *
+ * GET is defined as SAFE: it must not change or send anything. The first screen
+ * now only asks; the code goes out from the POST handler above, on the one
+ * branch that requests it, after CSRF, the timing/honeypot check and (if a club
+ * switched it on) a captcha. */
 
 tpl_render('header', ['page_title' => t('delgame_title')]);
 tpl_render('game_delete_confirm', [
@@ -112,6 +150,11 @@ tpl_render('game_delete_confirm', [
     'mode'     => game_deletion_mode(),
     'game'     => $game,
     'decision' => $decision,
+    /* Which half of the email-code path to show: ask for a code, or take one.
+     * Session-backed, so an expired code puts somebody back on the first step
+     * rather than at a box they can no longer satisfy. */
+    'code_sent' => verify_code_requested('game', $gameId),
+    'captcha'   => captcha_html('verify'),
     'error'    => $error,
     'purge'    => $purge,      // archived game -> only back / delete-everything buttons
     'csrf'     => csrf_field(),

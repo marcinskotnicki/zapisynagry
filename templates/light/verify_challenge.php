@@ -24,6 +24,9 @@
     <?php endif; ?>
 
     <form method="post" action="<?= e($action) ?>">
+        <?php // The gate had CSRF only; this is the timing/honeypot pair every
+              // other public form carries. ?>
+        <?= antibot_field() ?>
         <?= $csrf ?>
         <input type="hidden" name="action" value="verify">
 
@@ -34,14 +37,29 @@
             </div>
         <?php elseif ($decision === 'email_code'): // enter the emailed code ?>
             <p class="muted"><?= e(t('verify_code_sent')) ?></p>
-            <div class="field field-vcode">
-                <label for="vcode"><?= e(t('verify_code_label')) ?></label>
-                <input type="text" id="vcode" name="vcode" inputmode="numeric" required autofocus>
-            </div>
+            <?php if (empty($code_sent)): ?>
+                <?php /* STEP ONE: nothing has been emailed yet. Reaching this
+                       * gate must not send anything — it is reached by
+                       * following a link, and a crawler follows every link it
+                       * finds. */ ?>
+                <p class="muted"><?= e(t('verify_code_intro')) ?></p>
+                <?= $captcha ?? '' ?>
+            <?php else: ?>
+                <div class="field field-vcode">
+                    <label for="vcode"><?= e(t('verify_code_label')) ?></label>
+                    <input type="text" id="vcode" name="vcode" inputmode="numeric" required autofocus>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><?= e(t('verify_continue')) ?></button>
+            <?php if (($decision ?? '') === 'email_code' && empty($code_sent)): ?>
+                <button type="submit" name="choice" value="send_code" class="btn btn-primary">
+                    <?= e(t('verify_code_send')) ?>
+                </button>
+            <?php else: ?>
+                <button type="submit" class="btn btn-primary"><?= e(t('verify_continue')) ?></button>
+            <?php endif; ?>
             <a class="btn" href="index.php"><?= e(t('cancel')) ?></a>
         </div>
     </form>

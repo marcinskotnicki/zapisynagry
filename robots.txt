@@ -1,0 +1,32 @@
+# A sign-up board for one club's events. There is nothing here worth finding in
+# a search engine, and plenty worth NOT having crawled: every delete, edit and
+# vote link is a URL, and a crawler following them makes work for people —
+# verification emails sent to members who never clicked anything.
+#
+# Disallow: / covers the lot. The specific rules below are redundant against a
+# crawler that honours the first line, and are spelled out for one that only
+# reads the parts it likes.
+User-agent: *
+Disallow: /
+
+Disallow: /delete_game.php
+Disallow: /delete_player.php
+Disallow: /delete_poll.php
+Disallow: /edit_game.php
+Disallow: /edit_poll.php
+Disallow: /end_poll.php
+Disallow: /vote.php
+Disallow: /bring_back.php
+Disallow: /move_item.php
+Disallow: /sign_up.php
+Disallow: /add_game.php
+Disallow: /add_poll.php
+Disallow: /add_poll_game.php
+Disallow: /add_comment.php
+Disallow: /message.php
+Disallow: /admin.php
+Disallow: /user.php
+Disallow: /my_library.php
+Disallow: /google_auth.php
+Disallow: /verify.php
+Disallow: /unsubscribe.php

@@ -205,6 +205,16 @@ INSERT INTO options (key, value) VALUES
     ('captcha_on_message',    '1'),
     ('captcha_on_comment',    '1'),
     ('captcha_on_mailing',    '1'),
+    -- On the "are you sure?" step, BEFORE a verification code is emailed.
+    -- OFF by default, unlike the others: this one stands in front of an action
+    -- somebody has already clicked through to, and most clubs will not need it.
+    -- Worth having for a site being walked by something that ignores robots.txt.
+    ('captcha_on_verify',     '0'),
+    -- Bringing a soft-deleted game back. Its own switch rather than sharing the
+    -- add_game one: adding is a stranger creating something, restoring is
+    -- somebody undoing a removal on an entry that already exists, and a club
+    -- may reasonably want a challenge on one and not the other.
+    ('captcha_on_restore',    '1'),
     ('google_login',          '0'),
     ('google_client_id',      ''),
     ('google_client_secret',  ''),

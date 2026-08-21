@@ -117,6 +117,47 @@ function verify_check_email($storedEmail, $inputEmail) {
  * --------------------------------------------------------------------------- */
 
 /**
+ * Has a code already been asked for, for this target, in this session?
+ *
+ * The confirm screen has two shapes: "email me a code", and "type the code".
+ * This says which to render.
+ *
+ * Kept in the SESSION rather than inferred from the code row, because a code
+ * that was issued and has since expired should put somebody back on the first
+ * step rather than at a box they can no longer satisfy.
+ *
+ * @param string $targetType
+ * @param int    $targetId
+ * @return bool
+ */
+function verify_code_requested($targetType, $targetId) {
+    return !empty($_SESSION['verify_requested'][$targetType . ':' . (int)$targetId]);
+}
+
+/**
+ * Remember that this visitor asked for a code.
+ *
+ * @param string $targetType
+ * @param int    $targetId
+ * @return void
+ */
+function verify_mark_requested($targetType, $targetId) {
+    $_SESSION['verify_requested'][$targetType . ':' . (int)$targetId] = true;
+}
+
+/**
+ * Forget it — the code was used, or they backed out.
+ *
+ * @param string $targetType
+ * @param int    $targetId
+ * @return void
+ */
+function verify_clear_requested($targetType, $targetId) {
+    unset($_SESSION['verify_requested'][$targetType . ':' . (int)$targetId]);
+}
+
+
+/**
  * Generate, store, and email a 6-digit code for a target. Returns the code.
  *
  * Deletes any earlier codes for the same target first, so only the most recent

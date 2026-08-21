@@ -658,6 +658,8 @@ return [
     'verify_email_label'  => 'Podaj e-mail, którego użyłeś',
     'verify_code_label'   => 'Podaj 6-cyfrowy kod',
     'verify_code_sent'    => 'Wysłaliśmy kod na zapisany adres e-mail.',
+    'verify_code_intro'           => 'Żeby potwierdzić, że to Ty, możemy wysłać krótki kod na adres podany przy tym wpisie.',
+    'verify_code_send'            => 'Wyślij mi kod',
     'verify_failed'       => 'Weryfikacja nie powiodła się.',
     'verify_email_subject'=> 'Twój kod weryfikacyjny',
     'verify_email_body'   => "Twój kod weryfikacyjny to: %s\n\nWygasa za 30 minut.",

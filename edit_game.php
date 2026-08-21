@@ -20,6 +20,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -55,6 +56,16 @@ $error = null;
 /* ---- Challenge submission (gate) ----------------------------------------- */
 if (($_POST['action'] ?? '') === 'verify' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    antibot_check('form');
+    /* ASKING FOR A CODE is its own step and the only thing that sends mail. */
+    if (($_POST['choice'] ?? '') === 'send_code') {
+        if (captcha_verify('verify')) {
+            verify_send_code('game', $gameId, $game['brings_email']);
+            verify_mark_requested('game', $gameId);
+        } else {
+            $error = t('error_captcha');
+        }
+    } else
     if (verify_passes($decision, 'game', $gameId, $game['brings_email'], $_POST)) {
         $_SESSION['edit_ok'][$gameId] = true;   // remember success for this game
         $unlocked = true;
@@ -132,15 +143,17 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
 /* ---- Render -------------------------------------------------------------- */
 // Needs a challenge and not yet unlocked -> show the challenge gate.
 if (!$unlocked) {
-    if ($decision === 'email_code' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        verify_send_code('game', $gameId, $game['brings_email']);   // email the code on first view
-    }
+    /* NOTHING SENT ON A GET: the gate is reached by following a link, and a
+     * crawler follows every link. The code goes out from the gate POST that
+     * asks for it — see the 'send_code' branch above. */
     tpl_render('header', ['page_title' => t('editgame_title')]);
     tpl_render('verify_challenge', [
         'decision' => $decision,
         'action'   => 'edit_game.php?game=' . $gameId,   // the gate posts back here
         'title'    => t('editgame_title'),
         'error'    => $error,
+        'code_sent' => verify_code_requested('game', $gameId),
+        'captcha'   => captcha_html('verify'),
         'csrf'     => csrf_field(),
     ]);
     tpl_render('footer');
