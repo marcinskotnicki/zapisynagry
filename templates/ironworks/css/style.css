@@ -377,6 +377,8 @@ body.tpl-ironworks {
     border-radius: 2px;
 }
 .tpl-ironworks .poll-option { background: rgba(233, 223, 198, .05); border-color: rgba(233, 223, 198, .12); }
+.tpl-ironworks .poll-opt-voters { color: var(--parchment-3); }
+.tpl-ironworks .poll-opt-voters-label { color: var(--parchment-2); }
 .tpl-ironworks .poll-opt-name { color: var(--parchment); }
 .tpl-ironworks .poll-opt-bar { background: rgba(0, 0, 0, .45); }
 .tpl-ironworks .poll-opt-bar > span { background: var(--brass); }
@@ -467,14 +469,6 @@ body.tpl-ironworks {
 .tpl-ironworks .admin .tab:hover, .tpl-ironworks .admin .tab.tab-active { color: var(--text); }
 .tpl-ironworks .grid th { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .tpl-ironworks .tl-slot { border-radius: 2px; }
-
-.tpl-ironworks .poll-card> <.game-comment{
-    color:var(--parchment-3);
-}
-.tpl-ironworks .poll-opt-voters{
-    color:var(--parchment-3);
-}
-
 
 
 @media (max-width: 860px) {

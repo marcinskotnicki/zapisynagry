@@ -520,8 +520,6 @@ body.tpl-imperial {
 
 .tpl-imperial .event-msg{background: var(--surface-2); color: var(--iron);}
 
-
-
 @media (min-width: 701px) {
     .tpl-imperial .game-list > article { width: 580px; }
 }

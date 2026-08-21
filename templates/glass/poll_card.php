@@ -90,6 +90,16 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
             </div>
         <?php endif; ?>
 
+        <?php /* The proposer's own note about the poll. Every other card shows
+               * it; these three forks simply never rendered it, so a proposer
+               * explaining what the vote was about was writing into nothing.
+               *
+               * ABOVE the candidates, as on the light card: it is context for
+               * the choice, not a footnote to it. */ ?>
+        <?php if (!empty($poll['comment'])): ?>
+            <p class="game-comment"><?= nl2br(e($poll['comment'])) ?></p>
+        <?php endif; ?>
+
         <?php // ---- Candidates as side-by-side modules ---- ?>
         <ul class="poll-options sc-modules">
             <?php foreach ($poll['games'] as $c):
