@@ -41,9 +41,9 @@
             <p class="muted"><?= e(t('game_archived_note')) ?></p>
             <?php if (!$readonly): ?>
                 <div class="bl-actions">
-                    <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>"><?= e(t('bringback_button')) ?></a>
+                    <a class="btn btn-small" href="bring_back.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('bringback_button')) ?></a>
                     <?php if (is_admin()): ?>
-                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('game_purge_button')) ?></a>
+                        <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('game_purge_button')) ?></a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -115,7 +115,7 @@
                                     <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                                 <?php endif; ?>
                                 <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
-                                    <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>">&times;</a>
+                                    <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                                 <?php endif; ?>
                                 <?php $signedBy = player_signed_up_by($p);
                                     if ($signedBy !== ''): ?>
@@ -165,13 +165,13 @@
                   // this game" rather than as part of the picture. ?>
             <?php if ($canButtons): ?>
                 <div class="bl-actions">
-                    <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('edit')) ?></a>
+                    <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
                     <?php // Re-checked server-side in move_item.php — hiding a button
                           // is a courtesy, not a permission check. ?>
                     <?php if (is_admin()): ?>
-                        <a class="btn btn-small" href="move_item.php?game=<?= (int)$g['id'] ?>"><?= e(t('move_btn')) ?></a>
+                        <a class="btn btn-small" href="move_item.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('move_btn')) ?></a>
                     <?php endif; ?>
-                    <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>"><?= e(t('delete')) ?></a>
+                    <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                 </div>
             <?php endif; ?>
         </div>
