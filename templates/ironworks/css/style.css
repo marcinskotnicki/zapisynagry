@@ -473,7 +473,12 @@ body.tpl-ironworks {
 .tpl-ironworks .poll-card>.game-comment{
     color:var(--parchment-3);
 }
-
+@media (min-width: 1201px) {
+    .tpl-ironworks .game-card,
+    .tpl-ironworks .poll-card{
+            flex-basis: 45%;
+    }
+}
 
 @media (max-width: 860px) {
     .tpl-ironworks .game-list { gap: 1.6rem; }
