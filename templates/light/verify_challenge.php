@@ -35,16 +35,20 @@
                 <label for="vemail"><?= e(t('verify_email_label')) ?></label>
                 <input type="email" id="vemail" name="vemail" required autofocus>
             </div>
-        <?php elseif ($decision === 'email_code'): // enter the emailed code ?>
-            <p class="muted"><?= e(t('verify_code_sent')) ?></p>
+        <?php elseif ($decision === 'email_code'): ?>
             <?php if (empty($code_sent)): ?>
                 <?php /* STEP ONE: nothing has been emailed yet. Reaching this
                        * gate must not send anything — it is reached by
                        * following a link, and a crawler follows every link it
-                       * finds. */ ?>
+                       * finds.
+                       *
+                       * "We have sent a code" belongs to the step BELOW, not
+                       * here: printing it before anything was sent told people
+                       * to go and look for mail that did not exist. */ ?>
                 <p class="muted"><?= e(t('verify_code_intro')) ?></p>
                 <?= $captcha ?? '' ?>
             <?php else: ?>
+                <p class="muted"><?= e(t('verify_code_sent')) ?></p>
                 <div class="field field-vcode">
                     <label for="vcode"><?= e(t('verify_code_label')) ?></label>
                     <input type="text" id="vcode" name="vcode" inputmode="numeric" required autofocus>
