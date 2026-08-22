@@ -168,7 +168,12 @@ function poll_resolve_candidate($poll, $cand) {
                  * special case in fourteen forked templates: it reads as
                  * "Poll results: Aura — 2", which is what it is. */
                 db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
-                       [$gameId, t('poll_results_heading'), null, implode("\n", $lines)]);
+                /* LEADING NEWLINE so the heading gets a line to itself. The
+                 * templates print the commenter name, then the body on the
+                 * same line — fine for a one-line remark, but here it ran the
+                 * first result straight on from "Poll results:". nl2br() turns
+                 * this into the break. */
+                       [$gameId, t('poll_results_heading'), null, "\n" . implode("\n", $lines)]);
             }
         }
 
