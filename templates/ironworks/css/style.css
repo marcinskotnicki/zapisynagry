@@ -475,7 +475,8 @@ body.tpl-ironworks {
 }
 
 .tpl-ironworks .gc-waga strong{
-    text-shadow:1px 1px 1px rgba(0,0,0,0.8), -1px 1px 3px rgba(0,0,0,0.4);
+    /*text-shadow:1px 1px 1px rgba(0,0,0,0.8), -1px 1px 3px rgba(0,0,0,0.4);*/
+    color:#1a1508;
 }
 
 @media (min-width: 1201px) {
