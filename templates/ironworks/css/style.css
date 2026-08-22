@@ -473,6 +473,11 @@ body.tpl-ironworks {
 .tpl-ironworks .poll-card>.game-comment{
     color:var(--parchment-3);
 }
+
+.tpl-ironworks .gc-waga strong{
+    text-shadow:1px 1px 1px rgba(0,0,0,0.8), -1px 1px 3px rgba(0,0,0,0.4);
+}
+
 @media (min-width: 1201px) {
     .tpl-ironworks .game-card,
     .tpl-ironworks .poll-card{
