@@ -1066,13 +1066,21 @@ function timeline_build($dayRow, $tables, $extHours) {
             $ge = $gs + max(1, (int)$g['length_minutes']); // ensure non-zero width
             if ($ge > $endMin)   $endMin   = $ge;          // stretch to fit overruns
             if ($gs < $startMin) $startMin = $gs;          // pre-opening (grace) item
-            // "current players" = confirmed only (reserves don't occupy a seat).
-            $cur = 0;
-            foreach ($g['players'] as $p) { if ((int)$p['is_reserve'] === 0) $cur++; }
+            /* EVERYONE SIGNED UP, reserves included — the timeline is a glance
+             * at how busy a table is, and somebody waiting on the reserve list
+             * is still a person expecting to play. A game showing 5/4 is
+             * telling you exactly what it should: it is over-subscribed.
+             *
+             * The reserve count travels separately so the view can say WHY the
+             * number exceeds the maximum, rather than looking like an error. */
+            $cur = count($g['players']);
+            $reserves = 0;
+            foreach ($g['players'] as $p) { if ((int)$p['is_reserve'] === 1) $reserves++; }
             $games[] = [
                 'type' => 'game',
                 'id' => (int)$g['id'], 'name' => $g['name'], 'start_time' => $g['start_time'],
                 'start' => $gs, 'end' => $ge, 'cur' => $cur, 'max' => (int)$g['max_players'],
+                'reserves' => $reserves,
             ];
             $hasGames = true;
         }
@@ -1131,6 +1139,8 @@ function timeline_build($dayRow, $tables, $extHours) {
                 'id' => $g['id'], 'name' => $g['name'], 'start_time' => $g['start_time'],
                 'cur' => $g['cur'], 'max' => $g['max'],
                 'full' => ($g['max'] > 0 && $g['cur'] >= $g['max']),
+                // Somebody is queueing: worth marking apart from merely full.
+                'reserves' => (int)($g['reserves'] ?? 0),
                 'left'  => round(max(0, ($g['start'] - $startMin) / $total * 100), 3),
                 'width' => round(max(0.5, ($g['end'] - $g['start']) / $total * 100), 3),
             ];

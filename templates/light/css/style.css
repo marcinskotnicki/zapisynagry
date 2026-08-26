@@ -426,6 +426,7 @@ html { scroll-behavior: smooth; }
 .tl-name { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tl-sub { display: block; font-size: 0.72rem; opacity: 0.9; }
 .tl-count-full { color: #ffd5d0; font-weight: 700; }
+.tl-count-reserve { color: #ffd5d0; font-weight: 700; }
 .tl-game { }
 
 .game-name-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }

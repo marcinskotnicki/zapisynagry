@@ -59,7 +59,7 @@
                                    style="left:<?= $b['left'] ?>%;width:<?= $b['width'] ?>%">
                                     <span class="tl-name"><?= e($b['name']) ?></span>
                                     <span class="tl-sub"><?= e($b['start_time']) ?>,
-                                        <span class="tl-count<?= $b['full'] ? ' tl-count-full' : '' ?>"><?= (int)$b['cur'] ?>/<?= (int)$b['max'] ?></span>
+                                        <span class="tl-count<?= $b['full'] ? ' tl-count-full' : '' ?><?= !empty($b['reserves']) ? ' tl-count-reserve' : '' ?>"><?= (int)$b['cur'] ?>/<?= (int)$b['max'] ?></span>
                                     </span>
                                 </a>
                             <?php endif; ?>
