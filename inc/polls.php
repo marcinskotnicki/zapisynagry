@@ -347,6 +347,78 @@ function poll_full($pollRow) {
 }
 
 /* =============================================================================
+ *  POLL LENGTH — how long an OPEN poll should be treated as running.
+ * -----------------------------------------------------------------------------
+ *  Nobody knows which candidate will win until the poll resolves, so its
+ *  "length" is always an estimate. Governed by the poll_game_length_mode admin
+ *  setting and used in exactly two places: the timeline block width
+ *  (timeline_build(), inc/events.php) and the "next free slot" a subsequent
+ *  game/poll on the same table is pre-filled with (event_next_start_time(),
+ *  inc/events.php).
+ *
+ *  Deliberately NOT cached anywhere (not on the polls row, not in session): it
+ *  is recomputed from the current candidate list on every call, so a candidate
+ *  added or removed after the poll was created is reflected on the very next
+ *  read, with nothing to invalidate.
+ * ============================================================================= */
+
+/** The length modes an admin may choose between, in the order offered. */
+function poll_game_length_modes() {
+    return ['fixed', 'max', 'avg'];
+}
+
+/**
+ * The configured mode, defaulting (and falling back on a bad stored value) to
+ * 'fixed' — the flat 120-minute estimate this app used unconditionally before
+ * the setting existed.
+ * @return string 'fixed'|'max'|'avg'
+ */
+function poll_game_length_mode() {
+    $m = trim((string)opt('poll_game_length_mode'));
+    return in_array($m, poll_game_length_modes(), true) ? $m : 'fixed';
+}
+
+/**
+ * The candidate lengths that count toward a poll's computed length: only ones
+ * whose length_minutes has actually been set. That column defaults to 60 but,
+ * same as a real game's, can be cleared to 0 to mean "length unknown" — the
+ * poll card already hides a candidate's length under that same condition (see
+ * templates/light/poll_card.php).
+ *
+ * @param array $pollGames  poll_games rows (or anything with a length_minutes key).
+ * @return int[]
+ */
+function poll_candidate_known_lengths($pollGames) {
+    $out = [];
+    foreach ($pollGames as $g) {
+        $len = (int)($g['length_minutes'] ?? 0);
+        if ($len > 0) $out[] = $len;
+    }
+    return $out;
+}
+
+/**
+ * The poll's estimated length in minutes, per poll_game_length_mode():
+ *   fixed -> always 120.
+ *   max   -> the longest known candidate length.
+ *   avg   -> the average known candidate length, rounded to the nearest minute.
+ * max/avg both fall back to 120 when there are no candidates yet, or none of
+ * them have a length set — the same default 'fixed' always uses, so an empty
+ * poll behaves identically regardless of which mode is configured.
+ *
+ * @param array $pollGames  The poll's candidates (poll_full()'s ['games'], or
+ *                          a plain SELECT of poll_games for that poll id).
+ * @return int
+ */
+function poll_length_minutes($pollGames) {
+    $mode = poll_game_length_mode();
+    if ($mode === 'fixed') return 120;
+    $lens = poll_candidate_known_lengths($pollGames);
+    if (!$lens) return 120;
+    return $mode === 'max' ? max($lens) : (int)round(array_sum($lens) / count($lens));
+}
+
+/* =============================================================================
  *  DEADLINE RESOLUTION — polls that must conclude even without a full table.
  * -----------------------------------------------------------------------------
  *  Each poll may carry a `deadline` ('Y-m-d H:i:s', server time), computed at

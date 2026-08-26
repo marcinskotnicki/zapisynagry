@@ -22,6 +22,7 @@ require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in t
 require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the update-source field
 require_once __DIR__ . '/../events.php';    // day_tab_formats(), for the tab-layout picker
 require_once __DIR__ . '/../htaccess.php'; // the managed HTTPS-redirect block
+require_once __DIR__ . '/../polls.php';    // poll_game_length_modes()/poll_game_length_mode(), for that select
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -43,7 +44,7 @@ $OPTION_VALUES = [
     'captcha_site_key', 'captcha_version', 'captcha_v3_threshold',
     'timeline_extension',
     'game_languages',
-    'poll_default_deadline_hours', 'login_days',
+    'poll_default_deadline_hours', 'poll_game_length_mode', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
     'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
@@ -288,6 +289,9 @@ function option_sanitize($key, $val) {
             break;
         case 'game_deletion':
             if (!in_array($val, game_deletion_modes(), true)) return null;
+            break;
+        case 'poll_game_length_mode':
+            if (!in_array($val, poll_game_length_modes(), true)) return null;
             break;
         case 'deleted_games_display':
             if (!in_array($val, deleted_games_displays(), true)) return null;

@@ -148,6 +148,22 @@ $groupEnd = function () { echo '</div></details>'; };
         $textarea('game_languages');              // one dropdown choice per line
         $toggle('allow_polls');
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
+        ?>
+        <?php // How long an OPEN poll is treated as running, on the timeline and for
+              // "next free slot" on its table — nobody knows the winner yet, so this
+              // is always an estimate. See poll_length_minutes(). ?>
+        <div class="field">
+            <label for="poll_game_length_mode"><?= e(t('opt_poll_game_length_mode')) ?></label>
+            <select id="poll_game_length_mode" name="poll_game_length_mode">
+                <?php foreach (poll_game_length_modes() as $plm): ?>
+                    <option value="<?= e($plm) ?>"<?= poll_game_length_mode() === $plm ? ' selected' : '' ?>>
+                        <?= e(t('opt_poll_game_length_mode_' . $plm)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_poll_game_length_mode_note')) ?></p>
+        </div>
+        <?php
         $toggle('allow_discussions');
         ?>
         <?php // This one changes an INVARIANT, not just a view: with it off the

@@ -500,29 +500,51 @@ function event_table_count($dayId) {
 }
 
 /**
- * Default start time for a new game on a table: the day's start if the table is
- * empty, otherwise the latest game END on the day's clock (day_rel_min, so
- * after-midnight games count as latest, and a long earlier game that ends last
+ * Default start time for a new game (or poll) on a table: the day's start if
+ * the table has nothing on it yet, otherwise the latest END on the day's clock
+ * of everything already there — games AND open polls alike (day_rel_min, so
+ * after-midnight items count as latest, and a long earlier item that ends last
  * wins over a later short one). Returns 'HH:MM', wrapped past midnight so the
- * form's time input can display it. Lets the add-game form pre-fill a sensible
- * "next slot" so games line up.
+ * form's time input can display it. Lets the add-game/add-poll forms pre-fill
+ * a sensible "next slot" so the table's schedule lines up.
+ *
+ * A poll's own "end" is an ESTIMATE (see poll_length_minutes()) — nobody knows
+ * which candidate will win yet — so a club running poll_game_length_mode=fixed
+ * gets a flat 2h reservation after any open poll, while max/avg modes derive it
+ * from whatever candidates have been added to that poll so far.
  *
  * @param int    $tableId
- * @param string $dayStart  'HH:MM' fallback for an empty table.
+ * @param string $dayStart  'HH:MM' fallback for a table with nothing on it.
  * @return string
  */
 function event_next_start_time($tableId, $dayStart) {
-    // Latest game ON THE DAY'S CLOCK: a plain ORDER BY start_time would put a
-    // '00:30' after-midnight game first, not last, so pick the max via
-    // day_rel_min in PHP instead (tables hold a handful of games at most).
+    // Latest item ON THE DAY'S CLOCK: a plain ORDER BY start_time would put a
+    // '00:30' after-midnight item first, not last, so pick the max via
+    // day_rel_min in PHP instead (tables hold a handful of items at most).
     $dayStartMin = hhmm_to_min($dayStart);
+    $lastEnd = null;                                   // null = nothing on this table yet
+
     $rows = db_all('SELECT start_time, length_minutes FROM games WHERE table_id = ?', [$tableId]);
-    if (!$rows) return $dayStart;
-    $lastEnd = 0;
     foreach ($rows as $r) {
         $end = day_rel_min($r['start_time'], $dayStartMin) + (int)$r['length_minutes'];
-        if ($end > $lastEnd) $lastEnd = $end;
+        if ($lastEnd === null || $end > $lastEnd) $lastEnd = $end;
     }
+
+    // Open polls on the table reserve their estimated length too. Skipped
+    // entirely when polls are switched off, same as event_tables_full()'s own
+    // guard — nothing to add if the feature is off. Lazily required: several
+    // callers of this function (e.g. add_game.php) never load inc/polls.php
+    // themselves.
+    if (opt_bool('allow_polls')) {
+        require_once __DIR__ . '/polls.php';
+        foreach (db_all('SELECT id, start_time FROM polls WHERE table_id = ?', [$tableId]) as $p) {
+            $cands = db_all('SELECT length_minutes FROM poll_games WHERE poll_id = ?', [$p['id']]);
+            $end = day_rel_min($p['start_time'], $dayStartMin) + poll_length_minutes($cands);
+            if ($lastEnd === null || $end > $lastEnd) $lastEnd = $end;
+        }
+    }
+
+    if ($lastEnd === null) return $dayStart;           // table has nothing on it yet
     // Wrap past midnight for display ('25:30' -> '01:30'): the form's
     // type="time" input only accepts 00:00-23:59, and with day_rel_min doing
     // the ordering everywhere, the wrapped form is unambiguous on this day.
@@ -1043,12 +1065,13 @@ function timeline_build($dayRow, $tables, $extHours) {
         $games = [];
         foreach ($tbl['items'] as $it) {
             if ($it['type'] === 'poll') {
-                // Polls appear as provisional blocks. Nobody knows how long the
-                // winning game will run, so they get a flat DEFAULT of 2 hours —
-                // roughly the average game — purely for display.
+                // Polls appear as provisional blocks. Nobody knows which
+                // candidate will win, so the width is an ESTIMATE governed by
+                // poll_game_length_mode (fixed 2h, or derived from whatever
+                // candidates have been added so far — see poll_length_minutes()).
                 $p  = $it['data'];
                 $ps = day_rel_min($p['start_time'], $dayStartMin);
-                $pe = $ps + 120;                           // the 2h display default
+                $pe = $ps + poll_length_minutes($p['games'] ?? []);
                 if ($pe > $endMin)   $endMin   = $pe;      // stretch to fit, like games
                 if ($ps < $startMin) $startMin = $ps;      // pre-opening (grace) item
                 $games[] = [

@@ -76,6 +76,15 @@ INSERT INTO options (key, value) VALUES
     ('timeline_extension',    '3'),    -- hours added past the day's end on timeline
     ('login_days',            '365'),  -- how long logins persist (days); 0 = browser session only
     ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
+    -- poll_game_length_mode: how long an open poll is treated as running, both
+    -- on the timeline block and for "next free slot" on its table (nobody
+    -- knows the winning game yet, so this is always an estimate):
+    --   'fixed' = a flat 120 minutes, regardless of the candidates
+    --   'max'   = the longest length set among the poll's candidates
+    --   'avg'   = the average length set among the poll's candidates
+    -- 'max'/'avg' fall back to 120 when there are no candidates yet, or none
+    -- of them have a length set (see poll_length_minutes()).
+    ('poll_game_length_mode', 'fixed'),
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
     -- allow_manual_links: 1 = the person bringing a game may attach a rules /
     -- manual URL (a PDF, a video) which shows as a button on the card. Off
