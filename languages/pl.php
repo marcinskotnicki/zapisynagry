@@ -300,7 +300,7 @@ return [
     'opt_home_event_list_note'        => 'Gdy nie wybrano wydarzenia, strona główna pokazuje listę aktywnych wydarzeń zamiast otwierać jedno z nich.',
     'opt_event_details'               => 'Włącz dodatkowe informacje o wydarzeniu',
     'opt_event_details_note'          => 'Dodaje nazwę lokalizacji, adres i obrazek do formularzy wydarzeń oraz pokazuje je na zakładkach wydarzeń, liście wydarzeń i w kalendarzu.',
-    'opt_event_list_by_day'           => 'Pokaż nas tronie głównej każdy dzień osobno',
+    'opt_event_list_by_day'           => 'Pokaż na stronie głównej każdy dzień osobno',
     'opt_event_list_by_day_note'      => 'Lista wydarzeń pokazuje jeden wiersz na każdy dzień, uporządkowany według dat ze wszystkich wydarzeń, a każdy wiersz prowadzi wprost do tego dnia. Statystyki, jeśli włączone, liczą tylko ten jeden dzień. Wymaga włączonej listy wydarzeń powyżej.',
     'opt_hide_past_days'              => 'Ukryj minione dni na stronie głównej',
     'opt_hide_past_days_note'         => 'Pomija dni wcześniejsze niż wczoraj. Działa tylko przy włączonym pokazywaniu pojedynczych dni powyżej.',
