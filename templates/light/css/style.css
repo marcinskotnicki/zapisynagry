@@ -1246,6 +1246,7 @@ trix-toolbar .trix-button--dialog {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+	padding: 5px;
 }
 .event-list-thumb {
     max-width: 100%;
