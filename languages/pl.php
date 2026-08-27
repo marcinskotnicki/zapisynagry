@@ -302,6 +302,8 @@ return [
     'opt_event_details_note'          => 'Dodaje nazwę lokalizacji, adres i obrazek do formularzy wydarzeń oraz pokazuje je na zakładkach wydarzeń, liście wydarzeń i w kalendarzu.',
     'opt_event_list_by_day'           => 'Pokaż każdy dzień osobno',
     'opt_event_list_by_day_note'      => 'Lista wydarzeń pokazuje jeden wiersz na każdy dzień, uporządkowany według dat ze wszystkich wydarzeń, a każdy wiersz prowadzi wprost do tego dnia. Statystyki, jeśli włączone, liczą tylko ten jeden dzień. Wymaga włączonej listy wydarzeń powyżej.',
+    'opt_hide_past_days'              => 'Ukryj minione dni',
+    'opt_hide_past_days_note'         => 'Pomija dni wcześniejsze niż wczoraj. Sam wczorajszy dzień pozostaje widoczny, bo wydarzenie trwające po północy to wciąż ta sesja, której ludzie szukają. Działa tylko przy włączonym pokazywaniu pojedynczych dni powyżej.',
     'opt_event_stats'                 => 'Pokaż statystyki wydarzeń na liście wydarzeń',
     'opt_event_stats_note'            => 'Dodaje liczbę gier i liczbę graczy po datach na liście wydarzeń i w archiwum. Głosowanie liczy się jako jedna gra, a jako liczbę graczy przyjmuje liczbę głosów najpopularniejszej opcji. Gracze liczeni są per gra, więc jedna osoba w trzech grach liczy się trzy razy; rezerwowi nie są liczeni.',
     'evstats_games'                   => 'Gry',

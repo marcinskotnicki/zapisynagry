@@ -440,6 +440,9 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('event_list_by_day'); ?>
         <p class="field-note"><?= e(t('opt_event_list_by_day_note')) ?></p>
 
+        <?php $toggle('hide_past_days'); ?>
+        <p class="field-note"><?= e(t('opt_hide_past_days_note')) ?></p>
+
         <?php $toggle('hide_event_tabs'); ?>
         <p class="field-note"><?= e(t('opt_hide_event_tabs_note')) ?></p>
 

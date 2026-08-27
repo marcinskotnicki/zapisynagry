@@ -310,6 +310,8 @@ return [
     'opt_event_details_note'          => 'Adds a location name, address and picture to the event forms, and shows them on the event tabs, the event list and the calendar.',
     'opt_event_list_by_day'           => 'Display each day separately',
     'opt_event_list_by_day_note'      => 'The event list shows one row per day, ordered by date across all events, with each row linking straight to that day. Statistics, when shown, count only that day. Requires the event list above.',
+    'opt_hide_past_days'              => 'Hide days from the past',
+    'opt_hide_past_days_note'         => 'Leaves out days earlier than yesterday. Yesterday itself is kept, because an event running past midnight is still the session people are looking for. Only applies when individual days are shown above.',
     'opt_event_stats'                 => 'Display event statistics on event list',
     'opt_event_stats_note'            => 'Adds the number of games and the number of players after the dates on the event list and the event archive. A poll counts as one game, with its most popular option\'s votes as its players. Players are counted per game, so one person in three games counts three times; reserves are not counted.',
     'evstats_games'                   => 'Games',

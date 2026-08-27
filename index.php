@@ -51,13 +51,28 @@ $readonly = $resolved['readonly'];
  * make the setting look broken on the quiet weeks. */
 if (home_event_list_enabled()
     && (int)($_GET['event'] ?? 0) === 0
-    && ($_GET['e'] ?? '') === '') {
+    && ($_GET['e'] ?? '') === ''
+    /* ...and no ?day= either. front_url() leaves the event id OUT when the
+     * target IS the current event, since index.php?day=2 already resolves to
+     * it — so a link or a redirect to the live event's day arrives here naming
+     * only a day. Without this test the list would swallow all of them: every
+     * PRG after adding a game, signing up, voting or ending a poll lands back
+     * on the front page, and the person would be bounced to the list instead of
+     * the card they just acted on. A URL that names a day is asking for that
+     * day, not for the index. */
+    && (int)($_GET['day'] ?? 0) === 0) {
     /* A row per DAY, in date order across every event, or the default row per
      * event. The rows are the same shape either way (a day row carries its
      * event's columns), so the template renders one list and only the date and
      * the link differ. */
     $evByDay = event_list_by_day_enabled();
-    $evListRows = $evByDay ? events_active_days() : events_active();
+    /* Yesterday, not today: an event that runs past midnight is still the
+     * session people are looking for at 01:00, so dropping it at midnight would
+     * hide the very day in progress. Only meaningful per-day — a whole event is
+     * shown until it is archived, which is what "active" already means. */
+    $evFrom = ($evByDay && opt_bool('hide_past_days'))
+        ? date('Y-m-d', strtotime('-1 day')) : null;
+    $evListRows = $evByDay ? events_active_days($evFrom) : events_active();
     /* Statistics for whatever a row IS: a day's own games in day mode, the
      * whole event's in event mode. One batched query set either way, or []
      * when the summary is switched off. */
