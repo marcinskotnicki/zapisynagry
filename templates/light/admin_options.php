@@ -435,11 +435,19 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('home_event_list'); ?>
         <p class="field-note"><?= e(t('opt_home_event_list_note')) ?></p>
 
+        <?php // Directly under the option it depends on, since it does nothing
+              // on its own — the note says as much. ?>
+        <?php $toggle('event_list_by_day'); ?>
+        <p class="field-note"><?= e(t('opt_event_list_by_day_note')) ?></p>
+
         <?php $toggle('hide_event_tabs'); ?>
         <p class="field-note"><?= e(t('opt_hide_event_tabs_note')) ?></p>
 
         <?php $toggle('event_details'); ?>
         <p class="field-note"><?= e(t('opt_event_details_note')) ?></p>
+
+        <?php $toggle('event_stats'); ?>
+        <p class="field-note"><?= e(t('opt_event_stats_note')) ?></p>
 
         <?php /* Prefills for a NEW event's location. Rendered unconditionally,
                  even though they only do anything once the details above are on:

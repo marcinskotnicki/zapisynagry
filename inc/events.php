@@ -205,6 +205,178 @@ function event_details($ev) {
     return $out;
 }
 
+/**
+ * Should the event lists carry a games/players summary? Off by default.
+ * @return bool
+ */
+function event_stats_enabled() {
+    return opt_bool('event_stats');
+}
+
+/**
+ * How many games and how many players, for a whole page of events at once.
+ *
+ * BATCHED DELIBERATELY. The lists that use this are paginated, and asking per
+ * event would mean three queries per row — on an archive page of fifty events
+ * that is a hundred and fifty round trips for a decorative line of text. Takes
+ * the ids the caller is about to render and answers for all of them.
+ *
+ * WHAT COUNTS, and why:
+ *  - A POLL counts as ONE game. It is a game-shaped slot on a table; that the
+ *    club has not settled which game yet does not make it half a slot.
+ *  - A poll's PLAYERS are the votes on its most-voted option — the closest
+ *    honest guess at how many people that slot would seat, since the winning
+ *    option is the one it will become.
+ *  - RESERVES ARE NOT COUNTED. They are people who wanted a seat and did not
+ *    get one, so counting them would overstate how many actually played.
+ *  - The same person in three games counts three times. Guests are free text
+ *    with no reliable identity, so two "Marek"s cannot be told apart from one
+ *    Marek in two games — a per-person count would be a guess dressed as a
+ *    number. This is a count of SEATS FILLED, which is exactly answerable.
+ *
+ * @param int[] $eventIds
+ * @return array<int, array{games:int, players:int}>  Keyed by event id; every
+ *         requested id is present, zeroed when the event has nothing.
+ */
+function events_stats(array $eventIds) {
+    $ids = array_values(array_unique(array_map('intval', $eventIds)));
+    $out = [];
+    foreach ($ids as $id) $out[$id] = ['games' => 0, 'players' => 0];
+    if (!$ids) return $out;
+
+    // Safe to interpolate: every element was cast to int just above.
+    $in = implode(',', $ids);
+
+    // Real games, and the seats filled in them.
+    foreach (db_all(
+        "SELECT g.event_id AS eid,
+                COUNT(DISTINCT g.id) AS games,
+                COUNT(pl.id)         AS players
+           FROM games g
+           LEFT JOIN players pl ON pl.game_id = g.id AND pl.is_reserve = 0
+          WHERE g.event_id IN ($in)
+          GROUP BY g.event_id") as $r) {
+        $out[(int)$r['eid']]['games']   += (int)$r['games'];
+        $out[(int)$r['eid']]['players'] += (int)$r['players'];
+    }
+
+    // Each unresolved poll is one more game. (A poll that already resolved IS a
+    // game by now and was counted above, so there is no double counting.)
+    foreach (db_all("SELECT event_id AS eid, COUNT(*) AS n FROM polls
+                      WHERE event_id IN ($in) GROUP BY event_id") as $r) {
+        $out[(int)$r['eid']]['games'] += (int)$r['n'];
+    }
+
+    // And its players: the vote count of its best-supported option.
+    foreach (db_all(
+        "SELECT eid, SUM(mx) AS n FROM (
+             SELECT p.event_id AS eid, MAX(x.cnt) AS mx
+               FROM (SELECT pg.poll_id, pg.id, COUNT(v.id) AS cnt
+                       FROM poll_games pg
+                       LEFT JOIN poll_votes v ON v.poll_game_id = pg.id
+                      GROUP BY pg.id) x
+               JOIN polls p ON p.id = x.poll_id
+              WHERE p.event_id IN ($in)
+              GROUP BY p.id
+         ) y GROUP BY eid") as $r) {
+        $out[(int)$r['eid']]['players'] += (int)$r['n'];
+    }
+
+    return $out;
+}
+
+/**
+ * Should the landing-page list show one row per DAY rather than per event?
+ * Off by default; only meaningful when the list itself is switched on.
+ * @return bool
+ */
+function event_list_by_day_enabled() {
+    return opt_bool('event_list_by_day');
+}
+
+/**
+ * Every day of every active event, one row each, in date order.
+ *
+ * For the landing page's "a row per day" mode: a club running several short
+ * events would otherwise see a list ordered by event, where the next thing
+ * happening is somewhere in the middle. Ordered by DATE across all events, so
+ * the top of the list is the next session whichever event it belongs to.
+ *
+ * Each row is the EVENT's columns (so a caller can render it exactly like the
+ * per-event rows — same name, location, picture) plus the day's own id, index
+ * and date. date_from and date_to are both set to that day, which makes
+ * event_date_label() print the single date without needing a second formatter.
+ *
+ * @return array
+ */
+function events_active_days() {
+    return db_all(
+        "SELECT e.*,
+                d.id         AS day_id,
+                d.day_index  AS day_index,
+                d.day_date   AS date_from,
+                d.day_date   AS date_to
+           FROM event_days d
+           JOIN events e ON e.id = d.event_id
+          WHERE e.is_archived = 0
+            AND e.is_deleted  = 0
+          ORDER BY d.day_date IS NULL, d.day_date ASC, e.id ASC, d.day_index ASC");
+}
+
+/**
+ * events_stats() for single DAYS instead of whole events.
+ *
+ * Same rules, same batching, same shape of answer — see events_stats() for why
+ * each of them is what it is. Kept as its own function rather than a flag on
+ * that one: the two group by different columns, and a function that changes
+ * what its keys MEAN depending on an argument is the kind that gets called
+ * wrongly later.
+ *
+ * @param int[] $dayIds
+ * @return array<int, array{games:int, players:int}>  Keyed by event_days.id.
+ */
+function event_days_stats(array $dayIds) {
+    $ids = array_values(array_unique(array_map('intval', $dayIds)));
+    $out = [];
+    foreach ($ids as $id) $out[$id] = ['games' => 0, 'players' => 0];
+    if (!$ids) return $out;
+
+    $in = implode(',', $ids);   // every element cast to int just above
+
+    foreach (db_all(
+        "SELECT g.day_id AS did,
+                COUNT(DISTINCT g.id) AS games,
+                COUNT(pl.id)         AS players
+           FROM games g
+           LEFT JOIN players pl ON pl.game_id = g.id AND pl.is_reserve = 0
+          WHERE g.day_id IN ($in)
+          GROUP BY g.day_id") as $r) {
+        $out[(int)$r['did']]['games']   += (int)$r['games'];
+        $out[(int)$r['did']]['players'] += (int)$r['players'];
+    }
+
+    foreach (db_all("SELECT day_id AS did, COUNT(*) AS n FROM polls
+                      WHERE day_id IN ($in) GROUP BY day_id") as $r) {
+        $out[(int)$r['did']]['games'] += (int)$r['n'];
+    }
+
+    foreach (db_all(
+        "SELECT did, SUM(mx) AS n FROM (
+             SELECT p.day_id AS did, MAX(x.cnt) AS mx
+               FROM (SELECT pg.poll_id, pg.id, COUNT(v.id) AS cnt
+                       FROM poll_games pg
+                       LEFT JOIN poll_votes v ON v.poll_game_id = pg.id
+                      GROUP BY pg.id) x
+               JOIN polls p ON p.id = x.poll_id
+              WHERE p.day_id IN ($in)
+              GROUP BY p.id
+         ) y GROUP BY did") as $r) {
+        $out[(int)$r['did']]['players'] += (int)$r['n'];
+    }
+
+    return $out;
+}
+
 function events_active() {
     return db_all(
         "SELECT e.*,

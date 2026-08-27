@@ -26,10 +26,13 @@ $pages   = max(1, (int)ceil($total / $perPage));
 // page instead of an error, and clamping keeps prev/next arithmetic simple.
 $page    = max(1, min($pages, (int)($_GET['page'] ?? 1)));
 $events  = events_page($perPage, ($page - 1) * $perPage);
+// Games/players per event, for THIS page only, in one batched query set.
+$evStats = event_stats_enabled() ? events_stats(array_column($events, 'id')) : [];
 
 tpl_render('header', ['page_title' => t('archive_title')]);
 tpl_render('archive_list', [
     'events'  => $events,
+    'stats'   => $evStats,
     'page'    => $page,
     'pages'   => $pages,
     'total'   => $total,

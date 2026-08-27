@@ -1305,3 +1305,16 @@ trix-toolbar .trix-button--dialog {
 
 /* --- the admin forms ---------------------------------------------------- */
 .event-thumb-preview { display: block; margin: 0.5rem 0; max-height: 120px; width: auto; }
+
+/* --- the games/players summary on the event lists ---------------------- */
+/* Inline SVG inheriting the surrounding colour, so it comes out right on all
+   fourteen themes without any of them knowing this feature exists. */
+.event-stats { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
+.event-stat { display: inline-flex; align-items: center; gap: 0.25rem; }
+.event-stat-icon { width: 1em; height: 1em; flex: 0 0 auto; opacity: 0.75; }
+.event-stat-sep { opacity: 0.5; }
+/* On the archive list the summary sits inside the date cell, so it needs a gap
+   from the dates rather than a line of its own. */
+.archive-date .event-stats { margin-left: 0.5rem; }
+/* On the landing page it IS its own line, under the dates. */
+.event-list-stats { display: block; margin-top: 0.15rem; }

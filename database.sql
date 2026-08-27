@@ -90,12 +90,18 @@ INSERT INTO options (key, value) VALUES
     -- home_event_list: with no event chosen, index.php lists the active events
     --   instead of opening one. An explicit ?event=<id> still opens that event.
     ('home_event_list',   '0'),
+    -- event_list_by_day: that list shows one row per DAY, ordered by date across
+    --   every event, rather than one row per event. Only does anything when
+    --   home_event_list is on.
+    ('event_list_by_day', '0'),
     -- event_details: adds location name / address / thumbnail to the event
     --   forms, and shows them on the tabs, the event list and the calendar.
     ('event_details',     '0'),
     -- hide_event_tabs: drop the event switcher bar entirely — for clubs that
     --   navigate via the event list instead.
     ('hide_event_tabs',   '0'),
+    -- event_stats: a games/players summary after the dates on both event lists.
+    ('event_stats',       '0'),
     -- Prefills for the two location fields on a NEW event; most clubs meet in
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),

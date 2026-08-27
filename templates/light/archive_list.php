@@ -4,6 +4,7 @@
  * -----------------------------------------------------------------------------
  *  RENDER VARS:
  *    $events — event rows with date_from / date_to attached.
+ *    $stats  — games/players per event id, or [] when the summary is off.
  *    $page   — current 1-based page.
  *    $pages  — total pages.
  *    $total  — total events.
@@ -66,7 +67,15 @@
                             <?php endif; ?>
                         </span>
                         <?php $label = event_date_label($ev); ?>
-                        <span class="archive-date"><?= $label !== '' ? e($label) : '' ?></span>
+                        <span class="archive-date">
+                            <?= $label !== '' ? e($label) : '' ?>
+                            <?php // After the dates, as asked. $stats is empty
+                                  // when the summary is switched off, so this is
+                                  // one lookup rather than a second option check. ?>
+                            <?php if (isset($stats[(int)$ev['id']])): ?>
+                                <?php tpl_render('event_stats', ['stats' => $stats[(int)$ev['id']]]); ?>
+                            <?php endif; ?>
+                        </span>
                         <?php if ((int)$ev['is_archived'] === 1): ?>
                             <span class="archive-badge"><?= e(t('archive_closed')) ?></span>
                         <?php endif; ?>

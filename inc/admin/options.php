@@ -115,7 +115,7 @@ $OPTION_TOGGLES = [
     // 0 (an absent checkbox reads as off), destroying the legacy value that
     // header_brand_mode() falls back to.
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
-    'home_event_list', 'event_details', 'hide_event_tabs',
+    'home_event_list', 'event_list_by_day', 'event_details', 'hide_event_tabs', 'event_stats',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
     'club_shelf', 'club_shelf_pick', 'library_show_common', 'library_show_member_games', 'library_prefer_club',

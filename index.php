@@ -52,8 +52,27 @@ $readonly = $resolved['readonly'];
 if (home_event_list_enabled()
     && (int)($_GET['event'] ?? 0) === 0
     && ($_GET['e'] ?? '') === '') {
+    /* A row per DAY, in date order across every event, or the default row per
+     * event. The rows are the same shape either way (a day row carries its
+     * event's columns), so the template renders one list and only the date and
+     * the link differ. */
+    $evByDay = event_list_by_day_enabled();
+    $evListRows = $evByDay ? events_active_days() : events_active();
+    /* Statistics for whatever a row IS: a day's own games in day mode, the
+     * whole event's in event mode. One batched query set either way, or []
+     * when the summary is switched off. */
+    $evStats = [];
+    if (event_stats_enabled()) {
+        $evStats = $evByDay
+            ? event_days_stats(array_column($evListRows, 'day_id'))
+            : events_stats(array_column($evListRows, 'id'));
+    }
     tpl_render('header', ['page_title' => t('app_name')]);
-    tpl_render('front_event_list', ['events' => events_active()]);
+    tpl_render('front_event_list', [
+        'events' => $evListRows,
+        'stats'  => $evStats,
+        'by_day' => $evByDay,
+    ]);
     tpl_render('footer');
     exit;
 }
