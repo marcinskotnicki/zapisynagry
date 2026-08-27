@@ -21,7 +21,7 @@ Jeśli Twój klub należy do sieci **Klubów Gier Planszowych**
 
 Jeśli organizujesz spotkania z grami lub wydarzenia niekomercyjnie, ale nie obejmuje Cię punkt 1, możesz korzystać z tego oprogramowania bezpłatnie i modyfikować je, jak chcesz, pod warunkiem, że:
 
-- **przekażesz co najmniej 5 kg karmy dla kotów do schroniska dla zwierząt** i wyślesz dowód na adres koty@zapisynagry.pl;
+- **przekażesz co najmniej 5 kg karmy dla kotów (lub darowiznę pieniężną) do schroniska dla zwierząt** i wyślesz potwierdzenie na adres koty@zapisynagry.pl;
 - **zachowasz informację o autorstwie w stopce strony** (patrz niżej);
 - **zachowasz w oprogramowaniu link do tej licencji razem z oprogramowaniem** - nie zmieniając w niej niczego.
 
@@ -33,7 +33,7 @@ Niekomercyjny użytek oprogramowania oznacza natomiast, że nie pobierasz opłat
 
 Jeśli chcesz korzystać z tego oprogramowania komercyjnie i w ramach komercyjnego organizowania spotkań i wydarzeń, możesz to robić bezpłatnie, pod warunkiem, że:
 
-- **przekażesz co najmniej 10 kg karmy dla kotów do schroniska dla zwierząt** i wyślesz dowód na adres koty@zapisynagry.pl;
+- **przekażesz co najmniej 10 kg karmy dla kotów (lub darowiznę pieniężną) do schroniska dla zwierząt** i wyślesz potwierdzenie na adres koty@zapisynagry.pl;
 - **zachowasz informację o autorstwie w stopce strony** (patrz niżej);
 - **zachowasz w oprogramowaniu link do tej licencji razem z oprogramowaniem** - nie zmieniając w niej niczego.
 
