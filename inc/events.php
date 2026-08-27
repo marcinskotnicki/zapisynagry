@@ -314,6 +314,7 @@ function events_active_days() {
         "SELECT e.*,
                 d.id         AS day_id,
                 d.day_index  AS day_index,
+                d.day_name   AS day_name,
                 d.day_date   AS date_from,
                 d.day_date   AS date_to
            FROM event_days d
@@ -584,7 +585,7 @@ function event_days_renumber($eventId) {
  *
  * @return bool  False if the date is missing or already used by this event.
  */
-function event_day_add($eventId, $date, $start, $end) {
+function event_day_add($eventId, $date, $start, $end, $name = '') {
     $eventId = (int)$eventId;
     $date    = trim((string)$date);
     if ($date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return false;
@@ -599,8 +600,12 @@ function event_day_add($eventId, $date, $start, $end) {
     // Appended with a temporary index; renumber puts it in date order.
     $next = (int)db_val('SELECT COALESCE(MAX(day_index), 0) + 1 FROM event_days WHERE event_id = ?',
                         [$eventId]);
-    db_run('INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time)
-            VALUES (?,?,?,?,?)', [$eventId, $next, $date, $start, $end]);
+    /* NULL rather than '' when unnamed — one value in the column for "no
+     * label" instead of two, matching how the create wizard stores it. */
+    $name = trim((string)$name);
+    db_run('INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time, day_name)
+            VALUES (?,?,?,?,?,?)',
+           [$eventId, $next, $date, $start, $end, $name !== '' ? $name : null]);
     event_days_renumber($eventId);
     return true;
 }

@@ -154,7 +154,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $flash = t('saved_ok');
 
     } elseif ($id > 0 && $act === 'day_add') {
-        if (event_day_add($id, $_POST['day_date'] ?? '', $_POST['day_start'] ?? '', $_POST['day_end'] ?? '')) {
+        /* The name is accepted only when day names are switched on — the field
+         * is not rendered otherwise, and taking it from an absent POST would
+         * let a hand-built one set a label the form does not offer. Matches how
+         * the day EDIT handler just below already treats it. */
+        if (event_day_add($id, $_POST['day_date'] ?? '', $_POST['day_start'] ?? '', $_POST['day_end'] ?? '',
+                          day_names_enabled() ? ($_POST['day_name'] ?? '') : '')) {
             log_action('event_day_add', 'event #' . $id . ' ' . trim((string)($_POST['day_date'] ?? '')));
             $flash = t('days_added');
             $warnIfAutoArchived($id);   // dates may now be past the sweep's threshold

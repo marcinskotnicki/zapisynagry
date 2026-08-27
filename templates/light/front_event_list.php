@@ -70,6 +70,13 @@
                         <?php endif; ?>
                         <span class="event-list-text">
                             <span class="event-list-name"><?= e($ev['name']) ?></span>
+                            <?php /* The day's own label, under the event name.
+                                     Only in day mode — a row that covers a whole
+                                     event has no single day to name — and only
+                                     when the club uses labels at all. */ ?>
+                            <?php if ($by_day && day_names_enabled() && trim((string)($ev['day_name'] ?? '')) !== ''): ?>
+                                <span class="event-list-dayname"><?= e($ev['day_name']) ?></span>
+                            <?php endif; ?>
                             <?php $evLabel = event_date_label($ev); ?>
                             <?php if ($evLabel !== ''): ?>
                                 <span class="event-list-date"><?= e($evLabel) ?></span>

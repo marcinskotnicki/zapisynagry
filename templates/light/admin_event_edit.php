@@ -207,6 +207,17 @@
             <label for="new_day_end"><?= e(t('newevent_end')) ?></label>
             <input type="time" id="new_day_end" name="day_end" value="<?= e(opt('default_end_time')) ?>">
         </div>
+        <?php // The day's label, when the club uses them. It was on the create
+              // wizard and on the edit-a-day row but not here, so a day added to
+              // an existing event could only be named by adding it and then
+              // editing it. ?>
+        <?php if (day_names_enabled()): ?>
+            <div class="field">
+                <label for="new_day_name"><?= e(t('newevent_day_name')) ?></label>
+                <input type="text" id="new_day_name" name="day_name" maxlength="100"
+                       placeholder="<?= e(t('newevent_day_name_ph')) ?>">
+            </div>
+        <?php endif; ?>
         <button type="submit" class="btn btn-primary"><?= e(t('events_day_add')) ?></button>
         <?php // Days are renumbered by date after every change, so a day added
               // out of order still lands in the right place on the front page. ?>

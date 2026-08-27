@@ -1318,3 +1318,6 @@ trix-toolbar .trix-button--dialog {
 .archive-date .event-stats { margin-left: 0.5rem; }
 /* On the landing page it IS its own line, under the dates. */
 .event-list-stats { display: block; margin-top: 0.15rem; }
+/* The day's own label under the event name, in day mode. Smaller than the name
+   above it but not as quiet as the address — it says WHICH session this is. */
+.event-list-dayname { font-size: 1.05rem; }
