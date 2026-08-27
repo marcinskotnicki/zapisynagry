@@ -21,6 +21,18 @@
     <?php if (!$events): ?>
         <p class="muted"><?= e(t('archive_empty')) ?></p>
     <?php else: ?>
+        <?php /* Does ANY event on this page have a picture? If so, rows without
+                 one get an empty box of the same size, so every name starts at
+                 the same x and the date column stays straight. Same reasoning
+                 (and same shape) as the event list's picture column. Scanned per
+                 page rather than across the whole archive: this list is
+                 paginated, and a picture three pages back cannot misalign
+                 anything here. */ ?>
+        <?php $adAnyPic = false;
+              foreach ($events as $adScan) {
+                  $adScanD = event_details($adScan);
+                  if (!empty($adScanD['thumbnail'])) { $adAnyPic = true; break; }
+              } ?>
         <ul class="archive-list">
             <?php foreach ($events as $ev): ?>
                 <?php $ad = event_details($ev); ?>
@@ -31,6 +43,8 @@
                           // shop window. ?>
                     <?php if (!empty($ad['thumbnail'])): ?>
                         <img class="archive-thumb" src="<?= e($ad['thumbnail']) ?>" alt="">
+                    <?php elseif ($adAnyPic): ?>
+                        <span class="archive-thumb-empty"></span>
                     <?php endif; ?>
                     <?php /* THREE children exactly — name-block, date, badge —
                              because on desktop this is a three-column grid. The

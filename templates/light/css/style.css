@@ -1210,7 +1210,9 @@ trix-toolbar .trix-button--dialog {
 .event-tab-withpic { display: flex; align-items: center; gap: 0.5rem; }
 .event-tab-thumb { height: 64px; width: auto; max-width: 96px; object-fit: contain; flex: 0 0 auto; }
 .event-tab-text { display: flex; flex-direction: column; min-width: 0; }
-.event-tab-loc { font-size: 0.85rem; }
+/* Same size as the address below it: at 0.85rem the location was the loudest
+   thing on the tab, over the event's own name. */
+.event-tab-loc { font-size: 0.75rem; }
 /* The address is the least important line here — small, and never allowed to
    push the tab wide enough to squeeze its neighbours off a phone screen. */
 .event-tab-addr { font-size: 0.75rem; opacity: 0.8; line-height: 1.25; }
@@ -1245,8 +1247,11 @@ trix-toolbar .trix-button--dialog {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-	padding: 5px;
+    /* Room for the drop shadow. A picture as tall as the box would otherwise
+       touch the edges and have its shadow clipped clean off. No overflow:hidden
+       here either — object-fit already guarantees the picture fits, so the only
+       thing clipping could remove is the shadow. */
+    padding: 5px;
 }
 .event-list-thumb {
     max-width: 100%;
@@ -1284,6 +1289,9 @@ trix-toolbar .trix-button--dialog {
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
+/* Held open on events WITHOUT a picture, whenever some event in the list has
+   one — otherwise those rows start further left and the date column zigzags. */
+.archive-thumb-empty { flex: 0 0 auto; width: 64px; height: 48px; }
 .archive-item-main { display: flex; flex-direction: column; min-width: 0; }
 .archive-loc { font-size: 0.9rem; color: var(--text-muted); }
 .archive-row-loc { display: block; font-size: 0.85em; color: var(--text-muted); }
