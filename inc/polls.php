@@ -313,11 +313,36 @@ function poll_can_restrict_to_library($poll, $userId) {
     return $owner > 0 && library_own_pick_enabled($owner);
 }
 
-function poll_can_add_candidate($poll) {
+/**
+ * May the current visitor MANAGE this poll — edit its settings, and edit or
+ * remove its candidate games?
+ *
+ * This is the poll's owner-level gate, and the same one edit_poll.php computes
+ * for itself: the proposer's account or an admin (verify_decision 'allow'), or
+ * somebody who has already passed the poll's verification challenge this
+ * session. Extracted so the three places that need it — edit_poll.php, the
+ * candidate editor in add_poll_game.php, and poll_can_add_candidate() below —
+ * cannot drift apart.
+ *
+ * DELIBERATELY EXCLUDES the "let others add games" opt-in. That permission is
+ * one-way by design: anyone may ADD an option, but changing or removing one
+ * stays with the poll's owner, so a poll cannot be quietly rewritten by a
+ * passer-by after people have voted on it.
+ *
+ * @param array $poll  A polls row.
+ * @return bool
+ */
+function poll_can_manage($poll) {
     require_once __DIR__ . '/verify.php';   // verify_decision()
-    require_once __DIR__ . '/events.php';   // can_add_games()
     if (verify_decision($poll['proposer_user_id'], $poll['proposer_email']) === 'allow') return true;
-    if (!empty($_SESSION['poll_edit_ok'][(int)$poll['id']])) return true;
+    return !empty($_SESSION['poll_edit_ok'][(int)$poll['id']]);
+}
+
+function poll_can_add_candidate($poll) {
+    require_once __DIR__ . '/events.php';   // can_add_games()
+    // The owner-level gate, plus the one permission that is broader for adding
+    // than for editing: the proposer's explicit "let others add games" opt-in.
+    if (poll_can_manage($poll)) return true;
     return (int)($poll['allow_others_add'] ?? 0) === 1 && can_add_games();
 }
 

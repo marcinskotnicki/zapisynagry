@@ -246,6 +246,13 @@ input[type="checkbox"], input[type="radio"]{width:auto;flex:0 0 auto;}
 .row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .row-actions .inline { display: flex; gap: 0.25rem; align-items: center; }
 .row-actions input[type="email"], .row-actions input[type="password"] { width: 11rem; padding: 0.35rem 0.5rem; font-size: 0.85rem; }
+/* The user name in the Users tab is a link to that account's profile. Underlined
+   on hover only, so a column of names does not read as a wall of links. */
+.user-link { font-weight: 600; text-decoration: none; }
+.user-link:hover, .user-link:focus { text-decoration: underline; }
+/* The "back" line an admin gets when viewing somebody else's profile or
+   library — small, directly under the heading it belongs to. */
+.userpanel-back, .library-back { margin: -0.25rem 0 1rem; font-size: 0.9rem; }
 
 .day-block { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; padding: 0.5rem 1rem 1rem; }
 .day-block legend { font-weight: 700; padding: 0 0.4rem; }

@@ -11,7 +11,9 @@
  *
  *  RENDER VARS:
  *    $games — this member's library rows, already sorted.
- *    $user  — the signed-in member (for the contact preference).
+ *    $user  — the member whose library this is (for the contact preference).
+ *    $as_admin   — true when an admin is editing somebody else's library.
+ *    $self_url   — where every form posts (carries ?user=N in admin mode).
  *    $flash      — one-shot message from the last action, or null.
  *    $flash_kind — 'ok' | 'error' | 'warn', how to draw it.
  *    $csrf  — hidden CSRF field.
@@ -21,9 +23,27 @@
  *  file's header for why .card alone is too broad a target for a
  *  theme-specific fix.
  * ============================================================================= */
+
+/* Defaults, so the page still renders from a caller (or a forked theme) that
+ * predates admin mode: "my own library", which is what this has always been. */
+$as_admin = !empty($as_admin);
+$self_url = $self_url ?? 'my_library.php';
+// Carried in every form, so the POST edits the library the GET displayed.
+$uid_field = $as_admin
+    ? '<input type="hidden" name="user" value="' . (int)$user['id'] . '">'
+    : '';
 ?>
 <div class="card library">
-    <h1><?= e(t('lib_my_title')) ?></h1>
+    <?php // Name whose library this is when it is not your own, and offer the
+          // way back to their profile — the route an admin arrived by. ?>
+    <?php if ($as_admin): ?>
+        <h1><?= e(t('lib_my_title_admin', $user['display_name'])) ?></h1>
+        <p class="muted library-back">
+            <a href="user.php?user=<?= (int)$user['id'] ?>"><?= e(t('lib_back_to_profile')) ?></a>
+        </p>
+    <?php else: ?>
+        <h1><?= e(t('lib_my_title')) ?></h1>
+    <?php endif; ?>
 
     <?php // The kind matters: a refusal drawn in the success colour reads as
           // "done" whatever the words say. ?>
@@ -44,8 +64,8 @@
           // when the admin has enabled contacting at all — a checkbox that
           // cannot do anything would just raise questions. ?>
     <?php if (library_contact_enabled()): ?>
-        <form method="post" action="my_library.php" class="lib-prefs">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>" class="lib-prefs">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="contact_pref">
             <div class="field field-check field-library_contact_ok">
                 <label>
@@ -100,8 +120,8 @@
                         <?php // For a game imported from a BGG collection: pick the edition
                               // and the title without typing anything. BGG entries only —
                               // a hand-added game has no editions to choose from. ?>
-                        <form method="post" action="my_library.php" class="lib-pickver">
-                            <?= $csrf ?>
+                        <form method="post" action="<?= e($self_url) ?>" class="lib-pickver">
+                            <?= $csrf ?><?= $uid_field ?>
                             <input type="hidden" name="action" value="pick_version">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
 
@@ -109,8 +129,8 @@
                         </form>
                         <details class="lib-edit">
                             <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
-                            <form method="post" action="my_library.php" class="lib-edit-form">
-                                <?= $csrf ?>
+                            <form method="post" action="<?= e($self_url) ?>" class="lib-edit-form">
+                                <?= $csrf ?><?= $uid_field ?>
                                 <input type="hidden" name="action" value="edit">
                                 <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                                 <?php // A BGG title sometimes comes back in the wrong
@@ -141,8 +161,8 @@
                         <?php else: ?>
                             <details class="lib-edit">
                                 <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
-                                <form method="post" action="my_library.php" class="lib-edit-form">
-                                    <?= $csrf ?>
+                                <form method="post" action="<?= e($self_url) ?>" class="lib-edit-form">
+                                    <?= $csrf ?><?= $uid_field ?>
                                     <input type="hidden" name="action" value="edit">
                                     <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                                     <div class="field field-name">
@@ -173,8 +193,8 @@
                             </details>
                         <?php endif; ?>
 
-                        <form method="post" action="my_library.php" class="lib-toggle">
-                            <?= $csrf ?>
+                        <form method="post" action="<?= e($self_url) ?>" class="lib-toggle">
+                            <?= $csrf ?><?= $uid_field ?>
                             <input type="hidden" name="action" value="toggle">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                             <?php // Posts the state we want, not a flip, so a double
@@ -185,8 +205,8 @@
                             </button>
                         </form>
 
-                        <form method="post" action="my_library.php" class="lib-del">
-                            <?= $csrf ?>
+                        <form method="post" action="<?= e($self_url) ?>" class="lib-del">
+                            <?= $csrf ?><?= $uid_field ?>
                             <input type="hidden" name="action" value="remove">
                             <input type="hidden" name="game" value="<?= (int)$g['id'] ?>">
                             <button type="submit" class="btn btn-small btn-danger"><?= e(t('delete')) ?></button>
@@ -205,8 +225,8 @@
     <?php if (bgg_configured()): ?>
     <details class="lib-add">
         <summary><?= e(t('lib_add_bgg')) ?></summary>
-        <form method="post" action="my_library.php">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="add_bgg">
             <div class="field field-bgg">
                 <label for="bgg"><?= e(t('lib_add_bgg_label')) ?></label>
@@ -222,8 +242,8 @@
 
     <details class="lib-add">
         <summary><?= e(t('lib_add_manual')) ?></summary>
-        <form method="post" action="my_library.php">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="add_manual">
             <div class="field-row">
                 <div class="field field-name">
@@ -258,8 +278,8 @@
     <?php if (bgg_configured()): ?>
     <details class="lib-add lib-add-sync">
         <summary><?= e(t('lib_sync')) ?></summary>
-        <form method="post" action="my_library.php">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="sync">
             <?php // The warning is the point of this block: a sync DELETES games
                   // that are no longer in the BGG collection. Stated before the

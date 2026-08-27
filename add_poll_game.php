@@ -73,6 +73,35 @@ if (!$table || !$event || (int)$event['is_archived'] === 1 || !opt_bool('allow_p
     redirect('index.php');
 }
 
+/* ---- Target: an EXISTING candidate being EDITED --------------------------
+ * ?edit=<poll_games id> turns this whole page into an editor for a candidate
+ * that is already in a live poll, reusing the same form the add flow renders
+ * so the two can never offer different fields.
+ *
+ * GUARDED MORE TIGHTLY THAN ADDING: poll_can_manage(), not
+ * poll_can_add_candidate(). "Let others add games" lets a passer-by contribute
+ * an option; it must not let them rewrite one that people have already voted
+ * on. Owner, admin, or somebody who passed the poll's verification challenge
+ * this session — the same three that may remove a candidate.
+ *
+ * Scoped to the live poll: an id from another poll simply does not resolve, so
+ * a hand-edited number cannot reach across polls.                          */
+$editId   = (int)($_GET['edit'] ?? $_POST['edit_cand'] ?? 0);
+$editCand = null;
+if ($editId > 0 && $livePoll) {
+    if (!poll_can_manage($livePoll)) {
+        unset($_SESSION['poll_live_edit']);
+        redirect('index.php');
+    }
+    $editCand = db_one('SELECT * FROM poll_games WHERE id = ? AND poll_id = ?',
+                       [$editId, (int)$livePoll['id']]);
+    if (!$editCand) redirect('edit_poll.php?poll=' . (int)$livePoll['id']);
+}
+// The form posts back here; cancelling returns to wherever the flow started.
+$candCancel = $editCand
+    ? 'edit_poll.php?poll=' . (int)$livePoll['id']
+    : 'add_poll.php?table=' . $tableId;
+
 /**
  * Default candidate prefill. required_players defaults to the max — the poll
  * resolves once that many people vote for the candidate.
@@ -83,6 +112,32 @@ function poll_candidate_defaults() {
         'name' => '', 'length_minutes' => 60, 'weight' => 2.0, 'max_players' => 4,
         'thumbnail' => '', 'bgg_id' => '', 'language' => '', 'required_players' => 4, 'source' => 'manual',
         'manual_link' => '', 'link' => '',
+    ];
+}
+
+/**
+ * Turn a stored poll_games row into the shape the form prefills from.
+ *
+ * The row's own bgg_id decides which form it is — a BGG candidate keeps its
+ * locked image and identity, a manual one gets the thumbnail picker — so an
+ * edit cannot accidentally convert one kind into the other.
+ *
+ * @param array $row  A poll_games row.
+ * @return array
+ */
+function poll_candidate_from_row($row) {
+    return [
+        'name'             => (string)$row['name'],
+        'length_minutes'   => (int)$row['length_minutes'],
+        'weight'           => (float)$row['weight'],
+        'max_players'      => (int)$row['max_players'],
+        'required_players' => (int)$row['required_players'],
+        'thumbnail'        => (string)($row['thumbnail'] ?? ''),
+        'bgg_id'           => (int)($row['bgg_id'] ?? 0),
+        'language'         => (string)($row['language'] ?? ''),
+        'manual_link'      => (string)($row['manual_link'] ?? ''),
+        'link'             => (string)($row['link'] ?? ''),
+        'source'           => !empty($row['bgg_id']) ? 'bgg' : 'manual',
     ];
 }
 
@@ -115,16 +170,70 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($cand['name'] === '' || !text_has_content($cand['name'])
         || text_too_long($cand['name'], TEXT_NAME_MAX)) {
         // Name is the only hard requirement; re-render with the error.
-        tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
+        tpl_render('header', ['page_title' => $editCand ? t('poll_cand_edit_title') : t('addpoll_candidate_title')]);
         tpl_render('poll_candidate_form', [
             'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
             'thumbs' => $cand['source'] === 'bgg' ? [] : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
             'error' => t('error_name_required'), 'csrf' => csrf_field(),
-        
+            // Keep the edit target across the failed submit, or saving again
+            // would append a duplicate instead of updating the row.
+            'edit_id' => $editCand ? (int)$editCand['id'] : 0,
+            'cancel_url' => $candCancel,
+
         // Editions to offer beside the name; [] unless enabled and BGG has several.
         'versions' => game_pick_versions($cand['bgg_id'] ?? 0),]);
         tpl_render('footer');
         exit;
+    }
+    /* ---- EDIT: update the row in place --------------------------------- *
+     * Before the add branches below, because an edit is never also an add.
+     * poll_id is in the WHERE as well as the id: the row was already scoped
+     * when it was loaded, and repeating it here means a tampered edit_cand
+     * cannot update a candidate belonging to another poll.                */
+    if ($editCand) {
+        db_run(
+            'UPDATE poll_games
+                SET name = ?, length_minutes = ?, weight = ?, max_players = ?,
+                    thumbnail = ?, language = ?, required_players = ?,
+                    manual_link = ?, link = ?
+              WHERE id = ? AND poll_id = ?',
+            [$cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
+             $cand['thumbnail'] !== '' ? $cand['thumbnail'] : null,
+             $cand['language'] !== '' ? $cand['language'] : null,
+             $cand['required_players'],
+             $cand['manual_link'] !== '' ? $cand['manual_link'] : null,
+             $cand['link'] !== '' ? $cand['link'] : null,
+             (int)$editCand['id'], (int)$livePoll['id']]
+        );
+        /* bgg_id is deliberately NOT updated: it is the candidate's identity,
+         * the form only ever echoes it back, and rewriting it here would let a
+         * tampered field repoint an option people had already voted for. */
+        log_action('poll_cand_edited', $cand['name'] . ' (poll #' . (int)$livePoll['id'] . ')');
+        // Voters hear about it, as they do for an added or removed option — a
+        // game they voted for changing its player count is exactly that kind
+        // of change. The proposer is told too, unless they are the one doing
+        // the editing: an ADMIN may edit somebody else's poll, and that is
+        // precisely the change its owner would want to hear about.
+        $tell = notify_poll_voter_emails((int)$livePoll['id']);
+        $cu = current_user();
+        $editorIsProposer =
+            ($cu && (int)($livePoll['proposer_user_id'] ?? 0) === (int)$cu['id'])
+            || !empty($_SESSION['poll_edit_ok'][(int)$livePoll['id']]);
+        if (!$editorIsProposer && !empty($livePoll['proposer_email'])) {
+            $tell[] = $livePoll['proposer_email'];
+        }
+        notify_poll_changed($livePoll, t('ntf_pollchg_edited', $cand['name']), $tell);
+        unset($_SESSION['poll_live_edit']);           // one candidate per trip
+        /* LOWERING "required players" can put a candidate straight over its
+         * threshold, so the poll may resolve on this very save — the same
+         * re-check edit_poll.php runs after removing an option. */
+        $resolved = poll_check_resolve((int)$livePoll['id']);
+        if ($resolved) {
+            $dayRow = db_one('SELECT * FROM event_days WHERE id = ?', [(int)$livePoll['day_id']]);
+            redirect(front_url((int)($dayRow['day_index'] ?? 1),
+                               (int)$livePoll['event_id'], '#game-') . $resolved);
+        }
+        redirect('edit_poll.php?poll=' . (int)$livePoll['id']);
     }
     if ($livePoll) {
         // Live edit: write straight into the poll and tell its voters. A brand
@@ -155,6 +264,27 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $draft['games'][] = $cand;                       // append to the session draft
     redirect('add_poll.php?table=' . $tableId);      // back to the poll screen
+}
+
+/* ---- EDIT an existing candidate -> prefilled form ------------------------ *
+ * Before the BGG/library pick branches: those all START a new candidate, and
+ * an edit already has one. The row's own bgg_id decides which form renders, so
+ * a BGG candidate keeps its locked image and a manual one keeps its picker. */
+if ($editCand && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $cand = poll_candidate_from_row($editCand);
+    tpl_render('header', ['page_title' => t('poll_cand_edit_title')]);
+    tpl_render('poll_candidate_form', [
+        'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
+        'thumbs' => $cand['source'] === 'bgg'
+            ? []                                  // image locked to the BGG one
+            : db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
+        'error' => null, 'csrf' => csrf_field(),
+        'edit_id' => (int)$editCand['id'],
+        'cancel_url' => $candCancel,
+        'versions' => game_pick_versions($cand['bgg_id'] ?? 0),
+    ]);
+    tpl_render('footer');
+    exit;
 }
 
 /* ---- BGG detail -> prefilled candidate form ------------------------------ */

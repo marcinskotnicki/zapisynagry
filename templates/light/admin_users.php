@@ -2,10 +2,18 @@
 /* =============================================================================
  *  templates/light/admin_users.php — Users tab. Presentation only.
  * -----------------------------------------------------------------------------
- *  A create-account form on top, then a table of accounts, each row carrying
- *  tiny inline forms: promote/demote (the button flips based on the current
- *  role), change email, reset password, and block/unblock (also flipping).
- *  Each posts a distinct "action" that inc/admin/users.php branches on.
+ *  A create-account form on top, then a table of accounts. Each row carries the
+ *  ACCOUNT controls as tiny inline forms — promote/demote, block/unblock,
+ *  verify/unverify (each button flips with the current state) and delete — every
+ *  one posting a distinct "action" that inc/admin/users.php branches on.
+ *
+ *  The account's DETAILS are not edited here: the name is a link to that user's
+ *  profile (user.php?user=N), which carries email, password, notifications and
+ *  their library. Changing an email or a password used to mean two inline forms
+ *  in every row, which made the table tall and put a bare password box on a
+ *  list page. The split is "this tab manages an account, that page edits a
+ *  person" — inc/admin/users.php still ACCEPTS the email/password actions, so
+ *  nothing that already posts them breaks.
  *
  *  RENDER VARS:
  *    $csrf  — hidden CSRF field.
@@ -52,7 +60,16 @@
     <tbody>
     <?php foreach ($users as $u): ?>
         <tr>
-            <td data-label="<?= e(t('users_email')) ?>"><?= e($u['display_name']) ?></td>
+            <?php /* The name opens that account's PROFILE (user.php?user=N),
+                   * where the email, password, notifications and library live.
+                   * They used to be two inline forms in this cell, which made
+                   * every row tall and put a bare password box on a list page.
+                   * The controls that remain here manage the ACCOUNT — role,
+                   * access, deletion — which is a different job from editing
+                   * the person's details. */ ?>
+            <td data-label="<?= e(t('users_email')) ?>">
+                <a href="user.php?user=<?= (int)$u['id'] ?>" class="user-link"><?= e($u['display_name']) ?></a>
+            </td>
             <td data-label="<?= e(t('users_name')) ?>"><?= e($u['email']) ?></td>
             <td data-label="<?= e(t('users_role')) ?>">
                 <?= (int)$u['is_admin'] === 1 ? e(t('users_admin')) : e(t('users_user')) ?>
@@ -66,29 +83,7 @@
                 <?php endif; ?>
             </td>
             <td data-label="<?= e(t('users_actions')) ?>" class="row-actions">
-                <?php // Email and password FIRST, so those two inputs start at the
-                      // same x on every row. The role and block controls vary in
-                      // width and are absent entirely on your own row, so leading
-                      // with them would stagger the columns. ?>
-                <?php // Change email (uniqueness enforced server-side). ?>
-                <form method="post" action="admin.php?tab=users" class="inline">
-                    <?= $csrf ?>
-                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                    <input type="hidden" name="action" value="email">
-                    <input type="email" name="email" placeholder="<?= e(t('users_change_email')) ?>" required>
-                    <button class="btn btn-small"><?= e(t('save')) ?></button>
-                </form>
-
-                <?php // Reset password (admin reset; no current-password needed). ?>
-                <form method="post" action="admin.php?tab=users" class="inline">
-                    <?= $csrf ?>
-                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                    <input type="hidden" name="action" value="password">
-                    <input type="password" name="password" placeholder="<?= e(t('users_new_password')) ?>" required>
-                    <button class="btn btn-small"><?= e(t('users_reset_password')) ?></button>
-                </form>
-
-                <?php // Role and block, last. Both are withheld on your OWN row:
+                <?php // Role and block. Both are withheld on your OWN row:
                       // either one would remove your own access mid-click. The
                       // controller refuses both as well — hiding a control is a
                       // courtesy, not a guard. ?>

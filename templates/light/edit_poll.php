@@ -159,6 +159,11 @@
                     <?= e(t('poll_needs', (int)$c['required_players'])) ?>
                     — <?= (int)poll_candidate_votes((int)$c['id']) ?> <?= e(t('poll_votes_label')) ?>
                 </span>
+                <?php // Change this option's details — the same form it was
+                      // added with. A link, not a form: it opens an editor
+                      // rather than performing the change here. ?>
+                <a class="btn btn-small"
+                   href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>&amp;edit=<?= (int)$c['id'] ?>"><?= e(t('poll_cand_edit')) ?></a>
                 <?php if (count($cands) > 1): // a poll must keep at least one option ?>
                     <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>" class="inline">
                         <?= $csrf ?>

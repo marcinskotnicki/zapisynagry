@@ -3,8 +3,15 @@
  *  inc/admin/users.php — Users tab controller.
  * -----------------------------------------------------------------------------
  *  Lists registered users and supports these actions: create a new account,
- *  promote/demote admin, change email, reset password, block/unblock. Each POST
- *  carries an 'action' (+ 'user_id' for the per-user ones).
+ *  promote/demote admin, change email, reset password, block/unblock,
+ *  verify/unverify and delete. Each POST carries an 'action' (+ 'user_id' for
+ *  the per-user ones).
+ *
+ *  The 'email' and 'password' actions no longer have a form on this tab — those
+ *  edits moved to the user's own profile page (user.php?user=N, reached by
+ *  clicking a name). They are KEPT here, working and guarded exactly as before:
+ *  they cost nothing, and removing a working admin action because its button
+ *  moved is how a URL somebody bookmarked starts failing silently.
  *
  *  SAFETY: demote refuses to remove the LAST admin, and block refuses both
  *  self-blocking and blocking the last usable admin, so the site can never be

@@ -13,9 +13,16 @@
  *                add only, add and fill gaps, or a full sync that also
  *                DELETES. Only the last needs the confirmation checkbox.
  *
- *  EVERY ACTION IS SCOPED TO THE SIGNED-IN MEMBER. Nothing here takes a user id
- *  from the request: a member can only ever edit their own library, so a
- *  hand-edited form has nothing to aim at.
+ *  EVERY ACTION IS SCOPED TO ONE OWNER, resolved ONCE below as $owner and used
+ *  everywhere in place of a request-supplied id. For a member that is always
+ *  themselves, so a hand-edited form still has nothing to aim at.
+ *
+ *  ADMIN MODE (?user=N): an admin may open and edit ANOTHER member's library,
+ *  reached from that member's profile (user.php?user=N). It only changes WHO
+ *  $owner is; every action, guard and query below is untouched, which is what
+ *  keeps the two modes from drifting apart. Honoured for admins only — for
+ *  anyone else the parameter is ignored rather than refused, so editing the URL
+ *  lands you back in your own library instead of confirming the id exists.
  *
  *  PRG throughout — each action stashes a flash and redirects, so a refresh
  *  after adding a game does not add it twice.
@@ -31,6 +38,18 @@ if (!library_enabled()) redirect('user.php');
 
 $me = current_user();
 
+/* WHOSE library this is (see ADMIN MODE above). Resolved once, from the GET or
+ * the POST, so a multi-step action keeps its target across the redirect. */
+$wantId = (int)($_GET['user'] ?? $_POST['user'] ?? 0);
+$owner  = $me;
+if ($wantId > 0 && is_admin() && $wantId !== (int)$me['id']) {
+    $row = db_one('SELECT * FROM users WHERE id = ?', [$wantId]);
+    if ($row) $owner = $row;
+}
+$isSelf  = (int)$owner['id'] === (int)$me['id'];
+// Every form posts here, and the PRG lands here: carries ?user= when applicable.
+$selfUrl = $isSelf ? 'my_library.php' : 'my_library.php?user=' . (int)$owner['id'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $action = $_POST['action'] ?? '';
@@ -39,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* Hide or show one game in the PUBLIC library. It stays in this list
          * either way — that is the point: a game lent to a friend is still
          * yours, it just should not be advertised as available. */
-        library_set_active((int)($_POST['game'] ?? 0), !empty($_POST['active']), $me['id']);
+        library_set_active((int)($_POST['game'] ?? 0), !empty($_POST['active']), $owner['id']);
         flash_set(t('lib_visibility_saved'));
 
     } elseif ($action === 'edit') {
@@ -50,16 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * only edit is a new link; a manual one takes name, year and link. */
         $editId  = (int)($_POST['game'] ?? 0);
         $editRow = $editId ? db_one('SELECT bgg_id FROM library_games WHERE id = ? AND user_id = ?',
-                                    [$editId, $me['id']]) : null;
+                                    [$editId, $owner['id']]) : null;
         if ($editRow && !empty($editRow['bgg_id'])) {
             // Name too: a BGG entry may carry a title in the wrong language.
-            library_flash_edit(library_relink_bgg($editId, $_POST['link'] ?? '', $me['id'], $_POST['name'] ?? ''));
+            library_flash_edit(library_relink_bgg($editId, $_POST['link'] ?? '', $owner['id'], $_POST['name'] ?? ''));
         } else {
             library_flash_edit(library_update_manual(
                 $editId,
                 $_POST['name'] ?? '',
                 (int)($_POST['year'] ?? 0),
-                $me['id'],
+                $owner['id'],
                 // Only accept a link when the field was actually offered, so a
                 // hand-built POST cannot set one the form would not show.
                 library_link_field_visible() ? ($_POST['link'] ?? '') : null
@@ -69,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'remove') {
         // Scoped by user id inside library_remove(), so an id from a
         // hand-edited form cannot reach anybody else's row.
-        library_remove($me['id'], (int)($_POST['game'] ?? 0));
+        library_remove($owner['id'], (int)($_POST['game'] ?? 0));
         flash_set(t('lib_removed'));
 
     } elseif ($action === 'add_manual') {
@@ -79,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('error_name_required'), 'error');
         } else {
             // Year is optional; 0 stores as NULL rather than printing "0".
-            library_add($me['id'], [
+            library_add($owner['id'], [
                 'name' => $name,
                 'year' => (int)($_POST['year'] ?? 0),
                 'link' => $link,
@@ -119,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 tpl_render('footer');
                 exit;
             }
-            library_add($me['id'], $entry);
+            library_add($owner['id'], $entry);
             flash_set(t('lib_added', $entry['name']));
         }
 
@@ -133,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('lib_bgg_not_found'), 'error');
         } else {
             $entry = library_apply_version_choice($entry, $gameId, $_POST);
-            library_add($me['id'], $entry);
+            library_add($owner['id'], $entry);
             flash_set(t('lib_added', $entry['name']));
         }
 
@@ -143,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * screen as adding, but it UPDATES the row instead of creating one. */
         $rowId = (int)($_POST['game'] ?? 0);
         $row   = $rowId ? db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?',
-                                 [$rowId, $me['id']]) : null;
+                                 [$rowId, $owner['id']]) : null;
         if (!$row || empty($row['bgg_id'])) {
             flash_set(t('lib_edit_failed'), 'error');
         } else {
@@ -171,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // The chooser's answer for an existing row.
         $rowId = (int)($_POST['game'] ?? 0);
         $row   = $rowId ? db_one('SELECT * FROM library_games WHERE id = ? AND user_id = ?',
-                                 [$rowId, $me['id']]) : null;
+                                 [$rowId, $owner['id']]) : null;
         if (!$row || empty($row['bgg_id'])) {
             flash_set(t('lib_edit_failed'), 'error');
         } else {
@@ -209,14 +228,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($collection === null) {
                     flash_set(t('lib_sync_failed', $why), 'error');
                 } else {
-                    $res = library_sync_from_collection($me['id'], $collection, $syncMode);
+                    $res = library_sync_from_collection($owner['id'], $collection, $syncMode);
                     $msg = t('lib_sync_done', $res['added'], $res['removed'], $res['kept']);
                     if (!empty($res['purged']))  $msg .= ' ' . t('lib_sync_purged', $res['purged']);
                     if (!empty($res['updated'])) $msg .= ' ' . t('lib_sync_updated', $res['updated']);
                     // Same top-up as the club shelf: fill in full-size pictures
                     // for games added before those were recorded.
                     // This member's own rows only — see library_backfill_images().
-                    $fill = library_backfill_images('library_games', 25, $me['id']);
+                    $fill = library_backfill_images('library_games', 25, $owner['id']);
                     // "sync again" only when there is actually more to do.
                     if ($fill['left'] > 0) {
                         $msg .= ' ' . t('lib_images_filled', $fill['done'], $fill['left']);
@@ -233,17 +252,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // when it is off, so switching the feature on restores each member's
         // earlier choice rather than resetting everyone.
         db_run('UPDATE users SET library_contact_ok = ? WHERE id = ?',
-               [empty($_POST['library_contact_ok']) ? 0 : 1, $me['id']]);
+               [empty($_POST['library_contact_ok']) ? 0 : 1, $owner['id']]);
         flash_set(t('lib_prefs_saved'));
     }
 
-    redirect('my_library.php');
+    redirect($selfUrl);
 }
 
-tpl_render('header', ['page_title' => t('lib_my_title')]);
+tpl_render('header', ['page_title' => $isSelf
+    ? t('lib_my_title') : t('lib_my_title_admin', $owner['display_name'])]);
 tpl_render('my_library', [
-    'games' => library_for_user($me['id']),
-    'user'  => $me,
+    'games' => library_for_user($owner['id']),
+    // The OWNER, not the viewer: the contact preference on this page belongs to
+    // whoever's library it is, and an admin sending $me here would edit their
+    // own setting from somebody else's screen.
+    'user'  => $owner,
+    // Admin mode: name whose library this is, and where the forms post.
+    'as_admin' => !$isSelf,
+    'self_url' => $selfUrl,
     'flash' => flash_get(),
     // Read AFTER flash_get(), which clears the text — see flash_kind().
     'flash_kind' => flash_kind(),

@@ -9,18 +9,30 @@
  *  A BGG-sourced candidate locks its image (hidden bgg_id + thumbnail, shown as
  *  a preview); a manual candidate shows the predefined-thumbnail picker.
  *
+ *  EDITING uses this same form, so the fields on offer can never differ between
+ *  adding an option and changing one: $edit_id names the poll_games row being
+ *  changed, which turns the heading, the submit label and the target into their
+ *  edit wording. Zero (the default) means "adding".
+ *
  *  RENDER VARS:
  *    $table  — the table the poll belongs to.
  *    $cand   — prefill values for the candidate.
  *    $source — 'manual' or 'bgg' (drives the image area + hidden fields).
  *    $thumbs — predefined thumbnails for the manual picker (empty for BGG).
+ *    $edit_id— poll_games id being edited, or 0 when adding.
+ *    $cancel_url — where Cancel goes (the poll editor, or the add-poll screen).
  *    $error  — message above the form, or null.
  *    $csrf   — hidden CSRF field.
  * ============================================================================= */
 $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
+/* Defaults, so a caller that predates editing still renders the add form it
+ * always did rather than a blank heading and a dead Cancel link. */
+$edit_id    = (int)($edit_id ?? 0);
+$isEdit     = $edit_id > 0;
+$cancel_url = $cancel_url ?? ('add_poll.php?table=' . (int)$table['id']);
 ?>
 <div class="card">
-    <h1><?= e(t('addpoll_candidate_title')) ?></h1>
+    <h1><?= e($isEdit ? t('poll_cand_edit_title') : t('addpoll_candidate_title')) ?></h1>
 
     <?php if (!empty($error)): ?>
         <p class="msg msg-error"><?= e($error) ?></p>
@@ -31,6 +43,11 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
         <?= antibot_field() ?>
         <input type="hidden" name="mode" value="save">
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
+        <?php // Which row an edit updates. Absent while adding, so the same
+              // handler appends instead — see add_poll_game.php's save branch. ?>
+        <?php if ($isEdit): ?>
+            <input type="hidden" name="edit_cand" value="<?= $edit_id ?>">
+        <?php endif; ?>
         <input type="hidden" name="source" value="<?= e($source) ?>">
         <?php if ($isBgg): // carry the locked BGG identity + image through ?>
             <input type="hidden" name="bgg_id" value="<?= e($cand['bgg_id']) ?>">
@@ -144,8 +161,8 @@ $isBgg = ($source === 'bgg');   // BGG candidates keep a locked image
         <?php endif; ?>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><?= e(t('poll_addgame')) ?></button>
-            <a class="btn" href="add_poll.php?table=<?= (int)$table['id'] ?>"><?= e(t('cancel')) ?></a>
+            <button type="submit" class="btn btn-primary"><?= e($isEdit ? t('save') : t('poll_addgame')) ?></button>
+            <a class="btn" href="<?= e($cancel_url) ?>"><?= e(t('cancel')) ?></a>
         </div>
     </form>
 </div>

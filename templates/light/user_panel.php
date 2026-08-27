@@ -6,16 +6,45 @@
  *  and three independent profile forms (display name, email, password). Each
  *  form carries a different hidden "action" so user.php knows which to apply.
  *
+ *  ADMIN MODE: with $as_admin the same markup renders an admin's view of
+ *  SOMEBODY ELSE'S profile (user.php?user=N). Three differences, each explained
+ *  at its own site below: a heading naming whose profile this is, no
+ *  current-password field, and no theme/language card at all.
+ *
  *  RENDER VARS:
- *    $user                         — the logged-in user row (prefills the forms).
+ *    $user                         — the account being edited (prefills the forms).
+ *    $as_admin                     — true when that account is not your own.
+ *    $ask_current                  — whether to ask for the current password.
+ *    $self_url                     — where the forms post (carries ?user=N).
  *    $flash                        — one-shot confirmation message, or null.
  *    $brought_event / $brought_all — games-brought counts.
  *    $played_event  / $played_all  — games-played counts.
  *    $csrf                         — hidden CSRF field.
  * ============================================================================= */
+
+/* Defaults so the panel still renders if a caller (or a forked theme) omits the
+ * admin-mode vars: "my own profile", which is what this page has always been. */
+$as_admin    = !empty($as_admin);
+$ask_current = isset($ask_current) ? (bool)$ask_current : true;
+$self_url    = $self_url ?? 'user.php';
+// Carried inside every form, so the POST edits the same account the GET showed.
+$uid_field   = $as_admin
+    ? '<input type="hidden" name="user" value="' . (int)$user['id'] . '">'
+    : '';
 ?>
 <div class="userpanel">
-    <h1><?= e(t('up_title')) ?></h1>
+    <?php // Whose profile this is. On your own it is the plain panel title; an
+          // admin gets the account named, plus the way back to the tab they
+          // came from — without it the only route back is the browser button. ?>
+    <?php if ($as_admin): ?>
+        <h1><?= e(t('up_title_admin', $user['display_name'])) ?></h1>
+        <p class="muted userpanel-back">
+            <a href="admin.php?tab=users"><?= e(t('up_back_to_users')) ?></a>
+            &middot; <?= e($user['email']) ?>
+        </p>
+    <?php else: ?>
+        <h1><?= e(t('up_title')) ?></h1>
+    <?php endif; ?>
 
     <?php if (!empty($flash)): // result of the last profile change ?>
         <?php // A refusal ("that password is wrong") drawn green reads as success. ?>
@@ -42,8 +71,8 @@
 
     <div class="profile-forms">
         <?php // Change display name (action=name). ?>
-        <form method="post" action="user.php" class="card profile-card">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="name">
             <h3><?= e(t('up_change_name')) ?></h3>
             <div class="field field-display_name">
@@ -56,8 +85,8 @@
         </form>
 
         <?php // Change email (action=email; uniqueness checked server-side). ?>
-        <form method="post" action="user.php" class="card profile-card">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="email">
             <h3><?= e(t('up_change_email')) ?></h3>
             <div class="field field-email">
@@ -70,8 +99,8 @@
         </form>
 
         <?php // Change password (action=password; requires the current one). ?>
-        <form method="post" action="user.php" class="card profile-card">
-            <?= $csrf ?>
+        <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
+            <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="password">
             <h3><?= e(t('up_change_password')) ?></h3>
             <?php /* A GENTLE NUDGE, not a nag: somebody who signs in with
@@ -83,8 +112,11 @@
                 <p class="field-note"><?= e(t('google_set_password_hint')) ?></p>
             <?php endif; ?>
             <?php // Nothing to ask for when there is no password yet, and
-                  // asking would make setting a first one impossible. ?>
-            <?php if (empty($no_password)): ?>
+                  // asking would make setting a first one impossible. An ADMIN
+                  // resetting somebody else's is not asked either — they cannot
+                  // know it, which is the point of a reset (user.php enforces
+                  // this too; hiding the field alone would not). ?>
+            <?php if (empty($no_password) && $ask_current): ?>
             <div class="field field-current_password">
                 <label for="current_password"><?= e(t('up_current_password')) ?></label>
                 <input type="password" id="current_password" name="current_password" required>
@@ -115,7 +147,10 @@
                 <h3><?= e(t('lib_my_title')) ?></h3>
                 <p class="muted"><?= e(t('lib_panel_hint')) ?></p>
                 <div class="form-actions">
-                    <a class="btn btn-primary" href="my_library.php"><?= e(t('lib_open_btn')) ?></a>
+                    <?php // Admins open THAT member's library; my_library.php
+                          // applies the same admin-only rule to its ?user=. ?>
+                    <a class="btn btn-primary" href="<?= $as_admin
+                        ? 'my_library.php?user=' . (int)$user['id'] : 'my_library.php' ?>"><?= e(t('lib_open_btn')) ?></a>
                 </div>
             </div>
         <?php endif; ?>
@@ -124,9 +159,9 @@
                  the feature AND the site actually sends mail — a checkbox that
                  silently does nothing is worse than no checkbox. */ ?>
         <?php if (opt_bool('notify_new_event') && opt_bool('send_emails')): ?>
-        <form method="post" action="user.php" class="card profile-card">
+        <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
             <h3><?= e(t('up_notifications')) ?></h3>
-            <?= csrf_field() ?>
+            <?= csrf_field() ?><?= $uid_field ?>
             <input type="hidden" name="action" value="notify">
             <div class="field field-check field-notify_new_event">
                 <label>
@@ -141,8 +176,14 @@
         </form>
         <?php endif; ?>
 
-        <?php $upTpl  = tpl_switch_allowed()  && count(tpl_available())  > 1;
-              $upLang = lang_switch_allowed() && count(lang_available()) > 1; ?>
+        <?php /* THEME / LANGUAGE — your own panel only.
+                 Both preferences live in the VISITOR'S OWN COOKIE (prefs.php,
+                 tpl_current()), not on the user row, so on somebody else's
+                 profile there is nothing here to read or write: the values
+                 would be the ADMIN'S, shown under another person's name. So the
+                 card is omitted rather than rendered read-only. */ ?>
+        <?php $upTpl  = !$as_admin && tpl_switch_allowed()  && count(tpl_available())  > 1;
+              $upLang = !$as_admin && lang_switch_allowed() && count(lang_available()) > 1; ?>
         <?php if ($upTpl || $upLang): ?>
         <form method="post" action="prefs.php" class="card profile-card">
             <h3><?= e(t('up_prefs')) ?></h3>
