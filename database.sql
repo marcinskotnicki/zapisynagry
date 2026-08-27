@@ -85,6 +85,21 @@ INSERT INTO options (key, value) VALUES
     -- 'max'/'avg' fall back to 120 when there are no candidates yet, or none
     -- of them have a length set (see poll_length_minutes()).
     ('poll_game_length_mode', 'fixed'),
+    -- EVENT PRESENTATION. All three default OFF, so nothing about the front
+    -- page changes for an existing club until an admin asks for it.
+    -- home_event_list: with no event chosen, index.php lists the active events
+    --   instead of opening one. An explicit ?event=<id> still opens that event.
+    ('home_event_list',   '0'),
+    -- event_details: adds location name / address / thumbnail to the event
+    --   forms, and shows them on the tabs, the event list and the calendar.
+    ('event_details',     '0'),
+    -- hide_event_tabs: drop the event switcher bar entirely — for clubs that
+    --   navigate via the event list instead.
+    ('hide_event_tabs',   '0'),
+    -- Prefills for the two location fields on a NEW event; most clubs meet in
+    -- the same place every time, so typing it once is enough.
+    ('default_location_name',    ''),
+    ('default_location_address', ''),
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
     -- allow_manual_links: 1 = the person bringing a game may attach a rules /
     -- manual URL (a PDF, a video) which shows as a button on the card. Off
@@ -489,7 +504,13 @@ CREATE TABLE events (
     -- an event_days.id so it survives days being rebuilt when an event's length
     -- changes — and it is re-checked against the days that actually exist, so a
     -- stale index left by shortening an event cannot open a day that is gone.
-    highlight_day INTEGER
+    highlight_day INTEGER,
+    -- OPTIONAL EVENT DETAILS, shown only when the 'event_details' option is on.
+    -- All three are nullable and empty by default, so an event created before
+    -- the feature existed (or by a club that never turns it on) is unaffected.
+    location_name    TEXT,   -- e.g. "Klubokawiarnia Planszowa"
+    location_address TEXT,   -- free-form, multi-line; rendered with newlines kept
+    thumbnail        TEXT    -- relative path under /thumbnails, longest edge <= 600px
 );
 
 

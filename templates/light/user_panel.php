@@ -150,7 +150,8 @@ $uid_field   = $as_admin
                     <?php // Admins open THAT member's library; my_library.php
                           // applies the same admin-only rule to its ?user=. ?>
                     <a class="btn btn-primary" href="<?= $as_admin
-                        ? 'my_library.php?user=' . (int)$user['id'] : 'my_library.php' ?>"><?= e(t('lib_open_btn')) ?></a>
+                        ? 'my_library.php?user=' . (int)$user['id'] : 'my_library.php' ?>"><?= e($as_admin
+                        ? t('lib_open_btn_other') : t('lib_open_btn')) ?></a>
                 </div>
             </div>
         <?php endif; ?>

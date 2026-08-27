@@ -56,8 +56,23 @@
                                   // two clubs sharing a date is normal, and one
                                   // link would hide the other. ?>
                             <?php foreach ($evs as $ev): ?>
-                                <a class="cal-ev" href="index.php?event=<?= (int)$ev['id'] ?>&amp;day=<?= (int)$ev['day'] ?>"
-                                   title="<?= e($ev['name']) ?>"><?= e($ev['name']) ?></a>
+                                <?php /* Location under the name, when the details
+                                         feature is on and this event has one.
+                                         event_details() wants a row shaped like
+                                         an events row, and the calendar's rows
+                                         carry only the one field it needs here —
+                                         no address and no picture on a calendar,
+                                         where a cell is a few characters wide. */
+                                      $calLoc = event_details_enabled()
+                                          ? trim((string)($ev['location_name'] ?? '')) : ''; ?>
+                                <a class="cal-ev<?= $calLoc !== '' ? ' cal-ev-withloc' : '' ?>"
+                                   href="index.php?event=<?= (int)$ev['id'] ?>&amp;day=<?= (int)$ev['day'] ?>"
+                                   title="<?= e($ev['name']) ?>">
+                                    <span class="cal-ev-name"><?= e($ev['name']) ?></span>
+                                    <?php if ($calLoc !== ''): ?>
+                                        <span class="cal-ev-loc"><?= e($calLoc) ?></span>
+                                    <?php endif; ?>
+                                </a>
                             <?php endforeach; ?>
                         </td>
                     <?php endforeach; ?>

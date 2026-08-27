@@ -112,6 +112,15 @@ if (($_POST['mode'] ?? '') === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         // A BGG game's image is locked: keep the stored thumbnail; manual games
         // can change it via the picker.
         $thumbnail = (int)$game['bgg_id'] ? $game['thumbnail'] : trim($_POST['thumbnail'] ?? '');
+        /* And a manual game's new picture must be one the admin uploaded — the
+         * radio group is only a suggestion until it is checked. Anything else
+         * falls back to the picture the game already had rather than to none,
+         * so a thumbnail the admin has since deleted from the library is not
+         * silently stripped off the games still using it. Clearing on purpose
+         * still works: '' is a valid choice, and passes. */
+        if (!(int)$game['bgg_id'] && !thumbnail_is_predefined($thumbnail)) {
+            $thumbnail = $game['thumbnail'];
+        }
         db_run(
             'UPDATE games SET name=?, length_minutes=?, weight=?, max_players=?, start_time=?,
                     thumbnail=?, language=?, link=?, manual_link=?, brings_name=?, brings_email=?, explain_rules=?, require_email=?, comment=? WHERE id=?',

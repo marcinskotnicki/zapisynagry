@@ -94,6 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'add_manual') {
         $name = trim($_POST['name'] ?? '');
         $link = game_link_sanitize($_POST['link'] ?? '');
+        /* A picture for a game BGG has never heard of. Only the admin's own
+         * uploads are on offer, and the answer is CHECKED rather than trusted —
+         * see thumbnail_is_predefined(). An unrecognised value becomes "none"
+         * rather than an error: the only way to send one is to build the POST
+         * by hand, and there is nothing useful to tell that visitor. */
+        $thumb = trim($_POST['thumbnail'] ?? '');
+        if (!thumbnail_is_predefined($thumb)) $thumb = '';
         if ($name === '' || !text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) {
             flash_set(t('error_name_required'), 'error');
         } else {
@@ -102,9 +109,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'name' => $name,
                 'year' => (int)($_POST['year'] ?? 0),
                 'link' => $link,
+                'thumbnail' => $thumb,
             ]);
             flash_set(t('lib_added', $name));
         }
+
+    } elseif ($action === 'search_bgg') {
+        /* Find a game by NAME instead of pasting its address — the same search
+         * the add-game flow offers, so a member who has used one already knows
+         * this one. Each hit posts back as an ordinary 'add_bgg' with the id in
+         * place of a link, which means the edition chooser and every other rule
+         * below apply to a searched game exactly as to a pasted one.
+         *
+         * Rendered here rather than redirected to, so the results just fetched
+         * are shown immediately instead of being stashed in the session. */
+        $query = trim($_POST['q'] ?? '');
+        $problem = null;
+        if ($query === '')            $problem = 'empty';
+        elseif (!bgg_configured())    $problem = 'unconfigured';
+        $results = $problem === null ? bgg_search($query) : [];
+        tpl_render('header', ['page_title' => $isSelf
+            ? t('lib_my_title') : t('lib_my_title_admin', $owner['display_name'])]);
+        tpl_render('lib_bgg_search', [
+            'query' => $query, 'results' => $results, 'problem' => $problem,
+            'action' => $selfUrl, 'back' => $selfUrl,
+            'uid_field' => $isSelf ? '' : '<input type="hidden" name="user" value="' . (int)$owner['id'] . '">',
+            'csrf' => csrf_field(),
+        ]);
+        tpl_render('footer');
+        exit;
 
     } elseif ($action === 'add_bgg') {
         $why = '';

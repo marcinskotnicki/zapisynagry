@@ -429,6 +429,32 @@ $groupEnd = function () { echo '</div></details>'; };
         $text('archive_per_page', 'number');   // events per page on the public list
         $text('auto_archive_days', 'number');  // 0 = never auto-archive
         ?>
+
+        <?php /* HOW EVENTS ARE PRESENTED. All three default off, so a club that
+                 never opens this group sees exactly what it always has. */ ?>
+        <?php $toggle('home_event_list'); ?>
+        <p class="field-note"><?= e(t('opt_home_event_list_note')) ?></p>
+
+        <?php $toggle('hide_event_tabs'); ?>
+        <p class="field-note"><?= e(t('opt_hide_event_tabs_note')) ?></p>
+
+        <?php $toggle('event_details'); ?>
+        <p class="field-note"><?= e(t('opt_event_details_note')) ?></p>
+
+        <?php /* Prefills for a NEW event's location. Rendered unconditionally,
+                 even though they only do anything once the details above are on:
+                 every option this form can SAVE has to be visible on it, or it
+                 becomes a value an admin can neither see nor correct. The note
+                 says when they apply instead. */ ?>
+        <?php $text('default_location_name'); ?>
+        <div class="field field-default_location_address">
+            <label for="default_location_address"><?= e(t('opt_default_location_address')) ?></label>
+            <?php // A textarea, because an address is several lines and is
+                  // rendered with its newlines kept. ?>
+            <textarea id="default_location_address" name="default_location_address"
+                      rows="3"><?= e(opt('default_location_address')) ?></textarea>
+        </div>
+        <p class="field-note"><?= e(t('opt_default_location_note')) ?></p>
     <?php $groupEnd(); ?>
 
     <?php /* 4b. CLUB LIBRARY */ ?>

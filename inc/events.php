@@ -149,6 +149,62 @@ function events_count($archivedOnly = false, $includeDeleted = false) {
  *
  * @return array  Event rows with date_from / date_to attached.
  */
+/**
+ * Are the optional event details (location name, address, picture) in use?
+ *
+ * Off by default. When off, the fields stay on the events table but are never
+ * asked for and never rendered — an admin who tries the feature, fills a few
+ * in and turns it back off keeps what they typed rather than losing it.
+ *
+ * @return bool
+ */
+function event_details_enabled() {
+    return opt_bool('event_details');
+}
+
+/**
+ * With no event chosen, should the front page list the active events instead of
+ * opening one? Off by default, which is the behaviour every existing club has.
+ * @return bool
+ */
+function home_event_list_enabled() {
+    return opt_bool('home_event_list');
+}
+
+/**
+ * Should the event switcher bar be left off the page entirely? For clubs that
+ * navigate via the event list and want the event page itself uncluttered.
+ * @return bool
+ */
+function event_tabs_hidden() {
+    return opt_bool('hide_event_tabs');
+}
+
+/**
+ * The location details worth rendering for an event, or [] when there are none.
+ *
+ * One place decides this, because four templates ask the same question and
+ * "details are on AND this event actually filled something in" is the kind of
+ * condition that drifts when it is written out four times. Returns the pieces
+ * separately rather than pre-rendered markup — the tabs, the list and the
+ * calendar each present them differently.
+ *
+ * @param array $ev  An events row.
+ * @return array  ['name' => string, 'address' => string, 'thumbnail' => string]
+ *                with empty strings for the parts this event has not got; [] if
+ *                the feature is off or the event has nothing at all.
+ */
+function event_details($ev) {
+    if (!event_details_enabled()) return [];
+    $out = [
+        'name'      => trim((string)($ev['location_name'] ?? '')),
+        'address'   => trim((string)($ev['location_address'] ?? '')),
+        'thumbnail' => trim((string)($ev['thumbnail'] ?? '')),
+    ];
+    if ($out['name'] === '' && $out['address'] === '' && $out['thumbnail'] === '') return [];
+    return $out;
+}
+
 function events_active() {
     return db_all(
         "SELECT e.*,
@@ -163,10 +219,15 @@ function events_active() {
 /**
  * Every event day falling inside a calendar month, keyed by 'YYYY-MM-DD'.
  *
- * Returns a map of date => list of ['id','name'] so the calendar can mark a
- * cell and link it without a query per day. A multi-day event appears under
- * EVERY day it covers, which is what a calendar reader expects — an event
+ * Returns a map of date => list of ['id','name','location_name'] so the calendar
+ * can mark a cell and link it without a query per day. A multi-day event appears
+ * under EVERY day it covers, which is what a calendar reader expects — an event
  * running Fri-Sun should be visible on all three.
+ *
+ * location_name rides along for the calendar's second line. Selected
+ * unconditionally: whether it is SHOWN is the template's business (via
+ * event_details()), and making the query depend on the option would mean the
+ * calendar quietly returning different columns depending on a setting.
  *
  * Archived events are included: the calendar lives in the archive section and
  * looking back at what happened is its whole purpose.
@@ -179,7 +240,7 @@ function events_by_day($year, $month) {
     $first = sprintf('%04d-%02d-01', $year, $month);
     $last  = date('Y-m-t', strtotime($first));
     $rows  = db_all(
-        "SELECT d.day_date, d.day_index, e.id, e.name
+        "SELECT d.day_date, d.day_index, e.id, e.name, e.location_name
            FROM event_days d
            JOIN events e ON e.id = d.event_id
           WHERE d.day_date BETWEEN ? AND ?
@@ -196,6 +257,8 @@ function events_by_day($year, $month) {
             'id'   => (int)$r['id'],
             'name' => $r['name'],
             'day'  => (int)$r['day_index'],
+            // Second line under the name; the template decides whether to use it.
+            'location_name' => (string)($r['location_name'] ?? ''),
         ];
     }
     return $out;

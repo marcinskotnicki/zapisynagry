@@ -21,12 +21,21 @@
 
 const MAX_EVENT_DAYS = 60;   // sanity cap on the day count
 
+// thumb_process(), for the optional event picture on screen 1.
+require_once __DIR__ . '/../images.php';
+
 $stage = 'start';
 $error = null;
 
 // Defaults / carried values for the template (screen 1 initial render).
 $name     = opt('default_event_name');
 $num_days = 1;
+/* OPTIONAL EVENT DETAILS, prefilled from the configured defaults — most clubs
+ * meet in the same place every time, so typing it once is enough. Collected on
+ * screen 1 and carried hidden through screen 2, like the name and day count. */
+$loc_name = opt('default_location_name');
+$loc_addr = opt('default_location_address');
+$thumb    = '';                  // relative path once an image has been processed
 $days     = [];   // list of ['date'=>, 'start'=>, 'end'=>] for screen 2 prefill
 
 // day_names_enabled() / day_tab_formats() live here; this tab does not otherwise
@@ -46,6 +55,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Name falls back to the configured default; day count is clamped 1..MAX.
     $name      = trim($_POST['name'] ?? '') ?: opt('default_event_name');
     $num_days  = max(1, min(MAX_EVENT_DAYS, (int)($_POST['num_days'] ?? 1)));
+    /* Carried on both posts. Read even when the feature is off, so that turning
+     * it off mid-flow cannot half-create an event — the values simply stay
+     * empty because the fields were never rendered. */
+    $loc_name  = trim((string)($_POST['location_name'] ?? ''));
+    $loc_addr  = trim((string)($_POST['location_address'] ?? ''));
+    // Screen 2 hands back the path screen 1 produced.
+    $thumb     = trim((string)($_POST['thumbnail'] ?? ''));
+
+    /* THE PICTURE is processed the moment it is uploaded, on screen 1, and only
+     * its path travels on. A file input cannot be carried through a second form
+     * the way a text field can, so deferring it to the create step would mean
+     * losing the upload on every screen-2 validation error. Failure is not
+     * fatal: the event is still worth creating without a picture, and the admin
+     * can add one from the event's own screen afterwards. */
+    if (event_details_enabled()
+        && !empty($_FILES['thumb_file']['tmp_name'])
+        && is_uploaded_file($_FILES['thumb_file']['tmp_name'])) {
+        $made = thumb_process($_FILES['thumb_file']['tmp_name'], $APP_ROOT . '/thumbnails', 600);
+        if ($made !== null) $thumb = $made;
+    }
 
     if ($postStage === 'start') {
         // Screen 1 submitted -> advance to screen 2 with one prefilled row per day.
@@ -104,8 +133,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Unguessable share token for the read-only archive link later.
                 $token = bin2hex(random_bytes(16));
-                db_run('INSERT INTO events (name, num_days, access_token) VALUES (?,?,?)',
-                       [$name, $num_days, $token]);
+                db_run('INSERT INTO events (name, num_days, access_token, location_name, location_address, thumbnail)
+                        VALUES (?,?,?,?,?,?)',
+                       [$name, $num_days, $token,
+                        // NULL rather than '' for "not given": one value in the
+                        // column instead of two, same as day_name above.
+                        $loc_name !== '' ? $loc_name : null,
+                        $loc_addr !== '' ? $loc_addr : null,
+                        $thumb    !== '' ? $thumb    : null]);
                 $eventId = (int)db()->lastInsertId();
 
                 // Insert the days (1-based day_index).
@@ -171,6 +206,10 @@ $tab_body = tpl_capture('admin_new_event', [
     'stage'    => $stage,        // 'start' or 'days' — which screen to render
     'name'     => $name,
     'num_days' => $num_days,
+    'loc_name' => $loc_name,
+    'loc_addr' => $loc_addr,
+    'thumb'    => $thumb,
+    'details'  => event_details_enabled(),
     'days'     => $days,         // prefill rows for screen 2
     'error'    => $error,
     'current'  => $current,      // live event row, or null (drives the rename form)

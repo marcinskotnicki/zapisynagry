@@ -677,6 +677,27 @@ function custom_page($id) {
  *
  * @return bool
  */
+/**
+ * Is this the filename of an admin-uploaded predefined thumbnail?
+ *
+ * The picker offers a radio group, and a radio group is only a suggestion: the
+ * value that arrives is whatever was posted. Everywhere a member may choose a
+ * picture, the answer is checked against the predefined_thumbnails table rather
+ * than trusted, so a hand-built POST cannot point a game's art at an arbitrary
+ * path or an off-site URL.
+ *
+ * An empty string is "no picture" and is always allowed — that is the picker's
+ * own first option.
+ *
+ * @param string $file  The submitted filename.
+ * @return bool
+ */
+function thumbnail_is_predefined($file) {
+    $file = trim((string)$file);
+    if ($file === '') return true;                  // "none" is a valid choice
+    return (int)db_val('SELECT COUNT(*) FROM predefined_thumbnails WHERE filename = ?', [$file]) > 0;
+}
+
 function public_archives_enabled() {
     return opt_bool('public_archives');
 }

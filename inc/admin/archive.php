@@ -112,6 +112,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             log_action('event_rename', 'event #' . $id . ' -> ' . $newName);
             $flash = t('saved_ok');
         }
+        /* The optional details ride along with the rename form, since they are
+         * the same "what is this event" screen. Applied only when the feature is
+         * on: with it off the fields are not rendered, and writing them from an
+         * absent POST would blank what a club typed before turning it off. */
+        if (event_details_enabled()) {
+            require_once __DIR__ . '/../images.php';   // thumb_process()
+            $locName = trim((string)($_POST['location_name'] ?? ''));
+            $locAddr = trim((string)($_POST['location_address'] ?? ''));
+            db_run('UPDATE events SET location_name = ?, location_address = ? WHERE id = ?',
+                   [$locName !== '' ? $locName : null,
+                    $locAddr !== '' ? $locAddr : null, $id]);
+            // A new picture replaces the old one; uploading nothing keeps it.
+            if (!empty($_FILES['thumb_file']['tmp_name'])
+                && is_uploaded_file($_FILES['thumb_file']['tmp_name'])) {
+                $made = thumb_process($_FILES['thumb_file']['tmp_name'], $APP_ROOT . '/thumbnails', 600);
+                if ($made !== null) db_run('UPDATE events SET thumbnail = ? WHERE id = ?', [$made, $id]);
+            }
+            // Explicit "remove the picture", which an upload field cannot express.
+            if (!empty($_POST['thumb_clear'])) {
+                db_run('UPDATE events SET thumbnail = NULL WHERE id = ?', [$id]);
+            }
+            $flash = t('saved_ok');
+        }
 
     } elseif ($id > 0 && $act === 'highlight') {
         /* Which day the event opens on when no ?day= is given. 0 clears it and
@@ -246,6 +269,7 @@ if ($editId > 0) {
             'days'       => $editDays,
             'day_info'   => $dayInfo,
             'can_manage' => public_archives_enabled() || (int)$editEvent['is_archived'] === 0,
+            'details'    => event_details_enabled(),
         ]);
         return;   // this tab renders the edit screen instead of the list
     }

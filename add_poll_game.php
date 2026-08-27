@@ -167,6 +167,15 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'language'         => trim($_POST['language'] ?? ''),
         'source'           => ($_POST['source'] ?? 'manual') === 'bgg' ? 'bgg' : 'manual',
     ];
+    /* Manual candidates may only carry an admin-uploaded picture — same rule as
+     * the game form. A BGG candidate's thumbnail is BGG's own URL and is left
+     * alone. When EDITING, an unrecognised value falls back to the picture the
+     * candidate already had rather than to none: an admin who has since deleted
+     * a thumbnail from the library should not silently strip it off games that
+     * were using it just because somebody re-saved the form. */
+    if ($cand['source'] !== 'bgg' && !thumbnail_is_predefined($cand['thumbnail'])) {
+        $cand['thumbnail'] = $editCand ? (string)($editCand['thumbnail'] ?? '') : '';
+    }
     if ($cand['name'] === '' || !text_has_content($cand['name'])
         || text_too_long($cand['name'], TEXT_NAME_MAX)) {
         // Name is the only hard requirement; re-render with the error.

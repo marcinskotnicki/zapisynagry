@@ -43,7 +43,11 @@ if ($tokenQS === '' && public_archives_enabled()
       // is more than one event worth offering — a single tab pointing at the
       // page you are already on is noise. Horizontally scrollable rather than
       // wrapping, so a club with many upcoming dates keeps one tidy strip. ?>
-<?php if (!empty($event_tabs) && count($event_tabs) > 1): ?>
+<?php // The switcher can be turned off entirely — for clubs that navigate via
+      // the event list and want the event page itself uncluttered. Checked here
+      // rather than by not passing $event_tabs, so the reason is visible at the
+      // place the bar would have been. ?>
+<?php if (!event_tabs_hidden() && !empty($event_tabs) && count($event_tabs) > 1): ?>
     <?php // Reuses the DAY-tab classes on purpose. Eight of the ten themes
           // restyle .day-tab / .day-tab-active / .day-tab-date heavily; giving
           // the event switcher its own class names would have left it looking
@@ -59,14 +63,30 @@ if ($tokenQS === '' && public_archives_enabled()
     <nav class="day-tabs event-tabs" aria-label="<?= e(t('event_switch')) ?>">
         <?php foreach ($event_tabs as $et): ?>
             <?php $isHere = (int)$et['id'] === (int)$event['id']; ?>
-            <a class="day-tab event-tab<?= $isHere ? ' day-tab-active' : '' ?>"
+            <?php $etd = event_details($et); ?>
+            <a class="day-tab event-tab<?= $isHere ? ' day-tab-active' : '' ?><?= !empty($etd['thumbnail']) ? ' event-tab-withpic' : '' ?>"
                href="index.php?event=<?= (int)$et['id'] ?>"
                <?= $isHere ? 'aria-current="page"' : '' ?>>
-                <span class="event-tab-name"><?= e($et['name']) ?></span>
-                <?php $etLabel = event_date_label($et); ?>
-                <?php if ($etLabel !== ''): ?>
-                    <span class="day-tab-date"><?= e($etLabel) ?></span>
+                <?php // Picture to the LEFT of the words, so the block of text
+                      // below stays a single column whether or not there is one. ?>
+                <?php if (!empty($etd['thumbnail'])): ?>
+                    <img class="event-tab-thumb" src="<?= e($etd['thumbnail']) ?>" alt="">
                 <?php endif; ?>
+                <span class="event-tab-text">
+                    <span class="event-tab-name"><?= e($et['name']) ?></span>
+                    <?php $etLabel = event_date_label($et); ?>
+                    <?php if ($etLabel !== ''): ?>
+                        <span class="day-tab-date"><?= e($etLabel) ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($etd['name'])): ?>
+                        <span class="event-tab-loc"><?= e($etd['name']) ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($etd['address'])): ?>
+                        <?php // Escape, THEN break the lines — the other order
+                              // would let typed markup through. ?>
+                        <span class="event-tab-addr"><?= nl2br(e($etd['address'])) ?></span>
+                    <?php endif; ?>
+                </span>
             </a>
         <?php endforeach; ?>
     </nav>

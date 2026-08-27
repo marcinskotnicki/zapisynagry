@@ -14,6 +14,8 @@
  *    $stage    — 'start' or 'days'.
  *    $name     — event name (prefill / carried hidden on screen 2).
  *    $num_days — number of days.
+ *    $details  — whether the optional event details are switched on.
+ *    $loc_name / $loc_addr / $thumb — those details (carried between screens).
  *    $days     — per-day rows ['date','start','end'] (screen 2).
  *    $error    — message above the form, or null.
  *    $current  — the live event row, or null. When present, screen 1 shows a
@@ -49,8 +51,10 @@ $dayLabel = function($i) {
         </p>
     <?php endif; ?>
 
-    <?php // Screen 1: name + number of days. ?>
-    <form method="post" action="admin.php?tab=new_event" class="newevent">
+    <?php // Screen 1: name + number of days, plus the optional details.
+          // enctype, because the details include a file: without it the browser
+          // posts only the filename and the upload silently never arrives. ?>
+    <form method="post" action="admin.php?tab=new_event" class="newevent" enctype="multipart/form-data">
         <?= $csrf ?>
         <input type="hidden" name="stage" value="start">
 
@@ -62,6 +66,31 @@ $dayLabel = function($i) {
             <label for="ev_days"><?= e(t('newevent_days')) ?></label>
             <input type="number" id="ev_days" name="num_days" min="1" max="60" value="<?= e($num_days) ?>" required>
         </div>
+
+        <?php /* OPTIONAL DETAILS — only when the admin turned them on. Prefilled
+                 from the configured defaults, so the common case is to leave
+                 them alone. */ ?>
+        <?php if (!empty($details)): ?>
+            <div class="field">
+                <label for="ev_loc"><?= e(t('event_location_name')) ?></label>
+                <input type="text" id="ev_loc" name="location_name" value="<?= e($loc_name) ?>">
+            </div>
+            <div class="field">
+                <label for="ev_addr"><?= e(t('event_location_address')) ?></label>
+                <textarea id="ev_addr" name="location_address" rows="3"><?= e($loc_addr) ?></textarea>
+            </div>
+            <div class="field">
+                <label for="ev_thumb"><?= e(t('event_thumbnail')) ?></label>
+                <input type="file" id="ev_thumb" name="thumb_file" accept="image/*">
+                <p class="field-note"><?= e(t('event_thumbnail_note')) ?></p>
+                <?php // Already uploaded and processed on a previous pass through
+                      // this screen (a validation error, say) — show it, so it is
+                      // clear the file is not waiting to be picked again. ?>
+                <?php if (!empty($thumb)): ?>
+                    <img class="event-thumb-preview" src="<?= e($thumb) ?>" alt="">
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary"><?= e(t('newevent_next')) ?></button>
@@ -80,6 +109,14 @@ $dayLabel = function($i) {
         <input type="hidden" name="stage" value="days">
         <input type="hidden" name="name" value="<?= e($name) ?>">
         <input type="hidden" name="num_days" value="<?= e($num_days) ?>">
+        <?php // The details carry across the same way the name does. The picture
+              // travels as the PATH screen 1 already produced, since a file input
+              // cannot be refilled from markup. ?>
+        <?php if (!empty($details)): ?>
+            <input type="hidden" name="location_name" value="<?= e($loc_name) ?>">
+            <input type="hidden" name="location_address" value="<?= e($loc_addr) ?>">
+            <input type="hidden" name="thumbnail" value="<?= e($thumb) ?>">
+        <?php endif; ?>
 
         <?php foreach ($days as $i => $row): // parallel arrays: day_date[]/day_start[]/day_end[] ?>
             <fieldset class="day-block">

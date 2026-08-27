@@ -95,12 +95,20 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'source'         => ($_POST['source'] ?? 'manual') === 'bgg' ? 'bgg' : 'manual',
         'bgg_id'         => (int)($_POST['bgg_id'] ?? 0),
         'thumbnail'      => trim($_POST['thumbnail'] ?? ''),
-        'language'       => trim($_POST['language'] ?? ''),
-        'link'           => game_link_sanitize($_POST['link'] ?? ''),
+        'language'       => trim($_POST['language'] ?? ''),        'link'           => game_link_sanitize($_POST['link'] ?? ''),
         // Same sanitiser as the custom link: forces http(s) and validates,
         // so a javascript: or data: value can never reach an href.
         'manual_link'    => game_link_sanitize($_POST['manual_link'] ?? ''),
     ];
+    /* THE PICTURE, when the game is a hand-typed one: only the admin's own
+     * uploads. A BGG game's 'thumbnail' is BGG's image URL, carried in a hidden
+     * field, so it is left alone — the check is about the manual picker, whose
+     * radio group is only a suggestion until it is verified here. An
+     * unrecognised value becomes "no picture" rather than an error: the only
+     * way to send one is to build the POST by hand. */
+    if ($form['source'] !== 'bgg' && !thumbnail_is_predefined($form['thumbnail'])) {
+        $form['thumbnail'] = '';
+    }
     if (!is_valid_time($form['start_time'])) {
         // Bad/blank time -> fall back to the table's next slot rather than reject.
         $form['start_time'] = event_next_start_time($table['id'], $day['start_time']);

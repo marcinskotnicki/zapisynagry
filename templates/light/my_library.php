@@ -223,6 +223,25 @@ $uid_field = $as_admin
            * game up in, and nothing to sync against. Adding by hand still works,
            * which is the whole point of the club library existing. */ ?>
     <?php if (bgg_configured()): ?>
+    <?php // Search BGG by name. Offered ABOVE the paste-a-link block because it
+          // is the easier of the two — you need the game's name, not its
+          // address. Both end in the same add, so the choice is only about how
+          // you find it. ?>
+    <details class="lib-add">
+        <summary><?= e(t('lib_search_bgg')) ?></summary>
+        <form method="post" action="<?= e($self_url) ?>">
+            <?= $csrf ?><?= $uid_field ?>
+            <input type="hidden" name="action" value="search_bgg">
+            <div class="field field-bgg">
+                <label for="lib_q"><?= e(t('lib_search_bgg_label')) ?></label>
+                <input type="text" id="lib_q" name="q" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><?= e(t('lib_search_btn')) ?></button>
+            </div>
+        </form>
+    </details>
+
     <details class="lib-add">
         <summary><?= e(t('lib_add_bgg')) ?></summary>
         <form method="post" action="<?= e($self_url) ?>">
@@ -266,6 +285,30 @@ $uid_field = $as_admin
                 <div class="field field-link">
                     <label for="lib_link"><?= e(t('lib_add_manual_link')) ?></label>
                     <input type="url" id="lib_link" name="link" placeholder="https://">
+                </div>
+            <?php endif; ?>
+            <?php /* A picture for a game BGG has no record of. Admin uploads
+                     only — the same picker the manual add-game form uses, and
+                     for the same reason: an arbitrary URL here would be an
+                     off-site image on a club's page. Hidden entirely when the
+                     admin has uploaded none, rather than showing an empty
+                     picker with nothing to pick. */ ?>
+            <?php $libThumbs = db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'); ?>
+            <?php if (!empty($libThumbs)): ?>
+                <div class="field field-thumbnail">
+                    <label><?= e(t('f_thumbnail')) ?></label>
+                    <div class="thumb-picker">
+                        <label class="thumb-opt">
+                            <input type="radio" name="thumbnail" value="" checked>
+                            <span class="thumb-none-box"><?= e(t('no')) ?></span>
+                        </label>
+                        <?php foreach ($libThumbs as $tn): ?>
+                            <label class="thumb-opt">
+                                <input type="radio" name="thumbnail" value="<?= e($tn['filename']) ?>">
+                                <img src="<?= e($tn['filename']) ?>" alt="">
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             <?php endif; ?>
             <div class="form-actions">

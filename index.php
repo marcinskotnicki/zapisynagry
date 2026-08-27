@@ -39,6 +39,25 @@ $resolved = event_resolve();
 $event    = $resolved['event'];
 $readonly = $resolved['readonly'];
 
+/* THE EVENT LIST as a landing page, when the admin asked for it.
+ *
+ * Only when NOTHING names an event: an explicit ?event=<id> opens that event as
+ * always, and so does a share token, so every existing link and bookmark keeps
+ * working. Without the option this whole block is skipped and the front page
+ * opens an event exactly as it always has.
+ *
+ * Rendered even when there is only one active event: a club that turned this on
+ * wants the list as its front door, and having it vanish at one event would
+ * make the setting look broken on the quiet weeks. */
+if (home_event_list_enabled()
+    && (int)($_GET['event'] ?? 0) === 0
+    && ($_GET['e'] ?? '') === '') {
+    tpl_render('header', ['page_title' => t('app_name')]);
+    tpl_render('front_event_list', ['events' => events_active()]);
+    tpl_render('footer');
+    exit;
+}
+
 // No event at all yet -> the simple placeholder (prompt admin to create one).
 if (!$event) {
     tpl_render('header', ['page_title' => t('app_name')]);

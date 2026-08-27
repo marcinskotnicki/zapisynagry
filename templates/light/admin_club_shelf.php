@@ -92,6 +92,23 @@
 
 <?php // No BGG code, no BGG routes — see my_library.php. ?>
 <?php if (bgg_configured()): ?>
+<?php // Search by name, above the paste-a-link block: easier of the two, and
+      // both end in the same add. ?>
+<details class="lib-add">
+    <summary><?= e(t('lib_search_bgg')) ?></summary>
+    <form method="post" action="admin.php?tab=club_shelf">
+        <?= $csrf ?>
+        <input type="hidden" name="action" value="search_bgg">
+        <div class="field field-bgg">
+            <label for="cs_q"><?= e(t('lib_search_bgg_label')) ?></label>
+            <input type="text" id="cs_q" name="q" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= e(t('lib_search_btn')) ?></button>
+        </div>
+    </form>
+</details>
+
 <details class="lib-add">
     <summary><?= e(t('lib_add_bgg')) ?></summary>
     <form method="post" action="admin.php?tab=club_shelf">
@@ -131,6 +148,27 @@
             <div class="field field-link">
                 <label for="cs_link"><?= e(t('lib_add_manual_link')) ?></label>
                 <input type="url" id="cs_link" name="link" placeholder="https://">
+            </div>
+        <?php endif; ?>
+        <?php /* A picture for a game BGG has no record of — admin uploads only,
+                 the same picker the manual add-game form uses. Hidden when none
+                 have been uploaded rather than shown empty. */ ?>
+        <?php $csThumbs = db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'); ?>
+        <?php if (!empty($csThumbs)): ?>
+            <div class="field field-thumbnail">
+                <label><?= e(t('f_thumbnail')) ?></label>
+                <div class="thumb-picker">
+                    <label class="thumb-opt">
+                        <input type="radio" name="thumbnail" value="" checked>
+                        <span class="thumb-none-box"><?= e(t('no')) ?></span>
+                    </label>
+                    <?php foreach ($csThumbs as $tn): ?>
+                        <label class="thumb-opt">
+                            <input type="radio" name="thumbnail" value="<?= e($tn['filename']) ?>">
+                            <img src="<?= e($tn['filename']) ?>" alt="">
+                        </label>
+                    <?php endforeach; ?>
+                </div>
             </div>
         <?php endif; ?>
         <div class="form-actions">

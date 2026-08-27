@@ -21,7 +21,10 @@
 
 <fieldset>
     <legend><?= e(t('events_rename')) ?></legend>
-    <form method="post" action="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>">
+    <?php // enctype for the optional picture; harmless when the details are off
+          // and the form is text-only. ?>
+    <form method="post" action="admin.php?tab=archive&amp;event=<?= (int)$event['id'] ?>"
+          enctype="multipart/form-data">
         <?= $csrf ?>
         <input type="hidden" name="event" value="<?= (int)$event['id'] ?>">
         <input type="hidden" name="action" value="rename">
@@ -29,7 +32,36 @@
             <label for="ev_name"><?= e(t('newevent_name')) ?></label>
             <input type="text" id="ev_name" name="name" value="<?= e($event['name']) ?>" maxlength="200" required>
         </div>
-        <button type="submit" class="btn"><?= e(t('newevent_rename')) ?></button>
+        <?php /* The same three optional details as the create form. Rendered
+                 only when the feature is on — and the controller only WRITES
+                 them then, so anything typed before it was switched off is kept
+                 rather than blanked by an absent field. */ ?>
+        <?php if (!empty($details)): ?>
+            <div class="field">
+                <label for="ev_loc"><?= e(t('event_location_name')) ?></label>
+                <input type="text" id="ev_loc" name="location_name"
+                       value="<?= e($event['location_name'] ?? '') ?>">
+            </div>
+            <div class="field">
+                <label for="ev_addr"><?= e(t('event_location_address')) ?></label>
+                <textarea id="ev_addr" name="location_address" rows="3"><?= e($event['location_address'] ?? '') ?></textarea>
+            </div>
+            <div class="field">
+                <label for="ev_thumb"><?= e(t('event_thumbnail')) ?></label>
+                <input type="file" id="ev_thumb" name="thumb_file" accept="image/*">
+                <p class="field-note"><?= e(t('event_thumbnail_note')) ?></p>
+                <?php // The current picture, with the only way to say "none" —
+                      // a file input can replace an upload but never clear one. ?>
+                <?php if (!empty($event['thumbnail'])): ?>
+                    <img class="event-thumb-preview" src="<?= e($event['thumbnail']) ?>" alt="">
+                    <label class="check">
+                        <input type="checkbox" name="thumb_clear" value="1">
+                        <?= e(t('event_thumbnail_clear')) ?>
+                    </label>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <button type="submit" class="btn"><?= e(t('save')) ?></button>
     </form>
 </fieldset>
 

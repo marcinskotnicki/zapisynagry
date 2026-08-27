@@ -41,6 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } elseif ($action === 'add_manual') {
         $name = trim($_POST['name'] ?? '');
+        // Admin-uploaded pictures only, and checked rather than trusted — same
+        // rule as a member's own shelf. See thumbnail_is_predefined().
+        $thumb = trim($_POST['thumbnail'] ?? '');
+        if (!thumbnail_is_predefined($thumb)) $thumb = '';
         if ($name === '' || !text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) {
             $flash = t('error_name_required');
             $flashKind = 'error';
@@ -49,10 +53,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'name' => $name,
                 'year' => (int)($_POST['year'] ?? 0),
                 'link' => game_link_sanitize($_POST['link'] ?? ''),
+                'thumbnail' => $thumb,
             ]);
             log_action('club_shelf_add', $name);
             $flash = t('lib_added', $name);
         }
+
+    } elseif ($action === 'search_bgg') {
+        // Search by name instead of pasting an address; each hit posts back as
+        // an ordinary 'add_bgg' with the id, so the edition chooser above
+        // applies to a searched game exactly as to a pasted one.
+        $query = trim($_POST['q'] ?? '');
+        $problem = null;
+        if ($query === '')         $problem = 'empty';
+        elseif (!bgg_configured()) $problem = 'unconfigured';
+        $tab_body = tpl_capture('lib_bgg_search', [
+            'query'   => $query,
+            'results' => $problem === null ? bgg_search($query) : [],
+            'problem' => $problem,
+            'action'  => 'admin.php?tab=club_shelf',
+            'back'    => 'admin.php?tab=club_shelf',
+            'uid_field' => '',
+            'csrf'    => csrf_field(),
+        ]);
+        return;
 
     } elseif ($action === 'add_bgg') {
         // Same builder as a member's own shelf, so both accept a game link or
