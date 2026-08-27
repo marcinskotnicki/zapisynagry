@@ -550,7 +550,7 @@ return [
     'pager_prev'          => '← Poprzednia',
     'pager_next'          => 'Następna →',
     'pager_position'      => 'Strona %d z %d',
-    'opt_group_archive'              => 'Archiwum',
+    'opt_group_archive'              => 'Archiwum i lista wydarzeń',
     'opt_nav_hide_current'            => 'Ukryj w menu link do aktualnie oglądanej strony',
     'opt_nav_hide_current_note'       => 'Oszczędza miejsce w menu, bo link do strony, na której już jesteś, nic nie robi. Wyłącz, żeby menu wyglądało tak samo na każdej stronie.',
     'opt_archive_views'               => 'Minione wydarzenia pokazuj jako',
