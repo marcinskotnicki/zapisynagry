@@ -26,13 +26,31 @@
               // brand-new install before the first event exists. ?>
         <p class="muted"><?= e(t('evlist_none')) ?></p>
     <?php else: ?>
-        <ul class="event-list">
+        <?php /* Does ANY event here have a picture? If so every row reserves the
+                 picture column, so the names line up in one straight edge
+                 whether or not a particular event has one. If none do, the
+                 column is not reserved at all — a club that never uploads
+                 pictures should not get an empty gutter down the page. */ ?>
+        <?php $evAnyPic = false;
+              foreach ($events as $evScan) {
+                  $evScanD = event_details($evScan);
+                  if (!empty($evScanD['thumbnail'])) { $evAnyPic = true; break; }
+              } ?>
+        <ul class="event-list<?= $evAnyPic ? ' event-list-withpics' : '' ?>">
             <?php foreach ($events as $ev): ?>
                 <?php $evd = event_details($ev); ?>
                 <li>
                     <a class="event-list-row" href="index.php?event=<?= (int)$ev['id'] ?>">
-                        <?php if (!empty($evd['thumbnail'])): ?>
-                            <img class="event-list-thumb" src="<?= e($evd['thumbnail']) ?>" alt="">
+                        <?php // The box is what has the fixed width; the picture
+                              // is fitted inside it, so pictures of any shape or
+                              // size line up in one column. Rendered empty for an
+                              // event without one, to hold that column open. ?>
+                        <?php if ($evAnyPic): ?>
+                            <span class="event-list-thumbbox">
+                                <?php if (!empty($evd['thumbnail'])): ?>
+                                    <img class="event-list-thumb" src="<?= e($evd['thumbnail']) ?>" alt="">
+                                <?php endif; ?>
+                            </span>
                         <?php endif; ?>
                         <span class="event-list-text">
                             <span class="event-list-name"><?= e($ev['name']) ?></span>

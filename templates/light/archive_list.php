@@ -23,20 +23,40 @@
     <?php else: ?>
         <ul class="archive-list">
             <?php foreach ($events as $ev): ?>
-                <li class="archive-item<?= (int)$ev['is_archived'] === 1 ? ' archive-item-closed' : '' ?>">
-                    <?php // Linked by id, not by share token: the token is for
-                          // handing out a read-only view to people without an
-                          // account, whereas this list is the site's own
-                          // navigation and should behave like the rest of it —
-                          // an event still open stays editable when opened. ?>
-                    <a class="archive-name" href="index.php?event=<?= (int)$ev['id'] ?>"><?= e($ev['name']) ?></a>
-                    <?php $label = event_date_label($ev); ?>
-                    <?php if ($label !== ''): ?>
-                        <span class="archive-date"><?= e($label) ?></span>
+                <?php $ad = event_details($ev); ?>
+                <li class="archive-item<?= (int)$ev['is_archived'] === 1 ? ' archive-item-closed' : '' ?><?= !empty($ad['thumbnail']) ? ' archive-item-withpic' : '' ?>">
+                    <?php // A small picture to the left, when the event has one.
+                          // Deliberately smaller than the event list's: this is a
+                          // dense index of everything a club has ever run, not a
+                          // shop window. ?>
+                    <?php if (!empty($ad['thumbnail'])): ?>
+                        <img class="archive-thumb" src="<?= e($ad['thumbnail']) ?>" alt="">
                     <?php endif; ?>
-                    <?php if ((int)$ev['is_archived'] === 1): ?>
-                        <span class="archive-badge"><?= e(t('archive_closed')) ?></span>
-                    <?php endif; ?>
+                    <?php /* THREE children exactly — name-block, date, badge —
+                             because on desktop this is a three-column grid. The
+                             location goes INSIDE the name block rather than
+                             beside it: a fourth child would wrap onto a second
+                             grid row and pull the dates out of line. */ ?>
+                    <span class="archive-item-text">
+                        <span class="archive-item-main">
+                            <?php // Linked by id, not by share token: the token is for
+                                  // handing out a read-only view to people without an
+                                  // account, whereas this list is the site's own
+                                  // navigation and should behave like the rest of it —
+                                  // an event still open stays editable when opened. ?>
+                            <a class="archive-name" href="index.php?event=<?= (int)$ev['id'] ?>"><?= e($ev['name']) ?></a>
+                            <?php // Location name only — no address here, same as the
+                                  // calendar: this list is scanned, not read. ?>
+                            <?php if (!empty($ad['name'])): ?>
+                                <span class="archive-loc"><?= e($ad['name']) ?></span>
+                            <?php endif; ?>
+                        </span>
+                        <?php $label = event_date_label($ev); ?>
+                        <span class="archive-date"><?= $label !== '' ? e($label) : '' ?></span>
+                        <?php if ((int)$ev['is_archived'] === 1): ?>
+                            <span class="archive-badge"><?= e(t('archive_closed')) ?></span>
+                        <?php endif; ?>
+                    </span>
                 </li>
             <?php endforeach; ?>
         </ul>

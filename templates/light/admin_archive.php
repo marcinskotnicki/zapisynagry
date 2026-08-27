@@ -54,6 +54,14 @@
                 <?php if ($evDates !== ''): ?>
                     <span class="archive-row-dates"><?= e($evDates) ?></span>
                 <?php endif; ?>
+                <?php // Where it is held, under the dates — so an admin scanning
+                      // a list of similarly-named events can tell them apart.
+                      // Name only: this is a table cell, and the address is on
+                      // the event's own screen. ?>
+                <?php $evLoc = event_details($ev); ?>
+                <?php if (!empty($evLoc['name'])): ?>
+                    <span class="archive-row-loc"><?= e($evLoc['name']) ?></span>
+                <?php endif; ?>
             </td>
             <td data-label="<?= e(t('archive_status')) ?>" class="archive-status archive-status-<?= e($state) ?>"><?= e($stateLabel) ?></td>
             <td data-label="<?= e(t('archive_created')) ?>" class="nowrap"><?= e($ev['created_at']) ?></td>
