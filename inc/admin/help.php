@@ -37,6 +37,13 @@ $helpFile = $APP_ROOT . '/help/' . ($helpDocs[$helpLang] ?? $helpDocs['pl']);
  * that looks like a broken tab. */
 $helpBody = is_file($helpFile) ? (string)file_get_contents($helpFile) : null;
 
+/* Show the club's OWN address rather than the guide's example one, so an admin
+ * can read the instructions without translating them into their own site every
+ * time. Falls back to the examples when no address is configured. */
+if ($helpBody !== null) {
+    $helpBody = help_localise_urls($helpBody, opt('site_url'));
+}
+
 $tab_body = tpl_capture('admin_help', [
     'html'    => $helpBody === null ? null : md_render($helpBody),
     // Shown when the guide is missing, so an admin can tell somebody WHICH

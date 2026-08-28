@@ -692,6 +692,42 @@ function custom_page($id) {
  * @return bool
  */
 /**
+ * The example addresses written into the admin guides.
+ *
+ * The guides are ordinary Markdown, readable on their own, so they use a
+ * plausible-looking address rather than a placeholder like {{SITE_URL}} —
+ * somebody reading the file outside the app should see a sentence, not a
+ * template. The cost is that these two strings are load-bearing: change one in
+ * a guide without changing it here and the substitution silently stops
+ * happening. A test asserts the guides still contain them.
+ */
+const HELP_EXAMPLE_URLS = ['https://twojklub.pl', 'https://yourclub.com'];
+
+/**
+ * Swap the guides' example addresses for this club's real one.
+ *
+ * An admin reading "go to https://yourclub.com/admin" has to translate it into
+ * their own address every time; showing the address they actually use removes
+ * that step, and makes the guide something they can copy from directly.
+ *
+ * Only the BASE address is substituted — every other mention in the guides is
+ * that base plus a path ("/admin"), so replacing the host fixes those too
+ * without needing a rule per page.
+ *
+ * @param string $md       The guide's Markdown source.
+ * @param string $siteUrl  The configured site address; '' to leave it alone.
+ * @return string
+ */
+function help_localise_urls($md, $siteUrl) {
+    $siteUrl = rtrim(trim((string)$siteUrl), '/');
+    /* Nothing configured, or something that is not an address: leave the
+     * examples in place. A guide that says "yourclub.com" is mildly annoying;
+     * one that says "go to (nothing)/admin" is broken. */
+    if ($siteUrl === '' || !filter_var($siteUrl, FILTER_VALIDATE_URL)) return $md;
+    return str_replace(HELP_EXAMPLE_URLS, $siteUrl, $md);
+}
+
+/**
  * Is this the filename of an admin-uploaded predefined thumbnail?
  *
  * The picker offers a radio group, and a radio group is only a suggestion: the

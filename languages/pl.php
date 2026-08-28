@@ -58,6 +58,8 @@ return [
     'tab_logs'            => 'Logi',
     'tab_archive'         => 'Wydarzenia',
     'tab_users'           => 'Użytkownicy',
+    'opt_hide_help_tab'               => 'Ukryj zakładkę pomocy w panelu administracyjnym',
+    'opt_hide_help_tab_note'          => 'Usuwa link Pomoc z menu panelu, gdy poradnik nie jest już potrzebny. Sam poradnik pozostaje dostępny pod adresem admin.php?tab=help.',
     'tab_help'            => 'Pomoc',
     'help_missing'        => 'Nie znaleziono poradnika (%s). Poproś osobę, która instalowała system, o sprawdzenie, czy folder docs został wgrany.',
     'tab_update'          => 'Aktualizacja',

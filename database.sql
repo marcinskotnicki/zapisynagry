@@ -111,6 +111,10 @@ INSERT INTO options (key, value) VALUES
     --   itself simply leaves it off. The account goes; the games they proposed
     --   and the seats they took stay, under the same name.
     ('allow_self_delete', '0'),
+    -- hide_help_tab: drop the Help link from the admin nav once a club no
+    --   longer needs the guide. The PAGE stays reachable at ?tab=help — this
+    --   only declutters the panel, it does not switch anything off.
+    ('hide_help_tab',     '0'),
     -- Prefills for the two location fields on a NEW event; most clubs meet in
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),

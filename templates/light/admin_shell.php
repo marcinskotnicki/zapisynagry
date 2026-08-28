@@ -30,12 +30,18 @@ $tabs = [
     'logs'       => 'tab_logs',
     'texts'      => 'tab_texts',
     'users'      => 'tab_users',
-    // Help and Update at the end together: both are about the system itself
-    // rather than the club's events. Help is unconditional — a guide to
-    // switching features on has to be reachable while they are all still off.
-    'help'       => 'tab_help',
     'update'     => 'tab_update',
 ];
+/* Help goes LAST, after Update — it is the tab an admin needs least often once
+ * the site is running, and the one they can switch off entirely.
+ *
+ * HIDING IT DOES NOT DISABLE IT. Unlike chat or the club shelf above, the tab
+ * is removed only from this list, not from admin.php's whitelist: the guide
+ * stays reachable at ?tab=help for anyone who wants it, including the admin who
+ * hid it and later needs it back. This is decluttering, not a feature switch. */
+if (!opt_bool('hide_help_tab')) {
+    $tabs['help'] = 'tab_help';
+}
 // Same condition as admin.php's whitelist: no tab for a feature that is off.
 // mailing used to sit in the array above unconditionally, with the screen
 // itself saying "not enabled" when an admin clicked it — the same pattern

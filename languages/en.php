@@ -66,6 +66,8 @@ return [
     'tab_logs'            => 'Logs',
     'tab_archive'         => 'Events',
     'tab_users'           => 'Users',
+    'opt_hide_help_tab'               => 'Hide the help tab in the admin panel',
+    'opt_hide_help_tab_note'          => 'Removes the Help link from the panel navigation once you no longer need the guide. The guide itself stays available at admin.php?tab=help.',
     'tab_help'            => 'Help',
     'help_missing'        => 'The guide could not be found (%s). Ask whoever installed the system to check that the docs folder was uploaded.',
     'tab_update'          => 'Update system',

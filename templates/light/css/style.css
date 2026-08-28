@@ -1379,11 +1379,10 @@ trix-toolbar .trix-button--dialog {
     .btn.is-busy::before { animation: none; border-right-color: currentColor; opacity: 0.5; }
 }
 
-/* The admin guide (Help tab). A long document to be READ, so it gets a narrower
-   measure than the rest of the panel — full-width lines of prose across a
-   desktop monitor are genuinely hard to follow — and more room between its
-   parts than a settings form needs. */
-.admin-help { max-width: 46rem; line-height: 1.6; }
+/* The admin guide (Help tab). A long document to be READ, so it gets more room
+   between its parts than a settings form needs. Full width, matching the rest
+   of the panel. */
+.admin-help { line-height: 1.6; }
 .admin-help h1 { margin-top: 0; }
 .admin-help h2 { margin-top: 2rem; padding-top: 0.6rem; border-top: 1px solid var(--border); }
 .admin-help h3 { margin-top: 1.4rem; }
