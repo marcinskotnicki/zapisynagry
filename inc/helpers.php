@@ -733,12 +733,24 @@ function thumbnail_is_predefined($file) {
  * @return string
  */
 function rules_icon_html($tone, $label) {
+    /* FILLED, not outlined. The first version of this was two rounded
+     * rectangles drawn with a 2px stroke on a 24px grid — at the size it
+     * actually renders (about 16px, inline with the text) that leaves barely
+     * any interior, and it read as two bare boxes rather than a book. A filled
+     * silhouette keeps its shape all the way down. */
     return '<span class="p-knows rules-' . e($tone) . '" title="' . e($label) . '">'
          . '<svg class="p-knows-icon" viewBox="0 0 24 24" aria-hidden="true" '
-         . 'fill="none" stroke="currentColor" stroke-width="2" '
-         . 'stroke-linecap="round" stroke-linejoin="round">'
-         . '<path d="M3 5a2 2 0 0 1 2-2h5v18H5a2 2 0 0 1-2-2z"></path>'
-         . '<path d="M21 5a2 2 0 0 0-2-2h-5v18h5a2 2 0 0 0 2-2z"></path>'
+         . 'fill="currentColor">'
+         // Left page: spine at the top centre, curving out and down, with the
+         // bottom edge sagging the way an open book's pages do.
+         . '<path d="M11.4 8.0 C 9.3 6.3, 6.6 5.5, 3.6 5.5 C 2.9 5.5, 2.4 6.0, 2.4 6.7 '
+         . 'L 2.4 15.2 C 2.4 15.9, 2.9 16.4, 3.6 16.4 C 6.4 16.4, 9.0 17.2, 11.0 18.8 '
+         . 'C 11.2 18.9, 11.4 18.8, 11.4 18.6 Z"></path>'
+         // Right page: the same shape mirrored about x=12, leaving a gap down
+         // the middle that stays visible as the spine even at 14px.
+         . '<path d="M12.6 8.0 C 14.7 6.3, 17.4 5.5, 20.4 5.5 C 21.1 5.5, 21.6 6.0, 21.6 6.7 '
+         . 'L 21.6 15.2 C 21.6 15.9, 21.1 16.4, 20.4 16.4 C 17.6 16.4, 15.0 17.2, 13.0 18.8 '
+         . 'C 12.8 18.9, 12.6 18.8, 12.6 18.6 Z"></path>'
          . '</svg></span>';
 }
 
