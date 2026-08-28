@@ -33,6 +33,28 @@
 const BGG_BASE            = 'https://boardgamegeek.com/xmlapi2/';
 const RESULT_IMAGE_LIMIT  = 12;   // fetch per-item thumbnails only at/below this count
 const BGG_MAX_RETRIES     = 3;    // attempts, for HTTP 202 (queued) responses
+/* THE COLLECTION ENDPOINT IS DIFFERENT, and needs far more patience.
+ *
+ * /thing and /search answer immediately. /collection does not: BGG builds a
+ * collection on demand and answers 202 "queued" until it is ready, which for a
+ * collection it has not cached takes several seconds and sometimes half a
+ * minute. The three tries at 0.7s above add up to about two seconds of waiting
+ * — nowhere near enough, so the FIRST sync of the day reliably failed and the
+ * second or third "worked", by which time BGG had finished building it in the
+ * background. That is exactly the "errors at first, fine on the third try"
+ * people were reporting; it was never a rate limit.
+ *
+ * Waits grow rather than repeating: a collection that is not ready after two
+ * seconds will not be ready 0.7s later either, and hammering a queue endpoint
+ * is how a caller earns an actual throttle.
+ *
+ * The budget is what keeps this safe on shared hosting, where
+ * max_execution_time is commonly 30s: sleeping is capped at BGG_QUEUE_BUDGET
+ * regardless of how the waits are configured, so the request cannot sit long
+ * enough to be killed mid-sync. */
+const BGG_QUEUE_ATTEMPTS  = 6;                       // tries for a queued collection
+const BGG_QUEUE_WAITS     = [1.5, 2.5, 4.0, 5.0, 5.0];  // seconds between them
+const BGG_QUEUE_BUDGET    = 16.0;                    // total seconds we may sleep
 
 /**
  * Low-level fetch. Returns [body|false, httpCode]. Retries on 202.
@@ -44,7 +66,39 @@ const BGG_MAX_RETRIES     = 3;    // attempts, for HTTP 202 (queued) responses
  * @param string $url  Fully-built BGG endpoint URL.
  * @return array{0: string|false, 1: int}  [response body or false, HTTP status].
  */
-function bgg_fetch_raw($url) {
+/**
+ * The sleeps a retry policy actually permits, in order.
+ *
+ * Pure, so the part worth being sure about can be tested without touching the
+ * network: that the waits grow, that the last one repeats when the list is
+ * shorter than the attempt count, and — the one that matters on shared hosting
+ * — that the total never exceeds the budget. A schedule that overruns gets the
+ * request killed by max_execution_time mid-sync, which loses the whole run.
+ *
+ * @param int   $attempts  Total tries (so at most $attempts-1 sleeps).
+ * @param array $waits     Seconds between tries; the last repeats if needed.
+ * @param float $budget    Hard cap on the SUM of the sleeps.
+ * @return float[]  The sleeps to take, in order; [] means "do not retry".
+ */
+function bgg_retry_plan($attempts, array $waits, $budget) {
+    $attempts = max(1, (int)$attempts);
+    $budget   = (float)$budget;
+    if (!$waits) $waits = [0.7];
+    $plan = [];
+    $total = 0.0;
+    for ($i = 0; $i < $attempts - 1; $i++) {
+        $wait = (float)$waits[min($i, count($waits) - 1)];
+        if ($wait <= 0) break;
+        // Stop at the budget rather than trimming: a truncated sleep is not
+        // long enough to be worth the extra request it precedes.
+        if ($total + $wait > $budget) break;
+        $total += $wait;
+        $plan[] = $wait;
+    }
+    return $plan;
+}
+
+function bgg_fetch_raw($url, array $policy = []) {
     /* Without the curl extension every BGG feature is unavailable — but it must
      * be UNAVAILABLE, not fatal. This function is reached from a member adding
      * a game, an admin correcting one, and the collection sync; an uncaught
@@ -54,8 +108,16 @@ function bgg_fetch_raw($url) {
      * request means no caller needs to know. */
     if (!function_exists('curl_init')) return [false, 0];
 
+    /* Retry policy. The default is the quick one, right for /thing and /search;
+     * the collection sync passes the patient one (see BGG_QUEUE_* above). The
+     * schedule is worked out up front by bgg_retry_plan(), which is where the
+     * budget is enforced. */
+    $attempts = max(1, (int)($policy['attempts'] ?? BGG_MAX_RETRIES));
+    $plan     = bgg_retry_plan($attempts, $policy['waits'] ?? [0.7],
+                               $policy['budget'] ?? 5.0);
+
     $code = 0; $body = false;
-    for ($attempt = 0; $attempt < BGG_MAX_RETRIES; $attempt++) {
+    for ($attempt = 0; $attempt < $attempts; $attempt++) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   // return body as a string
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -73,8 +135,13 @@ function bgg_fetch_raw($url) {
         $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($code === 202) {           // queued — wait briefly and retry
-            usleep(700000);            // 0.7s
+        if ($code === 202) {           // queued — wait and retry
+            // No sleep left in the plan means the budget is spent: give up and
+            // let the caller report "still preparing", which is true and
+            // actionable, rather than being killed by max_execution_time
+            // halfway through and losing the run with nothing to show.
+            if (!isset($plan[$attempt])) break;
+            usleep((int)round($plan[$attempt] * 1000000));
             continue;
         }
         break;                         // 200 (or an error we won't retry) — done

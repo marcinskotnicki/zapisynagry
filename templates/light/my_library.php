@@ -229,7 +229,7 @@ $uid_field = $as_admin
           // you find it. ?>
     <details class="lib-add">
         <summary><?= e(t('lib_search_bgg')) ?></summary>
-        <form method="post" action="<?= e($self_url) ?>">
+        <form class="js-busy" method="post" action="<?= e($self_url) ?>">
             <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="search_bgg">
             <div class="field field-bgg">
@@ -237,7 +237,7 @@ $uid_field = $as_admin
                 <input type="text" id="lib_q" name="q" required>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary"><?= e(t('lib_search_btn')) ?></button>
+                <button type="submit" class="btn btn-primary" data-busy-label="<?= e(t('lib_search_working')) ?>"><?= e(t('lib_search_btn')) ?></button>
             </div>
         </form>
     </details>
@@ -321,7 +321,7 @@ $uid_field = $as_admin
     <?php if (bgg_configured()): ?>
     <details class="lib-add lib-add-sync">
         <summary><?= e(t('lib_sync')) ?></summary>
-        <form method="post" action="<?= e($self_url) ?>">
+        <form class="js-busy" method="post" action="<?= e($self_url) ?>">
             <?= $csrf ?><?= $uid_field ?>
             <input type="hidden" name="action" value="sync">
             <?php // The warning is the point of this block: a sync DELETES games
@@ -372,7 +372,7 @@ $uid_field = $as_admin
                 </label>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary"><?= e(t('lib_sync_btn')) ?></button>
+                <button type="submit" class="btn btn-primary" data-busy-label="<?= e(t('lib_sync_working')) ?>"><?= e(t('lib_sync_btn')) ?></button>
             </div>
         </form>
     </details>

@@ -145,6 +145,48 @@ function all_passed($checks) {
 const INSTALL_LANGS = ['pl' => 'Polski', 'en' => 'English'];
 
 /**
+ * The address this installer is being served from — which is, by definition,
+ * the address the site will live at.
+ *
+ * WHY DETECT IT AT ALL: site_url is only used to build the links at the end of
+ * outgoing emails, so a wrong or empty value is invisible until the first email
+ * goes out with a dead link in it — long after anyone would think to check. The
+ * one moment we can be sure of the answer is right now, while a browser is
+ * fetching this very file from that very address.
+ *
+ * Detected, never guessed: if anything looks wrong the function returns '' and
+ * the setting stays empty, exactly as before. An admin can always set it by
+ * hand in Options, and must when the club moves domain.
+ *
+ * @return string  Absolute URL with no trailing slash, or '' if undetectable.
+ */
+function install_detect_site_url() {
+    $host = (string)($_SERVER['HTTP_HOST'] ?? '');
+    // Host comes from the request, so treat it as untrusted: anything that is
+    // not a plain host[:port] is a header someone has played with, and a bad
+    // value baked into emails is worse than none.
+    if ($host === '' || !preg_match('/^[A-Za-z0-9.\-]+(:[0-9]{1,5})?$/', $host)) return '';
+
+    /* HTTPS behind a proxy does not set $_SERVER['HTTPS'], and shared hosts
+     * very often terminate TLS in front of PHP — so the forwarded header is
+     * checked too, or every such club would get http:// links to an https
+     * site. */
+    $https = (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off')
+          || strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
+          || (int)($_SERVER['SERVER_PORT'] ?? 0) === 443;
+
+    // The folder this script sits in — the app installs beside it, so that
+    // folder is the site root. '/install.php' at the top level gives ''.
+    $dir = str_replace('\\', '/', dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/install.php')));
+    $dir = rtrim($dir, '/');            // '' at the root, '/klub' in a subfolder
+
+    $url = ($https ? 'https' : 'http') . '://' . $host . $dir;
+    // Last check: if the assembled string is not a URL, say nothing rather than
+    // storing something that will quietly break links later.
+    return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
+}
+
+/**
  * The language for this request: an explicit choice, else the browser's
  * preference, else Polish (most clubs using this are Polish-speaking).
  *
@@ -519,6 +561,15 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$adminEmail, password_hash($adminPass, PASSWORD_DEFAULT), $adminName]);
         if ($venueName !== '') {
             $pdo->prepare('UPDATE options SET value=? WHERE key=?')->execute([$venueName, 'venue_name']);
+        }
+        /* The address the site is being installed at. Stored now because this
+         * request proves it; asking a non-technical admin to type their own URL
+         * later is a question they should never have to be asked. Skipped if
+         * undetectable, leaving the seeded blank and the setting editable. */
+        $detectedUrl = install_detect_site_url();
+        if ($detectedUrl !== '') {
+            $pdo->prepare('UPDATE options SET value=? WHERE key=?')
+                ->execute([$detectedUrl, 'site_url']);
         }
         // The language this page was filled in becomes the site's default, so
         // installing in Polish does not then require finding the setting.

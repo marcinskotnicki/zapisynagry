@@ -183,6 +183,34 @@ $uid_field   = $as_admin
                  profile there is nothing here to read or write: the values
                  would be the ADMIN'S, shown under another person's name. So the
                  card is omitted rather than rendered read-only. */ ?>
+        <?php /* CLOSING THE ACCOUNT — last on the page, and only on your own.
+                 An admin gets the Users tab for this instead, where the delete
+                 carries the last-admin guard and does not log the admin out.
+
+                 Behind a <details>, so it is not a button sitting next to the
+                 ordinary ones, and the confirmation is TYPING YOUR OWN ADDRESS
+                 rather than a second click: one mis-tap on a phone should not
+                 be able to do something irreversible. */ ?>
+        <?php if (!$as_admin && opt_bool('allow_self_delete')): ?>
+            <details class="card profile-card danger-zone">
+                <summary><?= e(t('up_delete_title')) ?></summary>
+                <p><?= e(t('up_delete_warning')) ?></p>
+                <p class="muted"><?= e(t('up_delete_history_note')) ?></p>
+                <form method="post" action="<?= e($self_url) ?>">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="delete_self">
+                    <div class="field">
+                        <label for="confirm_email"><?= e(t('up_delete_confirm_label', $user['email'])) ?></label>
+                        <input type="text" id="confirm_email" name="confirm_email"
+                               autocomplete="off" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger"><?= e(t('up_delete_btn')) ?></button>
+                    </div>
+                </form>
+            </details>
+        <?php endif; ?>
+
         <?php $upTpl  = !$as_admin && tpl_switch_allowed()  && count(tpl_available())  > 1;
               $upLang = !$as_admin && lang_switch_allowed() && count(lang_available()) > 1; ?>
         <?php if ($upTpl || $upLang): ?>

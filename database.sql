@@ -106,6 +106,11 @@ INSERT INTO options (key, value) VALUES
     ('hide_event_tabs',   '0'),
     -- event_stats: a games/players summary after the dates on both event lists.
     ('event_stats',       '0'),
+    -- allow_self_delete: a member may close their own account from their
+    --   profile. Off by default — a club that would rather handle departures
+    --   itself simply leaves it off. The account goes; the games they proposed
+    --   and the seats they took stay, under the same name.
+    ('allow_self_delete', '0'),
     -- Prefills for the two location fields on a NEW event; most clubs meet in
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),

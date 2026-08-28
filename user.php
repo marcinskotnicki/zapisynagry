@@ -142,6 +142,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set(t('up_password_updated'));
         }
     }
+    /* ---- CLOSING YOUR OWN ACCOUNT ------------------------------------- *
+     * Reuses the admin path exactly — user_delete_keeping_history() — so the
+     * account goes while the games somebody proposed and the seats they took
+     * stay on the board under the same name. Deleting yourself must not rewrite
+     * an event other people are still relying on.
+     *
+     * TWO DELIBERATE ACTS, and the second is not a button: the form asks the
+     * person to type their own email address. A single confirm button is one
+     * mis-tap on a phone, and this is the one action on the page that cannot be
+     * undone.
+     *
+     * Off unless an admin allows it. A club that would rather handle departures
+     * itself keeps the setting off and nothing changes.
+     *
+     * SELF ONLY. An admin viewing somebody else's profile does not get this —
+     * the Users tab is where accounts are administered, and its delete carries
+     * the last-admin guard. Sending an admin's "delete this member" through a
+     * form that logs YOU out afterwards would be its own kind of accident. */
+    if ($action === 'delete_self') {
+        if (!$isSelf || !opt_bool('allow_self_delete')) {
+            redirect($selfUrl);
+        }
+        $typed = trim((string)($_POST['confirm_email'] ?? ''));
+        if (strcasecmp($typed, (string)$u['email']) !== 0) {
+            flash_set(t('up_delete_confirm_wrong'), 'error');
+            redirect($selfUrl);
+        }
+        /* The last usable admin may not delete themselves, for the same reason
+         * the Users tab refuses it: an install with no way back in needs
+         * database surgery to recover. Checked here as well as there because
+         * this is a different route to the same place. */
+        if ((int)$u['is_admin'] === 1) {
+            $usableAdmins = (int)db_val(
+                'SELECT COUNT(*) FROM users WHERE is_admin = 1 AND is_blocked = 0 AND is_verified = 1');
+            if ($usableAdmins <= 1) {
+                flash_set(t('users_last_admin'), 'error');
+                redirect($selfUrl);
+            }
+        }
+        // Logged before the row goes: afterwards there is no email to name.
+        log_action('user_self_delete', $u['email']);
+        user_delete_keeping_history((int)$u['id']);
+        auth_logout();                  // the session now points at a row that is gone
+        /* AFTER the logout, not before: auth_logout() empties $_SESSION, which
+         * would take the flash with it and land the person on a silent front
+         * page wondering whether anything happened. */
+        flash_set(t('up_deleted_ok'));
+        redirect('index.php');
+    }
+
     redirect($selfUrl);   // PRG; message comes back via the session flash
 }
 

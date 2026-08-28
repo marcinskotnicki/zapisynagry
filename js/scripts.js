@@ -786,6 +786,45 @@
         }
     }
 
+    /* 13b. "Working…" state for forms that take a noticeable time.
+     *
+     * The BGG collection sync is the reason this exists. BGG builds a
+     * collection on demand and answers "queued" until it is ready, so the
+     * request legitimately sits there for ten seconds or more. With no feedback
+     * the page just looks stuck, and the natural response — pressing the button
+     * again — starts a SECOND sync of the same collection, which is both slower
+     * and more requests at an endpoint that is already making us wait.
+     *
+     * Opt-in per form (.js-busy) rather than applied to every submit: almost
+     * every other form on the site answers instantly, and a spinner that
+     * flashes for 40ms is noise.
+     *
+     * The button is disabled AFTER the browser has taken the submission (hence
+     * the timeout): disabling it synchronously inside the handler can cancel
+     * the submit in some browsers, and would drop the button's own name/value
+     * if it ever had one. Nothing here prevents the submit — if the script
+     * fails, the form still works exactly as it did before.
+     */
+    var busyForms = document.querySelectorAll('form.js-busy');
+    for (var bf = 0; bf < busyForms.length; bf++) {
+        (function (form) {
+            form.addEventListener('submit', function () {
+                var btn = form.querySelector('button[type="submit"], button:not([type])');
+                if (!btn || btn.disabled) return;
+                // Let the submission start, then show it is under way.
+                window.setTimeout(function () {
+                    var busyText = btn.getAttribute('data-busy-label');
+                    if (busyText) btn.textContent = busyText;
+                    btn.classList.add('is-busy');
+                    // Blocks the second press. The page is replaced by the
+                    // response when the request finishes, so nothing needs to
+                    // undo this.
+                    btn.disabled = true;
+                }, 0);
+            });
+        })(busyForms[bf]);
+    }
+
     /* 14. Filter the club shelf when picking a game for a table or a poll.
      *
      * Hides rows that do not match what is typed. Local only — no request — so

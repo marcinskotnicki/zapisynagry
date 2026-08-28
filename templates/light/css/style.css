@@ -1342,3 +1342,68 @@ trix-toolbar .trix-button--dialog {
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
+
+/* The "close my account" block on the profile. Set apart from the ordinary
+   settings above it — it is the only thing on that page that cannot be undone,
+   and it should not look like another way to change a preference. */
+.danger-zone > summary { cursor: pointer; font-weight: 600; color: var(--danger, #c0392b); }
+.danger-zone[open] { border: 1px solid var(--danger, #c0392b); }
+
+/* A button that is waiting on something slow — chiefly the BGG collection sync,
+   where BGG can take ten seconds or more to build a collection. Without this the
+   page looks stuck and people press the button again, starting a second sync.
+   The spinner is a bordered pseudo-element rather than an image or a character:
+   no request, no font to be missing, and it inherits the button's own colour so
+   it works on every theme. */
+.btn.is-busy { position: relative; cursor: progress; opacity: 0.85; padding-left: 2.1rem; }
+.btn.is-busy::before {
+    content: "";
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    width: 0.85em;
+    height: 0.85em;
+    margin-top: -0.45em;
+    border: 2px solid currentColor;
+    /* One transparent edge is what makes the rotation visible; a full ring
+       would look identical at every angle. */
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+/* Someone who has asked their system for less movement gets a still marker
+   instead — the button is disabled and relabelled either way, so the state is
+   never conveyed by the animation alone. */
+@media (prefers-reduced-motion: reduce) {
+    .btn.is-busy::before { animation: none; border-right-color: currentColor; opacity: 0.5; }
+}
+
+/* The admin guide (Help tab). A long document to be READ, so it gets a narrower
+   measure than the rest of the panel — full-width lines of prose across a
+   desktop monitor are genuinely hard to follow — and more room between its
+   parts than a settings form needs. */
+.admin-help { max-width: 46rem; line-height: 1.6; }
+.admin-help h1 { margin-top: 0; }
+.admin-help h2 { margin-top: 2rem; padding-top: 0.6rem; border-top: 1px solid var(--border); }
+.admin-help h3 { margin-top: 1.4rem; }
+.admin-help ul, .admin-help ol { padding-left: 1.4rem; }
+.admin-help li { margin: 0.25rem 0; }
+.admin-help blockquote {
+    margin: 1rem 0;
+    padding: 0.6rem 0.9rem;
+    border-left: 3px solid var(--primary);
+    background: var(--surface-2);
+}
+.admin-help blockquote > :first-child { margin-top: 0; }
+.admin-help pre {
+    background: var(--surface-2);
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    overflow-x: auto;   /* an address is one long unbreakable string */
+}
+.admin-help code { background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; }
+.admin-help pre code { background: none; padding: 0; }
+/* The pre-launch checklist: no bullet, since each line already has a box. */
+.admin-help .md-tasks { list-style: none; padding-left: 0.2rem; }
+.admin-help .md-tasks input { margin-right: 0.5rem; }

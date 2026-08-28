@@ -587,6 +587,15 @@ $groupEnd = function () { echo '</div></details>'; };
          *             is why the wording is not "stops working".)
          * allow_guest_messaging is deliberately unmarked: far from stopping, it
          * becomes the ONLY thing keeping messaging alive in guest-only mode. */
+        /* Closing your own account. Marked ACCOUNTS: it only ever applies to
+         * somebody logged in, so it does nothing for visitors in guest-only
+         * mode. Placed with the other account-level permissions rather than
+         * with the guest ones, since it is about what a MEMBER may do to their
+         * own account. */
+        $toggle('allow_self_delete', 'opt_note_accounts_only');
+        ?>
+        <p class="field-note"><?= e(t('opt_allow_self_delete_note')) ?></p>
+        <?php
         $toggle('allow_unregistered_add_games', 'opt_note_guest_only_inert');
         $toggle('allow_unregistered_signup',    'opt_note_guest_only_inert');
         // Sign somebody else up (a parent entering a child). Belongs here

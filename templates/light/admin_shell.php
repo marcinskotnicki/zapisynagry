@@ -30,6 +30,10 @@ $tabs = [
     'logs'       => 'tab_logs',
     'texts'      => 'tab_texts',
     'users'      => 'tab_users',
+    // Help and Update at the end together: both are about the system itself
+    // rather than the club's events. Help is unconditional — a guide to
+    // switching features on has to be reachable while they are all still off.
+    'help'       => 'tab_help',
     'update'     => 'tab_update',
 ];
 // Same condition as admin.php's whitelist: no tab for a feature that is off.

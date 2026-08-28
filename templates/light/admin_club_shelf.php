@@ -96,7 +96,7 @@
       // both end in the same add. ?>
 <details class="lib-add">
     <summary><?= e(t('lib_search_bgg')) ?></summary>
-    <form method="post" action="admin.php?tab=club_shelf">
+    <form class="js-busy" method="post" action="admin.php?tab=club_shelf">
         <?= $csrf ?>
         <input type="hidden" name="action" value="search_bgg">
         <div class="field field-bgg">
@@ -104,7 +104,7 @@
             <input type="text" id="cs_q" name="q" required>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><?= e(t('lib_search_btn')) ?></button>
+            <button type="submit" class="btn btn-primary" data-busy-label="<?= e(t('lib_search_working')) ?>"><?= e(t('lib_search_btn')) ?></button>
         </div>
     </form>
 </details>
@@ -181,7 +181,7 @@
 <?php if (bgg_configured()): ?>
 <details class="lib-add lib-add-sync">
     <summary><?= e(t('lib_sync')) ?></summary>
-    <form method="post" action="admin.php?tab=club_shelf">
+    <form class="js-busy" method="post" action="admin.php?tab=club_shelf">
         <?= $csrf ?>
         <input type="hidden" name="action" value="sync">
         <?php // The warning is the point of this block: a sync DELETES games that
@@ -232,7 +232,7 @@
             </label>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><?= e(t('lib_sync_btn')) ?></button>
+            <button type="submit" class="btn btn-primary" data-busy-label="<?= e(t('lib_sync_working')) ?>"><?= e(t('lib_sync_btn')) ?></button>
         </div>
     </form>
 </details>

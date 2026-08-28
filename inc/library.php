@@ -1958,6 +1958,15 @@ function library_fetch_collection($username, &$why = null) {
 
     require_once __DIR__ . '/bgg.php';   // lazy: see the note at the top
 
+    /* This one request may legitimately take half a minute: up to
+     * BGG_QUEUE_BUDGET of waiting while BGG builds the collection, plus the
+     * requests themselves. A default 30s max_execution_time would kill it part
+     * way through and the member would see a blank page instead of either a
+     * result or an honest "try again shortly". Suppressed and unchecked because
+     * plenty of hosts forbid it — where it is refused we simply keep the
+     * budget, which is why the budget exists rather than trusting this. */
+    @set_time_limit(90);
+
     /* own=1 asks for owned items only; excludesubtype drops expansions so a
      * library lists games rather than the boxes that go with them. The
      * response is filtered again in the parser regardless. */
@@ -1970,12 +1979,28 @@ function library_fetch_collection($username, &$why = null) {
     $url = BGG_BASE . 'collection?username=' . rawurlencode($username)
          . '&own=1&excludesubtype=boardgameexpansion&version=1';
 
-    // Reuses inc/bgg.php's fetcher, which already retries BGG's 202 "queued"
-    // response — a collection request is the one most likely to be queued,
-    // since BGG builds it on demand.
-    list($body, $code) = bgg_fetch_raw($url);
+    /* THE PATIENT RETRY POLICY, not the default one. BGG builds a collection on
+     * demand and answers 202 "queued" until it is ready — for a collection it
+     * has not cached that is regularly ten seconds or more. The default policy
+     * waits about two seconds in total, which is why the first sync of the day
+     * failed and the second or third appeared to fix itself: BGG had finished
+     * building it in between. See BGG_QUEUE_* in inc/bgg.php. */
+    $collectionAt = microtime(true);
+    list($body, $code) = bgg_fetch_raw($url, [
+        'attempts' => BGG_QUEUE_ATTEMPTS,
+        'waits'    => BGG_QUEUE_WAITS,
+        'budget'   => BGG_QUEUE_BUDGET,
+    ]);
     if ($body === false) { $why = 'request failed'; return null; }
-    if ($code === 202)   { $why = 'bgg still preparing the collection'; return null; }
+    if ($code === 202) {
+        /* Still queued after the whole budget. Now genuinely worth another go
+         * in a moment — BGG is building it, and the next attempt usually lands
+         * on a finished collection — so say that rather than "failed", which
+         * reads as something being broken. */
+        $why = 'bgg still preparing the collection (waited '
+             . round(microtime(true) - $collectionAt, 1) . 's)';
+        return null;
+    }
     if ($code === 404)   { $why = 'no such bgg user'; return null; }
     if ($code < 200 || $code >= 300) { $why = 'HTTP ' . $code; return null; }
 
