@@ -595,7 +595,7 @@ return [
     'rules_summary'       => 'Tylko krótkie streszczenie',
     'rules_known'         => 'Gracze muszą znać zasady',
     'knows_yes'           => 'Znam zasady',
-    'knows_somewhat'      => 'Znam zasady częściowo',
+    'knows_somewhat'      => 'Trochę znam zasady',
     'knows_no'            => 'Nie znam zasad',
 
     // ---- Captcha ------------------------------------------------------------
