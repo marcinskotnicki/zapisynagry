@@ -1326,3 +1326,19 @@ trix-toolbar .trix-button--dialog {
 /* The day's own label under the event name, in day mode. Smaller than the name
    above it but not as quiet as the address — it says WHICH session this is. */
 .event-list-dayname { font-size: 1.05rem; }
+
+/* The reserve heading on the slot-list themes (classic, ironworks, starchart,
+   steampunk, imperial). The label used to sit on every reserve's own line,
+   beside the name AND the rules answer — with a real name and a phrase like
+   "zna zasady" that line wrapped badly. Saying it once above the group fixes
+   the wrapping and reads better. Lives in the base stylesheet because all five
+   themes want the same shape; each still tints its own .gc-reserve rows. */
+.gc-reserve-head {
+    margin: 0.5rem 0 0.15rem;
+    /* Layout only. The element also carries .reserve-tag, which every theme
+       already styles its own way (brass small-caps on imperial, ember on
+       steampunk, plain muted on light) — so the look is inherited, not
+       restated here where it would override each of them. */
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}

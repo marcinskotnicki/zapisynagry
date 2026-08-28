@@ -73,7 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } elseif ($action === 'name') {
         $newName = trim($_POST['display_name'] ?? '');
-        if ($newName !== '') {                      // silently ignore a blank name
+        /* Same limit the sign-up and registration forms apply. This was the one
+         * route around it: a member could register within the limit and then
+         * widen their name here afterwards, and a display name shows up in seat
+         * lists exactly like a player's does.
+         *
+         * A blank name is still ignored in silence rather than reported — it
+         * means "I changed my mind", which is not an error. An over-long one
+         * IS reported: the person typed something and deserves to know it did
+         * not stick, rather than watching their name simply not change. */
+        if (text_too_long($newName, TEXT_PERSON_MAX)) {
+            flash_set(t('error_too_long', TEXT_PERSON_MAX), 'error');
+        } elseif ($newName !== '') {
             db_run('UPDATE users SET display_name = ? WHERE id = ?', [$newName, $u['id']]);
             if (!$isSelf) log_action('user_name', $u['email'] . ' -> ' . $newName);
             flash_set(t('up_name_updated'));

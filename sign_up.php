@@ -61,14 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_signup_name');
     } elseif (!text_has_content($form['name'])) {
         $error = t('error_name_meaningless');
-    } elseif (text_too_long($form['name'], TEXT_NAME_MAX)) {
-        $error = t('error_too_long', TEXT_NAME_MAX);
+    } elseif (text_too_long($form['name'], TEXT_PERSON_MAX)) {
+        $error = t('error_too_long', TEXT_PERSON_MAX);
     } elseif ($form['player_name'] !== '' && !text_has_content($form['player_name'])) {
         // Held to the same standard as the main name — it is the one that ends
         // up on the table.
         $error = t('error_name_meaningless');
-    } elseif (text_too_long($form['player_name'], TEXT_NAME_MAX)) {
-        $error = t('error_too_long', TEXT_NAME_MAX);
+    } elseif (text_too_long($form['player_name'], TEXT_PERSON_MAX)) {
+        $error = t('error_too_long', TEXT_PERSON_MAX);
     } elseif (email_required_for_game($game) && $form['email'] === '') {
         // Required globally (mode 1) or because THIS game's proposer demands it.
         $error = t('error_email_required');

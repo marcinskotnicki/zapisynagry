@@ -252,7 +252,7 @@ function chat_post($name, $message) {
         $userId  = null;
         // The NAME keeps the strict rule: it is shown beside every line the
         // person posts, so it is closer to a listing entry than to a remark.
-        if (!text_has_content($name) || text_too_long($name, TEXT_NAME_MAX)) return 'name';
+        if (!text_has_content($name) || text_too_long($name, TEXT_PERSON_MAX)) return 'name';
     }
 
     // Same ordering for the body: strip, then judge what is actually left.

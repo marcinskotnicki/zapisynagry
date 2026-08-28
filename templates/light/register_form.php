@@ -22,7 +22,7 @@
         <?= antibot_field() ?>
         <div class="field field-name">
             <label for="name"><?= e(t('reg_name')) ?> *</label>
-            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required autofocus>
+            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" maxlength="<?= TEXT_PERSON_MAX ?>" required autofocus>
         </div>
         <div class="field field-email">
             <label for="email"><?= e(t('signup_email')) ?> *</label>

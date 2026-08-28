@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // show an error, and a silently-skipped junk comment is the right outcome.
     if ($name !== '' && $comment !== ''
         && text_has_content($name) && text_has_content($comment)
-        && !text_too_long($name, TEXT_NAME_MAX)
+        && !text_too_long($name, TEXT_PERSON_MAX)
         && !text_too_long($comment, TEXT_BODY_MAX)) {
         if ($kind === 'poll') {
             db_run('INSERT INTO poll_comments (poll_id, name, user_id, comment) VALUES (?,?,?,?)',

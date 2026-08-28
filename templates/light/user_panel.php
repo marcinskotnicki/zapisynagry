@@ -77,7 +77,7 @@ $uid_field   = $as_admin
             <h3><?= e(t('up_change_name')) ?></h3>
             <div class="field field-display_name">
                 <label for="display_name"><?= e(t('up_name')) ?></label>
-                <input type="text" id="display_name" name="display_name" value="<?= e($user['display_name']) ?>" required>
+                <input type="text" id="display_name" name="display_name" value="<?= e($user['display_name']) ?>" maxlength="<?= TEXT_PERSON_MAX ?>" required>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>

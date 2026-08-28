@@ -137,8 +137,22 @@ function email_valid($email) {
  * out of the listings.
  * --------------------------------------------------------------------------- */
 
-/** Longest accepted single-line name (game, player, table, display name). */
+/** Longest accepted single-line name (game, table, event, library entry). */
 const TEXT_NAME_MAX = 200;
+/**
+ * Longest accepted name for a PERSON — someone signing up, an account's display
+ * name, a comment or chat author.
+ *
+ * Separate from, and far shorter than, TEXT_NAME_MAX because the two are used
+ * differently. A game called "Terraforming Mars: Ares Expedition" needs room; a
+ * person's name in a seat list has to fit on one line beside a rules answer and
+ * a couple of buttons, and at 200 characters one entry could push a card's
+ * layout apart for everybody looking at it.
+ *
+ * Only checked when a name is ENTERED. Anything already stored is left alone —
+ * lowering a limit should not make an existing member's account unusable.
+ */
+const TEXT_PERSON_MAX = 25;
 /** Longest accepted free-text block (comments, messages). */
 const TEXT_BODY_MAX = 2000;
 

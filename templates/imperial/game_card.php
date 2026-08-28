@@ -206,10 +206,18 @@
                 <div class="gc-more-slots"><?= e(t('cl_more_slots', $max - $shownSlots)) ?></div>
             <?php endif; ?>
 
+            <?php /* RESERVE HEADING, once, instead of tagging every name.
+                     The tag used to sit on the same line as the name and the
+                     rules answer, and with a real name and a full phrase like
+                     "zna zasady" that line wrapped badly. A heading says it
+                     once, and each row below is then just a person. */ ?>
+            <?php if (!empty($reserves)): ?>
+                <div class="gc-reserve-head reserve-tag"><?= e(t('reserve_tag')) ?></div>
+            <?php endif; ?>
             <?php foreach ($reserves as $p): ?>
                 <div class="gc-slot gc-reserve im-assigned">
                     <span class="im-line-no">R</span>
-                    <strong><?= e($p['name']) ?></strong> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span>
+                    <strong><?= e($p['name']) ?></strong>
                     <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
                     <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"><?= e(knows_rules_label($p['knows_rules'])) ?></span><?php endif; ?>
                     <?php if ($canMsg && !empty($p['email'])): ?>
