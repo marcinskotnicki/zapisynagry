@@ -43,7 +43,7 @@ Pick a table and choose **Add a game**. You can search BoardGameGeek for the
 title — that fills in the thumbnail, length and weight for you — or enter
 everything by hand.
 
-You will be asked how you want to handle the rules: whether you will teach them,
+You will be asked how you want to handle the rules: whether you will teach them, 
 give a short summary, or expect everyone to know the game already. Players see
 this before they sign up.
 
