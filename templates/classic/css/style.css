@@ -288,6 +288,8 @@
     width:auto;
 }
 
+.tpl-classic .gc-reserve{background: #e19289;}
+
 @media (max-width: 700px) {
     .tpl-classic .game-list>article{
         width:100%;

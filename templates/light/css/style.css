@@ -563,6 +563,11 @@ html { scroll-behavior: smooth; }
 .game-thumb .game-actions .btn { margin-top: 0; text-align: center; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
 
 .p-knows { font-size: 1em; margin-left: 0.3rem; vertical-align: middle; cursor: help; }
+/* The marker is inline SVG, not a character — Android has no glyph for the book
+   codepoint this used to be and drew an empty box instead. Sized in em so it
+   tracks whatever text it sits beside on every theme, and left to inherit
+   colour so the rules-* tones keep tinting it. */
+.p-knows-icon { width: 1em; height: 1em; vertical-align: -0.15em; }
 
 .signup-btn {
     background: #2e9e5b; color: #fff;
@@ -1321,3 +1326,19 @@ trix-toolbar .trix-button--dialog {
 /* The day's own label under the event name, in day mode. Smaller than the name
    above it but not as quiet as the address — it says WHICH session this is. */
 .event-list-dayname { font-size: 1.05rem; }
+
+/* The reserve heading on the slot-list themes (classic, ironworks, starchart,
+   steampunk, imperial). The label used to sit on every reserve's own line,
+   beside the name AND the rules answer — with a real name and a phrase like
+   "zna zasady" that line wrapped badly. Saying it once above the group fixes
+   the wrapping and reads better. Lives in the base stylesheet because all five
+   themes want the same shape; each still tints its own .gc-reserve rows. */
+.gc-reserve-head {
+    margin: 0.5rem 0 0.15rem;
+    /* Layout only. The element also carries .reserve-tag, which every theme
+       already styles its own way (brass small-caps on imperial, ember on
+       steampunk, plain muted on light) — so the look is inherited, not
+       restated here where it would override each of them. */
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}

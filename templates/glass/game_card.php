@@ -210,6 +210,8 @@
                     <?php foreach ($reserves as $p): ?>
                         <span class="sc-slot sc-slot-on player-reserve">
                             <span class="sc-slot-name"><?= e($p['name']) ?></span>
+                            <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
+                            <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="sc-dot rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"></span><?php endif; ?>
                             <?php if ($canMsg && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>

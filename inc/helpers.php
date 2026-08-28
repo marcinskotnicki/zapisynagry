@@ -137,8 +137,22 @@ function email_valid($email) {
  * out of the listings.
  * --------------------------------------------------------------------------- */
 
-/** Longest accepted single-line name (game, player, table, display name). */
+/** Longest accepted single-line name (game, table, event, library entry). */
 const TEXT_NAME_MAX = 200;
+/**
+ * Longest accepted name for a PERSON — someone signing up, an account's display
+ * name, a comment or chat author.
+ *
+ * Separate from, and far shorter than, TEXT_NAME_MAX because the two are used
+ * differently. A game called "Terraforming Mars: Ares Expedition" needs room; a
+ * person's name in a seat list has to fit on one line beside a rules answer and
+ * a couple of buttons, and at 200 characters one entry could push a card's
+ * layout apart for everybody looking at it.
+ *
+ * Only checked when a name is ENTERED. Anything already stored is left alone —
+ * lowering a limit should not make an existing member's account unusable.
+ */
+const TEXT_PERSON_MAX = 25;
 /** Longest accepted free-text block (comments, messages). */
 const TEXT_BODY_MAX = 2000;
 
@@ -696,6 +710,36 @@ function thumbnail_is_predefined($file) {
     $file = trim((string)$file);
     if ($file === '') return true;                  // "none" is a valid choice
     return (int)db_val('SELECT COUNT(*) FROM predefined_thumbnails WHERE filename = ?', [$file]) > 0;
+}
+
+/**
+ * The "does this player know the rules?" marker, as inline SVG.
+ *
+ * REPLACES A CHARACTER THAT DOES NOT EXIST ON MOST PHONES. This used to be
+ * &#128366; (U+1F56E, an open book). Desktop browsers with a big font stack
+ * find it; Android in particular has no glyph for it and draws the empty
+ * "tofu" box instead, so the one thing on the card that tells you whether
+ * somebody can teach the game rendered as a blank square.
+ *
+ * Inline SVG has no such problem: it is drawn, not looked up in a font. It
+ * inherits the surrounding colour through currentColor, so the rules-*
+ * classes keep tinting it green/amber/red exactly as before, on every theme.
+ *
+ * Returns MARKUP, already escaped where it needs to be — the caller echoes it
+ * raw. $tone and $label come from rules_tone() and knows_rules_label().
+ *
+ * @param string $tone   'yes'|'some'|'no' — the CSS tone class.
+ * @param string $label  Human-readable text for the tooltip.
+ * @return string
+ */
+function rules_icon_html($tone, $label) {
+    return '<span class="p-knows rules-' . e($tone) . '" title="' . e($label) . '">'
+         . '<svg class="p-knows-icon" viewBox="0 0 24 24" aria-hidden="true" '
+         . 'fill="none" stroke="currentColor" stroke-width="2" '
+         . 'stroke-linecap="round" stroke-linejoin="round">'
+         . '<path d="M3 5a2 2 0 0 1 2-2h5v18H5a2 2 0 0 1-2-2z"></path>'
+         . '<path d="M21 5a2 2 0 0 0-2-2h-5v18h5a2 2 0 0 0 2-2z"></path>'
+         . '</svg></span>';
 }
 
 function public_archives_enabled() {

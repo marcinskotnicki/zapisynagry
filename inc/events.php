@@ -307,9 +307,14 @@ function event_list_by_day_enabled() {
  * and date. date_from and date_to are both set to that day, which makes
  * event_date_label() print the single date without needing a second formatter.
  *
+ * @param string|null $fromDate  'YYYY-MM-DD'; days before it are left out.
+ *                               Null (the default) returns every day.
  * @return array
  */
-function events_active_days() {
+function events_active_days($fromDate = null) {
+    // Only ever a bound date string, and parameterised either way.
+    $where = $fromDate !== null ? ' AND d.day_date >= ?' : '';
+    $args  = $fromDate !== null ? [$fromDate] : [];
     return db_all(
         "SELECT e.*,
                 d.id         AS day_id,
@@ -320,8 +325,9 @@ function events_active_days() {
            FROM event_days d
            JOIN events e ON e.id = d.event_id
           WHERE e.is_archived = 0
-            AND e.is_deleted  = 0
-          ORDER BY d.day_date IS NULL, d.day_date ASC, e.id ASC, d.day_index ASC");
+            AND e.is_deleted  = 0"
+            . $where . "
+          ORDER BY d.day_date IS NULL, d.day_date ASC, e.id ASC, d.day_index ASC", $args);
 }
 
 /**

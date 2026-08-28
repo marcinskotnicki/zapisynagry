@@ -58,7 +58,7 @@
         <input type="hidden" name="action" value="post">
         <?php if (!$logged_in): ?>
             <input type="text" class="chat-name" name="name" id="chat-name"
-                   value="<?= e($guest_name) ?>" maxlength="200"
+                   value="<?= e($guest_name) ?>" maxlength="<?= TEXT_PERSON_MAX ?>"
                    placeholder="<?= e(t('chat_name_placeholder')) ?>" autocomplete="nickname">
         <?php endif; ?>
         <div class="chat-send-row">

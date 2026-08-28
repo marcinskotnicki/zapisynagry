@@ -94,6 +94,10 @@ INSERT INTO options (key, value) VALUES
     --   every event, rather than one row per event. Only does anything when
     --   home_event_list is on.
     ('event_list_by_day', '0'),
+    -- hide_past_days: in per-day mode, leave out days before YESTERDAY. Not
+    --   "before today": an event running past midnight is still the session
+    --   people are looking for at 01:00.
+    ('hide_past_days',    '0'),
     -- event_details: adds location name / address / thumbnail to the event
     --   forms, and shows them on the tabs, the event list and the calendar.
     ('event_details',     '0'),

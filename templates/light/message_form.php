@@ -63,7 +63,7 @@
         <?php if (!empty($is_guest)): // guests must identify themselves (see message.php) ?>
             <div class="field field-sender_name">
                 <label for="sender_name"><?= e(t('msg_sender_name')) ?> *</label>
-                <input type="text" id="sender_name" name="sender_name" value="<?= e($sender_name) ?>" required>
+                <input type="text" id="sender_name" name="sender_name" value="<?= e($sender_name) ?>" maxlength="<?= TEXT_PERSON_MAX ?>" required>
             </div>
             <div class="field field-sender_email">
                 <label for="sender_email"><?= e(t('msg_sender_email')) ?> *</label>

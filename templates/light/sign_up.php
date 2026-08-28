@@ -42,7 +42,7 @@
               // wording is unchanged — most clubs never see this. ?>
         <div class="field field-name">
             <label for="name"><?= e(signup_proxy_enabled() ? t('signup_your_name') : t('signup_name')) ?></label>
-            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required>
+            <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" maxlength="<?= TEXT_PERSON_MAX ?>" required>
         </div>
 
         <?php // Signing somebody else up — a parent entering a child. Optional:
@@ -50,7 +50,7 @@
         <?php if (signup_proxy_enabled()): ?>
             <div class="field field-player_name">
                 <label for="player_name"><?= e(t('signup_player_name')) ?></label>
-                <input type="text" id="player_name" name="player_name" value="<?= e($form['player_name'] ?? '') ?>">
+                <input type="text" id="player_name" name="player_name" value="<?= e($form['player_name'] ?? '') ?>" maxlength="<?= TEXT_PERSON_MAX ?>">
                 <p class="field-note"><?= e(t('signup_player_name_note')) ?></p>
             </div>
         <?php endif; ?>
