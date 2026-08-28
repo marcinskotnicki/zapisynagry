@@ -24,6 +24,33 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Friendly addresses for the admin guide, in both languages:
+    #   /admin/help and /admin/pomoc  ->  /admin.php?tab=help
+    #
+    # A REDIRECT, not an internal rewrite, and that is the whole point. Serving
+    # admin.php AT the path /admin/help would leave the browser resolving every
+    # relative asset ("templates/light/css/style.css", "js/scripts.js", the
+    # thumbnails) against /admin/ — so the page would arrive completely
+    # unstyled. See the note at the top of this file. Bouncing the browser to
+    # the real single-segment URL sidesteps that entirely: what finally renders
+    # is an ordinary /admin.php request.
+    #
+    # 302 rather than 301: a permanent redirect is cached by browsers for a
+    # long time and is awkward to take back, and this is a convenience alias
+    # rather than a promise about where the page lives.
+    #
+    # WHY THE TARGET IS BUILT FROM REQUEST_URI rather than written as a plain
+    # "admin.php?tab=help": with the R flag, a relative substitution is resolved
+    # against the FILESYSTEM, and the server's real directory path ends up in
+    # the Location header — a browser gets sent to /home/user/public_html/
+    # admin.php. Taking the part of the request BEFORE /admin gives a
+    # root-relative target instead, which is correct both at the web root and
+    # for a club installed in a subfolder (/zapisy/admin/help -> /zapisy/
+    # admin.php?tab=help). A hardcoded leading slash would fix the first case
+    # and break the second.
+    RewriteCond %{REQUEST_URI} ^(.*)/admin/(help|pomoc)/?$ [NC]
+    RewriteRule ^ %1/admin.php?tab=help [R=302,L]
+
     # Map /name -> name.php.
     #   !-f / !-d : never shadow something that already exists, so a real file or
     #               directory keeps winning (e.g. /icons stays the icons folder).
@@ -42,4 +69,10 @@
     # rule doesn't depend on that file having been written, and unlike
     # "Require all denied" it behaves the same on Apache 2.2 and 2.4.
     RewriteRule ^data(/|$) - [F,L]
+
+    # The admin guide is rendered by the Help tab, which is behind a login.
+    # The files themselves are plain Markdown, so without this they would also
+    # be readable by anyone who guessed the path — harmless in content, but
+    # there is no reason to serve a club's admin instructions to the public.
+    RewriteRule ^help(/|$) - [F,L]
 </IfModule>
