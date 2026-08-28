@@ -14,6 +14,14 @@
  *  the pattern matching below works on ALREADY-ESCAPED text, which is why the
  *  link pattern looks for &quot; rather than a plain quote.
  *
+ *  INLINE FORMATTING IS APPLIED TO A WHOLE BLOCK, NOT LINE BY LINE. The first
+ *  version of this did it per line, which quietly broke every piece of emphasis
+ *  that a wrapped paragraph split across two lines: **Public event archive**
+ *  with the newline in the middle left the asterisks showing. Worse, the two
+ *  halves then paired up with the NEXT stray pair further down, so bold turned
+ *  on and off in the wrong places. Blocks are therefore buffered raw and
+ *  formatted once, when the block closes.
+ *
  *  SUPPORTED: headings, paragraphs, bullet and numbered lists, task lists,
  *  blockquotes, fenced code blocks, horizontal rules, and inline bold, italic,
  *  code and links. Tables, images, footnotes and reference links are not
@@ -106,19 +114,37 @@ function md_render($md) {
 
     // Close whatever block is open. Called before starting a different one, so
     // the nesting cannot end up crossed.
+    /* Joined THEN formatted, so emphasis that spans a line break still works —
+     * see the note in this file's header. */
     $flushPara = function () use (&$para, &$out) {
         if (!$para) return;
-        $out[] = '<p>' . implode("\n", $para) . '</p>';
+        $out[] = '<p>' . md_inline(implode("\n", $para)) . '</p>';
         $para = [];
     };
-    $closeList = function () use (&$listType, &$out) {
+    /* The item currently being gathered. A list item wraps across lines just as
+     * a paragraph does, so it is buffered and formatted whole for exactly the
+     * same reason. */
+    $liBuf  = null;   // escaped text of the open <li>, or null if none
+    $liPre  = '';     // markup that goes before that text (the task checkbox)
+    $flushLi = function () use (&$liBuf, &$liPre, &$out) {
+        if ($liBuf === null) return;
+        $out[] = '<li>' . $liPre . md_inline($liBuf) . '</li>';
+        $liBuf = null;
+        $liPre = '';
+    };
+    $closeList = function () use (&$listType, &$out, &$flushLi) {
+        $flushLi();
         if ($listType === null) return;
         $out[] = '</' . $listType . '>';
         $listType = null;
     };
-    $closeQuote = function () use (&$inQuote, &$out) {
+    $quoteBuf = [];   // raw escaped lines of the open blockquote
+    $closeQuote = function () use (&$inQuote, &$out, &$quoteBuf) {
         if (!$inQuote) return;
+        // Same rule again: format the whole quote at once, not line by line.
+        $out[] = md_inline(implode("\n", $quoteBuf));
         $out[] = '</blockquote>';
+        $quoteBuf = [];
         $inQuote = false;
     };
 
@@ -161,9 +187,9 @@ function md_render($md) {
         if (preg_match('/^>\s?(.*)$/', $line, $m)) {
             $flushPara(); $closeList();
             if (!$inQuote) { $out[] = '<blockquote>'; $inQuote = true; }
-            // An empty quoted line separates paragraphs INSIDE the quote.
-            if (trim($m[1]) === '') { $out[] = '<br>'; }
-            else { $out[] = md_inline(e($m[1])); $out[] = ' '; }
+            // An empty quoted line separates paragraphs INSIDE the quote. Kept
+            // as a marker in the buffer so the break survives the join.
+            $quoteBuf[] = (trim($m[1]) === '') ? '<br>' : e($m[1]);
             continue;
         }
         $closeQuote();
@@ -174,9 +200,10 @@ function md_render($md) {
         if (preg_match('/^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/', $line, $m)) {
             $flushPara();
             if ($listType !== 'ul') { $closeList(); $out[] = '<ul class="md-tasks">'; $listType = 'ul'; }
+            $flushLi();
             $checked = (strtolower($m[1]) === 'x') ? ' checked' : '';
-            $out[] = '<li><input type="checkbox" disabled' . $checked . '> '
-                   . md_inline(e($m[2])) . '</li>';
+            $liPre = '<input type="checkbox" disabled' . $checked . '> ';
+            $liBuf = e($m[2]);
             continue;
         }
 
@@ -184,7 +211,8 @@ function md_render($md) {
         if (preg_match('/^\s*[-*]\s+(.*)$/', $line, $m)) {
             $flushPara();
             if ($listType !== 'ul') { $closeList(); $out[] = '<ul>'; $listType = 'ul'; }
-            $out[] = '<li>' . md_inline(e($m[1])) . '</li>';
+            $flushLi();
+            $liBuf = e($m[1]);
             continue;
         }
 
@@ -192,22 +220,25 @@ function md_render($md) {
         if (preg_match('/^\s*\d+\.\s+(.*)$/', $line, $m)) {
             $flushPara();
             if ($listType !== 'ol') { $closeList(); $out[] = '<ol>'; $listType = 'ol'; }
-            $out[] = '<li>' . md_inline(e($m[1])) . '</li>';
+            $flushLi();
+            $liBuf = e($m[1]);
             continue;
         }
 
         /* A CONTINUATION of the list item above — the manual wraps long items
          * across lines, and without this each wrapped line would start its own
          * paragraph in the middle of a list. */
-        if ($listType !== null && preg_match('/^\s+\S/', $raw)) {
-            $out[count($out) - 1] = preg_replace('/<\/li>$/', ' ' . md_inline(e(trim($line))) . '</li>',
-                                                 $out[count($out) - 1]);
+        if ($listType !== null && $liBuf !== null && preg_match('/^\s+\S/', $raw)) {
+            // Appended to the buffer, so the finished item is formatted in one
+            // piece: emphasis opened on the first line and closed on this one
+            // still becomes emphasis.
+            $liBuf .= "\n" . e(trim($line));
             continue;
         }
         $closeList();
 
         // Anything else is ordinary paragraph text.
-        $para[] = md_inline(e($line));
+        $para[] = e($line);   // formatted later, as one block
     }
 
     // End of document: close whatever is still open.

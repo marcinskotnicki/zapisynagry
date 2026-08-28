@@ -150,8 +150,12 @@ filling everything in from scratch.
 
 ### Worth considering
 
-**BoardGameGeek API code** — if somebody else installed the system for you, this
-is most likely filled in already and **you do not need to do anything**.
+**BoardGameGeek API code** — note that this one is **not in the basic
+settings**: you will find it right at the bottom of the options page, in the
+**Advanced** group.
+
+If somebody else installed the system for you, it is most likely filled in
+already and **you do not need to do anything**.
 
 The simplest way to check: go to the club page, start adding a game to a table,
 and see whether searching by title works. If it does, it is set — leave it
@@ -238,11 +242,17 @@ By default the system shows one event — the current one. For most clubs that i
 all they need.
 
 If you want sign-ups open for several meetups at the same time (say a weekly
-game night plus a tournament next month), go to Options, to the **Archive and
-event list** group, and switch on **Public event archive**. Tabs for switching
-between events then appear at the top of the page.
+game night plus a tournament next month), switch on **Public event archive** —
+you will find it in the **Basic settings** group, along with the other switches
+that turn features on. Tabs for switching between events then appear at the top
+of the page.
 
-The same group has several settings worth knowing about:
+> **Two different places.** The switch itself ("do we want this at all") is in
+> **Basic settings**. The detailed settings for the feature have their own group
+> further down, **Archive and event list**. Most features in this system work
+> that way: the switch near the top, the settings in their own group.
+
+The **Archive and event list** group has several settings worth knowing about:
 
 **Display active event list as home page** — instead of opening one meetup
 straight away, the front page shows a list of all the active ones. Good for
@@ -279,7 +289,11 @@ list instead of typed in again.
 logged-in member can list the games they own and could bring. Everyone else can
 see them, so asking somebody for a particular title is easier.
 
-Both are switched on in Options, in the **Club library** group.
+Both are switched on in Options, in the **Basic settings** group — the
+*Enable the club's own game collection* and *Enable members' game libraries*
+switches. The remaining settings for both libraries (how many games to show per
+page, and so on) have their own group further down, **Club library** — the same
+split as the event archive above.
 
 ### Adding games to a list
 

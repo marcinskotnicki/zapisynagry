@@ -151,8 +151,12 @@ kliknięć zamiast wypełniania wszystkiego od nowa.
 
 ### Warto rozważyć
 
-**Kod API BoardGameGeek** — jeśli system był instalowany dla Was przez kogoś
-innego, ten kod najprawdopodobniej jest już wpisany i **nie musisz nic robić**.
+**Kod API BoardGameGeek** — uwaga, tego ustawienia **nie ma w ustawieniach
+podstawowych**: znajdziesz je na samym dole strony z opcjami, w grupie
+**Zaawansowane**.
+
+Jeśli system był instalowany dla Was przez kogoś innego, ten kod
+najprawdopodobniej jest już wpisany i **nie musisz nic robić**.
 
 Najprostszy sposób, żeby to sprawdzić: wejdź na stronę klubu, spróbuj dodać grę
 do stołu i zobacz, czy działa wyszukiwanie po tytule. Jeśli tak — jest ustawiony
@@ -239,11 +243,18 @@ Domyślnie system pokazuje jedno wydarzenie — to bieżące. Dla większości k
 to wystarcza.
 
 Jeśli chcesz mieć otwarte zapisy na kilka spotkań jednocześnie (np. cotygodniowe
-granie i osobny turniej za miesiąc), wejdź w Opcje, do grupy **Archiwum i lista
-wydarzeń**, i włącz **Publiczne archiwum wydarzeń**. Wtedy na górze strony
-pojawią się zakładki do przełączania między wydarzeniami.
+granie i osobny turniej za miesiąc), włącz **Publiczne archiwum wydarzeń** —
+znajdziesz je w grupie **Ustawienia podstawowe**, razem z innymi przełącznikami
+włączającymi funkcje. Wtedy na górze strony pojawią się zakładki do przełączania
+między wydarzeniami.
 
-W tej samej grupie znajdziesz kilka ustawień, które warto znać:
+> **Uwaga na dwa różne miejsca.** Sam przełącznik („czy w ogóle to włączamy”)
+> jest w **Ustawieniach podstawowych**. Szczegółowe ustawienia tej funkcji mają
+> osobną grupę niżej, **Archiwum i lista wydarzeń**. Tak samo działa większość
+> funkcji w tym systemie: włącznik na górze, ustawienia w swojej grupie.
+
+W grupie **Archiwum i lista wydarzeń** znajdziesz kilka ustawień, które warto
+znać:
 
 **Lista aktywnych wydarzeń jako strona główna** — zamiast otwierać od razu jedno
 spotkanie, strona główna pokaże listę wszystkich aktywnych. Dobre dla klubów z
@@ -279,7 +290,11 @@ od nowa.
 zalogowany członek może wpisać, jakie gry ma u siebie i może przynieść. Inni to
 widzą, więc łatwiej poprosić kogoś o konkretny tytuł.
 
-Obie włącza się w Opcjach, w grupie **Biblioteka klubu**.
+Obie włącza się w Opcjach, w grupie **Ustawienia podstawowe** — tam są
+przełączniki *Włącz własną kolekcję gier klubu* i *Włącz biblioteki gier
+uczestników*. Pozostałe ustawienia obu bibliotek (np. ile gier pokazywać na
+stronie) mają własną grupę niżej, **Biblioteka klubu** — tak jak przy archiwum
+wydarzeń opisanym wyżej.
 
 ### Dodawanie gier do spisu
 
