@@ -204,6 +204,8 @@
                 <div class="gc-slot gc-reserve sk-berth">
                     <span class="sk-rivet" aria-hidden="true"></span>
                     <strong><?= e($p['name']) ?></strong> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span>
+                    <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
+                    <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"><?= e(knows_rules_label($p['knows_rules'])) ?></span><?php endif; ?>
                     <?php if ($canMsg && !empty($p['email'])): ?>
                         <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>

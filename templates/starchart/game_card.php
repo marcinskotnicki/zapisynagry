@@ -189,6 +189,8 @@
             <?php foreach ($reserves as $p): // reserves listed under the slots ?>
                 <div class="gc-slot gc-reserve">
                     <span><strong><?= e($p['name']) ?></strong> <?= e(t('reserve_tag')) ?></span>
+                    <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
+                    <?php $kn = knows_rules_label($p['knows_rules']); ?><?php if ($kn !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>">(<?= e(mb_strtolower($kn)) ?>)</span><?php endif; ?>
                     <?php if ($canMsg && !empty($p['email'])): ?>
                         <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>

@@ -558,7 +558,7 @@ return [
     'pager_prev'          => '← Previous',
     'pager_next'          => 'Next →',
     'pager_position'      => 'Page %d of %d',
-    'opt_group_archive'              => 'Archive',
+    'opt_group_archive'              => 'Archive and event list',
     'opt_nav_hide_current'            => 'Hide the menu link for the page being viewed',
     'opt_nav_hide_current_note'       => 'Saves a slot in the menu, since a link to the page you are already on does nothing. Switch it off to keep the menu the same on every page.',
     'opt_archive_views'               => 'Past events shown as',

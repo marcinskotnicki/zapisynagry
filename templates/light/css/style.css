@@ -563,6 +563,11 @@ html { scroll-behavior: smooth; }
 .game-thumb .game-actions .btn { margin-top: 0; text-align: center; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
 
 .p-knows { font-size: 1em; margin-left: 0.3rem; vertical-align: middle; cursor: help; }
+/* The marker is inline SVG, not a character — Android has no glyph for the book
+   codepoint this used to be and drew an empty box instead. Sized in em so it
+   tracks whatever text it sits beside on every theme, and left to inherit
+   colour so the rules-* tones keep tinting it. */
+.p-knows-icon { width: 1em; height: 1em; vertical-align: -0.15em; }
 
 .signup-btn {
     background: #2e9e5b; color: #fff;

@@ -1,67 +1,92 @@
 # Licence
 
-**zapisynagry** — a sign-up board for board game events.
+**zapisynagry** - a sign-up board for board game events.
 
 Copyright © Marcin Skotnicki.
 
-This is a plain-language licence. It is not one of the standard open source licences, and it has not been reviewed by a lawyer. If you need certainty for something that matters legally or commercially, get advice on it.
+This licence is written in plain language. It is not a standard open source licence, and it has not been reviewed by a lawyer. If you need certainty for something that matters legally or commercially, consult a lawyer.
 
 *[Polska wersja tego pliku](LICENSE.pl.md)*
 
-There are three ways to use this software. Find the one that describes you.
+There are three ways to use this software. Pick the one that applies to you.
 
 ---
 
-## 1. KGP member clubs, and anyone who got it from a creator
+## 1. KGP member clubs, and anyone who received the software from a creator
 
 If your club is a member of the **Kluby Gier Planszowych** network
-([klubygierplanszowych.pl](https://klubygierplanszowych.pl)), or you received this software directly from one of its creators, you may use it freely and modify it however you like. There are no further conditions.
+([klubygierplanszowych.pl](https://klubygierplanszowych.pl)), or you received the software directly from one of its creators, you may use it without restriction and modify it freely.
+
+There are no further conditions here.
 
 ## 2. Non-commercial use outside the Kluby Gier Planszowych community
 
-If you run game meetups or events non-commercially but are not covered by section 1, you may use this software free of charge, and modify it however you like, provided that:
+If you run game meetups or other events non-commercially, but section 1 does not cover you, you may use this software free of charge and modify it freely, provided that:
 
-- **you donate at least 5 kg of cat food to an animal shelter** and send proof to koty@zapisynagry.pl;
+- **you donate at least 5 kg of cat food (or a monetary donation) to an animal shelter** and send confirmation to koty@zapisynagry.pl;
 - **you keep the attribution notice in the page footer** (see below);
-- **you keep the link to this licence in the software** — without changing anything in it.
+- **you keep the link to this licence in the software** and supply it together with the software, without making any changes to it.
 
-Running meetups or events non-commercially means you do not charge for taking part, and that no sale of goods or services is attached to those meetups from which the organiser, or people or businesses connected to them, make money. We also count as non-commercial those meetups where you have to collect contributions from participants — for the venue, materials, insurance and the like — where those contributions cover exactly the necessary costs that allow the event to happen at all. Any situation where the organiser takes more than the necessary costs came to, or pays themselves the surplus, already describes a commercial meetup or event, and this section of the licence does not apply to it. In other words: breaking even and not-for-profit stay in section 2; making money moves you to section 3.
+By **running meetups or events non-commercially** we mean a situation where you do not charge for taking part, and where it does not involve the sale of goods or services from which the organiser, or people or businesses connected to them, make money.
 
-Non-commercial use of the software, on the other hand, means that you are not charging for the software, for access to it, or for a service whose main offering is the software itself.
+An exception is where participants contribute towards genuinely necessary costs of the event - the venue, materials or insurance, for example - and the contributions collected cover exactly those costs. In that case we still treat the event as non-commercial.
+
+If the organiser takes more than the necessary costs come to, or pays themselves the surplus, we already treat the event as commercial and section 3 applies.
+
+In other words: **breaking even and not-for-profit stay in section 2; making money moves you to section 3.**
+
+By **non-commercial use of the software** we also mean a situation where you do not charge for the software itself, for access to it, or for a service whose main element is that software.
 
 ## 3. Commercial use of the software
 
-If you want to use this software commercially, and as part of commercially organised meetups and events, you may do so free of charge, provided that:
+If you want to use this software commercially, including for running paid meetups or events, you may do so free of charge, provided that:
 
-- **you donate at least 10 kg of cat food to an animal shelter** and send proof to koty@zapisynagry.pl;
+- **you donate at least 10 kg of cat food (or a monetary donation) to an animal shelter** and send confirmation to koty@zapisynagry.pl;
 - **you keep the attribution notice in the page footer** (see below);
-- **you keep the link to this licence in the software** — without changing anything in it.
+- **you keep the link to this licence in the software** and supply it together with the software, without making any changes to it.
 
 ---
 
 ## The donation
 
-Once per organisation, not once per installation, and not per year. Any shelter you like — the nearest one is the obvious choice, but it is your call.
+The donation only needs to be made **once per organisation, not once per installation and not every year**.
 
-"Proof" means whatever you would show a friend: a receipt, a photo, a note from the shelter, even a plain written statement. Nobody will audit it. The point is that the cats get fed.
+You may choose any shelter. The nearest one will probably be the most convenient, but the choice is yours.
 
-Write to **koty@zapisynagry.pl**
+"Confirmation" simply means anything that can confirm the donation was made - it might be a receipt, a photo, a note from the shelter, or even a plain written statement.
+
+Nobody will examine this in any detail. The point, above all, is that the cats get fed.
+
+Send the confirmation to **koty@zapisynagry.pl**.
 
 ## The footer notice
 
-The attribution appears in the page footer via inc/copyright.php. It consists of: (C) 2026 Marcin Skotnicki in cooperation with, together with the Kluby Gier Planszowych logo linking to that community's website. Keeping exactly this form of the attribution, and the link to this licence, in the software's footer are the only things this licence asks you to preserve and not to change — everything else in the software is yours to alter.
+The attribution notice is added to the page footer via the `inc/copyright.php` file.
 
-**You may add your own copyright line beside it.** The admin panel has a field for exactly that, and a club naming itself in its own footer is expected and welcome. What is not allowed is changing or removing the existing notice while doing so.
+It should contain:
 
-Removing or hiding it counts as removing it — by deleting the file, blanking it, or covering it with custom CSS.
+`(C) 2026 Marcin Skotnicki in cooperation with`
 
-If that file is not present in your copy, there is nothing to preserve and nothing to breach; the clause applies to the notice as and when it is shipped.
+together with the **Kluby Gier Planszowych** logo, linking to that community's website.
+
+Leaving this attribution notice, and the link to this licence, in the software's footer are the only things this licence requires you to keep unchanged. Everything else in the software you may modify to suit your own needs.
+
+**You may add your own copyright notice beside the existing one.** The admin panel contains a dedicated field that can be used for this. So you are welcome to sign the software with your own name or your club's name as well - it is in fact encouraged.
+
+What you may not do, while making such a change, is remove or modify the existing attribution notice.
+
+Deleting the file, blanking its contents, and hiding the notice using custom CSS all count as removing or hiding it.
+
+If that file is not present in your copy of the software, there is nothing to keep and nothing that can be breached. This clause applies to the notice from the moment it is made available.
 
 ## No warranty
 
-The software is provided "as is", without warranty of any kind, express or implied. The author is not liable for any claim, damages or other liability arising from the software or its use — including lost data, a sign-up sheet that was unavailable when you needed it, or an event that did not go to plan.
+The software is provided "as is", without warranty of any kind - express or implied.
+
+The author is not liable for any claim, damages or other liability connected with this software or its use. This includes, among other things, lost data, the sign-up list being unavailable at an important moment, or a situation where an event does not go to plan.
 
 ## Questions
 
-If your situation does not fit any of the three sections above, ask.
-The intent is simple: KGP clubs use it freely, other communities feed some cats, and anyone making money from it feeds a few more.
+If your situation does not fit any of the three sections above, just ask.
+
+The intent is simple: **KGP member clubs use it freely, other communities feed some cats, and anyone who makes money from using the software chips in a little more.**

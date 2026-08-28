@@ -119,7 +119,7 @@
                 <ul class="player-list el-vine">
                     <?php foreach ($confirmed as $p): ?>
                         <li class="player el-leaf">
-                            <?= e($p['name']) ?><?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="p-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>">&#128366;</span><?php endif; ?><?php if (is_admin() && !empty($p['user_id'])): ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?>
+                            <?= e($p['name']) ?><?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><?= rules_icon_html(rules_tone($p['knows_rules']), knows_rules_label($p['knows_rules'])) ?><?php endif; ?><?php if (is_admin() && !empty($p['user_id'])): ?><span class="p-acct" title="<?= e(t('player_account_bound', $p['account_name'] ?? ('#' . (int)$p['user_id']))) ?>">@</span><?php endif; ?>
                             <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
@@ -141,7 +141,7 @@
 
                     <?php foreach ($reserves as $p): ?>
                         <li class="player player-reserve el-leaf">
-                            <?= e($p['name']) ?><?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="p-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>">&#128366;</span><?php endif; ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span>
+                            <?= e($p['name']) ?><?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><?= rules_icon_html(rules_tone($p['knows_rules']), knows_rules_label($p['knows_rules'])) ?><?php endif; ?> <span class="reserve-tag"><?= e(t('reserve_tag')) ?></span>
                             <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
