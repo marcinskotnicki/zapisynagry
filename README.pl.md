@@ -87,4 +87,4 @@ Dane o grach pochodzą z [BoardGameGeek](https://boardgamegeek.com/) poprzez ich
 API XML. Za wysyłkę poczty odpowiada
 [PHPMailer](https://github.com/PHPMailer/PHPMailer).
 
-[ai.md](Informacja o wykorzystaniu sztucznej inteligencji).
+[Informacja o wykorzystaniu sztucznej inteligencji](ai.md).
