@@ -280,6 +280,19 @@ There is also **messaging**: to the person bringing a game, or to everyone
 signed up for it. The message goes by email, but you do not see the addresses —
 neither theirs, nor they yours.
 
+### Chat
+
+Some clubs also have a **chat** — a small speech-bubble window, usually in the
+corner of the screen. You click it, type your name, and write to everyone who
+happens to be looking at the page. Good for small things like "I am at the
+door" or "anyone fancy something short before 18:00?".
+
+You do not need an account. New messages appear on their own, without
+refreshing the page.
+
+> **Cannot see that window?** It means the organiser has not switched chat on
+> for your club. Nothing is broken — the feature is simply turned off.
+
 ---
 
 ## 14. Common questions

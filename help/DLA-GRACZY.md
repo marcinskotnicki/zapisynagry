@@ -275,6 +275,19 @@ Jest też **wysyłanie wiadomości**: do osoby przynoszącej grę albo do wszyst
 przy niej zapisanych. Wiadomość idzie e-mailem, ale adresów nie widzisz — ani
 Ty ich, ani oni Twojego.
 
+### Czat
+
+Niektóre kluby mają jeszcze **czat** — małe okienko z dymkiem, zwykle w rogu
+ekranu. Klikasz, wpisujesz imię i piszesz do wszystkich, którzy akurat patrzą
+na stronę. Przydaje się do drobiazgów w rodzaju „jestem pod drzwiami” albo
+„ktoś ma ochotę na coś krótkiego przed 18:00?”.
+
+Nie musisz mieć konta. Nowe wiadomości pojawiają się same, bez odświeżania
+strony.
+
+> **Nie widzisz takiego okienka?** To znaczy, że organizator nie włączył czatu w
+> Waszym klubie. Nic się nie zepsuło — po prostu ta funkcja jest wyłączona.
+
 ---
 
 ## 14. Najczęstsze pytania
