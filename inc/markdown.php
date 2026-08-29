@@ -86,7 +86,11 @@ function md_inline($line) {
 
     // 3. Bold before italic: ** would otherwise be eaten as two singles.
     $line = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $line);
-    $line = preg_replace('/(?<![\w*])\*([^*\n]+)\*(?![\w*])/', '<em>$1</em>', $line);
+    /* Italic may span a line break, exactly like bold above — the excluded \n
+     * here was the same fault, and showed up as a stray pair of asterisks
+     * whenever a wrapped line split an italic phrase. Blocks arrive here joined,
+     * so a newline inside the match is a wrap, never a paragraph boundary. */
+    $line = preg_replace('/(?<![\w*])\*([^*]+)\*(?![\w*])/', '<em>$1</em>', $line);
 
     // 4. Put the code spans back.
     $line = preg_replace_callback('/\x00CODE(\d+)\x00/', function ($m) use ($codes) {

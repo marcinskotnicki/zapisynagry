@@ -171,6 +171,8 @@ complexity by itself.
 > the first place to check. If there is no code at all, you get one from the
 > BoardGameGeek site — ask somebody more technical, it is a one-off job.
 
+---
+
 **Allow polls** — lets people post a "poll" instead of a specific game: several
 suggestions for others to vote on, which the system turns into a real game once
 enough people want it. Useful when you do not know in advance what you will

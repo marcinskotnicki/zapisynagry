@@ -173,6 +173,8 @@ trudności.
 > stronie BoardGameGeek — poproś kogoś bardziej technicznego, to jednorazowa
 > czynność.
 
+---
+
 **Zezwól na głosowania** — pozwala zamiast konkretnej gry wystawić „głosowanie”:
 kilka propozycji, na które ludzie głosują, a system sam zamienia je w grę, gdy
 zbierze się komplet. Przydatne, gdy nie wiecie z góry, w co zagracie.

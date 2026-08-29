@@ -1406,3 +1406,9 @@ trix-toolbar .trix-button--dialog {
 /* The pre-launch checklist: no bullet, since each line already has a box. */
 .admin-help .md-tasks { list-style: none; padding-left: 0.2rem; }
 .admin-help .md-tasks input { margin-right: 0.5rem; }
+/* A rule used INSIDE a section, to part two settings that each run to a full
+   paragraph. Lighter than the ones between sections, which are doing a bigger
+   job — and with room around it, since the thing above is usually a callout
+   box whose own edge would otherwise sit almost on top of it. */
+.admin-help hr { margin: 1.8rem 0; border: 0; border-top: 1px solid var(--border); }
+.admin-help blockquote + hr { margin-top: 1.4rem; }
