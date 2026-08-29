@@ -11,24 +11,9 @@ nie potrzebuje arkusza kalkulacyjnego.
 
 ---
 
-## Licencja w skrócie
+## Licencja 
 
-**Kluby zrzeszone w KGP** — oraz osoby, które otrzymały program bezpośrednio od
-twórców — korzystają z niego swobodnie i mogą go dowolnie modyfikować, bez
-dodatkowych warunków.
-
-**Pozostałe kluby niekomercyjne** również korzystają bezpłatnie, zachowując
-informację o autorstwie w stopce i przekazując co najmniej **5 kg karmy dla
-kotów** do schroniska — dowód na adres koty@zapisynagry.pl. Klub pozostaje
-niekomercyjny, jeśli opłaty (bilety, składki) pokrywają tylko jego koszty; jeśli
-ktoś na nich zarabia, to już użytek komercyjny.
-
-**Użytek komercyjny** jest także bezpłatny, na tych samych zasadach, ale
-**10 kg**.
-
-Własną informację o prawach autorskich można dopisać w stopce obok istniejącej.
-
-Pełne warunki w pliku [LICENSE.pl.md](LICENSE.pl.md).
+Warunki w pliku [LICENSE.pl.md](LICENSE.pl.md).
 
 ---
 
@@ -59,53 +44,7 @@ na danym wydarzeniu.
 
 ## Dla odwiedzających
 
-### Dodawanie gry
-
-Wybierz stół i kliknij **Dodaj grę**. Możesz wyszukać tytuł w BoardGameGeek — to
-uzupełni miniaturkę, czas gry i wagę — albo wpisać wszystko ręcznie.
-
-Zostaniesz zapytany, jak chcesz podejść do zasad: czy je wytłumaczysz, streścisz
-w skrócie, czy zakładasz, że wszyscy już grę znają. Gracze widzą to, zanim się
-zapiszą.
-
-Jeśli podasz adres e-mail, dostaniesz powiadomienie, gdy ktoś dołączy do Twojej
-gry lub z niej zrezygnuje. Pozwala on też później edytować albo usunąć grę bez
-zakładania konta.
-
-### Zajmowanie miejsca
-
-Kliknij wolne miejsce przy dowolnej grze. Jeśli komplet jest już zebrany,
-trafisz na listę rezerwową i awansujesz automatycznie, gdy zwolni się miejsce.
-
-Aby zrezygnować, użyj przycisku **Zrezygnuj** przy swoim nazwisku.
-
-### Ankiety
-
-Ankieta to miejsce w grafiku, w którym gra nie została jeszcze wybrana. Dodaj co
-najmniej dwie propozycje i pozwól ludziom zagłosować.
-
-Ankieta rozstrzyga się sama. Domyślnie dzieje się to w chwili, gdy któraś
-propozycja zbierze potrzebną liczbę graczy. Jeśli osoba zakładająca ankietę
-zaznaczyła **Czekaj na koniec głosowania**, ankieta potrwa do terminu, a wygra
-propozycja z najlepszym wypełnieniem.
-
-Autor ankiety może też zakończyć głosowanie wcześniej, edytować ankietę albo ją
-usunąć.
-
-### Edytowanie tego, co dodałeś
-
-Jeśli w chwili dodawania byłeś zalogowany, po prostu wejdź w edycję ponownie.
-
-Jeśli nie — serwis poprosi o potwierdzenie tożsamości: zwykle przez ponowne
-wpisanie użytego adresu e-mail albo przez kod wysłany na ten adres. To, który
-sposób obowiązuje, ustala organizator.
-
-### Powiadomienia
-
-Jeśli organizator włączył tę opcję, pod grafikiem znajdziesz pole, w którym
-możesz zostawić adres, żeby dowiadywać się o nowych grach na tym wydarzeniu.
-Każdy e-mail zawiera link do wypisania się, a zapisy dotyczą pojedynczego
-wydarzenia — zapisanie się na jedno nie zapisuje Cię na kolejne.
+Skrócona instrukcja obsługi w pliku [help/DLA-GRACZY.md](help/DLA-GRACZY.md).
 
 ---
 
@@ -116,52 +55,7 @@ Panel administratora znajduje się pod adresem `/admin.php` (albo po prostu
 
 ### Zakładanie wydarzenia
 
-**Nowe wydarzenie** tworzy je od zera: nazwa, liczba dni, godziny otwarcia i
-zamknięcia każdego dnia oraz liczba stołów.
-
-Dzień może przekraczać północ — 18:00 → 03:00 traktowane jest jako jeden wieczór,
-a nie dwa dni, i gry zaczynające się po północy trafiają w odpowiednie miejsce na
-osi czasu.
-
-### Opcje
-
-Zakładka **Opcje** to główny panel sterowania. Najważniejsze ustawienia:
-
-| Ustawienie | Za co odpowiada |
-|---|---|
-| Strefa czasowa | Zegar, według którego działa cały serwis. Musi zgadzać się z lokalem, inaczej ankiety rozstrzygną się w złym momencie. |
-| Konta | Czy odwiedzający mogą się rejestrować, czy serwis działa wyłącznie dla gości. |
-| Kto może dodawać gry / zapisywać się | Goście czy tylko zalogowani. |
-| Wymaganie e-maila | Nigdy, zawsze, albo decyduje autor każdej gry. |
-| Metoda weryfikacji | Jak gość potwierdza, że jest autorem wpisu. |
-| Captcha | Chroni publiczne formularze; wymaga kluczy reCAPTCHA. |
-| Kod API BGG | Włącza wyszukiwanie w BoardGameGeek. Bez niego gry dodaje się ręcznie. |
-| Lista mailingowa | Pole zapisu i powiadomienia o nowych grach. |
-| Motyw i język | Wartości domyślne oraz to, czy odwiedzający mogą je zmieniać. |
-
-### Wysyłanie wiadomości
-
-Zakładka **Mailing** pozwala napisać do jednej z czterech grup:
-
-- osoby zapisane na bieżące wydarzenie
-- wszyscy, którzy kiedykolwiek się zapisali, na dowolne wydarzenie
-- uczestnicy tego wydarzenia (dodali grę, zapisali się lub głosowali)
-- obie grupy związane z tym wydarzeniem naraz
-
-Osoby z listy mailingowej automatycznie dostają link do wypisania się. Liczba
-obok każdej opcji pokazuje, ilu jest odbiorców.
-
-### Pozostałe zakładki
-
-- **Użytkownicy** — zakładanie kont, nadawanie uprawnień administratora,
-  blokowanie.
-- **Miniaturki** — grafiki zastępcze dla gier bez wpisu w BGG oraz favicon
-  serwisu.
-- **Logi** — historia tego, co zostało dodane, zmienione i usunięte, oraz przez
-  kogo.
-- **Archiwum** — minione wydarzenia, dostępne tylko do odczytu.
-- **Aktualizacja** — pobiera najnowszą wersję z GitHuba i ją wgrywa, razem ze
-  zmianami w bazie danych.
+Instrukcja wprowadzająca w pliku [help/PIERWSZE-KROKI.md](help/PIERWSZE-KROKI.md).
 
 ---
 
