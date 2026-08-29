@@ -51,9 +51,7 @@ Skrócona instrukcja obsługi w pliku [help/DLA-GRACZY.md](help/DLA-GRACZY.md).
 ## Dla organizatorów
 
 Panel administratora znajduje się pod adresem `/admin.php` (albo po prostu
-`/admin`). Wszystko poniżej jest właśnie tam.
-
-### Zakładanie wydarzenia
+`/admin`). 
 
 Instrukcja wprowadzająca w pliku [help/PIERWSZE-KROKI.md](help/PIERWSZE-KROKI.md).
 
