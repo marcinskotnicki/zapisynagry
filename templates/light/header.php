@@ -164,6 +164,12 @@ ob_start();
     if (library_any_enabled() && $hideHere('library.php')) {
         echo nav_link('library.php', 'library', t('lib_title'), $here === 'library.php');
     }
+    /* The players' guide, when the club offers it. Sits with the other public
+     * links rather than by the account ones: it is for visitors, and most of
+     * all for the ones who have never used a board like this. */
+    if (opt_bool('show_help_front') && $hideHere('help.php')) {
+        echo nav_link('help.php', 'help', t('nav_help'), $here === 'help.php');
+    }
     if (is_admin() && $hideHere('admin.php')) {         // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'), $here === 'admin.php');
     }

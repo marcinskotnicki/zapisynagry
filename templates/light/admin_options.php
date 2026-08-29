@@ -266,8 +266,11 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php /* Panel housekeeping rather than site appearance — but this is
                  where an admin looks to change what is on their screen, and a
                  group of its own for a single checkbox would be worse. */ ?>
-        <?php $toggle('hide_help_tab'); ?>
-        <p class="field-note"><?= e(t('opt_hide_help_tab_note')) ?></p>
+        <?php $toggle('show_help_tab'); ?>
+        <p class="field-note"><?= e(t('opt_show_help_tab_note')) ?></p>
+
+        <?php $toggle('show_help_front'); ?>
+        <p class="field-note"><?= e(t('opt_show_help_front_note')) ?></p>
 
         <?php // Where the theme / language switchers appear. Separate from the
               // allow_* toggles in group 6, which decide WHETHER each audience

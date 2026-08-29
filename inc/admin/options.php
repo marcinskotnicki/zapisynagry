@@ -117,7 +117,7 @@ $OPTION_TOGGLES = [
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'allow_self_delete',
     'home_event_list', 'event_list_by_day', 'hide_past_days', 'event_details', 'hide_event_tabs', 'event_stats',
-    'hide_help_tab',
+    'show_help_tab', 'show_help_front',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',
     'club_shelf', 'club_shelf_pick', 'library_show_common', 'library_show_member_games', 'library_prefer_club',

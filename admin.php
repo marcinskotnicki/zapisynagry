@@ -54,7 +54,7 @@ if (chat_enabled()) $TABS[] = 'chat';
 // through instead of rendering a manager for a feature that is not running.
 if (club_shelf_enabled()) $TABS[] = 'club_shelf';
 $TABS[] = 'update';   // appended after the optional tabs so it stays last
-/* Help is ALWAYS in the whitelist, even when 'hide_help_tab' is on. That option
+/* Help is ALWAYS in the whitelist, even when 'show_help_tab' is off. That option
  * removes the nav link only — see admin_shell.php. Deliberately unlike chat and
  * club_shelf above, which are dropped from the whitelist because their screens
  * manage features that are not running; a guide is still a guide, and an admin

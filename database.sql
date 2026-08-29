@@ -111,10 +111,20 @@ INSERT INTO options (key, value) VALUES
     --   itself simply leaves it off. The account goes; the games they proposed
     --   and the seats they took stay, under the same name.
     ('allow_self_delete', '0'),
-    -- hide_help_tab: drop the Help link from the admin nav once a club no
-    --   longer needs the guide. The PAGE stays reachable at ?tab=help — this
-    --   only declutters the panel, it does not switch anything off.
-    ('hide_help_tab',     '0'),
+    -- show_help_tab: the Help link in the admin nav. ON by default — a new
+    --   admin needs the guide most, and finding it should not itself require
+    --   reading something. Turning it off only declutters the panel: the PAGE
+    --   stays reachable at ?tab=help.
+    --   Phrased as "show", not "hide", so it reads the same way round as
+    --   show_help_front below it; two neighbouring checkboxes that mean
+    --   opposite things by the same tick is how an admin ends up switching off
+    --   what they meant to switch on.
+    ('show_help_tab',     '1'),
+    -- show_help_front: a Help button in the site's top bar, opening the guide
+    --   written for PLAYERS (help/DLA-GRACZY.md or FOR-PLAYERS.md). Off by
+    --   default: most clubs explain the board in person, and an unnecessary
+    --   button in the top bar costs every visitor a slot on a narrow screen.
+    ('show_help_front',   '0'),
     -- Prefills for the two location fields on a NEW event; most clubs meet in
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),

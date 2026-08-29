@@ -39,7 +39,7 @@ $tabs = [
  * is removed only from this list, not from admin.php's whitelist: the guide
  * stays reachable at ?tab=help for anyone who wants it, including the admin who
  * hid it and later needs it back. This is decluttering, not a feature switch. */
-if (!opt_bool('hide_help_tab')) {
+if (opt_bool('show_help_tab')) {
     $tabs['help'] = 'tab_help';
 }
 // Same condition as admin.php's whitelist: no tab for a feature that is off.

@@ -46,7 +46,13 @@ function md_anchor($text) {
     // Drop anything that is not a letter, digit, space or hyphen. /u so the
     // Unicode classes apply to Polish letters rather than cutting them up.
     $slug = preg_replace('/[^\p{L}\p{N}\s\-]+/u', '', $slug);
-    $slug = preg_replace('/\s+/u', '-', trim($slug));
+    /* One hyphen per whitespace character, NOT one per run. A heading like
+     * "Polls — how they work" loses the dash to the strip above and is left
+     * with two spaces where it was, which GitHub turns into TWO hyphens. These
+     * documents are read on GitHub as well as in the panel, so the anchors have
+     * to agree with it — collapsing the run here produced ids that every
+     * contents link written in the normal way then missed. */
+    $slug = preg_replace('/\s/u', '-', trim($slug));
     return $slug;
 }
 

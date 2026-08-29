@@ -1429,3 +1429,7 @@ trix-toolbar .trix-button--dialog {
     opacity: 0.45;
 }
 .c-del-btn:hover, .c-del-btn:focus { color: var(--danger, #c0392b); opacity: 1; }
+/* The players' guide is the same kind of document as the admin one and reuses
+   its styling; this only stops it running to the full width of a wide screen,
+   since unlike the admin panel it sits on an otherwise narrow page. */
+.player-help { max-width: 52rem; margin-left: auto; margin-right: auto; }

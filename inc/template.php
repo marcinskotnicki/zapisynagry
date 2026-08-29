@@ -384,6 +384,10 @@ function nav_icon_svg($key) {
         'calendar' => '<path d="M4 6h16v14H4z"/><path d="M4 10h16"/><path d="M9 3v4M15 3v4"/>',
         // Library: books standing on a shelf, one leaning.
         'library'  => '<path d="M4 4h4v16H4z"/><path d="M10 4h4v16h-4z"/><path d="M16.5 5.5l3.5 1-3.6 13.4-3.4-1z"/>',
+        // Help: a question mark in a circle — the one icon nobody has to be
+        // taught. Drawn as strokes like the rest, so it inherits the same
+        // weight and colour on every theme.
+        'help'     => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.6"/><path d="M12 17.2v.1"/>',
     ];
     if (!isset($paths[$key])) return '';
     return '<svg class="nav-svg" viewBox="0 0 24 24" width="18" height="18" '
