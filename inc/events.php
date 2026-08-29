@@ -404,7 +404,22 @@ function event_days_stats(array $dayIds) {
  */
 function comment_delete_html($c, $kind) {
     if (!is_admin()) return '';
-    return '<form method="post" action="delete_comment.php" class="c-del">'
+    /* Confirmed before it goes. The control is a small × sitting inside every
+     * comment, which is exactly the shape of thing that gets hit by accident on
+     * a phone — and a deleted comment cannot be brought back.
+     *
+     * onsubmit="return confirm(...)" is the pattern the rest of the panel
+     * already uses for destructive actions (deleting a table, a day, an
+     * account), so it behaves the same way everywhere. It is a courtesy, not a
+     * guard: with JavaScript off the form still posts, and the endpoint's
+     * require_admin() is what actually protects anything.
+     *
+     * The message must not contain an apostrophe — it is delimited by single
+     * quotes here, and e() turns one into &#039;, which the HTML parser hands
+     * to JavaScript as a real quote and breaks the call. Same constraint the
+     * existing confirm() strings in this project are written to. */
+    return '<form method="post" action="delete_comment.php" class="c-del"'
+         . ' onsubmit="return confirm(\'' . e(t('comment_delete_confirm')) . '\');">'
          . csrf_field()
          . '<input type="hidden" name="comment" value="' . (int)$c['id'] . '">'
          . '<input type="hidden" name="kind" value="' . ($kind === 'poll' ? 'poll' : 'game') . '">'
