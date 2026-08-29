@@ -187,7 +187,7 @@ $canVote = !$readonly && can_signup();
             <?php if (!empty($poll['comments'])): ?>
                 <ul class="comment-list">
                     <?php foreach ($poll['comments'] as $c): ?>
-                        <li><span class="c-name"><?= e($c['name']) ?>:</span> <?= nl2br(e($c['comment'])) ?></li>
+                        <li><span class="c-name"><?= e($c['name']) ?>:</span> <?= nl2br(e($c['comment'])) ?><?= comment_delete_html($c, 'poll') ?></li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>

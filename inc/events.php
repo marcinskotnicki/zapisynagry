@@ -384,6 +384,34 @@ function event_days_stats(array $dayIds) {
     return $out;
 }
 
+/**
+ * The little "remove this comment" control, or '' for everyone who may not.
+ *
+ * A helper rather than markup in the templates because SEVENTEEN theme files
+ * render a comment, and a permission check copied seventeen times is a
+ * permission check that will eventually differ in one of them. The themes call
+ * this and get either a control or nothing.
+ *
+ * Returns '' for non-admins, which is a courtesy only — delete_comment.php
+ * calls require_admin() itself. Hiding a control has never been a guard.
+ *
+ * A form, not a link: deleting is a state change, so it goes by POST behind the
+ * CSRF token. A GET would also be followable by anything that prefetches links.
+ *
+ * @param array  $c     The comment row (needs 'id').
+ * @param string $kind  'game' or 'poll' — which discussion it belongs to.
+ * @return string  HTML, or '' when the viewer may not moderate.
+ */
+function comment_delete_html($c, $kind) {
+    if (!is_admin()) return '';
+    return '<form method="post" action="delete_comment.php" class="c-del">'
+         . csrf_field()
+         . '<input type="hidden" name="comment" value="' . (int)$c['id'] . '">'
+         . '<input type="hidden" name="kind" value="' . ($kind === 'poll' ? 'poll' : 'game') . '">'
+         . '<button type="submit" class="c-del-btn" title="' . e(t('comment_delete')) . '">'
+         . '&times;</button></form>';
+}
+
 function events_active() {
     return db_all(
         "SELECT e.*,

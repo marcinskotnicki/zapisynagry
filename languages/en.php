@@ -758,6 +758,7 @@ return [
     'bringback_name'        => 'Your name',
     'bringback_email'       => 'Email',
     'bringback_submit'      => 'Bring it back',
+    'comment_delete'      => 'Delete this comment',
     'comment_add'           => 'Add a comment',
     'comments_toggle'       => 'Comments',
     'comment_name'          => 'Name',

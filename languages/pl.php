@@ -750,6 +750,7 @@ return [
     'bringback_name'        => 'Twoje imię',
     'bringback_email'       => 'E-mail',
     'bringback_submit'      => 'Przywróć',
+    'comment_delete'      => 'Usuń ten komentarz',
     'comment_add'           => 'Dodaj komentarz',
     'comments_toggle'       => 'Komentarze',
     'comment_name'          => 'Imię',
