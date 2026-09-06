@@ -117,4 +117,9 @@ if (club_shelf_enabled()) {
 <?php if (!empty($needs_editor)): ?>
     <link rel="stylesheet" href="vendor/trix/trix.css">
     <script src="vendor/trix/trix.min.js"></script>
+    <?php /* Loaded AFTER Trix, because it registers listeners on the element
+             Trix upgrades. Kept out of js/scripts.js: that file runs on every
+             page of the site, and this only means anything where an editor
+             exists — which is one tab of the admin panel. */ ?>
+    <script src="js/editor.js"></script>
 <?php endif; ?>

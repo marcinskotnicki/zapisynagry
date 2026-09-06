@@ -1433,3 +1433,21 @@ trix-toolbar .trix-button--dialog {
    its styling; this only stops it running to the full width of a wide screen,
    since unlike the admin panel it sits on an otherwise narrow page. */
 .player-help { max-width: 52rem; margin-left: auto; margin-right: auto; }
+
+/* The event's or the day's description, above the tables. Sized as prose rather
+   than as a heading: it is a note to read, not a label to scan past. */
+.event-desc {
+    max-width: 46rem;
+    margin: 0.9rem auto 1.2rem;
+    padding: 0.7rem 0.9rem;
+    background: var(--surface-2);
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+    line-height: 1.5;
+}
+
+/* The page editor's HTML view. A monospace box the same height as the editor it
+   replaces, so switching between them does not make the page jump. */
+.js-html-source { width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace;
+    font-size: 0.85rem; line-height: 1.45; }
+.js-html-toggle { margin-top: 0.5rem; }

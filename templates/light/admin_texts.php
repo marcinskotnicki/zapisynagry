@@ -92,7 +92,24 @@
                   // The input must come BEFORE the editor element that names it,
                   // or Trix cannot find it at upgrade time. ?>
             <input type="hidden" id="page_body" name="body" value="<?= e($editing['body'] ?? '') ?>">
-            <trix-editor input="page_body" id="page_body_editor" class="trix-content"></trix-editor>
+            <?php /* The upload endpoint and the CSRF token ride on the element,
+                     so js/editor.js needs no server-rendered script block and no
+                     assumptions about paths. Images attached in the editor are
+                     uploaded through this; without it they were only ever a
+                     preview and vanished on save. */ ?>
+            <trix-editor input="page_body" id="page_body_editor" class="trix-content"
+                         data-upload-url="upload_image.php"
+                         data-csrf="<?= e(csrf_token()) ?>"
+                         data-upload-error="<?= e(t('texts_upload_failed')) ?>"></trix-editor>
+
+            <?php /* The markup view. Hidden until the script un-hides it: with
+                     JavaScript off there is no editor to toggle away from, and a
+                     button that does nothing is worse than no button. */ ?>
+            <button type="button" class="btn btn-small js-html-toggle" hidden
+                    data-label-html="<?= e(t('texts_view_html')) ?>"
+                    data-label-rich="<?= e(t('texts_view_editor')) ?>"><?= e(t('texts_view_html')) ?></button>
+            <textarea class="js-html-source" rows="16" hidden aria-label="<?= e(t('texts_view_html')) ?>"></textarea>
+
             <p class="field-note"><?= e(t('texts_page_body_note')) ?></p>
         </div>
         <button type="submit" class="btn btn-primary"><?= e(t('save')) ?></button>

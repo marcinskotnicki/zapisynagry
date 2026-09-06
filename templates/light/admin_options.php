@@ -268,6 +268,22 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('show_help_tab'); ?>
         <p class="field-note"><?= e(t('opt_show_help_tab_note')) ?></p>
 
+        <?php /* Free text above the tables. Here with the other things that
+                 change what the front page shows, rather than in the archive
+                 group: an admin looking for "how do I put a note on the page"
+                 looks at appearance. */ ?>
+        <div class="field">
+            <label for="event_description_mode"><?= e(t('opt_event_description_mode')) ?></label>
+            <select id="event_description_mode" name="event_description_mode">
+                <?php foreach (event_description_modes() as $edMode): ?>
+                    <option value="<?= e($edMode) ?>"<?= event_description_mode() === $edMode ? ' selected' : '' ?>>
+                        <?= e(t('opt_event_description_mode_' . $edMode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_event_description_mode_note')) ?></p>
+        </div>
+
         <?php $toggle('show_help_front'); ?>
         <p class="field-note"><?= e(t('opt_show_help_front_note')) ?></p>
 

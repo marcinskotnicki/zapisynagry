@@ -125,6 +125,13 @@ INSERT INTO options (key, value) VALUES
     --   default: most clubs explain the board in person, and an unnecessary
     --   button in the top bar costs every visitor a slot on a narrow screen.
     ('show_help_front',   '0'),
+    -- event_description_mode: free text under the event name or the day tabs.
+    --   'off'   — no description anywhere (default; nothing changes)
+    --   'event' — one per event, shown on every day of it
+    --   'day'   — one per day, so a convention can say what each day is for
+    -- One or the other, never both: two blocks of prose stacked above the
+    -- tables is the thing nobody reads.
+    ('event_description_mode', 'off'),
     -- Prefills for the two location fields on a NEW event; most clubs meet in
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),
@@ -549,7 +556,10 @@ CREATE TABLE events (
     -- the feature existed (or by a club that never turns it on) is unaffected.
     location_name    TEXT,   -- e.g. "Klubokawiarnia Planszowa"
     location_address TEXT,   -- free-form, multi-line; rendered with newlines kept
-    thumbnail        TEXT    -- relative path under /thumbnails, longest edge <= 600px
+    thumbnail        TEXT,   -- relative path under /thumbnails, longest edge <= 600px
+    -- Free text shown under the event's name on the front page, when
+    -- event_description_mode is 'event'. Plain text, newlines kept.
+    description      TEXT
 );
 
 
@@ -563,6 +573,9 @@ CREATE TABLE event_days (
     day_index  INTEGER NOT NULL,                 -- 1, 2, 3 ...
     day_date   TEXT,                             -- 'YYYY-MM-DD'
     day_name   TEXT,                             -- optional label, shown when 'use_day_names' is on
+    -- Free text shown under this day's tabs, when event_description_mode is
+    -- 'day'. Plain text, newlines kept.
+    description TEXT,
     start_time TEXT NOT NULL,                    -- 'HH:MM'
     end_time   TEXT NOT NULL,                    -- 'HH:MM'
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE

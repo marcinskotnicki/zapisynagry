@@ -1,0 +1,22 @@
+# Images uploaded through the page editor live here, and they must be SERVED —
+# so unlike /data this directory is readable. What must never happen is one of
+# them being EXECUTED: an upload is attacker-supplied content, and a directory
+# that both accepts files and runs code is the classic way a site is taken over.
+#
+# upload_image.php already re-encodes everything through GD, so what lands here
+# is always a real JPG and never source code. This is the second lock on the
+# same door: belt and braces, because the cost is four lines and the failure is
+# total.
+<FilesMatch "\.(php|phtml|php[0-9]|phar|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+# Guarded: php_flag exists only under mod_php. On a server running PHP-FPM —
+# which most now do — an unguarded php_flag is a fatal configuration error and
+# would take the whole site down with a 500. The FilesMatch above is the rule
+# that actually does the work; this only helps where it applies.
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>

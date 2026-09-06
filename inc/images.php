@@ -23,7 +23,7 @@
  * @param int    $maxEdge  Longest-edge cap (never upscales smaller images).
  * @return string|null     Relative path on success, null on any failure.
  */
-function thumb_process($tmpPath, $destDir, $maxEdge) {
+function thumb_process($tmpPath, $destDir, $maxEdge, $webPrefix = 'thumbnails/', $namePrefix = 't_') {
     $info = @getimagesize($tmpPath);             // also tells us the real type
     if (!$info) return null;                     // not an image we can read
     [$w, $h] = $info;
@@ -50,10 +50,15 @@ function thumb_process($tmpPath, $destDir, $maxEdge) {
     imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
 
     if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
-    $name = 't_' . bin2hex(random_bytes(6)) . '.jpg';   // random, collision-proof name
+    /* Random name, and the ORIGINAL FILENAME IS DISCARDED. It is attacker-chosen
+     * text: dropping it removes every question about traversal, odd characters
+     * and case-insensitive filesystems in one go, and nothing downstream needs
+     * it. The extension is .jpg because that is what was just written, whatever
+     * arrived. */
+    $name = $namePrefix . bin2hex(random_bytes(6)) . '.jpg';
     $okSave = imagejpeg($dst, $destDir . '/' . $name, 85);   // quality 85
 
     imagedestroy($src);                          // free GD memory
     imagedestroy($dst);
-    return $okSave ? 'thumbnails/' . $name : null;
+    return $okSave ? $webPrefix . $name : null;
 }

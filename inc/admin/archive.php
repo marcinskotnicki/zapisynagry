@@ -112,6 +112,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             log_action('event_rename', 'event #' . $id . ' -> ' . $newName);
             $flash = t('saved_ok');
         }
+        /* The event's own description, when that is the chosen mode. Written
+         * only in 'event' mode, for the same reason the location fields are
+         * written only when their feature is on: the box is not rendered
+         * otherwise, and saving from an absent POST would wipe what a club
+         * typed before switching modes. */
+        if (event_description_mode() === 'event') {
+            $evDesc = trim((string)($_POST['description'] ?? ''));
+            db_run('UPDATE events SET description = ? WHERE id = ?',
+                   [$evDesc !== '' ? $evDesc : null, $id]);
+            $flash = t('saved_ok');
+        }
         /* The optional details ride along with the rename form, since they are
          * the same "what is this event" screen. Applied only when the feature is
          * on: with it off the fields are not rendered, and writing them from an
@@ -159,7 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * let a hand-built one set a label the form does not offer. Matches how
          * the day EDIT handler just below already treats it. */
         if (event_day_add($id, $_POST['day_date'] ?? '', $_POST['day_start'] ?? '', $_POST['day_end'] ?? '',
-                          day_names_enabled() ? ($_POST['day_name'] ?? '') : '')) {
+                          day_names_enabled() ? ($_POST['day_name'] ?? '') : '',
+                          event_description_mode() === 'day' ? ($_POST['description'] ?? '') : '')) {
             log_action('event_day_add', 'event #' . $id . ' ' . trim((string)($_POST['day_date'] ?? '')));
             $flash = t('days_added');
             $warnIfAutoArchived($id);   // dates may now be past the sweep's threshold
@@ -193,6 +205,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 db_run('UPDATE event_days SET day_date = ?, start_time = ?, end_time = ? WHERE id = ?',
                        [$newDate, $newStart, $newEnd, $dayId]);
+            }
+            /* And this day's own description, on the same terms: written only
+             * in 'day' mode, so switching modes never blanks stored text. */
+            if (event_description_mode() === 'day') {
+                $dayDesc = trim((string)($_POST['description'] ?? ''));
+                db_run('UPDATE event_days SET description = ? WHERE id = ?',
+                       [$dayDesc !== '' ? $dayDesc : null, $dayId]);
             }
             // The date may have moved the day past its neighbours.
             event_days_renumber($id);

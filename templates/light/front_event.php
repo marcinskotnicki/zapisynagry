@@ -134,6 +134,21 @@ if ($tokenQS === '' && public_archives_enabled()
     </div>
 <?php endif; ?>
 
+<?php /* The event's or the day's own description, when the admin asked for one
+         and somebody filled it in. Placed AFTER the tabs and BEFORE the tables:
+         it is context for what follows ("today is the tournament day"), so it
+         belongs above the thing it describes.
+
+         Outside the tab block on purpose — a single-day event draws no tabs at
+         all, and its description should still appear.
+
+         nl2br(e(...)), never the other way round: escape first, then turn the
+         newlines into breaks, or typed markup would become real markup. */ ?>
+<?php $evDesc = event_description($event ?? [], $day_row ?? null); ?>
+<?php if ($evDesc !== ''): ?>
+    <div class="event-desc"><?= nl2br(e($evDesc)) ?></div>
+<?php endif; ?>
+
 <div class="tables">
     <?php foreach ($tables as $tbl): // one block per table on the active day ?>
         <?php // id anchor: the rename edit/cancel links and the post-save redirect

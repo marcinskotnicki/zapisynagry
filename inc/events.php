@@ -105,10 +105,16 @@ function events_page($limit, $offset = 0, $archivedOnly = false, $includeDeleted
     return db_all(
         "SELECT e.*,
                 (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
-                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
+                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to,
+                /* Same tie-break as events_active(), reversed with the rest of
+                 * this list: newest first, and within a date latest first. */
+                (SELECT MIN(d2.start_time) FROM event_days d2
+                  WHERE d2.event_id = e.id
+                    AND d2.day_date = (SELECT MIN(d3.day_date) FROM event_days d3 WHERE d3.event_id = e.id)
+                ) AS time_from
            FROM events e
            $where
-          ORDER BY date_from IS NULL, date_from DESC, e.id DESC
+          ORDER BY date_from IS NULL, date_from DESC, time_from IS NULL, time_from DESC, e.id DESC
           LIMIT ? OFFSET ?", [(int)$limit, max(0, (int)$offset)]);
 }
 
@@ -158,6 +164,43 @@ function events_count($archivedOnly = false, $includeDeleted = false) {
  *
  * @return bool
  */
+/** The three ways a description can be offered. */
+function event_description_modes() {
+    return ['off', 'event', 'day'];
+}
+
+/**
+ * Where free-text descriptions are kept, if anywhere: 'off', 'event' or 'day'.
+ * @return string
+ */
+function event_description_mode() {
+    $m = trim((string)opt('event_description_mode', 'off'));
+    return in_array($m, event_description_modes(), true) ? $m : 'off';
+}
+
+/**
+ * The description to show above the tables right now, or '' for none.
+ *
+ * One place decides, because the answer depends on THREE things — the mode, and
+ * whether the event or that particular day actually filled anything in — and
+ * the front page, the admin forms and the tests all need the same answer.
+ *
+ * ONE OR THE OTHER, NEVER BOTH: in 'event' mode the day's own text is ignored
+ * even if something is stored there from a previous setting, and vice versa.
+ * Two blocks of prose stacked above the tables is the thing nobody reads, and
+ * an admin switching modes should not discover old text reappearing.
+ *
+ * @param array $event  The events row.
+ * @param array $day    The event_days row for the day being shown.
+ * @return string  Plain text; the caller escapes it and keeps the newlines.
+ */
+function event_description($event, $day = null) {
+    $mode = event_description_mode();
+    if ($mode === 'event') return trim((string)($event['description'] ?? ''));
+    if ($mode === 'day')   return trim((string)($day['description'] ?? ''));
+    return '';
+}
+
 function event_details_enabled() {
     return opt_bool('event_details');
 }
@@ -327,7 +370,9 @@ function events_active_days($fromDate = null) {
           WHERE e.is_archived = 0
             AND e.is_deleted  = 0"
             . $where . "
-          ORDER BY d.day_date IS NULL, d.day_date ASC, e.id ASC, d.day_index ASC", $args);
+          /* Date, then the day's own start time: two events meeting on the same
+           * Saturday should read afternoon-then-evening, not in id order. */
+          ORDER BY d.day_date IS NULL, d.day_date ASC, d.start_time ASC, e.id ASC, d.day_index ASC", $args);
 }
 
 /**
@@ -431,11 +476,20 @@ function events_active() {
     return db_all(
         "SELECT e.*,
                 (SELECT MIN(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_from,
-                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to
+                (SELECT MAX(day_date) FROM event_days d WHERE d.event_id = e.id) AS date_to,
+                /* The earliest start ON that first day, so two events sharing a
+                 * date are ordered by when they actually begin rather than by
+                 * which was created first. Clubs running an afternoon and an
+                 * evening event on one Saturday were getting them in whatever
+                 * order they happened to be entered. */
+                (SELECT MIN(d2.start_time) FROM event_days d2
+                  WHERE d2.event_id = e.id
+                    AND d2.day_date = (SELECT MIN(d3.day_date) FROM event_days d3 WHERE d3.event_id = e.id)
+                ) AS time_from
            FROM events e
           WHERE e.is_archived = 0
             AND e.is_deleted = 0
-          ORDER BY date_from IS NULL, date_from ASC, e.id ASC");
+          ORDER BY date_from IS NULL, date_from ASC, time_from IS NULL, time_from ASC, e.id ASC");
 }
 
 /**
@@ -601,7 +655,10 @@ function event_days($eventId) {
     // having to be rewritten first. event_days_renumber() then brings the
     // indexes back in line whenever the day list actually changes, so the two
     // orders agree from that point on.
-    return db_all('SELECT * FROM event_days WHERE event_id = ? ORDER BY day_date, day_index',
+    /* start_time between the date and the index: an event with two days on one
+     * date (a morning and an evening session entered separately) should still
+     * read in the order they happen. */
+    return db_all('SELECT * FROM event_days WHERE event_id = ? ORDER BY day_date, start_time, day_index',
                   [$eventId]);
 }
 
@@ -634,7 +691,7 @@ function event_days_renumber($eventId) {
  *
  * @return bool  False if the date is missing or already used by this event.
  */
-function event_day_add($eventId, $date, $start, $end, $name = '') {
+function event_day_add($eventId, $date, $start, $end, $name = '', $description = '') {
     $eventId = (int)$eventId;
     $date    = trim((string)$date);
     if ($date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return false;
@@ -652,9 +709,12 @@ function event_day_add($eventId, $date, $start, $end, $name = '') {
     /* NULL rather than '' when unnamed — one value in the column for "no
      * label" instead of two, matching how the create wizard stores it. */
     $name = trim((string)$name);
-    db_run('INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time, day_name)
-            VALUES (?,?,?,?,?,?)',
-           [$eventId, $next, $date, $start, $end, $name !== '' ? $name : null]);
+    $description = trim((string)$description);
+    db_run('INSERT INTO event_days (event_id, day_index, day_date, start_time, end_time, day_name, description)
+            VALUES (?,?,?,?,?,?,?)',
+           [$eventId, $next, $date, $start, $end,
+            $name !== '' ? $name : null,
+            $description !== '' ? $description : null]);
     event_days_renumber($eventId);
     return true;
 }

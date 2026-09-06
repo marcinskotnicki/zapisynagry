@@ -73,6 +73,7 @@ $OPTION_VALUES = [
     'chat_send_delay',
     'archive_per_page', 'admin_per_page', 'auto_archive_days', 'library_per_page',
     'default_location_name', 'default_location_address',
+    'event_description_mode',
     // A text field, NOT a toggle: listed among the checkboxes it would be
     // rewritten to '0' by every save, since an absent checkbox reads as off.
     'library_club_email',
@@ -298,6 +299,9 @@ function option_sanitize($key, $val) {
             break;
         case 'game_deletion':
             if (!in_array($val, game_deletion_modes(), true)) return null;
+            break;
+        case 'event_description_mode':
+            if (!in_array($val, event_description_modes(), true)) return null;
             break;
         case 'poll_game_length_mode':
             if (!in_array($val, poll_game_length_modes(), true)) return null;

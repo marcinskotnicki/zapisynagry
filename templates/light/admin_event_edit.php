@@ -32,6 +32,14 @@
             <label for="ev_name"><?= e(t('newevent_name')) ?></label>
             <input type="text" id="ev_name" name="name" value="<?= e($event['name']) ?>" maxlength="200" required>
         </div>
+        <?php // The event's description, when that is the chosen mode. ?>
+        <?php if (event_description_mode() === 'event'): ?>
+            <div class="field">
+                <label for="ev_desc"><?= e(t('event_description')) ?></label>
+                <textarea id="ev_desc" name="description" rows="4"><?= e($event['description'] ?? '') ?></textarea>
+                <p class="field-note"><?= e(t('event_description_note')) ?></p>
+            </div>
+        <?php endif; ?>
         <?php /* The same three optional details as the create form. Rendered
                  only when the feature is on — and the controller only WRITES
                  them then, so anything typed before it was switched off is kept
@@ -142,6 +150,13 @@
                                     <label for="ed_end"><?= e(t('newevent_end')) ?></label>
                                     <input type="time" id="ed_end" name="day_end" value="<?= e($d['end_time']) ?>" required>
                                 </div>
+                                <?php // This day's description, in 'day' mode. ?>
+                                <?php if (event_description_mode() === 'day'): ?>
+                                    <div class="field">
+                                        <label for="ed_desc"><?= e(t('event_description')) ?></label>
+                                        <textarea id="ed_desc" name="description" rows="3"><?= e($d['description'] ?? '') ?></textarea>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if (day_names_enabled()): ?>
                                     <div class="field">
                                         <label for="ed_name"><?= e(t('newevent_day_name')) ?></label>
@@ -211,6 +226,12 @@
               // wizard and on the edit-a-day row but not here, so a day added to
               // an existing event could only be named by adding it and then
               // editing it. ?>
+        <?php if (event_description_mode() === 'day'): ?>
+            <div class="field">
+                <label for="new_day_desc"><?= e(t('event_description')) ?></label>
+                <textarea id="new_day_desc" name="description" rows="3"></textarea>
+            </div>
+        <?php endif; ?>
         <?php if (day_names_enabled()): ?>
             <div class="field">
                 <label for="new_day_name"><?= e(t('newevent_day_name')) ?></label>
