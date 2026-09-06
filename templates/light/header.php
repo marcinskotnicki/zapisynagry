@@ -263,11 +263,21 @@ $hdrLangPick = function_exists('switcher_visible')
                             <?php foreach (tpl_available() as $tn): ?>
                                 <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
                             <?php endforeach; ?>
-                            <?php // Last, and only when there is an override to undo.
-                                  // Empty value = "no preference of my own". ?>
-                            <?php if (tpl_overridden()): ?>
-                                <option value=""><?= e(t('pref_reset')) ?></option>
-                            <?php endif; ?>
+                            <?php /* Last, and ALWAYS offered — not only when the
+                                     visitor's choice differs from the admin's.
+                                     Empty value = "no preference of my own".
+
+                                     It used to be hidden unless tpl_overridden()
+                                     said there was something to undo, which meant
+                                     the entry appeared and vanished depending on
+                                     state the visitor cannot see: pick the theme
+                                     the admin happens to use and the way back
+                                     disappears. Always listing it also makes the
+                                     picker self-explanatory — you can see that
+                                     following the club's choice is an option at
+                                     all. Choosing it with no cookie set simply
+                                     clears nothing. */ ?>
+                            <option value=""><?= e(t('pref_reset')) ?></option>
                         </select>
                     </label>
                 <?php endif; ?>

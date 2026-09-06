@@ -843,7 +843,14 @@
         for (var i = 0; i < boxes.length; i++) {
             (function (box) {
                 var wrap = box.closest ? box.closest('.club-filter') : null;
-                var list = document.querySelector('.club-pick-list');
+                /* WHICH list to filter. Originally this only ever ran on the
+                 * game-picker, so the list was hardcoded. The same box now sits
+                 * above the library pages, the club shelf and a member's own
+                 * shelf, so the wrapper names its list — falling back to the
+                 * picker's, which is what every existing caller means. */
+                var sel  = wrap ? (wrap.getAttribute('data-filter-list') || '.club-pick-list')
+                                : '.club-pick-list';
+                var list = document.querySelector(sel);
                 if (!wrap || !list) return;
                 var none = wrap.querySelector('.js-club-filter-none');
                 var rows = list.querySelectorAll('.lib-item');

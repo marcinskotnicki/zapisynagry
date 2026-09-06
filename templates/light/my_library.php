@@ -85,7 +85,9 @@ $uid_field = $as_admin
     <?php if (empty($games)): ?>
         <p class="muted"><?= e(t('lib_my_empty')) ?></p>
     <?php else: ?>
-        <ul class="lib-list">
+        <?php // This list is never split up, so the box is always safe here. ?>
+        <?php tpl_render('lib_filter', ['id' => 'lib_filter_mine', 'target' => '.lib-list-mine']); ?>
+        <ul class="lib-list lib-list-mine">
             <?php foreach ($games as $g): ?>
                 <?php $lnk = library_link($g); ?>
                 <?php $inactive = (int)$g['is_active'] !== 1; ?>

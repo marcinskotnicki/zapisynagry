@@ -180,6 +180,102 @@ function notify_poll_deleted($poll) {
     }
 }
 
+/**
+ * Somebody commented on a game you are involved in. -> everyone signed up, plus
+ * the person bringing it.
+ *
+ * WHY THE BRINGER IS ADDED SEPARATELY: they are not necessarily on the player
+ * list. Plenty of people bring a game to teach it and never take a seat, and
+ * they are exactly who a comment like "can you bring the expansion too?" is
+ * aimed at.
+ *
+ * NOT SENT TO THE AUTHOR. Being emailed your own comment reads as a bug, and it
+ * is the one address we can identify with any confidence. Matched on the
+ * address, not the name: names are free text and two people called Marek would
+ * otherwise silence each other.
+ *
+ * The comment text is deliberately NOT quoted in the email. It is written for
+ * the people around that table, it can be edited or removed afterwards, and a
+ * copy sitting in an inbox cannot be. The mail says where to look.
+ *
+ * @param array  $game         Game row (needs 'id', 'name', 'brings_email').
+ * @param string $authorName   Who wrote it, for the body.
+ * @param string $authorEmail  Their address, so they are not told about
+ *                             themselves; '' when they left none.
+ * @return void
+ */
+function notify_comment_added($game, $authorName, $authorEmail = '') {
+    if (!notify_enabled()) return;
+    foreach (notify_comment_recipients($game, $authorEmail) as $addr) {
+        send_mail($addr,
+            t('ntf_comment_subject', $game['name']),
+            t('ntf_comment_body', $authorName, $game['name']));
+    }
+}
+
+/**
+ * WHO hears about a comment on a game — separated from the sending so the rule
+ * can be checked directly. Mail itself leaves no trace a test can inspect (it
+ * goes to SMTP or nowhere), and "did the right people get told" is the part
+ * worth being sure of.
+ *
+ * @param array  $game
+ * @param string $authorEmail  Skipped; '' when the author left no address.
+ * @return string[]  Distinct addresses, in no particular order.
+ */
+function notify_comment_recipients($game, $authorEmail = '') {
+    $to = notify_player_emails((int)$game['id']);
+    if (!empty($game['brings_email'])) $to[] = $game['brings_email'];
+
+    $out = [];
+    foreach (array_unique(array_filter($to)) as $addr) {
+        if ($authorEmail !== '' && strcasecmp($addr, $authorEmail) === 0) continue;
+        $out[] = $addr;
+    }
+    return $out;
+}
+
+/**
+ * Somebody commented on a poll you voted in. -> every voter, plus the proposer.
+ *
+ * Same shape and same reasoning as notify_comment_added() above: the proposer
+ * may not have voted, the author is skipped, and the text itself is not
+ * carried into the email.
+ *
+ * @param array  $poll         Poll row (needs 'id', 'proposer_email').
+ * @param string $authorName
+ * @param string $authorEmail
+ * @return void
+ */
+function notify_poll_comment_added($poll, $authorName, $authorEmail = '') {
+    if (!notify_enabled()) return;
+    foreach (notify_poll_comment_recipients($poll, $authorEmail) as $addr) {
+        send_mail($addr,
+            t('ntf_pollcomment_subject'),
+            t('ntf_pollcomment_body', $authorName));
+    }
+}
+
+/**
+ * WHO hears about a comment on a poll. Same split, same reason as
+ * notify_comment_recipients() above.
+ *
+ * @param array  $poll
+ * @param string $authorEmail
+ * @return string[]
+ */
+function notify_poll_comment_recipients($poll, $authorEmail = '') {
+    $to = notify_poll_voter_emails((int)$poll['id']);
+    if (!empty($poll['proposer_email'])) $to[] = $poll['proposer_email'];
+
+    $out = [];
+    foreach (array_unique(array_filter($to)) as $addr) {
+        if ($authorEmail !== '' && strcasecmp($addr, $authorEmail) === 0) continue;
+        $out[] = $addr;
+    }
+    return $out;
+}
+
 function notify_poll_changed($poll, $what, $emails = null) {
     if (!notify_enabled()) return;
     if ($emails === null) $emails = notify_poll_voter_emails((int)$poll['id']);

@@ -290,6 +290,10 @@ return [
     'opt_library_pagination_all'        => 'Keep all games on one page',
     'opt_library_pagination_pages'      => 'Split into pages',
     'opt_library_pagination_alpha'      => 'Group alphabetically',
+    'opt_library_pagination_scope_common'  => 'Splitting the combined game list',
+    'opt_library_pagination_scope_club'     => 'Splitting the club collection',
+    'opt_library_pagination_scope_members'  => 'Splitting a member\'s library',
+    'opt_library_pagination_note'           => 'The search box above each list only appears when that list is shown in full, since it can only filter what is on the page.',
     'opt_library_per_page'              => 'Games per page',
     'opt_library_per_page_note'         => 'Only used when the list is split into pages.',
     'lib_all_letters'                   => 'All letters',
@@ -815,6 +819,10 @@ return [
 
 The link expires in one hour.',
     // ---- Notifications / messaging ------------------------------------------
+    'ntf_comment_subject'     => 'New comment: %s',
+    'ntf_comment_body'        => '%s has commented on "%s". Open the event page to read it.',
+    'ntf_pollcomment_subject' => 'New comment on a poll',
+    'ntf_pollcomment_body'    => '%s has commented on a poll you took part in. Open the event page to read it.',
     'ntf_signup_subject'    => 'New signup: %s',
     'ntf_signup_body'       => '%s signed up for your game "%s".',
     'ntf_resign_subject'    => 'Signup cancelled: %s',

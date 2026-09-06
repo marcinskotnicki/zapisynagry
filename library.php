@@ -228,7 +228,16 @@ $games = in_array($tab, ['games', 'common'], true)
  * a member's shelf makes. */
 $clubManage = is_admin();
 $clubGames  = $tab === 'club' ? club_shelf_all(!$clubManage) : [];
-$mode      = library_pagination();
+/* Which list this tab is, so it gets its own splitting rule:
+ *   'games'  — every member's games gathered into one list  -> members
+ *   'common' — that plus the club's own cabinet             -> common
+ *   'club'   — the club's cabinet alone                     -> club
+ * An INDIVIDUAL member's shelf is not in the list on purpose: it is one
+ * person's games, splitting it would be all cost and no benefit, and the manage
+ * controls live there — hiding rows behind pages would make an admin hunt. It
+ * stays whole, which also means it always gets the filter box. */
+$scope = ($tab === 'club') ? 'club' : (($tab === 'games') ? 'members' : 'common');
+$mode  = ($tab === 'members') ? 'all' : library_pagination($scope);
 $letters   = [];
 $letter    = '';
 $page      = 1;

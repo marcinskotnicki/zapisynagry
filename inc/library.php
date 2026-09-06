@@ -50,8 +50,34 @@ function library_pagination_modes() {
  * options table cannot put the page into a mode it has no code for.
  * @return string
  */
-function library_pagination() {
-    $mode = (string)opt('library_pagination', 'all');
+/** The three lists that can be split up independently. */
+function library_pagination_scopes() {
+    return ['common', 'club', 'members'];
+}
+
+/**
+ * How to split ONE of the game lists.
+ *
+ * Separate per list because they grow at completely different rates: the
+ * combined list gathers every member's shelf and gets long in a club of thirty,
+ * while the club's own cabinet stays at whatever fits in the cupboard. Forcing
+ * the same choice on both meant paginating a list of forty games to tame a list
+ * of nine hundred.
+ *
+ * FALLS BACK TO THE OLD SINGLE SETTING when a scoped one has never been saved.
+ * The updater seeds new option rows with the schema's default, so without this
+ * every club that had chosen 'pages' would silently drop back to one long page
+ * at their next update — a setting quietly undone is worse than one that needs
+ * choosing again. The scoped rows ship empty and mean "whatever was set before";
+ * the first save writes a real value and the fallback stops mattering.
+ *
+ * @param string $scope  'common' | 'club' | 'members'.
+ * @return string  One of library_pagination_modes().
+ */
+function library_pagination($scope = 'common') {
+    if (!in_array($scope, library_pagination_scopes(), true)) $scope = 'common';
+    $mode = trim((string)opt('library_pagination_' . $scope, ''));
+    if ($mode === '') $mode = (string)opt('library_pagination', 'all');
     return in_array($mode, library_pagination_modes(), true) ? $mode : 'all';
 }
 

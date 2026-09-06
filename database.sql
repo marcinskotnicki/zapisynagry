@@ -196,7 +196,17 @@ INSERT INTO options (key, value) VALUES
     -- An install that upgrades keeps whatever it already has: this default is
     -- read only when database.sql seeds a fresh options table, never applied
     -- to a row that already exists.
+    -- Kept as the FALLBACK for the three scoped settings below: a club that
+    -- chose a split before those existed keeps it, instead of silently dropping
+    -- back to one long page at their next update. See library_pagination().
     ('library_pagination',    'alpha'),
+    -- How each list is split, chosen separately because they grow at very
+    -- different rates: the combined list gathers every member's shelf, while
+    -- the club's own cabinet stays the size of the cupboard. Empty means
+    -- "whatever library_pagination says"; the first save writes a real value.
+    ('library_pagination_common',  ''),
+    ('library_pagination_club',    ''),
+    ('library_pagination_members', ''),
     -- The CLUB's own shelf, independent of the members' shared library above:
     -- either can be on without the other.
     ('club_shelf',            '0'),

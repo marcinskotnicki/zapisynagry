@@ -225,11 +225,11 @@ $uid_field   = $as_admin
                         <?php foreach (tpl_available() as $tn): ?>
                             <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
                         <?php endforeach; ?>
-                        <?php // Last, and only when there is an override to undo.
-                              // Empty value = "no preference of my own". ?>
-                        <?php if (tpl_overridden()): ?>
-                            <option value=""><?= e(t('pref_reset')) ?></option>
-                        <?php endif; ?>
+                        <?php // Last, and ALWAYS offered — see the note on the
+                              // same entry in header.php. Empty value = "no
+                              // preference of my own"; choosing it with nothing
+                              // set simply clears nothing. ?>
+                        <option value=""><?= e(t('pref_reset')) ?></option>
                     </select>
                 </div>
             <?php endif; ?>

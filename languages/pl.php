@@ -282,6 +282,10 @@ return [
     'opt_library_pagination_all'        => 'Wszystkie gry na jednej stronie',
     'opt_library_pagination_pages'      => 'Podziel na strony',
     'opt_library_pagination_alpha'      => 'Pogrupuj alfabetycznie',
+    'opt_library_pagination_scope_common'  => 'Podział wspólnej listy gier',
+    'opt_library_pagination_scope_club'     => 'Podział kolekcji klubu',
+    'opt_library_pagination_scope_members'  => 'Podział biblioteki uczestnika',
+    'opt_library_pagination_note'           => 'Pole wyszukiwania nad listą pojawia się tylko wtedy, gdy lista pokazywana jest w całości — może filtrować wyłącznie to, co jest na stronie.',
     'opt_library_per_page'              => 'Gier na stronę',
     'opt_library_per_page_note'         => 'Używane tylko wtedy, gdy lista jest podzielona na strony.',
     'lib_all_letters'                   => 'Wszystkie litery',
@@ -807,6 +811,10 @@ return [
 
 Link wygasa za godzinę.',
     // ---- Notifications / messaging ------------------------------------------
+    'ntf_comment_subject'     => 'Nowy komentarz: %s',
+    'ntf_comment_body'        => '%s skomentował(a) grę „%s”. Wejdź na stronę wydarzenia, żeby przeczytać.',
+    'ntf_pollcomment_subject' => 'Nowy komentarz w głosowaniu',
+    'ntf_pollcomment_body'    => '%s skomentował(a) głosowanie, w którym brałeś/aś udział. Wejdź na stronę wydarzenia, żeby przeczytać.',
     'ntf_signup_subject'    => 'Nowy zapis: %s',
     'ntf_signup_body'       => '%s zapisał(a) się na Twoją grę „%s".',
     'ntf_resign_subject'    => 'Anulowano zapis: %s',

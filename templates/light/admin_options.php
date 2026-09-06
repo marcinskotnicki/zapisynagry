@@ -176,7 +176,6 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php
         $toggle('chat_enabled');
         $toggle('mailing_list');
-        $toggle('send_emails');       // master switch for notifications
         $toggle('allow_messaging');
         // The two libraries. Their master switches belong HERE, with the other
         // feature switches, rather than at the top of their own group: this is
@@ -507,17 +506,33 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $text('library_club_email', 'email'); ?>
         <p class="field-note"><?= e(t('opt_library_club_email_note')) ?></p>
 
-        <?php // How the shared game list is broken up once it outgrows a screen. ?>
-        <div class="field">
-            <label for="library_pagination"><?= e(t('opt_library_pagination')) ?></label>
-            <select id="library_pagination" name="library_pagination">
-                <?php foreach (library_pagination_modes() as $libMode): ?>
-                    <option value="<?= e($libMode) ?>"<?= opt('library_pagination') === $libMode ? ' selected' : '' ?>>
-                        <?= e(t('opt_library_pagination_' . $libMode)) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+        <?php /* How each list is broken up once it outgrows a screen — chosen
+                 separately per list, because they grow at very different rates:
+                 the combined list gathers every member's shelf, while the club's
+                 own cabinet stays the size of the cupboard.
+
+                 The SELECTED value comes from library_pagination($scope), not
+                 straight from the option: until a club saves this form the
+                 scoped rows are empty and mean "whatever the old single setting
+                 said", so reading the raw row would show 'all' next to a list
+                 that is in fact still grouped alphabetically. */ ?>
+        <?php foreach (library_pagination_scopes() as $libScope): ?>
+            <div class="field">
+                <label for="library_pagination_<?= e($libScope) ?>">
+                    <?= e(t('opt_library_pagination_scope_' . $libScope)) ?>
+                </label>
+                <select id="library_pagination_<?= e($libScope) ?>"
+                        name="library_pagination_<?= e($libScope) ?>">
+                    <?php $libNow = library_pagination($libScope); ?>
+                    <?php foreach (library_pagination_modes() as $libMode): ?>
+                        <option value="<?= e($libMode) ?>"<?= $libNow === $libMode ? ' selected' : '' ?>>
+                            <?= e(t('opt_library_pagination_' . $libMode)) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endforeach; ?>
+        <p class="field-note"><?= e(t('opt_library_pagination_note')) ?></p>
         <?php // Only does anything in 'pages' mode; the note says so rather than
               // the field disappearing, so an admin can set it before switching. ?>
         <?php $text('library_per_page', 'number'); ?>
@@ -694,6 +709,13 @@ $groupEnd = function () { echo '</div></details>'; };
 
     <?php /* 7. EMAIL */ ?>
     <?php $group('opt_group_email'); ?>
+        <?php /* The master switch for notifications, moved here from the feature
+                 list above. It belongs with the SMTP details it depends on: on
+                 its own it does nothing, and an admin who turns it on without
+                 filling in a mail server has a setting that looks enabled and
+                 sends nothing. Next to the server fields, the missing piece is
+                 visible in the same glance. */ ?>
+        <?php $toggle('send_emails'); ?>
         <?php
         $text('email_address');
         $text('email_login');

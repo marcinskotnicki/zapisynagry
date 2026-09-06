@@ -56,13 +56,21 @@ if (function_exists('switcher_visible')) {
                     <?php foreach (tpl_available() as $tn): ?>
                         <option value="<?= e($tn) ?>"<?= $tn === tpl_current() ? ' selected' : '' ?>><?= e(ucfirst($tn)) ?></option>
                     <?php endforeach; ?>
-                    <?php // Last, and only when there is an override to undo — with
-                          // none set this would be a no-op sitting in the list. An
-                          // empty value means "no preference of my own"; prefs.php
-                          // clears the cookie rather than storing today's default. ?>
-                    <?php if (tpl_overridden()): ?>
-                        <option value=""><?= e(t('pref_reset')) ?></option>
-                    <?php endif; ?>
+                    <?php /* Last, and ALWAYS listed. An empty value means "no
+                             preference of my own"; prefs.php clears the cookie
+                             rather than storing today's default.
+
+                             It used to appear only when tpl_overridden() said
+                             there was something to undo. That hid it in the two
+                             cases where people look for it: when the visitor
+                             picked the same theme the admin uses, and when the
+                             cookie was set on a different device — so the way
+                             back seemed to come and go at random. Listing it
+                             always also makes the picker readable: you can see
+                             that following the club's choice IS one of the
+                             options. Choosing it with nothing set clears
+                             nothing, which costs a redirect and no more. */ ?>
+                    <option value=""><?= e(t('pref_reset')) ?></option>
                 </select>
             </label>
         <?php endif; ?>

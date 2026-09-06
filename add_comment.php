@@ -9,6 +9,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/events.php';
+require __DIR__ . '/inc/notify.php';   // tell the others a comment arrived
 
 // One endpoint serves both discussions: a comment belongs either to a game or
 // to a poll. $target is whichever row we found; $kind says which.
@@ -50,14 +51,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         && text_has_content($name) && text_has_content($comment)
         && !text_too_long($name, TEXT_PERSON_MAX)
         && !text_too_long($comment, TEXT_BODY_MAX)) {
+        /* The author's own address, so the notification below can skip them.
+         * A logged-in commenter has one on their account; a guest does not, and
+         * '' simply means "cannot tell" — then everyone is told, which is the
+         * safe direction to err in. */
+        $authorEmail = (string)($u['email'] ?? '');
+
         if ($kind === 'poll') {
             db_run('INSERT INTO poll_comments (poll_id, name, user_id, comment) VALUES (?,?,?,?)',
                    [$pollId, $name, $u['id'] ?? null, $comment]);
             log_action('comment_add', 'poll #' . $pollId);
+            /* Everyone with a stake in that poll hears about it. Sent AFTER the
+             * insert, so a mail never announces a comment that failed to save. */
+            notify_poll_comment_added($target, $name, $authorEmail);
         } else {
             db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
                    [$gameId, $name, $u['id'] ?? null, $comment]);
             log_action('comment_add', $game['name']);
+            notify_comment_added($game, $name, $authorEmail);
         }
     }
 }

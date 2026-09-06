@@ -28,7 +28,9 @@
 <?php if (empty($games)): ?>
     <p class="muted"><?= e(t('lib_club_empty')) ?></p>
 <?php else: ?>
-    <ul class="lib-list">
+    <?php // Never split up, so the box is always safe here. ?>
+    <?php tpl_render('lib_filter', ['id' => 'lib_filter_shelf', 'target' => '.lib-list-shelf']); ?>
+    <ul class="lib-list lib-list-shelf">
         <?php foreach ($games as $g): ?>
             <?php
             $lnk = library_link($g);

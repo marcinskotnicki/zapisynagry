@@ -60,7 +60,12 @@ $OPTION_VALUES = [
     'log_retention_days',   // 0 = keep everything
     'game_deletion',        // choose|soft|hard; validated below
     'deleted_games_display',// name|full; validated below
-    'library_pagination',  // all|pages|alpha; validated below
+    /* One per list — see library_pagination(). Same three values each.
+       The old single un-scoped setting is deliberately NOT here any more: it
+       is no longer editable, surviving only as the fallback these three inherit
+       from until a club saves this form. Leaving it whitelisted would mean an
+       option this page can save but never shows. */
+    'library_pagination_common', 'library_pagination_club', 'library_pagination_members',
     'footer_custom_text',   // raw HTML, admin-only; see the note in the template
     'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
     'header_brand',         // auto|both|none; validated below
@@ -301,6 +306,9 @@ function option_sanitize($key, $val) {
             if (!in_array($val, deleted_games_displays(), true)) return null;
             break;
         case 'library_pagination':
+        case 'library_pagination_common':
+        case 'library_pagination_club':
+        case 'library_pagination_members':
             if (!in_array($val, library_pagination_modes(), true)) return null;
             break;
         case 'header_brand':

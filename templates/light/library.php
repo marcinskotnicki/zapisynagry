@@ -288,7 +288,13 @@ endif;
                 <p class="muted"><?= e(t('lib_club_empty')) ?></p>
             <?php endif; ?>
         <?php else: ?>
-            <ul class="lib-list">
+        <?php /* Only on a COMPLETE list: the box filters the rows that are on
+                 the page, so above a paginated or letter-grouped list it would
+                 quietly claim to have searched games it never saw. */ ?>
+        <?php if (($mode ?? 'all') === 'all'): ?>
+            <?php tpl_render('lib_filter', ['id' => 'lib_filter_club', 'target' => '.lib-list-club']); ?>
+        <?php endif; ?>
+            <ul class="lib-list lib-list-club">
                 <?php foreach ($club_games as $g): ?>
                     <?php lib_render_row($g, null, !empty($club_manage), $csrf ?? '', 'club'); ?>
                 <?php endforeach; ?>
@@ -341,7 +347,13 @@ endif;
                 <p class="muted"><?= e(t('lib_empty')) ?></p>
             <?php endif; ?>
         <?php else: ?>
-            <ul class="lib-list">
+        <?php /* Only on a COMPLETE list: the box filters the rows that are on
+                 the page, so above a paginated or letter-grouped list it would
+                 quietly claim to have searched games it never saw. */ ?>
+        <?php if (($mode ?? 'all') === 'all'): ?>
+            <?php tpl_render('lib_filter', ['id' => 'lib_filter_all', 'target' => '.lib-list-all']); ?>
+        <?php endif; ?>
+            <ul class="lib-list lib-list-all">
                 <?php foreach ($games as $g): ?>
                     <?php lib_render_row($g, $g['owners']); ?>
                 <?php endforeach; ?>
@@ -374,7 +386,9 @@ endif;
         <?php if (empty($member_games)): ?>
             <p class="muted"><?= e(t('lib_empty')) ?></p>
         <?php else: ?>
-            <ul class="lib-list">
+            <?php // A member's shelf is never split, so the box is always safe. ?>
+            <?php tpl_render('lib_filter', ['id' => 'lib_filter_member', 'target' => '.lib-list-member']); ?>
+            <ul class="lib-list lib-list-member">
                 <?php foreach ($member_games as $g): ?>
                     <?php lib_render_row($g, null, !empty($can_manage), $csrf ?? ''); ?>
                 <?php endforeach; ?>
