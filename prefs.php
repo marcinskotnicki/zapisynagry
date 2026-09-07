@@ -31,17 +31,27 @@ if ($back === '' || strpos($back, '://') !== false || substr($back, 0, 2) === '/
  * directory name and tpl_exists('') is false. Clearing rather than writing the
  * current default keeps the visitor following the admin's choice in future
  * too. */
+/* Logged in? The choice is ALSO kept on the account, so it travels: sign in on
+ * a phone and the theme picked on a laptop comes too, instead of every device
+ * having to be set up again. The cookie is still what this browser reads — the
+ * account copy is applied at login (auth_apply_prefs), not on every request, so
+ * changing theme mid-session still works normally. */
+$prefUser = current_user();
+
 if (isset($_POST['template']) && tpl_switch_allowed()) {
     $wantTpl = (string)$_POST['template'];
     if ($wantTpl === '') {
         tpl_clear_cookie();
+        if ($prefUser) auth_save_prefs((int)$prefUser['id'], '');
     } elseif (tpl_exists($wantTpl)) {
         tpl_set_cookie($wantTpl);
+        if ($prefUser) auth_save_prefs((int)$prefUser['id'], $wantTpl);
     }
 }
 // Language: same pattern.
 if (isset($_POST['lang']) && lang_switch_allowed() && lang_exists((string)$_POST['lang'])) {
     lang_set_cookie((string)$_POST['lang']);
+    if ($prefUser) auth_save_prefs((int)$prefUser['id'], false, (string)$_POST['lang']);
 }
 
 redirect($back);

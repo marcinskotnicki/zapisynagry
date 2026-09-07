@@ -89,9 +89,82 @@ function auth_login($email, $password) {
         csrf_rotate();
         $_SESSION['user_id'] = (int)$user['id'];
         auth_remember_issue((int)$user['id']);     // persistent login (option-gated)
+        auth_apply_prefs($user);                   // bring their theme/language along
         return true;
     }
     return false;
+}
+
+/**
+ * Remember this person's theme / language choice ON THEIR ACCOUNT.
+ *
+ * The cookie is still what each browser reads — nothing about rendering
+ * changes. This is the copy that travels: sign in on a phone and the choice
+ * made on a laptop comes with you, instead of every device having to be set up
+ * again. Guests are unaffected; they have nowhere to keep it.
+ *
+ * NULL means "no preference of my own", the same thing the picker's reset entry
+ * means. Stored as NULL rather than as today's default so that a later change
+ * to the club's default still reaches them.
+ *
+ * @param int         $userId
+ * @param string|null $template  Theme name, '' / null to clear. Omit to leave.
+ * @param string|null $language  Language code, '' / null to clear. Omit to leave.
+ * @return void
+ */
+function auth_save_prefs($userId, $template = false, $language = false) {
+    $userId = (int)$userId;
+    if ($userId <= 0) return;
+
+    if ($template !== false) {
+        $t = trim((string)$template);
+        db_run('UPDATE users SET pref_template = ? WHERE id = ?',
+               [$t !== '' ? $t : null, $userId]);
+    }
+    if ($language !== false) {
+        $l = trim((string)$language);
+        db_run('UPDATE users SET pref_language = ? WHERE id = ?',
+               [$l !== '' ? $l : null, $userId]);
+    }
+}
+
+/**
+ * Apply an account's stored preferences to THIS browser, at login.
+ *
+ * Called from every path that starts a session — password, remember-me cookie
+ * and Google — because a preference that follows you on only two of the three
+ * is more confusing than one that does not follow you at all.
+ *
+ * DONE AT LOGIN, not on every request: the cookie stays the working value, so
+ * a visitor can still change theme mid-session without the account overruling
+ * them on the next page. Signing in is the moment "this is me, bring my
+ * settings" is unambiguous.
+ *
+ * A NULL stored preference CLEARS the cookie rather than leaving it: somebody
+ * who resets to the club default on one device means it everywhere, and leaving
+ * the old cookie would make the reset look broken on the others.
+ *
+ * @param array $user  The users row just logged in.
+ * @return void
+ */
+function auth_apply_prefs($user) {
+    // Lazily required: auth.php is loaded on every request, these are not.
+    require_once __DIR__ . '/template.php';
+    require_once __DIR__ . '/lang.php';
+
+    /* Only where the visitor is allowed to choose at all. With switching off,
+     * the admin's choice is the whole story and a stored preference must not
+     * quietly reintroduce a theme they turned off. */
+    if (tpl_switch_allowed()) {
+        $t = trim((string)($user['pref_template'] ?? ''));
+        if ($t !== '' && tpl_exists($t)) tpl_set_cookie($t);
+        elseif ($t === '')               tpl_clear_cookie();
+    }
+    if (lang_switch_allowed()) {
+        $l = trim((string)($user['pref_language'] ?? ''));
+        if ($l !== '' && lang_exists($l)) lang_set_cookie($l);
+        elseif ($l === '')               lang_clear_cookie();
+    }
 }
 
 /**
@@ -312,6 +385,12 @@ function auth_remember_check() {
     if (!$row) return;                             // unknown or expired -> stay logged out
     session_regenerate_id(true);                   // fresh session id for the fresh login
     $_SESSION['user_id'] = (int)$row['user_id'];
+    /* Here too, not only on the password path: this is how somebody returning
+     * on a device they ticked "remember me" on gets logged in, and a preference
+     * that follows you on some routes but not others is worse than one that
+     * never follows you at all. */
+    $remUser = db_one('SELECT * FROM users WHERE id = ?', [(int)$row['user_id']]);
+    if ($remUser) auth_apply_prefs($remUser);
     $exp = time() + max(1, opt_int('login_days')) * 86400;
     db_run('UPDATE auth_tokens SET expires_at = ? WHERE id = ?',
            [date('Y-m-d H:i:s', $exp), $row['id']]);

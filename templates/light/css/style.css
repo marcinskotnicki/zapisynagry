@@ -1451,3 +1451,34 @@ trix-toolbar .trix-button--dialog {
 .js-html-source { width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace;
     font-size: 0.85rem; line-height: 1.45; }
 .js-html-toggle { margin-top: 0.5rem; }
+
+/* Trix labels every attached image with its filename and file size, in a
+   caption under the picture. That is useful when the attachment is a document
+   to download; on a club's page it is noise — "DSC_4471.jpg 84 KB" under a
+   photo of a table. Hidden in BOTH places the markup appears: the editor, and
+   the finished page.
+
+   The name and size only, not the caption itself: Trix puts a real caption a
+   person typed in the same figcaption, and that should still show. Hiding the
+   whole caption would silently discard their words.
+
+   CSS rather than stripping the markup on save, because the tags are already
+   in every page written so far — a save-time filter would fix new pages and
+   leave the existing ones alone. */
+.trix-content .attachment__name,
+.trix-content .attachment__size,
+.custom-page-body .attachment__name,
+.custom-page-body .attachment__size { display: none; }
+/* On the FINISHED PAGE, a caption holding nothing but those two hidden spans
+   would still reserve a line under every picture. :empty cannot help — the
+   spans are still children, hidden or not — so the caption is hidden by default
+   and shown again only when it holds text a person actually typed.
+
+   Trix marks a caption somebody typed with its own --edited class, so that is
+   the test: no class, nothing worth showing. Using the editor's own marker
+   rather than a guess about the markup means this keeps working if the inner
+   structure changes.
+
+   The EDITOR is deliberately left out of this: its caption row holds the input
+   you type a caption INTO, so hiding it would remove the ability to add one. */
+.custom-page-body .attachment__caption:not(.attachment__caption--edited) { display: none; }

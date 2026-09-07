@@ -486,6 +486,12 @@ CREATE TABLE users (
     -- while the admin's library_allow_contact option is on — so the default
     -- never exposes anyone until an admin deliberately enables the feature.
     library_contact_ok INTEGER NOT NULL DEFAULT 1,
+    -- The theme and language this person chose, remembered on the ACCOUNT as
+    -- well as in the browser cookie, so signing in on a second device brings
+    -- their choice with them. NULL means "no preference of my own" — follow
+    -- whatever the club has set as its default.
+    pref_template TEXT,
+    pref_language TEXT,
     -- Is this account usable, or still waiting to be let in?
     --
     -- DEFAULT 1, deliberately. Under the default 'auto' policy there is nothing

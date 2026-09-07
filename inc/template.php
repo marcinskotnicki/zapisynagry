@@ -238,6 +238,12 @@ function tpl_css_url() {
 function tpl_set_cookie($name) {
     if (tpl_exists($name)) {
         setcookie('template', $name, time() + 31536000, '/');   // 365 days
+        /* And make it visible to THIS request. setcookie() only queues a header
+         * for the browser; without this, code running later in the same request
+         * still reads the old value — which is why the clear helpers have always
+         * done the same. It matters at login, where the account's stored theme
+         * is applied to a page that is about to be rendered. */
+        $_COOKIE['template'] = $name;
     }
 }
 

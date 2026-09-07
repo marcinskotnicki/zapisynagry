@@ -145,6 +145,7 @@ session_regenerate_id(true);
 csrf_rotate();
 $_SESSION['user_id'] = (int)$user['id'];
 auth_remember_issue((int)$user['id']);
+auth_apply_prefs($user);   // and their theme/language, as on the other paths
 log_action('google_login', 'User #' . (int)$user['id']);
 
 redirect('user.php');

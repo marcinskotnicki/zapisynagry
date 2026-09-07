@@ -213,5 +213,22 @@ function lang_placeholder_count($s) {
 function lang_set_cookie($code) {
     if (lang_exists($code)) {
         setcookie('lang', $code, time() + 31536000, '/');   // 31536000s = 365 days
+        // Visible to this request too — see the note in tpl_set_cookie().
+        $_COOKIE['lang'] = $code;
     }
+}
+
+/**
+ * Drop the visitor's language override, so they follow the admin's choice
+ * again.
+ *
+ * Expiring the cookie rather than writing today's default into it: the point is
+ * to stop having an opinion, so a later change to the site's language still
+ * reaches them. The mirror of tpl_clear_cookie().
+ *
+ * @return void
+ */
+function lang_clear_cookie() {
+    setcookie('lang', '', time() - 3600, '/');
+    unset($_COOKIE['lang']);   // so THIS request already sees it gone
 }
