@@ -224,7 +224,6 @@ return [
     'up_deleted_ok'                   => 'Twoje konto zostało usunięte.',
     'opt_note_guest_only_inert'       => 'W trybie „Tylko goście” nie ma znaczenia — tam może to każdy.',
     'opt_note_guest_only_accounts'    => 'Dotyczy tylko zalogowanych kont, a tryb „Tylko goście” nie daje odwiedzającym możliwości zalogowania się.',
-    'opt_send_emails'                  => 'Wysyłaj powiadomienia e-mail',
     'opt_require_email'                => 'E-maile przy dodawaniu gier / zapisach',
     'opt_require_email_0'              => 'Niewymagane',
     'opt_require_email_1'              => 'Wymagane',
@@ -1085,6 +1084,13 @@ Link wygasa za godzinę.',
 
 
     // ---- Mailing list -----------------------------------------------------------
+    'opt_notify_mode'          => 'Powiadomienia e-mail',
+    'opt_notify_mode_always'   => 'Zawsze wysyłaj',
+    'opt_notify_mode_never'    => 'Nigdy nie wysyłaj',
+    'opt_notify_mode_user_yes' => 'Niech decydują użytkownicy — domyślnie zaznaczone',
+    'opt_notify_mode_user_no'  => 'Niech decydują użytkownicy — domyślnie odznaczone',
+    'opt_notify_mode_note'     => 'Przy obu opcjach „niech decydują użytkownicy” na formularzach dodawania gry, zapisu, głosowania i zakładania ankiety pojawia się pole wyboru. Zalogowani użytkownicy zachowują swój ostatni wybór.',
+    'notify_optin'             => 'Powiadamiaj mnie o tej pozycji',
     'opt_mailing_list'        => 'Włącz listę mailingową',
     'opt_mailing_gdpr'        => 'Treść zgody (RODO)',
     'opt_mailing_gdpr_note'   => 'Jeśli pole jest puste, checkbox zgody nie będzie pokazywany ani wymagany. Jeśli wpiszesz tekst, zapisujący się będzie musiał zaznaczyć zgodę.',

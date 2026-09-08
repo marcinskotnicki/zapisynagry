@@ -22,7 +22,8 @@ require_once __DIR__ . '/../mail.php';      // mail_subject_prefix(), shown in t
 require_once __DIR__ . '/../update.php';    // update_repo_url(), pre-fills the update-source field
 require_once __DIR__ . '/../events.php';    // day_tab_formats(), for the tab-layout picker
 require_once __DIR__ . '/../htaccess.php'; // the managed HTTPS-redirect block
-require_once __DIR__ . '/../polls.php';    // poll_game_length_modes()/poll_game_length_mode(), for that select
+require_once __DIR__ . '/../polls.php';    // poll_game_length_modes(), for that select
+require_once __DIR__ . '/../notify.php';   // notify_modes(), for the notifications one
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -71,6 +72,7 @@ $OPTION_VALUES = [
     'header_brand',         // auto|both|none; validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
+    'notify_mode',   // always|never|user_yes|user_no; validated below
     'archive_per_page', 'admin_per_page', 'auto_archive_days', 'library_per_page',
     'default_location_name', 'default_location_address',
     'event_description_mode',
@@ -112,7 +114,7 @@ unset($__oLang);
 
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
-    'send_emails', 'allow_polls', 'allow_discussions',
+    'allow_polls', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'mailing_list', 'antibot_honeypot',
@@ -302,6 +304,9 @@ function option_sanitize($key, $val) {
             break;
         case 'event_description_mode':
             if (!in_array($val, event_description_modes(), true)) return null;
+            break;
+        case 'notify_mode':
+            if (!in_array($val, notify_modes(), true)) return null;
             break;
         case 'poll_game_length_mode':
             if (!in_array($val, poll_game_length_modes(), true)) return null;

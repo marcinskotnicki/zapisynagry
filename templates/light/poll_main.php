@@ -53,6 +53,10 @@
                     <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
+            <?php /* "Email me about this" — only where the club leaves the choice
+                     to people; the partial decides. Under the address, since it
+                     means nothing without one. */ ?>
+            <?php tpl_render('notify_optin'); ?>
             <div class="field field-p_deadline">
                 <?php // Hours BEFORE the start when voting closes; 0 disables the deadline. ?>
                 <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>

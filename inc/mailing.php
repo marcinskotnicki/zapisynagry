@@ -245,9 +245,9 @@ function mailing_clean($rows) {
  *                          message, so a "sent" tally would be false precision.
  */
 function mailing_notify_new_item($eventId, $name, $dayId, $startTime, $anchor, $isPoll = false) {
-    // opt_bool('send_emails') is exactly what notify_enabled() checks; read it
+    // notify_enabled() is the one question "does this site send mail at all"; ask it
     // directly so this file needs no include of inc/notify.php.
-    if (!mailing_enabled() || !opt_bool('send_emails')) return 0;
+    if (!mailing_enabled() || !notify_enabled()) return 0;
 
     $day = db_one('SELECT * FROM event_days WHERE id = ?', [$dayId]);
     if (!$day) return 0;
@@ -295,7 +295,7 @@ function mailing_notify_new_item($eventId, $name, $dayId, $startTime, $anchor, $
  *              transport accepting a message is not proof of delivery.
  */
 function mailing_notify_new_event($eventId) {
-    if (!opt_bool('notify_new_event') || !opt_bool('send_emails')) return 0;
+    if (!opt_bool('notify_new_event') || !notify_enabled()) return 0;
 
     $event = db_one('SELECT * FROM events WHERE id = ?', [(int)$eventId]);
     if (!$event) return 0;

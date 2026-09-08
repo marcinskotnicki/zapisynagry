@@ -159,7 +159,7 @@ $uid_field   = $as_admin
         <?php /* New-event notifications. Only offered when the admin has enabled
                  the feature AND the site actually sends mail — a checkbox that
                  silently does nothing is worse than no checkbox. */ ?>
-        <?php if (opt_bool('notify_new_event') && opt_bool('send_emails')): ?>
+        <?php if (opt_bool('notify_new_event') && notify_enabled()): ?>
         <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
             <h3><?= e(t('up_notifications')) ?></h3>
             <?= csrf_field() ?><?= $uid_field ?>

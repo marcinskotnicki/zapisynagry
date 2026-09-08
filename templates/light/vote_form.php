@@ -44,6 +44,11 @@
         <?php if (opt_msg('msg_email_field') !== ''): ?>
             <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
         <?php endif; ?>
+        <?php /* "Email me about this" — rendered only where the club leaves the
+                 choice to people; the partial decides. Placed right under the
+                 address it applies to, since it means nothing without one. */ ?>
+        <?php tpl_render('notify_optin'); ?>
+
 
         <div class="field field-knows">
             <label for="knows"><?= e(t('signup_knows')) ?></label>

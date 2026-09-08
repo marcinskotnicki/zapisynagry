@@ -86,16 +86,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $signedUpBy = $form['player_name'] !== '' ? $form['name'] : null;
 
         db_run(
-            'INSERT INTO players (game_id, name, email, knows_rules, is_reserve, user_id, signed_up_by)
-             VALUES (?,?,?,?,?,?,?)',
+            'INSERT INTO players (game_id, name, email, knows_rules, is_reserve, user_id, signed_up_by, notify)
+             VALUES (?,?,?,?,?,?,?,?)',
             [
                 $gameId, $playerName,
                 $form['email'] !== '' ? $form['email'] : null,   // store NULL, not ''
                 $form['knows'], $isReserve,
                 $u['id'] ?? null,                                // link to account if logged in
                 $signedUpBy,
+                // Whether this player wants the emails about this game.
+                notify_flag_from_post($_POST),
             ]
         );
+        notify_remember_choice(notify_flag_from_post($_POST));
         log_action('signup', $playerName . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : '')
             . ($signedUpBy !== null ? ' (by ' . $signedUpBy . ')' : ''));
         // Remember the agreement so the next form starts ticked. Only after a

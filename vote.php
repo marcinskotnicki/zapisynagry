@@ -90,11 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('vote_email_dup');
     } else {
         db_run(
-            'INSERT INTO poll_votes (poll_game_id, poll_id, name, email, knows_rules, user_id)
-             VALUES (?,?,?,?,?,?)',
+            'INSERT INTO poll_votes (poll_game_id, poll_id, name, email, knows_rules, user_id, notify)
+             VALUES (?,?,?,?,?,?,?)',
             [$pgId, $cand['poll_id'], $form['name'],
-             $form['email'] !== '' ? $form['email'] : null, $form['knows'], $uid]
+             $form['email'] !== '' ? $form['email'] : null, $form['knows'], $uid,
+             // Whether this voter wants the emails about the poll.
+             notify_flag_from_post($_POST)]
         );
+        notify_remember_choice(notify_flag_from_post($_POST));
         log_action('poll_vote', $form['name'] . ' -> ' . $cand['name']);
         // Remember the agreement so the next form starts ticked. Only after a
         // successful submission, so the cookie can never record consent for

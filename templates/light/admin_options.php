@@ -731,7 +731,21 @@ $groupEnd = function () { echo '</div></details>'; };
                  filling in a mail server has a setting that looks enabled and
                  sends nothing. Next to the server fields, the missing piece is
                  visible in the same glance. */ ?>
-        <?php $toggle('send_emails'); ?>
+        <?php /* Who decides whether the notifications go out. Replaces the old
+                 on/off switch: 'always' and 'never' are the two states it had,
+                 and the other two hand the choice to each person, differing only
+                 in how their box starts out. */ ?>
+        <div class="field">
+            <label for="notify_mode"><?= e(t('opt_notify_mode')) ?></label>
+            <select id="notify_mode" name="notify_mode">
+                <?php foreach (notify_modes() as $nMode): ?>
+                    <option value="<?= e($nMode) ?>"<?= notify_mode() === $nMode ? ' selected' : '' ?>>
+                        <?= e(t('opt_notify_mode_' . $nMode)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_notify_mode_note')) ?></p>
+        </div>
         <?php
         $text('email_address');
         $text('email_login');

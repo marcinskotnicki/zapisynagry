@@ -21,8 +21,80 @@ require_once __DIR__ . '/mail.php';   // send_mail() — require_once so double-
  * Are notifications switched on at all? The single gate every trigger checks.
  * @return bool
  */
-function notify_enabled() {
-    return opt_bool('send_emails');
+/* The mode helpers — notify_mode(), notify_enabled(), notify_user_choice() and
+ * notify_default_on() — live in inc/helpers.php, not here. They are asked from
+ * auth.php and mailing.php, which load on every request, and pulling this file
+ * (and mail.php behind it) into those just to read one option would cost every
+ * page a pair of includes it has no other use for. */
+
+
+/**
+ * Does THIS person want the mail, given what the club allows?
+ *
+ * Under 'always' the stored flag is ignored entirely — the club has said
+ * everyone is written to, and a flag left over from a spell of letting people
+ * choose must not quietly silence them. Under 'user_yes'/'user_no' the flag is
+ * the answer. ('never' never reaches here; the triggers stop earlier.)
+ *
+ * @param mixed $flag  The row's notify column.
+ * @return bool
+ */
+function notify_wants($flag) {
+    if (!notify_user_choice()) return true;
+    return (int)$flag === 1;
+}
+
+/**
+ * The value to store for a newly submitted form.
+ *
+ * Under 'always'/'never' nothing is asked and 1 is stored, so that a club which
+ * later starts letting people choose finds everyone opted IN rather than
+ * everyone silently opted out.
+ *
+ * @param array  $post   The submitted form.
+ * @param string $field  Checkbox name.
+ * @return int  0 or 1.
+ */
+/**
+ * How the opt-in box should start out for the person filling in the form.
+ *
+ * The club's default, unless this member has answered before — in which case
+ * their last answer is the better guess, and being asked the same question
+ * every single time is what makes a checkbox annoying.
+ *
+ * REMEMBERED FOR ACCOUNTS ONLY. A guest has nowhere to keep it: a cookie would
+ * be a fourth thing to reason about, and guests already re-type their name each
+ * time. They get the club's default every time, which is the honest fallback.
+ *
+ * @return bool
+ */
+function notify_optin_default() {
+    $me = current_user();
+    if ($me && isset($me['pref_notify']) && $me['pref_notify'] !== null) {
+        return (int)$me['pref_notify'] === 1;
+    }
+    return notify_default_on();
+}
+
+/**
+ * Remember this answer for next time, for a logged-in person.
+ *
+ * Called after a successful submission only, so a form that was refused never
+ * teaches the site the wrong preference.
+ *
+ * @param int $flag  0 or 1, as stored on the row.
+ * @return void
+ */
+function notify_remember_choice($flag) {
+    if (!notify_user_choice()) return;   // nothing was asked
+    $me = current_user();
+    if (!$me) return;                    // a guest has nowhere to keep it
+    db_run('UPDATE users SET pref_notify = ? WHERE id = ?', [(int)$flag === 1 ? 1 : 0, (int)$me['id']]);
+}
+
+function notify_flag_from_post($post, $field = 'notify_me') {
+    if (!notify_user_choice()) return 1;
+    return !empty($post[$field]) ? 1 : 0;
 }
 
 /**
@@ -33,11 +105,19 @@ function notify_enabled() {
  * @return string[]
  */
 function notify_player_emails($gameId) {
+    /* The flag comes back with the address and is applied in PHP rather than in
+     * the WHERE clause: whether it matters at all depends on the club's mode,
+     * and one query that always returns the same rows is easier to reason about
+     * than a condition that appears and disappears. */
     $rows = db_all(
-        'SELECT DISTINCT email FROM players
+        'SELECT DISTINCT email, notify FROM players
          WHERE game_id = ? AND email IS NOT NULL AND email <> ""', [$gameId]
     );
-    return array_column($rows, 'email');   // flatten [['email'=>x],...] -> [x,...]
+    $out = [];
+    foreach ($rows as $r) {
+        if (notify_wants($r['notify'])) $out[] = $r['email'];
+    }
+    return $out;
 }
 
 /* ---- Triggers ------------------------------------------------------------ *
@@ -52,7 +132,9 @@ function notify_player_emails($gameId) {
  * @param string $playerName  Who just signed up.
  */
 function notify_signup($game, $playerName) {
-    if (!notify_enabled() || empty($game['brings_email'])) return;
+    // notify_owner: the bringer's own answer, when the club lets people choose.
+    if (!notify_enabled() || empty($game['brings_email'])
+        || !notify_wants($game['notify_owner'] ?? 1)) return;
     send_mail($game['brings_email'],
         t('ntf_signup_subject', $game['name']),
         t('ntf_signup_body', $playerName, $game['name']));
@@ -62,7 +144,9 @@ function notify_signup($game, $playerName) {
  * Someone resigned from a game you're bringing. -> the game's bringer.
  */
 function notify_resign($game, $playerName) {
-    if (!notify_enabled() || empty($game['brings_email'])) return;
+    // notify_owner: the bringer's own answer, when the club lets people choose.
+    if (!notify_enabled() || empty($game['brings_email'])
+        || !notify_wants($game['notify_owner'] ?? 1)) return;
     send_mail($game['brings_email'],
         t('ntf_resign_subject', $game['name']),
         t('ntf_resign_body', $playerName, $game['name']));
@@ -146,9 +230,13 @@ function notify_poll_concluded($emails, $gameName, $when = '') {
  * @return string[]
  */
 function notify_poll_voter_emails($pollId) {
-    $rows = db_all('SELECT DISTINCT email FROM poll_votes WHERE poll_id = ? AND email IS NOT NULL AND email <> ""',
-                   [$pollId]);
-    return array_column($rows, 'email');
+    $rows = db_all('SELECT DISTINCT email, notify FROM poll_votes
+                     WHERE poll_id = ? AND email IS NOT NULL AND email <> ""', [$pollId]);
+    $out = [];
+    foreach ($rows as $r) {
+        if (notify_wants($r['notify'])) $out[] = $r['email'];
+    }
+    return $out;
 }
 
 /**
@@ -225,7 +313,9 @@ function notify_comment_added($game, $authorName, $authorEmail = '') {
  */
 function notify_comment_recipients($game, $authorEmail = '') {
     $to = notify_player_emails((int)$game['id']);
-    if (!empty($game['brings_email'])) $to[] = $game['brings_email'];
+    if (!empty($game['brings_email']) && notify_wants($game['notify_owner'] ?? 1)) {
+        $to[] = $game['brings_email'];
+    }
 
     $out = [];
     foreach (array_unique(array_filter($to)) as $addr) {
@@ -266,7 +356,9 @@ function notify_poll_comment_added($poll, $authorName, $authorEmail = '') {
  */
 function notify_poll_comment_recipients($poll, $authorEmail = '') {
     $to = notify_poll_voter_emails((int)$poll['id']);
-    if (!empty($poll['proposer_email'])) $to[] = $poll['proposer_email'];
+    if (!empty($poll['proposer_email']) && notify_wants($poll['notify_owner'] ?? 1)) {
+        $to[] = $poll['proposer_email'];
+    }
 
     $out = [];
     foreach (array_unique(array_filter($to)) as $addr) {

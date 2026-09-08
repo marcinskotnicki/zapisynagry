@@ -167,6 +167,11 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                     <p class="field-note"><?= e(opt_msg('msg_email_field')) ?></p>
                 <?php endif; ?>
             </div>
+        <?php /* "Email me about this" — rendered only where the club leaves the
+                 choice to people; the partial decides. Placed right under the
+                 address it applies to, since it means nothing without one. */ ?>
+        <?php tpl_render('notify_optin'); ?>
+
         </div>
 
         <?php if (email_require_mode() === 2): // per-game rule: proposer decides (their own email then required too) ?>

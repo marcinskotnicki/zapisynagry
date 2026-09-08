@@ -240,7 +240,7 @@ function account_is_usable(array $user) {
  * @return void
  */
 function account_notify_admins_pending($name, $email) {
-    if (!opt_bool('send_emails')) return;
+    if (!notify_enabled()) return;
     require_once __DIR__ . '/mail.php';
 
     $link = rtrim(site_base_url(), '/') . '/admin.php?tab=users';

@@ -19,9 +19,10 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
+require_once __DIR__ . '/inc/notify.php';   // notify_flag_from_post(), for the opt-in box
 require __DIR__ . '/inc/bgg.php';
 require __DIR__ . '/inc/captcha.php';
-require __DIR__ . '/inc/mail.php';       // send_mail(), used by the mailing list
+require_once __DIR__ . '/inc/mail.php';  // send_mail(); _once because inc/notify.php pulls it in too
 require __DIR__ . '/inc/mailing.php';
 
 // ---- Resolve the target table (and its day/event) --------------------------
@@ -152,8 +153,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run(
                 'INSERT INTO games
                  (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-                  thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                  thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,notify_owner)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [
                     $table['id'], $event['id'], $day['id'], $form['name'],
                     $form['length_minutes'], $form['weight'], $form['max_players'], $form['start_time'],
@@ -167,9 +168,12 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     $uid, $form['explain_rules'], $form['require_email'],
                     $form['comment'] !== '' ? $form['comment'] : null,
                     $uid,                                                    // added_by = bringer
+                    // Whether the bringer wants the emails about this game.
+                    notify_flag_from_post($_POST),
                 ]
             );
             $gameId = (int)db()->lastInsertId();
+            notify_remember_choice(notify_flag_from_post($_POST));
 
             // Auto-add the bringer as the first player when requested.
             if ($form['add_self'] && $form['brings_name'] !== '') {

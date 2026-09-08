@@ -137,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline,notify_owner)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -150,6 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (int)$draft['show_results'], (int)$draft['others_library'], $draft['add_self'],
                         (int)$draft['wait_deadline'],
                         $deadline,
+                        // Whether the proposer wants the emails about it.
+                        notify_flag_from_post($_POST),
                     ]
                 );
                 $pollId = (int)db()->lastInsertId();
@@ -203,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($error === null) {
+                notify_remember_choice(notify_flag_from_post($_POST));
                 log_action('poll_create', $draft['name'] . ' (' . count($draft['games']) . ' games)');
                 // Remember the agreement so the next form starts ticked. Only after a
                 // successful submission, so the cookie can never record consent for

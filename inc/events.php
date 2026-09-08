@@ -513,6 +513,29 @@ function comment_delete_html($c, $kind) {
  * @param string $kind  'game' or 'poll'.
  * @return string
  */
+/**
+ * Both controls for one comment, in a single wrapper.
+ *
+ * A wrapper rather than two loose elements because they have to sit TOGETHER —
+ * bottom-right of the comment, on one line. Left separate, each <details> and
+ * each form took a line of its own and a two-line comment became a five-line
+ * one.
+ *
+ * Emitting them from one helper also means the seventeen card templates make a
+ * single call, so the pair cannot end up half-applied in one theme.
+ *
+ * @param array  $c
+ * @param string $kind  'game' or 'poll'.
+ * @return string  '' when the viewer may do neither.
+ */
+function comment_actions_html($c, $kind) {
+    if (!comment_can_manage($c)) return '';
+    return '<span class="c-actions">'
+         . comment_edit_html($c, $kind)
+         . comment_delete_html($c, $kind)
+         . '</span>';
+}
+
 function comment_edit_html($c, $kind) {
     if (!comment_can_manage($c)) return '';
     return '<details class="c-edit">'

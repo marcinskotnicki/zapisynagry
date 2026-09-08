@@ -727,6 +727,48 @@ function help_localise_urls($md, $siteUrl) {
     return str_replace(HELP_EXAMPLE_URLS, $siteUrl, $md);
 }
 
+/** The four ways a club can settle the question. */
+function notify_modes() {
+    return ['always', 'never', 'user_yes', 'user_no'];
+}
+
+/**
+ * Who decides whether notifications are sent.
+ *
+ * 'always' / 'never' are the club deciding for everyone — the two states the
+ * old on/off switch had. 'user_yes' / 'user_no' hand the choice to each person,
+ * differing only in how the box starts out.
+ *
+ * @return string
+ */
+function notify_mode() {
+    $m = trim((string)opt('notify_mode', 'always'));
+    return in_array($m, notify_modes(), true) ? $m : 'always';
+}
+
+/**
+ * Are notifications switched on at all? False only under 'never'.
+ *
+ * Kept as the name every trigger already guards with, so "the club has turned
+ * email off" stays one question asked in one way.
+ *
+ * @return bool
+ */
+function notify_enabled() {
+    return notify_mode() !== 'never';
+}
+
+/** Do people get a say, or has the club decided for them? */
+function notify_user_choice() {
+    $m = notify_mode();
+    return $m === 'user_yes' || $m === 'user_no';
+}
+
+/** How the box starts out when they do get a say. */
+function notify_default_on() {
+    return notify_mode() !== 'user_no';
+}
+
 /**
  * Is this the filename of an admin-uploaded predefined thumbnail?
  *

@@ -232,7 +232,6 @@ return [
     'up_deleted_ok'                   => 'Your account has been deleted.',
     'opt_note_guest_only_inert'       => 'Has no effect in guests-only mode — everyone may do this there.',
     'opt_note_guest_only_accounts'    => 'Applies only to logged-in accounts, and guests-only mode gives visitors no way to sign in.',
-    'opt_send_emails'                  => 'Send email notifications',
     'opt_require_email'                => 'Emails when adding games / signing up',
     'opt_require_email_0'              => 'Not required',
     'opt_require_email_1'              => 'Required',
@@ -1093,6 +1092,13 @@ The link expires in one hour.',
 
 
     // ---- Mailing list -----------------------------------------------------------
+    'opt_notify_mode'          => 'Email notifications',
+    'opt_notify_mode_always'   => 'Always send them',
+    'opt_notify_mode_never'    => 'Never send them',
+    'opt_notify_mode_user_yes' => 'Let people choose — ticked by default',
+    'opt_notify_mode_user_no'  => 'Let people choose — unticked by default',
+    'opt_notify_mode_note'     => 'With either "let people choose" option, a checkbox appears on the add-game, sign-up, poll and voting forms. Logged-in members keep whatever they chose last time.',
+    'notify_optin'             => 'Email me about this',
     'opt_mailing_list'        => 'Enable the mailing list',
     'opt_mailing_gdpr'        => 'Consent text (GDPR)',
     'opt_mailing_gdpr_note'   => 'Leave empty and no consent checkbox is shown or required. Enter any text and subscribers must tick it to sign up.',

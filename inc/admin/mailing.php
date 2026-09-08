@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'send'
         $error = t('ml_admin_disabled');
     } elseif ($draft['subject'] === '' || $draft['body'] === '') {
         $error = t('ml_admin_empty');
-    } elseif (!opt_bool('send_emails')) {   // the email master switch
+    } elseif (!notify_enabled()) {          // the email master switch (notify_mode)
         // No point queueing mail the app can't actually send.
         $error = t('ml_admin_nomail');
     } else {

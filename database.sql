@@ -364,7 +364,13 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- registration_mode: 'registration' = accounts allowed, 'guest_only' =
     -- no accounts (the two toggles above are then irrelevant).
     ('registration_mode',            'registration'),
-    ('send_emails',                  '1'),
+    -- notify_mode: who decides whether the emails go out.
+    --   'always'   — every notification is sent (what send_emails=1 did)
+    --   'never'    — none are (what send_emails=0 did)
+    --   'user_yes' — each person chooses, ticked by default
+    --   'user_no'  — each person chooses, unticked by default
+    -- Default 'always' so an existing club behaves exactly as it did.
+    ('notify_mode',                  'always'),
     -- require_email: 0 = emails never required, 1 = always required,
     -- 2 = per-game: the proposer decides via a checkbox when adding a game or
     --     poll (and must then give their OWN email too).
@@ -492,6 +498,10 @@ CREATE TABLE users (
     -- whatever the club has set as its default.
     pref_template TEXT,
     pref_language TEXT,
+    -- The last answer this person gave to "email me about this", so they are not
+    -- asked the same question from scratch every time. NULL = never answered,
+    -- which means "use the club's default".
+    pref_notify   INTEGER,
     -- Is this account usable, or still waiting to be let in?
     --
     -- DEFAULT 1, deliberately. Under the default 'auto' policy there is nothing
@@ -634,6 +644,12 @@ CREATE TABLE games (
     manual_link      TEXT,                        -- optional rules/manual URL (PDF, video) shown as a button on the card
     brings_name      TEXT,                        -- who brings the game (shown)
     brings_email     TEXT,                        -- stored, NEVER shown publicly
+    -- Does this person want the emails about it? Only consulted when the
+    -- 'notify_mode' option leaves the choice to people; under 'always' every
+    -- address is written to regardless — which is also what DEFAULT 1 gives
+    -- every row that existed before the choice did, so nothing goes quiet at
+    -- the moment a club updates.
+    notify_owner     INTEGER NOT NULL DEFAULT 1,
     brings_user_id   INTEGER,                     -- for "games brought" stats
     explain_rules    INTEGER NOT NULL DEFAULT 0,  -- see code map above
     require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; per-game email rule (only honoured when option require_email = 2)
@@ -738,6 +754,12 @@ CREATE TABLE players (
     game_id     INTEGER NOT NULL,
     name        TEXT NOT NULL,
     email       TEXT,                             -- may be NULL
+    -- Does this person want the emails about it? Only consulted when the
+    -- 'notify_mode' option leaves the choice to people; under 'always' every
+    -- address is written to regardless — which is also what DEFAULT 1 gives
+    -- every row that existed before the choice did, so nothing goes quiet at
+    -- the moment a club updates.
+    notify      INTEGER NOT NULL DEFAULT 1,
     knows_rules INTEGER,                          -- see code map; NULL allowed
     is_reserve  INTEGER NOT NULL DEFAULT 0,
     user_id     INTEGER,                          -- NULL if signed up unregistered
@@ -805,6 +827,12 @@ CREATE TABLE polls (
     day_id           INTEGER NOT NULL,           -- denormalised
     proposer_name    TEXT,
     proposer_email   TEXT,
+    -- Does this person want the emails about it? Only consulted when the
+    -- 'notify_mode' option leaves the choice to people; under 'always' every
+    -- address is written to regardless — which is also what DEFAULT 1 gives
+    -- every row that existed before the choice did, so nothing goes quiet at
+    -- the moment a club updates.
+    notify_owner     INTEGER NOT NULL DEFAULT 1,
     proposer_user_id INTEGER,
     comment          TEXT,
     start_time       TEXT NOT NULL,              -- 'HH:MM'
@@ -946,6 +974,12 @@ CREATE TABLE poll_votes (
     poll_id      INTEGER NOT NULL,               -- denormalised
     name         TEXT NOT NULL,
     email        TEXT,
+    -- Does this person want the emails about it? Only consulted when the
+    -- 'notify_mode' option leaves the choice to people; under 'always' every
+    -- address is written to regardless — which is also what DEFAULT 1 gives
+    -- every row that existed before the choice did, so nothing goes quiet at
+    -- the moment a club updates.
+    notify       INTEGER NOT NULL DEFAULT 1,
     knows_rules  INTEGER,
     user_id      INTEGER,                         -- NULL if voted unregistered
     created_at   TEXT NOT NULL DEFAULT (datetime('now')),
