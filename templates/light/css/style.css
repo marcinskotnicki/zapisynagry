@@ -1482,3 +1482,21 @@ trix-toolbar .trix-button--dialog {
    The EDITOR is deliberately left out of this: its caption row holds the input
    you type a caption INTO, so hiding it would remove the ability to add one. */
 .custom-page-body .attachment__caption:not(.attachment__caption--edited) { display: none; }
+
+/* Sub-tabs inside a panel tab (Messages: chat / comments). Lighter than the
+   main tab bar, so the two levels are visibly different and an admin can tell
+   at a glance which one they are moving within. */
+.subtabs { display: flex; gap: 0.4rem; margin: 0 0 1rem; flex-wrap: wrap; }
+.subtab {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.subtab:hover { text-decoration: none; background: var(--surface-2); }
+.subtab-active { background: var(--surface-2); color: var(--text); font-weight: 600; }
+/* A comment can be long; the column takes the slack rather than the table
+   growing a horizontal scrollbar. */
+.comment-cell { max-width: 32rem; }

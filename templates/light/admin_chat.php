@@ -7,8 +7,10 @@
  *    $messages — rows, newest first.
  *    $total    — total stored messages.
  *    $page, $pages — pagination state.
+ *    $sub      — which sub-tab is open, for the switcher above the list.
  * ============================================================================= */
 ?>
+<?php tpl_render('admin_msg_subtabs', ['sub' => $sub ?? 'chat']); ?>
 <h3><?= e(t('chat_admin_title')) ?></h3>
 
 <?php if (!$messages): ?>

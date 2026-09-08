@@ -51,6 +51,17 @@ db_run($kind === 'poll'
 log_action('comment_delete', $kind . ' #' . (int)$row['parent_id'] . ' — '
          . $row['name'] . ': ' . mb_substr((string)$row['comment'], 0, 80));
 
+/* Back where the deletion was asked for. From a game card that is the event
+ * page; from the admin list it is that list, and sending an admin who is
+ * working through a page of comments out to the front page after each one would
+ * make the job unusable.
+ *
+ * The value is not trusted: only a known internal destination is honoured, so a
+ * crafted form cannot turn this endpoint into an open redirect. */
+if (($_POST['back'] ?? '') === 'admin.php?tab=chat&sub=comments') {
+    redirect('admin.php?tab=chat&sub=comments');
+}
+
 $day = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$row['day_id']]);
 redirect(front_url((int)($day['day_index'] ?? 1), (int)($day['event_id'] ?? 0))
          . ($kind === 'poll' ? '#poll-' : '#game-') . (int)$row['parent_id']);

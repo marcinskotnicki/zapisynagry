@@ -54,11 +54,15 @@ if (mailing_enabled()) {
           + ['mailing' => 'tab_mailing']
           + array_slice($tabs, $pos, null, true);
 }
-if (chat_enabled()) {
+/* Messages: the chat AND the comments. Shown whenever either exists — a club
+ * that never switched the shoutbox on still writes comments under games, and
+ * still needs somewhere to moderate them. Same condition as admin.php's
+ * whitelist, or the nav would offer a tab the controller refuses. */
+if (chat_enabled() || opt_bool('allow_discussions')) {
     // Inserted before Update, which stays last.
     $pos  = array_search('update', array_keys($tabs), true);
     $tabs = array_slice($tabs, 0, $pos, true)
-          + ['chat' => 'tab_chat']
+          + ['chat' => 'tab_messages']
           + array_slice($tabs, $pos, null, true);
 }
 if (club_shelf_enabled()) {

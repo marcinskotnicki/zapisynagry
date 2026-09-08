@@ -48,7 +48,11 @@ if (mailing_enabled()) $TABS[] = 'mailing';
 // rather than merely hidden in the nav, so ?tab=chat on a site with the chat
 // switched off falls through to the default rather than rendering a moderation
 // screen for a feature that is not running.
-if (chat_enabled()) $TABS[] = 'chat';
+/* The Messages tab holds BOTH the chat and the comments, so it is reachable
+ * whenever either exists. Comments do not depend on the chat being on, and a
+ * club that never enabled the shoutbox still needs somewhere to moderate what
+ * people write under their games. */
+if (chat_enabled() || opt_bool('allow_discussions')) $TABS[] = 'chat';
 // Same reasoning for the club's own shelf: removed from the whitelist rather
 // than merely hidden, so ?tab=club_shelf on a site with it switched off falls
 // through instead of rendering a manager for a feature that is not running.
