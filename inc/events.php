@@ -447,8 +447,34 @@ function event_days_stats(array $dayIds) {
  * @param string $kind  'game' or 'poll' — which discussion it belongs to.
  * @return string  HTML, or '' when the viewer may not moderate.
  */
+/**
+ * May the current visitor edit or remove THIS comment?
+ *
+ * Admins: any comment — that is moderation. Everyone else: only one they wrote
+ * while logged in, matched on the stored user_id.
+ *
+ * NOT MATCHED ON THE NAME. A guest comment keeps only the name that was typed,
+ * and a name is free text: anyone could sign a comment "Marek" and claim
+ * Marek's. So a guest can never edit or delete anything, even something they
+ * genuinely wrote a minute earlier — there is no way to tell. That is the
+ * honest answer rather than a convenient one, and it gives members a real
+ * reason to log in.
+ *
+ * @param array $c  The comment row (needs 'user_id').
+ * @return bool
+ */
+function comment_can_manage($c) {
+    if (is_admin()) return true;
+    $me = current_user();
+    if (!$me) return false;
+    // Strict about NULL: a guest comment has no owner, and (int)null === 0
+    // would make it match a user whose id somehow read as 0.
+    return isset($c['user_id']) && $c['user_id'] !== null
+        && (int)$c['user_id'] === (int)$me['id'];
+}
+
 function comment_delete_html($c, $kind) {
-    if (!is_admin()) return '';
+    if (!comment_can_manage($c)) return '';
     /* Confirmed before it goes. The control is a small × sitting inside every
      * comment, which is exactly the shape of thing that gets hit by accident on
      * a phone — and a deleted comment cannot be brought back.
@@ -470,6 +496,34 @@ function comment_delete_html($c, $kind) {
          . '<input type="hidden" name="kind" value="' . ($kind === 'poll' ? 'poll' : 'game') . '">'
          . '<button type="submit" class="c-del-btn" title="' . e(t('comment_delete')) . '">'
          . '&times;</button></form>';
+}
+
+/**
+ * The "change what I wrote" control, or '' for everyone who may not.
+ *
+ * A <details> holding the form rather than a link to a page of its own: a
+ * comment is one short paragraph, and sending somebody to another screen and
+ * back to fix a typo is more ceremony than the edit is worth. Closed until
+ * clicked, so a thread of ten comments does not become ten textareas.
+ *
+ * Same permission as deleting — see comment_can_manage(). An admin gets it on
+ * every comment; a member on the ones they wrote while logged in.
+ *
+ * @param array  $c     The comment row (needs 'id', 'comment').
+ * @param string $kind  'game' or 'poll'.
+ * @return string
+ */
+function comment_edit_html($c, $kind) {
+    if (!comment_can_manage($c)) return '';
+    return '<details class="c-edit">'
+         . '<summary class="c-edit-btn" title="' . e(t('comment_edit')) . '">&#9998;</summary>'
+         . '<form method="post" action="edit_comment.php">'
+         . csrf_field()
+         . '<input type="hidden" name="comment" value="' . (int)$c['id'] . '">'
+         . '<input type="hidden" name="kind" value="' . ($kind === 'poll' ? 'poll' : 'game') . '">'
+         . '<textarea name="comment_text" rows="3" required>' . e((string)$c['comment']) . '</textarea>'
+         . '<button type="submit" class="btn btn-small">' . e(t('save')) . '</button>'
+         . '</form></details>';
 }
 
 function events_active() {

@@ -64,6 +64,22 @@
                         <?= nl2br(e($c['comment'])) ?>
                     </td>
                     <td class="row-actions">
+                        <?php /* Editing, in place: the same <details> form the
+                                 cards use, so a correction made here behaves
+                                 identically to one made on the event page. The
+                                 'back' field brings the admin to this list
+                                 rather than out to the event. */ ?>
+                        <details class="c-edit">
+                            <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
+                            <form method="post" action="edit_comment.php">
+                                <?= $csrf ?>
+                                <input type="hidden" name="comment" value="<?= (int)$c['id'] ?>">
+                                <input type="hidden" name="kind" value="<?= e($c['kind']) ?>">
+                                <input type="hidden" name="back" value="admin.php?tab=chat&amp;sub=comments">
+                                <textarea name="comment_text" rows="3" required><?= e($c['comment']) ?></textarea>
+                                <button type="submit" class="btn btn-small"><?= e(t('save')) ?></button>
+                            </form>
+                        </details>
                         <?php /* Posts to the SAME endpoint the card's own × uses,
                                  rather than a second delete written here: one
                                  place to get the permission check right, and the

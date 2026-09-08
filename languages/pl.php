@@ -776,6 +776,8 @@ return [
     'bringback_email'       => 'E-mail',
     'bringback_submit'      => 'Przywróć',
     'comment_delete_confirm' => 'Czy na pewno chcesz usunąć ten komentarz?',
+    'comment_edit'          => 'Edytuj ten komentarz',
+    'error_comment_required' => 'Komentarz nie może być pusty. Jeśli chodziło o usunięcie — użyj przycisku usuwania.',
     'comment_delete'      => 'Usuń ten komentarz',
     'comment_add'           => 'Dodaj komentarz',
     'comments_toggle'       => 'Komentarze',

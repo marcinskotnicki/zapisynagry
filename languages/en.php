@@ -784,6 +784,8 @@ return [
     'bringback_email'       => 'Email',
     'bringback_submit'      => 'Bring it back',
     'comment_delete_confirm' => 'Are you sure you want to delete this comment?',
+    'comment_edit'          => 'Edit this comment',
+    'error_comment_required' => 'A comment cannot be empty. Delete it instead if that is what you meant.',
     'comment_delete'      => 'Delete this comment',
     'comment_add'           => 'Add a comment',
     'comments_toggle'       => 'Comments',

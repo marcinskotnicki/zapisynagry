@@ -2,12 +2,15 @@
 /* =============================================================================
  *  delete_comment.php — remove one comment from a discussion.
  * -----------------------------------------------------------------------------
- *  ADMINS ONLY, and deliberately so. Everything else on a card can be undone by
- *  the person who did it — a seat is resigned, a game is edited by whoever
- *  brought it. A comment is different: the people who would most want one gone
- *  are the ones it was aimed at, and letting them delete it turns a discussion
- *  into something anyone can quietly rewrite. So this is moderation, not
- *  self-service: the club's admins, nobody else.
+ *  WHO: comment_can_manage() — an admin on any comment, and a member on one they
+ *  wrote while logged in. That second half is why this is no longer admin-only:
+ *  fixing your own remark should not need finding an admin.
+ *
+ *  It stops there, though. A GUEST comment records no owner, only the typed
+ *  name, and a name proves nothing — anyone could sign one "Marek". So guests
+ *  can delete nothing, including comments they really did write. The people who
+ *  would most want a comment gone are often the ones it was aimed at, and
+ *  matching on a name would hand it to them.
  *
  *  Mirrors add_comment.php's shape on purpose — one endpoint for both kinds of
  *  discussion, POST only, no page of its own, always redirects back to the card
@@ -15,7 +18,8 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
-require_admin();                       // moderation is an admin action
+// No require_admin() here: the rule depends on WHICH comment, so it can only be
+// asked once the row is loaded — see comment_can_manage() below.
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('index.php');
 csrf_check();
@@ -39,6 +43,9 @@ if ($kind === 'poll') {
 }
 // Already gone, or an id that never existed: nothing to say, nothing to do.
 if (!$row) redirect('index.php');
+
+// Now the row is known, so the question can be asked.
+if (!comment_can_manage($row)) redirect('index.php');
 
 db_run($kind === 'poll'
         ? 'DELETE FROM poll_comments WHERE id = ?'
