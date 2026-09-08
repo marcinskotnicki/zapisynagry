@@ -89,7 +89,7 @@
             <?php if ($page > 1): ?>
                 <a class="btn btn-small" href="<?= $cUrl ?>&amp;page=<?= $page - 1 ?>"><?= e(t('pager_prev')) ?></a>
             <?php endif; ?>
-            <span class="pager-info"><?= e(t('pager_page', $page, $pages)) ?></span>
+            <span class="pager-info"><?= e(t('pager_position', $page, $pages)) ?></span>
             <?php if ($page < $pages): ?>
                 <a class="btn btn-small" href="<?= $cUrl ?>&amp;page=<?= $page + 1 ?>"><?= e(t('pager_next')) ?></a>
             <?php endif; ?>
