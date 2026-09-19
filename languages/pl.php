@@ -689,7 +689,7 @@ return [
     'f_start_range'       => 'Dozwolone między %s a %s.',
     'f_thumbnail'         => 'Miniatura',
     'f_no_thumb'          => 'Brak miniatury',
-    'f_brings'            => 'Kto przynosi grę',
+    'f_brings'            => 'Kto przynosi grę (Twoje imię/nick)',
     'f_language'              => 'Wersja językowa',
     'f_email'             => 'E-mail',
     'f_explain'           => 'Czy tłumaczysz zasady?',
