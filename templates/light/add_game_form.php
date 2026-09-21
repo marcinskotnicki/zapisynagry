@@ -42,6 +42,12 @@ $captcha = $captcha ?? '';                                       // '' = no capt
         <input type="hidden" name="mode" value="save">
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
         <input type="hidden" name="source" value="<?= e($source) ?>">
+        <?php /* Remembers only that the form was opened from the club shelf, so a
+                 re-render after a mistake uses the same wording. Nothing is
+                 stored with the game — it is a label, not data. */ ?>
+        <?php if (!empty($from_club)): ?>
+            <input type="hidden" name="from_club" value="1">
+        <?php endif; ?>
         <?php if ($is_edit): // edit mode carries the game id ?>
             <input type="hidden" name="game" value="<?= (int)$game['id'] ?>">
         <?php endif; ?>
@@ -155,7 +161,10 @@ $captcha = $captcha ?? '';                                       // '' = no capt
                 </select>
             </div>
             <div class="field field-brings_name">
-                <label for="brings_name"><?= e(t('f_brings')) ?></label>
+                <?php /* "Who is bringing the game" makes no sense for the club's own
+                         copy, which is already there — that confused people. So
+                         for a club-shelf game the same box just asks for a name. */ ?>
+                <label for="brings_name"><?= e(t(!empty($from_club) ? 'f_brings_club' : 'f_brings')) ?></label>
                 <input type="text" id="brings_name" name="brings_name" value="<?= e($game['brings_name']) ?>">
             </div>
             <div class="field field-brings_email">

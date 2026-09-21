@@ -463,6 +463,39 @@ function event_days_stats(array $dayIds) {
  * @param array $c  The comment row (needs 'user_id').
  * @return bool
  */
+/**
+ * The word in front of the person's name on a game card.
+ *
+ * "Przynosi" for a game somebody brings; "Proponuje" for the club's own copy,
+ * which nobody brings — it is already on the shelf, and "brings" read as if the
+ * named person had to fetch it. Decided from the stored from_club marker, the
+ * same one that sets the wording of the add and edit forms, so the card and
+ * the form always agree.
+ *
+ * One helper, because eleven theme files render this line and a condition
+ * copied eleven times is a condition that differs in one of them.
+ *
+ * @param array $g  The game row.
+ * @return string  Plain text; the caller escapes it.
+ */
+function game_brings_label($g) {
+    return t((int)($g['from_club'] ?? 0) === 1 ? 'game_brings_club' : 'game_brings');
+}
+
+/**
+ * The "(from the club library)" note for a club game, or '' for anything else.
+ *
+ * Its own line under the name rather than tucked beside it: it says where the
+ * game IS, which is exactly what "Proponuje" on its own leaves out.
+ *
+ * @param array $g
+ * @return string  HTML, already escaped.
+ */
+function game_club_note_html($g) {
+    if ((int)($g['from_club'] ?? 0) !== 1) return '';
+    return '<br><span class="game-club-note">' . e(t('game_club_note')) . '</span>';
+}
+
 function comment_can_manage($c) {
     if (is_admin()) return true;
     $me = current_user();

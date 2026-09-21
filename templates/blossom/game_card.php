@@ -93,7 +93,7 @@
             </div>
 
             <?php if (!empty($g['brings_name'])): ?>
-                <p class="game-brings"><?= e(t('game_brings')) ?>: <strong><?= e($g['brings_name']) ?></strong></p>
+                <p class="game-brings"><?= e(game_brings_label($g)) ?>: <strong><?= e($g['brings_name']) ?></strong><?= game_club_note_html($g) ?></p>
             <?php endif; ?>
             <p class="game-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></p>
             <?php if (($mlink = manual_link($g)) !== null): ?>

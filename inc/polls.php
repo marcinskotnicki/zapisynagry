@@ -95,8 +95,9 @@ function poll_resolve_candidate($poll, $cand) {
         db_run(
             'INSERT INTO games
              (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-              thumbnail,bgg_id,language,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+              thumbnail,bgg_id,language,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,
+              from_club,notify_owner)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
                 $poll['table_id'], $poll['event_id'], $poll['day_id'],
                 $cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
@@ -107,6 +108,14 @@ function poll_resolve_candidate($poll, $cand) {
                 $poll['proposer_user_id'], $poll['explain_rules'],
                 (int)($poll['require_email'] ?? 0),   // the email rule survives resolution
                 $poll['comment'] ?: null, $poll['proposer_user_id'],
+                /* A candidate picked from the club's shelf becomes a club game,
+                 * so it is edited with the same wording as one added directly. */
+                (int)($cand['from_club'] ?? 0),
+                /* And the proposer's answer to "email me about this" carries
+                 * over. The game column defaults to 1, so without this a
+                 * proposer who had opted out would be silently opted back IN
+                 * the moment their poll resolved. */
+                (int)($poll['notify_owner'] ?? 1),
             ]
         );
         $gameId = (int)db()->lastInsertId();

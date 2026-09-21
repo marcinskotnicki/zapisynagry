@@ -650,6 +650,13 @@ CREATE TABLE games (
     -- every row that existed before the choice did, so nothing goes quiet at
     -- the moment a club updates.
     notify_owner     INTEGER NOT NULL DEFAULT 1,
+    -- 1 when the game was picked from the CLUB'S OWN shelf rather than brought
+    -- by somebody. Only the wording of the form depends on it today ("your
+    -- name" instead of "who is bringing it"), kept so the edit form asks the
+    -- same question the add form did. DEFAULT 0: every game that existed before
+    -- this was recorded keeps the original wording, which is what it was
+    -- entered with.
+    from_club        INTEGER NOT NULL DEFAULT 0,
     brings_user_id   INTEGER,                     -- for "games brought" stats
     explain_rules    INTEGER NOT NULL DEFAULT 0,  -- see code map above
     require_email    INTEGER NOT NULL DEFAULT 0,  -- 0/1; per-game email rule (only honoured when option require_email = 2)
@@ -955,6 +962,11 @@ CREATE TABLE poll_games (
     bgg_id           INTEGER,
     language         TEXT,                        -- edition/language of the copy (mirrors games.language)
     required_players INTEGER NOT NULL DEFAULT 1, -- votes >= this => option wins
+    -- 1 when this candidate was picked from the CLUB'S OWN shelf. Carried onto
+    -- the game the poll turns into, so that game is edited with the same
+    -- wording ("your name", not "who is bringing it") a club game gets when it
+    -- is added directly. DEFAULT 0 for candidates that predate this.
+    from_club        INTEGER NOT NULL DEFAULT 0,
     link             TEXT,                        -- custom external URL for non-BGG candidates (mirrors games.link)
     manual_link      TEXT,                        -- mirrors games.manual_link
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),

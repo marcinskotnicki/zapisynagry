@@ -84,7 +84,7 @@
             </div>
 
             <?php if (!empty($g['brings_name'])): ?>
-                <p class="game-brings"><?= e(t('game_brings')) ?>: <strong><?= e($g['brings_name']) ?></strong></p>
+                <p class="game-brings"><?= e(game_brings_label($g)) ?>: <strong><?= e($g['brings_name']) ?></strong><?= game_club_note_html($g) ?></p>
             <?php endif; ?>
             <?php if (!empty($g['language'])): ?>
                 <p class="game-language"><?= e(t('f_language')) ?>: <strong><?= e($g['language']) ?></strong></p>

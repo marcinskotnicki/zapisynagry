@@ -111,7 +111,7 @@ function poll_candidate_defaults() {
     return [
         'name' => '', 'length_minutes' => 60, 'weight' => 2.0, 'max_players' => 4,
         'thumbnail' => '', 'bgg_id' => '', 'language' => '', 'required_players' => 4, 'source' => 'manual',
-        'manual_link' => '', 'link' => '',
+        'manual_link' => '', 'link' => '', 'from_club' => 0,
     ];
 }
 
@@ -138,6 +138,7 @@ function poll_candidate_from_row($row) {
         'manual_link'      => (string)($row['manual_link'] ?? ''),
         'link'             => (string)($row['link'] ?? ''),
         'source'           => !empty($row['bgg_id']) ? 'bgg' : 'manual',
+        'from_club'        => (int)($row['from_club'] ?? 0),
     ];
 }
 
@@ -166,6 +167,9 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'bgg_id'           => (int)($_POST['bgg_id'] ?? 0),
         'language'         => trim($_POST['language'] ?? ''),
         'source'           => ($_POST['source'] ?? 'manual') === 'bgg' ? 'bgg' : 'manual',
+        // Picked from the club's shelf? Carried to the resolved game. A hidden
+        // field, like the game form's — it only ever changes a label's wording.
+        'from_club'        => !empty($_POST['from_club']) ? 1 : 0,
     ];
     /* Manual candidates may only carry an admin-uploaded picture — same rule as
      * the game form. A BGG candidate's thumbnail is BGG's own URL and is left
@@ -249,15 +253,16 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         // new candidate starts at zero votes, so no resolve check is needed.
         db_run(
             'INSERT INTO poll_games
-             (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link,link)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+             (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link,link,from_club)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
             [$livePollId, $cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
              $cand['thumbnail'] !== '' ? $cand['thumbnail'] : null,
              $cand['bgg_id'] ?: null,
              $cand['language'] !== '' ? $cand['language'] : null,
              $cand['required_players'],
              $cand['manual_link'] !== '' ? $cand['manual_link'] : null,
-             $cand['link'] !== '' ? $cand['link'] : null]
+             $cand['link'] !== '' ? $cand['link'] : null,
+             (int)($cand['from_club'] ?? 0)]
         );
         log_action('poll_cand_added', $cand['name'] . ' (poll #' . $livePollId . ')');
         // Voters always hear about it; the proposer is added to the list when
@@ -361,6 +366,9 @@ if (isset($_GET['club'])) {
     if (!$shelfRow) redirect('add_poll_game.php');
 
     $cand = club_shelf_prefill(poll_candidate_defaults(), $shelfRow);
+    // From the club's own shelf — remembered so the game this becomes if it
+    // wins is treated like any other club game.
+    $cand['from_club'] = 1;
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('poll_candidate_form', [
         'table' => $table, 'cand' => $cand, 'source' => $cand['source'],

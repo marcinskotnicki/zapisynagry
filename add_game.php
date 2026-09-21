@@ -153,8 +153,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             db_run(
                 'INSERT INTO games
                  (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-                  thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,notify_owner)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                  thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,notify_owner,from_club)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [
                     $table['id'], $event['id'], $day['id'], $form['name'],
                     $form['length_minutes'], $form['weight'], $form['max_players'], $form['start_time'],
@@ -170,6 +170,14 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     $uid,                                                    // added_by = bringer
                     // Whether the bringer wants the emails about this game.
                     notify_flag_from_post($_POST),
+                    /* Picked from the club's own shelf? Kept so that editing
+                     * the game later asks the same question adding it did.
+                     * The marker comes from the form, so in principle anyone
+                     * could set it — but all it changes is the wording of one
+                     * label on their own game, so it is not worth verifying
+                     * against the shelf. If it is ever used for something that
+                     * matters, it should be checked there first. */
+                    !empty($_POST['from_club']) ? 1 : 0,
                 ]
             );
             $gameId = (int)db()->lastInsertId();
@@ -215,6 +223,8 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     tpl_render('header', ['page_title' => t('addgame_title')]);
     tpl_render('add_game_form', [
         'table'   => $table, 'game' => $form, 'source' => $form['source'],
+        // Same wording as the first time round — see the club route above.
+        'from_club' => !empty($_POST['from_club']),
         'thumbs'  => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'captcha' => captcha_html('add_game'), 'error' => $error, 'csrf' => csrf_field(),
     
@@ -297,6 +307,11 @@ if (isset($_GET['club'])) {
     tpl_render('header', ['page_title' => t('addgame_title')]);
     tpl_render('add_game_form', [
         'table'   => $table, 'game' => $form, 'source' => $form['source'],
+        /* The club's own copy is already in the room — nobody BRINGS it. The
+         * form asks for a name either way; this only changes what the question
+         * says, because "who is bringing the game" confused people looking at a
+         * game that was sitting on the club's shelf. */
+        'from_club' => true,
         // A BGG-sourced pick locks its image, like the search path; a
         // hand-added one can still choose a predefined thumbnail.
         'thumbs'  => $form['source'] === 'bgg'

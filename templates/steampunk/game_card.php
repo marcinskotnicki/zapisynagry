@@ -106,7 +106,7 @@
                 <div class="gc-band gc-row"><?= e(t('cl_length')) ?>: <strong><?= e(t('game_length_min', (int)$g['length_minutes'])) ?></strong></div>
             <?php endif; ?>
             <?php if (!empty($g['brings_name'])): ?>
-                <div class="gc-band gc-row"><?= e(t('game_brings')) ?>: <strong><?= e($g['brings_name']) ?></strong></div>
+                <div class="gc-band gc-row"><?= e(game_brings_label($g)) ?>: <strong><?= e($g['brings_name']) ?></strong><?= game_club_note_html($g) ?></div>
             <?php endif; ?>
             <?php if (!empty($g['language'])): ?>
                 <div class="gc-band gc-row"><?= e(t('cl_version')) ?>: <strong><?= e($g['language']) ?></strong></div>

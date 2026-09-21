@@ -1567,3 +1567,7 @@ trix-toolbar .trix-button--dialog {
 .row-actions .c-edit { position: static; }
 .row-actions .c-edit > summary { width: auto; height: auto; padding: 0.2rem 0.5rem; opacity: 1; }
 .row-actions .c-edit[open] > form { position: static; width: auto; box-shadow: none; }
+
+/* "(gra z biblioteki klubu)" under the name on a club game's card. Quieter than
+   the name above it — it is a note about WHERE the game is, not a second name. */
+.game-club-note { font-size: 0.85em; font-weight: 400; opacity: 0.75; }

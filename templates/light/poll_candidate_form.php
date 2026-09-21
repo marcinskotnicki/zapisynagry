@@ -49,6 +49,12 @@ $cancel_url = $cancel_url ?? ('add_poll.php?table=' . (int)$table['id']);
             <input type="hidden" name="edit_cand" value="<?= $edit_id ?>">
         <?php endif; ?>
         <input type="hidden" name="source" value="<?= e($source) ?>">
+        <?php /* Picked from the club's own shelf — carried through the submit so
+                 the candidate is stored with it, and on to the game it becomes
+                 if it wins. */ ?>
+        <?php if (!empty($cand['from_club'])): ?>
+            <input type="hidden" name="from_club" value="1">
+        <?php endif; ?>
         <?php if ($isBgg): // carry the locked BGG identity + image through ?>
             <input type="hidden" name="bgg_id" value="<?= e($cand['bgg_id']) ?>">
             <input type="hidden" name="thumbnail" value="<?= e($cand['thumbnail']) ?>">

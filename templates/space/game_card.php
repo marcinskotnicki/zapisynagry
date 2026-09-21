@@ -98,7 +98,7 @@
             </div>
 
             <?php if (!empty($g['brings_name'])): ?>
-                <p class="game-brings"><span class="sp-key"><?= e(t('game_brings')) ?></span> <strong><?= e($g['brings_name']) ?></strong></p>
+                <p class="game-brings"><span class="sp-key"><?= e(game_brings_label($g)) ?></span> <strong><?= e($g['brings_name']) ?></strong><?= game_club_note_html($g) ?></p>
             <?php endif; ?>
             <p class="game-rules rules-<?= rules_tone($g['explain_rules']) ?>"><?= e(explain_rules_label($g['explain_rules'])) ?></p>
             <?php // Rules / manual link, right after the rules line it belongs with.

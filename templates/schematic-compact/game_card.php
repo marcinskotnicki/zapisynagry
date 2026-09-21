@@ -134,8 +134,8 @@
                 <?php endif; ?>
                 <?php if (!empty($g['brings_name'])): ?>
                     <span class="sc-cell sc-cell-wide">
-                        <span class="sc-key"><?= e(t('game_brings')) ?></span>
-                        <span class="sc-val"><?= e($g['brings_name']) ?></span>
+                        <span class="sc-key"><?= e(game_brings_label($g)) ?></span>
+                        <span class="sc-val"><?= e($g['brings_name']) ?><?= game_club_note_html($g) ?></span>
                     </span>
                 <?php endif; ?>
                 <?php // No key label on this one: unlike "weight 3,5" the rules

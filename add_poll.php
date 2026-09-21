@@ -159,8 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Insert each candidate; collect their new ids for self-voting.
                 $cg = db()->prepare(
                     'INSERT INTO poll_games
-                     (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link,link)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+                     (poll_id,name,length_minutes,weight,max_players,thumbnail,bgg_id,language,required_players,manual_link,link,from_club)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
                 );
                 $candIds = [];
                 foreach ($draft['games'] as $g) {
@@ -175,6 +175,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // field existed still writes cleanly rather than
                         // tripping an undefined-index notice.
                         !empty($g['link']) ? $g['link'] : null,
+                        // Same caution: a draft from before this field has none.
+                        (int)($g['from_club'] ?? 0),
                     ]);
                     $candIds[] = (int)db()->lastInsertId();
                 }

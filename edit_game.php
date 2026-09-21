@@ -185,6 +185,10 @@ tpl_render('add_game_form', [
     'csrf'    => csrf_field(),
     'action'  => 'edit_game.php?game=' . $gameId,   // form posts mode=save back here
     'is_edit' => true,
+    /* The same wording the game was added with — "your name" for the club's
+     * own copy, "who is bringing it" for everything else. Read from the stored
+     * row, not the request: an edit never changes where the game came from. */
+    'from_club' => (int)($game['from_club'] ?? 0) === 1,
     'title'   => t('editgame_title'),
 
         // Editions to offer beside the name; [] unless enabled and BGG has several.
