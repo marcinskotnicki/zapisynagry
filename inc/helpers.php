@@ -770,6 +770,26 @@ function notify_default_on() {
 }
 
 /**
+ * The rules-knowledge answer from a submitted form, or null if none was given.
+ *
+ * NULL, NOT ZERO, for "no answer". Code 0 means "I know the rules", so treating
+ * a missing field as 0 silently recorded the most optimistic answer for anybody
+ * who skipped the question — and the person bringing the game then expected to
+ * teach nobody. The two mistakes are not equal: someone wrongly marked "does not
+ * know" costs a few minutes of explanation they did not need; someone wrongly
+ * marked "knows" can leave a table unable to start. So there is no default at
+ * all, and the forms refuse to go through until a choice is made.
+ *
+ * @param array $post
+ * @return int|null  0, 1 or 2; null when absent or not one of those.
+ */
+function knows_from_post($post) {
+    if (!isset($post['knows']) || $post['knows'] === '') return null;
+    $k = (int)$post['knows'];
+    return in_array($k, [0, 1, 2], true) ? $k : null;
+}
+
+/**
  * Is this the filename of an admin-uploaded predefined thumbnail?
  *
  * The picker offers a radio group, and a radio group is only a suggestion: the

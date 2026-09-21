@@ -643,6 +643,8 @@ return [
     'rules_summary'       => 'Quick summary only',
     'rules_known'         => 'Players need to know the rules',
     'knows_yes'           => 'I know the rules',
+    'knows_choose'        => '— choose —',
+    'error_knows_required' => 'Please say whether you know the rules of this game.',
     'knows_somewhat'      => 'I know the rules somewhat',
     'knows_no'            => "I don't know the rules",
 
@@ -717,7 +719,7 @@ return [
     'signup'              => 'Sign up',
     'signup_reserve'      => 'Sign up for reserve list',
     'signup_title'        => 'Sign up',
-    'signup_name'         => 'Name',
+    'signup_name'         => 'Name / nickname',
     'signup_your_name'              => 'Your name',
     'signup_player_name'            => 'Player\'s name (optional)',
     'signup_player_name_note'       => 'If you want to sign up someone else for the game (for example your child), put their name here. If you\'re signing up as yourself, leave this field blank.',

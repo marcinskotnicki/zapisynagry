@@ -41,7 +41,8 @@ $guest = guest_identity();
 $form = [
     'name'  => $_POST['name']  ?? ($u['display_name'] ?? $guest['name']),
     'email' => $_POST['email'] ?? ($u['email'] ?? $guest['email']),
-    'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
+    // No default: the question must be answered — see knows_from_post().
+    'knows' => knows_from_post($_POST),
 ];
 $error = null;
 
@@ -67,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $form['name']  = trim((string)$form['name']);
     $form['email'] = trim((string)$form['email']);
-    $form['knows'] = min(2, max(0, (int)$form['knows']));
+    // Already validated by knows_from_post(): 0..2, or null when unanswered.
 
     // Data-protection consent, when the admin configured wording and the
     // visitor is not signed in. Checked here rather than trusting the
@@ -76,6 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('gdpr_required');
     } elseif ($form['name'] === '') {
         $error = t('error_signup_name');
+    } elseif ($form['knows'] === null) {
+        /* Enforced here, not only by the select's `required`: a browser that
+         * ignores it, or a hand-built POST, must not slip through to the
+         * optimistic default this used to fall back on. */
+        $error = t('error_knows_required');
     } elseif (email_required_for_poll($poll) && $form['email'] === '') {
         // Required globally (mode 1) or because THIS poll's proposer demands it.
         $error = t('error_email_required');

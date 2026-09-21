@@ -70,9 +70,19 @@
 
         <div class="field field-knows">
             <label for="knows"><?= e(t('signup_knows')) ?></label>
-            <select id="knows" name="knows">
+            <?php /* NO PRE-SELECTED ANSWER. The first entry was "I know the
+                     rules", so anyone who skipped the question was recorded as
+                     knowing them — and the person bringing the game prepared to
+                     teach nobody. The placeholder is selected until they pick
+                     something, and `required` plus the empty value means the
+                     browser will not submit it; the server refuses it too.
+
+                     Compared with ===, not (int): (int)null is 0, which would
+                     quietly select "I know the rules" all over again. */ ?>
+            <select id="knows" name="knows" required>
+                <option value="" disabled<?= $form['knows'] === null ? ' selected' : '' ?>><?= e(t('knows_choose')) ?></option>
                 <?php foreach ([0 => 'knows_yes', 1 => 'knows_somewhat', 2 => 'knows_no'] as $code => $k): ?>
-                    <option value="<?= $code ?>"<?= (int)$form['knows'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
+                    <option value="<?= $code ?>"<?= $form['knows'] === $code ? ' selected' : '' ?>><?= e(t($k)) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

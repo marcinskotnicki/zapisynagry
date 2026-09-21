@@ -635,6 +635,8 @@ return [
     'rules_summary'       => 'Tylko krótkie streszczenie',
     'rules_known'         => 'Gracze muszą znać zasady',
     'knows_yes'           => 'Znam zasady',
+    'knows_choose'        => '— wybierz —',
+    'error_knows_required' => 'Zaznacz, czy znasz zasady tej gry.',
     'knows_somewhat'      => 'Trochę znam zasady',
     'knows_no'            => 'Nie znam zasad',
 
@@ -709,7 +711,7 @@ return [
     'signup'              => 'Zapisz się',
     'signup_reserve'      => 'Zapisz się na listę rezerwową',
     'signup_title'        => 'Zapisz się',
-    'signup_name'         => 'Imię / nazwa',
+    'signup_name'         => 'Imię / nick',
     'signup_your_name'              => 'Twoje imię',
     'signup_player_name'            => 'Imię gracza (opcjonalnie)',
     'signup_player_name_note'       => 'Jeśli chcesz zapisać na grę kogoś innego (na przykład swoje dziecko), wpisz tutaj jego imię. Jeśli zapisujesz siebie, zostaw to pole puste.',

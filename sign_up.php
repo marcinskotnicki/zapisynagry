@@ -27,12 +27,13 @@ if (!$event || (int)$event['is_archived'] === 1 || !can_signup()) {
     redirect('index.php');
 }
 
-// Prefill name/email for a logged-in user; default "knows rules" to 0 ("yes").
+// Prefill name/email for a logged-in user. The rules question has NO default.
 $u = current_user();
 $form = [
     'name'  => $_POST['name']  ?? ($u['display_name'] ?? guest_identity()['name']),
     'email' => $_POST['email'] ?? ($u['email'] ?? guest_identity()['email']),
-    'knows' => isset($_POST['knows']) ? (int)$_POST['knows'] : 0,
+    // No default: the question must be answered — see knows_from_post().
+    'knows' => knows_from_post($_POST),
     // Set on POST below; declared here so the form can redisplay it after an
     // error without a notice.
     'player_name' => $_POST['player_name'] ?? '',
@@ -50,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Only accepted when the field was actually offered, so a hand-built POST
     // cannot use a form the admin has switched off.
     $form['player_name'] = signup_proxy_enabled() ? trim((string)($_POST['player_name'] ?? '')) : '';
-    $form['knows'] = min(2, max(0, (int)$form['knows']));   // clamp to the 0..2 codes
+    // Already validated by knows_from_post(): 0..2, or null when unanswered.
 
     // Data-protection consent, when the admin configured wording and the
     // visitor is not signed in. Checked here rather than trusting the
@@ -59,6 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('gdpr_required');
     } elseif ($form['name'] === '') {
         $error = t('error_signup_name');
+    } elseif ($form['knows'] === null) {
+        /* Enforced here, not only by the select's `required`: a browser that
+         * ignores it, or a hand-built POST, must not slip through to the
+         * optimistic default this used to fall back on. */
+        $error = t('error_knows_required');
     } elseif (!text_has_content($form['name'])) {
         $error = t('error_name_meaningless');
     } elseif (text_too_long($form['name'], TEXT_PERSON_MAX)) {
