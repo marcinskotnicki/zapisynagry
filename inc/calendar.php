@@ -329,19 +329,24 @@ function calendar_game_google_link($g, $event) {
 }
 
 /**
- * The two buttons, in whichever shape this theme's card uses.
+ * The two calendar controls for one game, as small icons.
  *
- * Emitted by one helper so twelve card templates make one call each. The two
- * shapes match what the card already has next to them: most themes draw the
- * rules link as a button ('btn'), the schematic family as a cell in a grid row
- * ('cell') — and a button dropped into that grid, or a grid cell into a row of
- * buttons, is exactly the layout breakage this option was expected to risk.
+ * ICONS, not labelled buttons, and in the corner with the edit/delete controls
+ * rather than beside the rules link: as full buttons they sat in the middle of
+ * every card and drew more attention than a convenience deserves. They go in
+ * the same place in every theme — wherever that theme keeps its edit/delete
+ * controls — but OUTSIDE the owner-only condition, since anyone may want to
+ * add a game to their own calendar.
  *
- * @param array  $g
- * @param string $shape  'btn' or 'cell'.
+ * The calendar glyph is the header's own (nav_icon_svg('calendar')), so the
+ * two read as the same idea. The .ics one is the text ".ics" drawn as a small
+ * badge — at this size a document icon would be an unreadable smudge, and the
+ * three letters are exactly what someone looking for "the file" recognises.
+ *
+ * @param array $g
  * @return string  '' when the option is off or the game has no usable time.
  */
-function game_calendar_html($g, $shape = 'btn') {
+function game_calendar_html($g) {
     if (!calendar_game_enabled()) return '';
     static $events = [];
     $eid = (int)($g['event_id'] ?? 0);
@@ -354,25 +359,15 @@ function game_calendar_html($g, $shape = 'btn') {
     if ($google === '') return '';
     $ics = 'ical.php?game=' . (int)$g['id'];
 
-    if ($shape === 'cell') {
-        return '<a class="sc-cell sc-cell-manual game-cal" href="' . e($google) . '" target="_blank" rel="noopener"'
-             . ' title="' . e(t('cal_game_google')) . '"><span class="sc-val">' . e(t('cal_game_google_short')) . '</span></a>'
-             . '<a class="sc-cell sc-cell-manual game-cal" href="' . e($ics) . '"'
-             . ' title="' . e(t('cal_download_ics')) . '"><span class="sc-val">.ics</span></a>';
-    }
-    /* game-manual as well as game-cal: every theme already styles the rules
-     * button (.game-manual) in its own look — a dark pill on classic, a bordered
-     * tag elsewhere — and these sit right beside it. Borrowing that class makes
-     * them match in every theme without a single theme stylesheet knowing they
-     * exist; without it they came out as plain white buttons next to a styled
-     * one. */
-    return '<span class="game-cal-btns">'
-         . '<a class="btn btn-small game-manual game-cal" href="' . e($google) . '" target="_blank" rel="noopener"'
-         . ' title="' . e(t('cal_game_google')) . '">' . e(t('cal_game_google_short')) . '</a>'
-         . '<a class="btn btn-small game-manual game-cal game-cal-ics" href="' . e($ics) . '" title="' . e(t('cal_download_ics')) . '">.ics</a>'
+    $glyph = function_exists('nav_icon_svg') ? nav_icon_svg('calendar') : '';
+    return '<span class="game-cal-icons">'
+         . '<a class="game-cal-icon" href="' . e($google) . '" target="_blank" rel="noopener"'
+         . ' title="' . e(t('cal_game_google')) . '" aria-label="' . e(t('cal_game_google')) . '">'
+         . ($glyph !== '' ? $glyph : '&#128197;') . '</a>'
+         . '<a class="game-cal-icon game-cal-icon-ics" href="' . e($ics) . '"'
+         . ' title="' . e(t('cal_download_ics')) . '" aria-label="' . e(t('cal_download_ics')) . '">.ics</a>'
          . '</span>';
 }
-
 
 /* =============================================================================
  *  CALENDAR LINKS BY EMAIL — sent when somebody commits to a game.

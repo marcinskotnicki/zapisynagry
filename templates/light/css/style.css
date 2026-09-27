@@ -1426,6 +1426,13 @@ trix-toolbar .trix-button--dialog {
     margin: 0.9rem auto 1.2rem;
     padding: 0.7rem 0.9rem;
     background: var(--surface-2);
+    /* Paired with the background, always. This block sits OUTSIDE the cards,
+       directly on the page, so without a colour of its own it inherited the text
+       colour of whatever is around it. On the schematic and imperial themes that
+       is the pale text meant for their dark board — laid on top of their light
+       paper surface, which is how it came out white on cream. Setting the
+       surface's own text colour keeps the two in step on every theme. */
+    color: var(--text);
     border-left: 3px solid var(--primary);
     border-radius: 4px;
     line-height: 1.5;
@@ -1583,15 +1590,31 @@ trix-toolbar .trix-button--dialog {
 .footer-calendar > * { margin: 0.15rem 0.45rem; }
 .footer-calendar-label { opacity: 0.7; }
 
-/* "Add this game to a calendar", beside the rules link on each card. Kept as an
-   inline group that WRAPS as a unit: on a narrow card the two buttons move to
-   the next line together instead of one of them being stranded, and nothing
-   here can push the card wider than its column. */
-.game-cal-btns { display: inline-flex; flex-wrap: wrap; max-width: 100%; vertical-align: middle; }
-/* Margin, not `gap` — same reason as the footer line above. */
-.game-cal-btns > .game-cal { margin: 0.1rem 0.15rem; }
-/* The rules button carries a "⧉ opens elsewhere" marker, and the calendar
-   buttons borrow its class to borrow its look. That is right for the Google one
-   (it does open a new tab) but wrong for .ics, which is a download. */
-.btn.game-manual.game-cal-ics:after { content: none; }
-.game-cal { white-space: nowrap; }
+
+
+
+/* Calendar icons on a game card, beside (or in place of) the edit/delete
+   controls. Small and quiet on purpose — a convenience, not a call to action.
+   Colour INHERITED, as with the comment controls, so they read on dark cards
+   and light ones alike without a theme knowing they exist. */
+.game-cal-icons { display: inline-flex; align-items: center; vertical-align: middle; }
+.game-cal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    margin: 0 0.1rem;
+    padding: 0 0.15rem;
+    color: inherit;
+    opacity: 0.6;
+    text-decoration: none;
+    border-radius: 4px;
+}
+.game-cal-icon:hover, .game-cal-icon:focus { opacity: 1; background: rgba(127, 127, 127, 0.2); text-decoration: none; }
+.game-cal-icon svg { width: 1.05rem; height: 1.05rem; }
+/* ".ics" as a tiny badge the same height as the calendar glyph: at this size a
+   document icon would be an unreadable smudge, and the three letters are what
+   somebody looking for "the file" recognises. */
+.game-cal-icon-ics { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+    border: 1px solid currentColor; height: 1.1rem; line-height: 1; }

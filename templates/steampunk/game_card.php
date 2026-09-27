@@ -87,6 +87,8 @@
                     <a class="msg-icon msg-icon-all" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msgbtn_game_all')) ?>" aria-label="<?= e(t('msgbtn_game_all')) ?>">&#9993;</a>
                 </div>
             <?php endif; ?>
+            <?php // Add this game to a calendar — for EVERYONE, so outside the owner-only block above, but in the same spot. ?>
+            <?= game_calendar_html($g) ?>
 
             <?php if (!empty($g['thumbnail'])): ?>
                 <div class="gc-thumb"><img src="<?= e($g['thumbnail']) ?>" alt=""></div>
@@ -119,10 +121,6 @@
                 <a class="btn btn-small game-manual" href="<?= e($mlink) ?>" target="_blank" rel="noopener noreferrer"
                    title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
             <?php endif; ?>
-            <?php // Add THIS game to a calendar — only when the club switched it on.
-                  // Beside the rules link because it is the other button every
-                  // visitor may use; the owner's edit/delete row is not. ?>
-            <?= game_calendar_html($g, 'btn') ?>
 
             <?php if (!empty($g['comment'])): ?>
                 <div class="gc-band gc-comment"><?= e(t('cl_comment')) ?>:<br><?= nl2br(e($g['comment'])) ?></div>

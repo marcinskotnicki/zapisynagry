@@ -107,6 +107,8 @@
                         <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                     </span>
                 <?php endif; ?>
+                <?php // Add this game to a calendar — for EVERYONE, so outside the owner-only block above, but in the same spot. ?>
+                <?= game_calendar_html($g) ?>
             </div>
 
             <?php // ---- Data cells: label above value, the way a panel legend
@@ -163,9 +165,6 @@
                         <span class="sc-val"><?= e(t('game_manual_btn')) ?></span>
                     </a>
                 <?php endif; ?>
-                <?php // Add this game to a calendar: two more cells in the same row as
-                      // the rules link, so they join its run instead of breaking it. ?>
-                <?= game_calendar_html($g, 'cell') ?>
             </div>
 
             <?php if (!empty($g['comment'])): ?>

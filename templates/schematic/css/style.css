@@ -233,6 +233,12 @@ body.tpl-schematic {
 .tpl-schematic .sc-body { flex: 1 1 auto; min-width: 0; padding: 0.5rem 0.75rem 0.6rem; }
 
 .tpl-schematic .sc-head {
+    /* The card's own ink colour. The header sits on the cream paper card, but
+       set nothing itself, so anything in it that did not name a colour — the
+       calendar icons, which inherit on purpose — took the pale colour meant for
+       the dark board around the card, and vanished. The game name escaped only
+       because it sets --ink itself. */
+    color: var(--ink);
     display: flex;
     align-items: center;
     gap: 0.5rem;
