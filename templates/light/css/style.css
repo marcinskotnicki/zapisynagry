@@ -619,9 +619,30 @@ html { scroll-behavior: smooth; }
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.4rem 1rem;
     padding: 0.8rem 1rem 0;
     font-size: 0.9rem;
+}
+/* SPACING AND SEPARATORS for both footer lines — the page links above and the
+   calendar links below. On a wide screen everything sits on one line, and with
+   only a small gap the titles ran into each other until they read as one long
+   phrase ("RegulaminPolityka prywatnościDojazd" where the gap was not honoured
+   at all).
+
+   Spaced by MARGIN rather than flex `gap`, which older browsers ignore.
+
+   A middle dot between items, drawn as a pseudo-element of the item that
+   follows it. inline-block, so it is not underlined along with the link, and
+   pointer-events off, so it is not part of what you click. Faded, so it
+   separates without competing with the words. */
+.footer-pages > a { margin: 0.2rem 0; }
+.footer-pages > a + a::before,
+.footer-calendar > :nth-child(n+3)::before {
+    content: "·";
+    display: inline-block;
+    margin: 0 0.7rem;
+    opacity: 0.5;
+    pointer-events: none;
+    text-decoration: none;
 }
 #footer_custom {
     max-width: var(--maxw);
@@ -1584,10 +1605,10 @@ trix-toolbar .trix-button--dialog {
    phone rather than overflowing. */
 .footer-calendar { display: flex; flex-wrap: wrap; justify-content: center;
     margin: 0.8rem auto; font-size: 0.85rem; }
-/* Spacing by MARGIN rather than flex `gap`: gap is ignored by older browsers
-   and rendering engines, and without it these links ran together into one
-   unreadable string. Margins space them everywhere. */
-.footer-calendar > * { margin: 0.15rem 0.45rem; }
+/* Vertical breathing room when the line wraps on a phone; the horizontal space
+   between items comes from the separators (see .footer-pages above). */
+.footer-calendar > * { margin: 0.2rem 0; }
+.footer-calendar-label { margin-right: 0.6rem !important; }
 .footer-calendar-label { opacity: 0.7; }
 
 

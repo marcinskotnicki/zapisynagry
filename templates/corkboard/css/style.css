@@ -354,3 +354,17 @@ body.tpl-corkboard {
     .tpl-corkboard .day-tabs { justify-content: flex-start; }
 }
 .tpl-corkboard .day-tabs { justify-content: safe center; }
+
+
+/* FOOTER LINKS. The footer sits on this theme's page background, but links take
+   --primary — a colour chosen for text on the CARDS, which here is dark enough
+   to nearly vanish against the background around them. So the footer gets a
+   light colour of the theme's own, its signage colour, which keeps the theme's character and
+   clears the 4.5:1 contrast bar comfortably. Set on the whole line, not just the
+   links, so the "Kalendarz:" label and any plain text in it match. */
+.tpl-corkboard .footer-pages,
+.tpl-corkboard .footer-calendar,
+.tpl-corkboard .footer-pages a,
+.tpl-corkboard .footer-calendar a { color: var(--signage); }
+.tpl-corkboard .footer-pages a:hover,
+.tpl-corkboard .footer-calendar a:hover { text-decoration: underline; }

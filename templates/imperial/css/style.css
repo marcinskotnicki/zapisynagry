@@ -537,3 +537,17 @@ body.tpl-imperial {
     .tpl-imperial .day-tabs { justify-content: flex-start; }
 }
 .tpl-imperial .day-tabs { justify-content: safe center; }
+
+
+/* FOOTER LINKS. The footer sits on this theme's page background, but links take
+   --primary — a colour chosen for text on the CARDS, which here is dark enough
+   to nearly vanish against the background around them. So the footer gets a
+   light colour of the theme's own, the vellum of its own cards, which keeps the theme's character and
+   clears the 4.5:1 contrast bar comfortably. Set on the whole line, not just the
+   links, so the "Kalendarz:" label and any plain text in it match. */
+.tpl-imperial .footer-pages,
+.tpl-imperial .footer-calendar,
+.tpl-imperial .footer-pages a,
+.tpl-imperial .footer-calendar a { color: var(--vellum); }
+.tpl-imperial .footer-pages a:hover,
+.tpl-imperial .footer-calendar a:hover { text-decoration: underline; }

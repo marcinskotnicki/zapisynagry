@@ -496,3 +496,17 @@ body.tpl-ironworks {
     .tpl-ironworks .gc-players { margin-left: 0; margin-top: 0.6rem; min-width: 0; }
     .tpl-ironworks .gc-resign { margin-right: 0; }
 }
+
+
+/* FOOTER LINKS. The footer sits on this theme's page background, but links take
+   --primary — a colour chosen for text on the CARDS, which here is dark enough
+   to nearly vanish against the background around them. So the footer gets a
+   light colour of the theme's own, its brass, which keeps the theme's character and
+   clears the 4.5:1 contrast bar comfortably. Set on the whole line, not just the
+   links, so the "Kalendarz:" label and any plain text in it match. */
+.tpl-ironworks .footer-pages,
+.tpl-ironworks .footer-calendar,
+.tpl-ironworks .footer-pages a,
+.tpl-ironworks .footer-calendar a { color: var(--brass-lit); }
+.tpl-ironworks .footer-pages a:hover,
+.tpl-ironworks .footer-calendar a:hover { text-decoration: underline; }
