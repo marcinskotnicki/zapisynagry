@@ -476,6 +476,15 @@ $groupEnd = function () { echo '</div></details>'; };
         <?php $toggle('event_stats'); ?>
         <p class="field-note"><?= e(t('opt_event_stats_note')) ?></p>
 
+        <?php $toggle('calendar_export'); ?>
+        <p class="field-note"><?= e(t('opt_calendar_export_note')) ?></p>
+
+        <?php $toggle('calendar_game_export'); ?>
+        <p class="field-note"><?= e(t('opt_calendar_game_export_note')) ?></p>
+
+        <?php $toggle('calendar_email'); ?>
+        <p class="field-note"><?= e(t('opt_calendar_email_note')) ?></p>
+
         <?php /* Prefills for a NEW event's location. Rendered unconditionally,
                  even though they only do anything once the details above are on:
                  every option this form can SAVE has to be visible on it, or it

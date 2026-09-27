@@ -38,6 +38,11 @@ if ($tokenQS === '' && public_archives_enabled()
     && (int)($_GET['event'] ?? 0) === (int)$event['id']) {
     $tokenQS = '&event=' . (int)$event['id'];
 }
+
+/* The game cards below call game_calendar_html(). The footer also loads the
+ * calendar module, but it renders AFTER the cards — so without this the first
+ * card on the page would call a function that does not exist yet. */
+require_once __DIR__ . '/../../inc/calendar.php';
 ?>
 <?php // Event switcher: only when public archives are on, and only when there
       // is more than one event worth offering — a single tab pointing at the

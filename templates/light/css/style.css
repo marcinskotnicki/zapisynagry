@@ -1571,3 +1571,27 @@ trix-toolbar .trix-button--dialog {
 /* "(gra z biblioteki klubu)" under the name on a club game's card. Quieter than
    the name above it — it is a note about WHERE the game is, not a second name. */
 .game-club-note { font-size: 0.85em; font-weight: 400; opacity: 0.75; }
+
+/* "Add to calendar" links in the footer. A quiet single line — it is a
+   convenience at the bottom of the page, not a call to action. Wraps on a
+   phone rather than overflowing. */
+.footer-calendar { display: flex; flex-wrap: wrap; justify-content: center;
+    margin: 0.8rem auto; font-size: 0.85rem; }
+/* Spacing by MARGIN rather than flex `gap`: gap is ignored by older browsers
+   and rendering engines, and without it these links ran together into one
+   unreadable string. Margins space them everywhere. */
+.footer-calendar > * { margin: 0.15rem 0.45rem; }
+.footer-calendar-label { opacity: 0.7; }
+
+/* "Add this game to a calendar", beside the rules link on each card. Kept as an
+   inline group that WRAPS as a unit: on a narrow card the two buttons move to
+   the next line together instead of one of them being stranded, and nothing
+   here can push the card wider than its column. */
+.game-cal-btns { display: inline-flex; flex-wrap: wrap; max-width: 100%; vertical-align: middle; }
+/* Margin, not `gap` — same reason as the footer line above. */
+.game-cal-btns > .game-cal { margin: 0.1rem 0.15rem; }
+/* The rules button carries a "⧉ opens elsewhere" marker, and the calendar
+   buttons borrow its class to borrow its look. That is right for the Google one
+   (it does open a new tab) but wrong for .ics, which is a download. */
+.btn.game-manual.game-cal-ics:after { content: none; }
+.game-cal { white-space: nowrap; }

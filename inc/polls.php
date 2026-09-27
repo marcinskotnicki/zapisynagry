@@ -221,7 +221,7 @@ function poll_resolve_candidate($poll, $cand) {
                 $whenText = trim($whenText . ' ' . substr((string)$poll['start_time'], 0, 5));
             }
         }
-        notify_poll_concluded($notifyEmails, $cand['name'], $whenText);
+        notify_poll_concluded($notifyEmails, $cand['name'], $whenText, $gameId);
     }
     return $gameId;
 }

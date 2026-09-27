@@ -125,6 +125,7 @@ $OPTION_TOGGLES = [
     'chat_enabled', 'public_archives', 'use_day_names', 'gdpr_prefill',
     'allow_self_delete',
     'home_event_list', 'event_list_by_day', 'hide_past_days', 'event_details', 'hide_event_tabs', 'event_stats',
+    'calendar_export', 'calendar_game_export', 'calendar_email',
     'show_help_tab', 'show_help_front',
     'chat_close_outside', 'chat_logged_in_only', 'notify_new_event',
     'club_library', 'library_show_members', 'library_allow_contact', 'library_mail_venue',

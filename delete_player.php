@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $promoted = promote_reserves($player['game_id']);   // fill the freed seat from reserve
             foreach ($promoted as $pid) {
                 $pe = db_val('SELECT email FROM players WHERE id = ?', [$pid]);
-                notify_promoted($pe, $game['name']);
+                notify_promoted($pe, $game['name'], (int)$game['id']);
             }
         }
         log_action('player_delete', $player['name'] . ' <- ' . $game['name']);

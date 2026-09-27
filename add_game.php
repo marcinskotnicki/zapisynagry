@@ -182,6 +182,11 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             $gameId = (int)db()->lastInsertId();
             notify_remember_choice(notify_flag_from_post($_POST));
+            /* The calendar links, to whoever is bringing it — when the club has
+             * that switched on and they left an address. The helper checks both
+             * and their own "email me" answer, so this is a no-op otherwise. */
+            require_once __DIR__ . '/inc/calendar.php';
+            calendar_email_send($form['brings_email'], $gameId, notify_flag_from_post($_POST));
 
             // Auto-add the bringer as the first player when requested.
             if ($form['add_self'] && $form['brings_name'] !== '') {

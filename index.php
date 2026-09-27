@@ -38,6 +38,9 @@ logs_prune();
 $resolved = event_resolve();
 $event    = $resolved['event'];
 $readonly = $resolved['readonly'];
+// The footer's calendar links belong to the event actually on screen — which,
+// with several active events, is not necessarily the site's default one.
+$GLOBALS['footer_event'] = $event;
 
 /* THE EVENT LIST as a landing page, when the admin asked for it.
  *
@@ -82,6 +85,10 @@ if (home_event_list_enabled()
             ? event_days_stats(array_column($evListRows, 'day_id'))
             : events_stats(array_column($evListRows, 'id'));
     }
+    /* The list is not one event, so the footer's "add THIS event" links have
+     * nothing to point at. Said explicitly: left unset, the footer would fall
+     * back to the site's default event, which is not the one being looked at. */
+    $GLOBALS['footer_event'] = null;
     tpl_render('header', ['page_title' => t('app_name')]);
     tpl_render('front_event_list', [
         'events' => $evListRows,

@@ -94,6 +94,20 @@ INSERT INTO options (key, value) VALUES
     --   every event, rather than one row per event. Only does anything when
     --   home_event_list is on.
     ('event_list_by_day', '0'),
+    -- calendar_export: "add to calendar" links in the footer, and the public
+    --   ical.php feed behind them. ON by default — it costs nothing until
+    --   somebody clicks, and a club that would rather not offer it can switch it
+    --   off, which also takes the feed address down rather than just the links.
+    ('calendar_export',   '1'),
+    -- calendar_game_export: "add to calendar" buttons on every game card. OFF by
+    --   default — unlike the one footer line above, this adds two buttons to
+    --   every card, which is a visible change to a crowded board.
+    ('calendar_game_export', '0'),
+    -- calendar_email: email people the calendar links for a game when they add
+    --   it or take a seat, and add those links to the poll-resolved and
+    --   reserve-promoted emails. OFF by default — it is one more email per
+    --   sign-up, which is a real change to how much mail a club sends.
+    ('calendar_email',       '0'),
     -- hide_past_days: in per-day mode, leave out days before YESTERDAY. Not
     --   "before today": an event running past midnight is still the session
     --   people are looking for at 01:00.

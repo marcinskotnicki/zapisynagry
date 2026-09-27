@@ -109,6 +109,10 @@
                 <a class="btn btn-small game-manual" href="<?= e($mlink) ?>" target="_blank" rel="noopener noreferrer"
                    title="<?= e(t('game_manual_title')) ?>"><?= e(t('game_manual_btn')) ?></a>
             <?php endif; ?>
+            <?php // Add THIS game to a calendar — only when the club switched it on.
+                  // Beside the rules link because it is the other button every
+                  // visitor may use; the owner's edit/delete row is not. ?>
+            <?= game_calendar_html($g, 'btn') ?>
             <?php if (!empty($g['comment'])): ?>
                 <p class="game-comment"><?= nl2br(e($g['comment'])) ?></p>
             <?php endif; ?>

@@ -143,6 +143,9 @@
                         <span class="sc-val"><?= e(t('game_manual_btn')) ?></span>
                     </a>
                 <?php endif; ?>
+                <?php // Add this game to a calendar: two more cells in the same row as
+                      // the rules link, so they join its run instead of breaking it. ?>
+                <?= game_calendar_html($g, 'cell') ?>
             </div>
 
             <?php if (!empty($g['comment'])): ?>

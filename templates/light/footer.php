@@ -99,6 +99,31 @@ if (function_exists('switcher_visible')) {
         <?php endforeach; ?>
     </nav>
 <?php endif; ?>
+<?php /* CALENDAR LINKS. The first two are about the event being looked at —
+         the one index.php put on screen, or the site's current event on any
+         other page — and are left out when there is no event at all (the
+         event-list landing page, a fresh install). The third subscribes to
+         EVERY event, so it is offered whenever the feature is on. */ ?>
+<?php require_once __DIR__ . '/../../inc/calendar.php'; ?>
+<?php if (calendar_enabled()): ?>
+    <?php /* array_key_exists, not ??: index.php sets it to NULL on purpose on
+             the event-list page, and ?? would treat that as "not set" and fall
+             back to the default event. Other pages set nothing, and get the
+             site's current event. */ ?>
+    <?php $calEvent = array_key_exists('footer_event', $GLOBALS) ? $GLOBALS['footer_event'] : current_event(); ?>
+    <?php $calGoogle = $calEvent ? calendar_google_link($calEvent) : ''; ?>
+    <?php $calSub = calendar_google_subscribe_link(); ?>
+    <nav class="footer-calendar">
+        <span class="footer-calendar-label"><?= e(t('cal_label')) ?></span>
+        <?php if ($calGoogle !== ''): ?>
+            <a href="<?= e($calGoogle) ?>" target="_blank" rel="noopener"><?= e(t('cal_google_event')) ?></a>
+            <a href="ical.php?event=<?= (int)$calEvent['id'] ?>"><?= e(t('cal_download_ics')) ?></a>
+        <?php endif; ?>
+        <?php if ($calSub !== ''): ?>
+            <a href="<?= e($calSub) ?>" target="_blank" rel="noopener"><?= e(t('cal_google_all')) ?></a>
+        <?php endif; ?>
+    </nav>
+<?php endif; ?>
 <div class="bgg_logo">
 <img src="img/powered_by_BGG_01_SM.png" alt="Powered by BGG"/>
 </div>

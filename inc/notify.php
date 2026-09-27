@@ -191,9 +191,16 @@ function notify_starttime_changed($game, $newStart) {
  * @param string|null $playerEmail
  * @param string      $gameName
  */
-function notify_promoted($playerEmail, $gameName) {
+function notify_promoted($playerEmail, $gameName, $gameId = 0) {
     if (!notify_enabled() || !$playerEmail) return;
-    send_mail($playerEmail, t('ntf_promoted_subject', $gameName), t('ntf_promoted_body', $gameName));
+    $body = t('ntf_promoted_body', $gameName);
+    /* A reserve getting a seat has just gone from "maybe" to "playing" — the
+     * same moment as signing up, so the same calendar links, when enabled. */
+    if ($gameId > 0) {
+        require_once __DIR__ . '/calendar.php';
+        $body .= calendar_email_block($gameId);
+    }
+    send_mail($playerEmail, t('ntf_promoted_subject', $gameName), $body);
 }
 
 /**
@@ -206,7 +213,7 @@ function notify_promoted($playerEmail, $gameName) {
  * @param string[] $emails    Voter emails + proposer email (may contain dups/blanks).
  * @param string   $gameName  The game the poll resolved into.
  */
-function notify_poll_concluded($emails, $gameName, $when = '') {
+function notify_poll_concluded($emails, $gameName, $when = '', $gameId = 0) {
     if (!notify_enabled()) return;
     /* WHEN, not just what. Somebody at a club running several events may have
      * voted in more than one poll, and "the game X is now scheduled" tells them
@@ -217,6 +224,14 @@ function notify_poll_concluded($emails, $gameName, $when = '') {
     $body = $when !== ''
         ? t('ntf_poll_body_when', $gameName, $when)
         : t('ntf_poll_body', $gameName);
+    /* The moment a poll resolves is exactly when somebody learns they are
+     * playing, so the calendar links belong here too — when the club has them
+     * switched on. calendar_email_block() answers '' otherwise, and a caller
+     * that passes no game id gets the email exactly as it always was. */
+    if ($gameId > 0) {
+        require_once __DIR__ . '/calendar.php';
+        $body .= calendar_email_block($gameId);
+    }
     foreach (array_unique(array_filter($emails)) as $to) {   // drop blanks, de-dup
         send_mail($to, t('ntf_poll_subject', $gameName), $body);
     }

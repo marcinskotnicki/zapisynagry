@@ -105,6 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         );
         notify_remember_choice(notify_flag_from_post($_POST));
+        /* The calendar links for a CONFIRMED seat only. A reserve is not playing
+         * yet, and "add this to your calendar" would say otherwise — they get the
+         * links instead if they are promoted, in the promotion email. */
+        if (!$isReserve) {
+            require_once __DIR__ . '/inc/calendar.php';
+            calendar_email_send($form['email'], $gameId, notify_flag_from_post($_POST));
+        }
         log_action('signup', $playerName . ' -> ' . $game['name'] . ($isReserve ? ' (reserve)' : '')
             . ($signedUpBy !== null ? ' (by ' . $signedUpBy . ')' : ''));
         // Remember the agreement so the next form starts ticked. Only after a
