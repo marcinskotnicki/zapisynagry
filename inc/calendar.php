@@ -187,6 +187,70 @@ function calendar_google_link($event) {
 }
 
 /**
+ * Do an event's days run on consecutive dates, with no day off in between?
+ *
+ * Decides between one Google entry for the whole event and one per day. A
+ * Friday-to-Sunday convention reads right as a single block; a league meeting
+ * on the 3rd and the 17th does NOT — spanning it would put a two-week block in
+ * somebody's calendar, which is what the single link used to do.
+ *
+ * By DATE, not by clock: an evening running 18:00-02:00 still belongs to its
+ * own date, so a Friday evening and a Saturday are consecutive days.
+ *
+ * @param array $days  event_days rows, in order.
+ * @return bool  True for a single day or an unbroken run.
+ */
+function calendar_days_consecutive($days) {
+    /* Dates compared as dates, in UTC. Local time would make the day a clock
+     * change falls on 23 or 25 hours long, and adding 86400 seconds would then
+     * land on the wrong date twice a year. */
+    $utc = new DateTimeZone('UTC');
+    for ($i = 1, $n = count($days); $i < $n; $i++) {
+        try {
+            $prev = new DateTimeImmutable((string)$days[$i - 1]['day_date'], $utc);
+        } catch (Exception $ex) {
+            return false;   // a day without a usable date: do not claim a run
+        }
+        if ($prev->modify('+1 day')->format('Y-m-d') !== (string)$days[$i]['day_date']) return false;
+    }
+    return true;
+}
+
+/**
+ * The Google "add this event" links for an event: ONE for a single day or an
+ * unbroken run of days, one PER DAY when there is a gap.
+ *
+ * @param array $event
+ * @return array  List of ['label' => string, 'url' => string]; label is '' for
+ *                the single whole-event link and a short date otherwise.
+ */
+function calendar_google_links($event) {
+    $days = event_days((int)$event['id']);
+    if (!$days) return [];
+    if (calendar_days_consecutive($days)) {
+        $one = calendar_google_link($event);
+        return $one !== '' ? [['label' => '', 'url' => $one]] : [];
+    }
+    $out = [];
+    foreach ($days as $day) {
+        $span = calendar_day_span($day);
+        if (!$span) continue;
+        $ts = strtotime((string)$day['day_date']);
+        $out[] = [
+            // "sb 3.10" — short enough that several fit on one footer line.
+            'label' => t('weekday_short_' . (int)date('w', $ts)) . ' ' . date('j.n', $ts),
+            'url'   => 'https://calendar.google.com/calendar/render?' . http_build_query([
+                'action'  => 'TEMPLATE',
+                'text'    => $event['name'],
+                'dates'   => $span[0]->format('Ymd\THis\Z') . '/' . $span[1]->format('Ymd\THis\Z'),
+                'details' => calendar_event_url($event, (int)$day['day_index']),
+            ]),
+        ];
+    }
+    return $out;
+}
+
+/**
  * A Google Calendar link that SUBSCRIBES to the whole feed.
  *
  * Google takes the feed's address in the cid parameter and re-reads it on its

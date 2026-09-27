@@ -111,12 +111,25 @@ if (function_exists('switcher_visible')) {
              back to the default event. Other pages set nothing, and get the
              site's current event. */ ?>
     <?php $calEvent = array_key_exists('footer_event', $GLOBALS) ? $GLOBALS['footer_event'] : current_event(); ?>
-    <?php $calGoogle = $calEvent ? calendar_google_link($calEvent) : ''; ?>
+    <?php /* One link for a single day or an unbroken run of days; one per day
+             when there is a gap — spanning a league night on the 3rd and the
+             17th would put a two-week block in somebody's calendar. */ ?>
+    <?php $calGoogle = $calEvent ? calendar_google_links($calEvent) : []; ?>
     <?php $calSub = calendar_google_subscribe_link(); ?>
     <nav class="footer-calendar">
         <span class="footer-calendar-label"><?= e(t('cal_label')) ?></span>
-        <?php if ($calGoogle !== ''): ?>
-            <a href="<?= e($calGoogle) ?>" target="_blank" rel="noopener"><?= e(t('cal_google_event')) ?></a>
+        <?php if (count($calGoogle) === 1 && $calGoogle[0]['label'] === ''): ?>
+            <a href="<?= e($calGoogle[0]['url']) ?>" target="_blank" rel="noopener"><?= e(t('cal_google_event')) ?></a>
+        <?php elseif ($calGoogle): ?>
+            <?php // "Add to Google Calendar: sb 3.10 · sb 17.10" — one per day. ?>
+            <span class="footer-calendar-days">
+                <?= e(t('cal_google_event')) ?>:
+                <?php foreach ($calGoogle as $calDay): ?>
+                    <a href="<?= e($calDay['url']) ?>" target="_blank" rel="noopener"><?= e($calDay['label']) ?></a>
+                <?php endforeach; ?>
+            </span>
+        <?php endif; ?>
+        <?php if ($calGoogle): ?>
             <a href="ical.php?event=<?= (int)$calEvent['id'] ?>"><?= e(t('cal_download_ics')) ?></a>
         <?php endif; ?>
         <?php if ($calSub !== ''): ?>

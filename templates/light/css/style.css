@@ -1618,3 +1618,6 @@ trix-toolbar .trix-button--dialog {
    somebody looking for "the file" recognises. */
 .game-cal-icon-ics { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
     border: 1px solid currentColor; height: 1.1rem; line-height: 1; }
+/* The per-day Google links, when an event's days have a gap between them. The
+   dates are spaced by margin for the same reason as the rest of this line. */
+.footer-calendar-days a { margin: 0 0.25rem; }
