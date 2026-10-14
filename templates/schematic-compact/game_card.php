@@ -87,7 +87,7 @@
                 <?php if ($canMsg): ?>
                     <a class="msg-icon msg-icon-all" href="message.php?game=<?= (int)$g['id'] ?>" title="<?= e(t('msgbtn_game_all')) ?>" aria-label="<?= e(t('msgbtn_game_all')) ?>">&#9993;</a>
                 <?php endif; ?>
-                <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): ?>
+                <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'], $g['brings_email'] ?? null)): ?>
                     <span class="sc-actions">
                         <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
                         <?php // Admin-only: move this game to another table on the same day.
@@ -185,7 +185,7 @@
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
                             <?php // Last, so the auto-margin parks it at the chip's right edge. ?>
-                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                                 <a class="sc-slot-x" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                         <?php else: ?>
@@ -209,7 +209,7 @@
                             <?php if ($canMsg && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
-                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                                 <a class="sc-slot-x" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                         </span>

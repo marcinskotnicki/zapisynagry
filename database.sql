@@ -76,6 +76,19 @@ INSERT INTO options (key, value) VALUES
     ('timeline_extension',    '3'),    -- hours added past the day's end on timeline
     ('login_days',            '365'),  -- how long logins persist (days); 0 = browser session only
     ('poll_default_deadline_hours', '48'),  -- default: polls close this many hours BEFORE the planned start
+    -- allow_poll_wait: offer "keep voting open until the deadline" when a poll
+    --   is created or edited. ON by default, so nothing changes until a club
+    --   decides otherwise. Switching it off stops NEW choices only: a poll that
+    --   already chose to wait keeps waiting, since changing the rules of a vote
+    --   while people are voting would surprise all of them.
+    ('allow_poll_wait',              '1'),
+    -- site_polls_enabled: the admin's own opinion polls ("which day suits you
+    --   best?"), shown on the front page. Nothing to do with the GAME polls —
+    --   those decide what is played at a table; these just ask the club
+    --   something. Off by default.
+    ('site_polls_enabled',           '0'),
+    -- site_polls_position: 'top' or 'bottom' of the front page.
+    ('site_polls_position',          'top'),
     -- poll_game_length_mode: how long an open poll is treated as running, both
     -- on the timeline block and for "next free slot" on its table (nobody
     -- knows the winning game yet, so this is always an estimate):
@@ -447,12 +460,26 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('site_url',                     ''),
     -- verification_method for editing/deleting unregistered-added content:
     --   'none'        = no check, anyone may proceed
-    --   'registered'  = must be logged in (no code/email)
+    --   'registered'  = logged-in users manage only their own entries; guest
+    --                   entries (nobody's own) are left to admins
     --   'email_code'  = 6-digit code emailed, must be entered
     --   'email_match' = retype original email, case-insensitive match
-    -- (Admins and the original logged-in owner always skip this. If no email
-    --  was stored on the item, the action is always free regardless of method.)
+    --   'admins'      = only admins may edit/delete anything (not even the
+    --                   owning account)
+    -- (Admins always skip this; the logged-in owner too, except under
+    --  'admins'. Under the email methods, an item with no email stored is
+    --  decided by noemail_edit_mode below.)
     ('verification_method',          'email_code'),
+    -- noemail_edit_mode: who may edit/delete a game, player sign-up or poll
+    -- that was added by a guest WITHOUT an email (so there is nothing to
+    -- verify against). Entries with an email, or tied to an account, are not
+    -- affected — they follow verification_method as before.
+    --   'everyone' = anyone may (the original behaviour)
+    --   'admins'   = only admins may (for e.g. primary-school events, where
+    --                children have no email and might delete each other's games)
+    -- Used only with the email methods; 'none', 'registered' and 'admins'
+    -- treat every guest entry alike, email or not.
+    ('noemail_edit_mode',            'everyone'),
     -- table_names_mode: who may set / edit the optional table names:
     --   'off'     = table names are not used at all
     --   'admin'   = only admins may set and edit them
@@ -1108,3 +1135,65 @@ CREATE INDEX idx_logs_event        ON logs(event_id);
 --  NOTE: no admin account is seeded here (never ship a default password). The
 --  install script / first-run flow is responsible for creating the first admin.
 -- =============================================================================
+
+
+-- =============================================================================
+--  site_polls — the admin's own opinion polls, shown on the front page.
+-- -----------------------------------------------------------------------------
+--  NOT the game polls (table `polls`), which belong to an event and turn into
+--  a game. These belong to no event, decide nothing, and simply ask the club a
+--  question. Kept in tables of their own so neither kind can be mistaken for the
+--  other in a query.
+-- =============================================================================
+CREATE TABLE site_polls (
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+    title                 TEXT NOT NULL,
+    -- 0 = runs until switched off; otherwise hours from creation.
+    length_hours          INTEGER NOT NULL DEFAULT 0,
+    -- Worked out once, when the poll is made: NULL for an unlimited poll.
+    -- UTC, like every other timestamp here.
+    ends_at               TEXT,
+    is_enabled            INTEGER NOT NULL DEFAULT 1,
+    show_results          INTEGER NOT NULL DEFAULT 0,  -- tallies visible before it ends
+    multi                 INTEGER NOT NULL DEFAULT 0,  -- checkboxes rather than radios
+    vote_login_only       INTEGER NOT NULL DEFAULT 0,
+    allow_custom          INTEGER NOT NULL DEFAULT 0,  -- voters may add an answer
+    custom_login_only     INTEGER NOT NULL DEFAULT 0,
+    custom_needs_approval INTEGER NOT NULL DEFAULT 0,
+    created_at            TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE site_poll_options (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    poll_id          INTEGER NOT NULL,
+    text             TEXT NOT NULL,
+    -- 0 = a voter's answer still waiting for an admin; shown nowhere public.
+    is_approved      INTEGER NOT NULL DEFAULT 1,
+    -- Who added it, when a voter did (NULL for the admin's own options).
+    added_by_user_id INTEGER,
+    added_by_ip      TEXT,
+    sort_order       INTEGER NOT NULL DEFAULT 0,
+    created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (poll_id)          REFERENCES site_polls(id) ON DELETE CASCADE,
+    FOREIGN KEY (added_by_user_id) REFERENCES users(id)      ON DELETE SET NULL
+);
+CREATE INDEX idx_site_poll_options_poll ON site_poll_options(poll_id);
+
+-- One row per choice. A single-answer poll holds at most one per voter; a
+-- multi-answer one, one per ticked option.
+CREATE TABLE site_poll_votes (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    poll_id    INTEGER NOT NULL,
+    option_id  INTEGER NOT NULL,
+    -- WHO voted: the account when logged in, otherwise the address the vote
+    -- came from. Exactly one is set. An address is a weak identity — several
+    -- people behind one router share it — which is why a poll can require an
+    -- account; see vote_login_only.
+    user_id    INTEGER,
+    voter_ip   TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (poll_id)   REFERENCES site_polls(id)        ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES site_poll_options(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id)   REFERENCES users(id)             ON DELETE SET NULL
+);
+CREATE INDEX idx_site_poll_votes_poll ON site_poll_votes(poll_id);

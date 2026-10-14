@@ -18,7 +18,7 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 // captcha_html()/captcha_verify(): the optional challenge on the step that
 // asks for a code. Loaded here because that step lives on this page.
 require __DIR__ . '/inc/captcha.php';
@@ -47,7 +47,7 @@ if ($purge) {
 } else {
     // Live event + active game only, and re-check the button rule server-side.
     if (!$event || (int)$event['is_archived'] === 1
-        || !verify_can_show_buttons($game['added_by_user_id'])) {
+        || !verify_can_show_buttons($game['added_by_user_id'], $game['brings_email'] ?? null)) {
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
     }
     $decision = verify_decision($game['added_by_user_id'], $game['brings_email']);

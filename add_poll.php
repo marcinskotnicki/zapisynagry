@@ -92,7 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $draft['allow_others']  = isset($_POST['allow_others']) ? 1 : 0;
     $draft['show_results']  = isset($_POST['show_results']) ? 1 : 0;
     $draft['others_library'] = isset($_POST['others_library']) ? 1 : 0;
-    $draft['wait_deadline'] = isset($_POST['wait_deadline']) ? 1 : 0;
+    // Honoured only while the club offers it — a hand-built POST cannot switch
+    // on something the form no longer shows.
+    $draft['wait_deadline'] = poll_wait_allowed() && isset($_POST['wait_deadline']) ? 1 : 0;
     $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
 
     if ($do === 'addgame') {

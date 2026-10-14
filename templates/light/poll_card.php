@@ -33,11 +33,10 @@ $canVote = !$readonly && can_signup();
     // "End voting now": the proposer's own account, or an admin. Accounts only —
     // guest-created polls just wait for their threshold or deadline.
     $uid = current_user()['id'] ?? 0;
-    $canEnd = !$readonly && is_logged_in()
-              && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
+    $canEnd = !$readonly && verify_can_end_poll($poll);
     // Editing and deleting follow the usual button rule (owner / admin /
     // verified guest), unlike ending which is account-only.
-    $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
+    $canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id'], $poll['proposer_email'] ?? null);
     $canMsgAll   = !$readonly && messaging_allowed();
     $canAddCand  = !$readonly && poll_can_add_candidate($poll);
     ?>

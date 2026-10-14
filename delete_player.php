@@ -15,7 +15,7 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 // captcha_html()/captcha_verify() for the optional challenge on the ask step.
 require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
@@ -40,7 +40,7 @@ if (!$game || !$event || (int)$event['is_archived'] === 1) {
 
 // Buttons shouldn't have been shown if this is true, but enforce server-side
 // (never trust that the UI hid the link).
-if (!verify_can_show_buttons($player['user_id'])) {
+if (!verify_can_show_buttons($player['user_id'], $player['email'] ?? null)) {
     redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 

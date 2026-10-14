@@ -65,6 +65,14 @@ if (chat_enabled() || opt_bool('allow_discussions')) {
           + ['chat' => 'tab_messages']
           + array_slice($tabs, $pos, null, true);
 }
+// Opinion polls: same condition as admin.php's whitelist, so the nav never
+// offers a tab the controller refuses.
+if (function_exists('site_polls_enabled') && site_polls_enabled()) {
+    $pos  = array_search('update', array_keys($tabs), true);
+    $tabs = array_slice($tabs, 0, $pos, true)
+          + ['site_polls' => 'tab_site_polls']
+          + array_slice($tabs, $pos, null, true);
+}
 if (club_shelf_enabled()) {
     $pos  = array_search('update', array_keys($tabs), true);
     $tabs = array_slice($tabs, 0, $pos, true)

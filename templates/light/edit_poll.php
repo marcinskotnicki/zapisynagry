@@ -138,13 +138,16 @@
             <p class="field-note"><?= e(t('poll_show_results_note')) ?></p>
         </div>
         <?php // Run to the deadline instead of ending on the first full candidate. ?>
-        <div class="field field-check field-wait_deadline">
-            <label>
-                <input type="checkbox" name="wait_deadline" value="1" <?= (int)($poll['wait_for_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
-                <?= e(t('poll_wait_deadline')) ?>
-            </label>
-            <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
-        </div>
+        <?php // Only while the club offers it (allow_poll_wait). ?>
+        <?php if (poll_wait_allowed()): ?>
+            <div class="field field-check field-wait_deadline">
+                <label>
+                    <input type="checkbox" name="wait_deadline" value="1" <?= (int)($poll['wait_for_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_wait_deadline')) ?>
+                </label>
+                <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
+            </div>
+        <?php endif; ?>
     </form>
 
     <?php // ---- Candidates ---------------------------------------------- ?>

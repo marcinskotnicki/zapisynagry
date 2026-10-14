@@ -26,7 +26,10 @@
  *  WHY THIS DESIGN: content added by people who weren't logged in has no account
  *  to tie ownership to, so the admin chooses how strangers prove they're the one
  *  who added it (retype the email, or a one-time emailed code), or whether to
- *  require login, or to allow anyone. Registered content is simply owner-only.
+ *  require login (then only your own entries), to allow anyone, or to leave
+ *  everything to admins. Guest content with no email has nothing to verify
+ *  against; noemail_edit_mode decides it under the two email methods.
+ *  Registered content is owner-only (admin-only under 'admins').
  * ============================================================================= */
 
 /* Wrong guesses allowed against one emailed code before it is thrown away.
@@ -46,22 +49,81 @@ function verify_uid() {
 }
 
 /**
- * Should the edit/delete buttons even be shown for this target?
- *   - admins: yes (anything)
- *   - unregistered-added content ($ownerUserId === null): yes for everyone — the
- *     buttons are visible, but the *action* is still gated by verify_decision().
- *   - registered-added content: only the owner.
+ * The verification methods the admin can pick, in dropdown order.
+ *   'none'        anyone may edit/delete guest-added content
+ *   'registered'  logged-in users manage only their OWN entries; guest-added
+ *                 content (nobody's own) is left to admins
+ *   'email_code'  a one-time code is emailed to the stored address
+ *   'email_match' the stored email must be retyped
+ *   'admins'      only admins — not even the owning account may
+ * @return string[]
+ */
+function verify_methods() {
+    return ['none', 'registered', 'email_code', 'email_match', 'admins'];
+}
+
+/**
+ * Does the "entries without an email" dropdown (noemail_edit_mode) apply
+ * under the current verification method?
  *
- * This governs VISIBILITY only; it never authorises the action by itself.
- *
- * @param int|null $ownerUserId
+ * Only under the two EMAIL methods — the only ones where an email matters.
+ * The others treat every guest entry alike, email or not:
+ *   'none'       — all open; locking the email-less ones would protect them
+ *                  BETTER than the ones whose owner left an address;
+ *   'registered' — guest entries belong to nobody's account, so admin-only;
+ *   'admins'     — everything is admin-only.
  * @return bool
  */
-function verify_can_show_buttons($ownerUserId) {
-    if (is_admin()) return true;
-    if ($ownerUserId === null) return true;
-    $uid = verify_uid();
-    return $uid !== null && (int)$ownerUserId === (int)$uid;
+function verify_noemail_applies() {
+    return in_array(opt('verification_method'), ['email_code', 'email_match'], true);
+}
+
+/**
+ * Are guest entries without an email restricted to admins (effective value)?
+ * @return bool
+ */
+function verify_noemail_admins_only() {
+    return verify_noemail_applies() && opt('noemail_edit_mode') === 'admins';
+}
+
+/**
+ * Is this (guest-added) target locked because it has no email and the admin
+ * restricted such entries to admins? Callers check the owner first: entries
+ * tied to an account are never affected.
+ *
+ * @param string|null $email
+ * @return bool
+ */
+function verify_noemail_locked($email) {
+    return verify_email_blank($email) && verify_noemail_admins_only();
+}
+
+/** @return bool  No usable email stored (NULL, '' or whitespace). */
+function verify_email_blank($email) {
+    return $email === null || trim((string)$email) === '';
+}
+
+/**
+ * Should the edit/delete buttons even be shown for this target?
+ *
+ * Shown exactly when verify_decision() would not refuse outright — so a
+ * button never leads to a silent bounce. A challenge ('email_code' /
+ * 'email_match') still shows the button: the challenge is behind it.
+ *
+ * $email === false means the caller didn't pass the stored email; then an
+ * email-blind approximation is used (an email-less guest entry is assumed to
+ * have one, so the no-email lock is not applied). Every card passes it today;
+ * the fallback is for safety only.
+ *
+ * This governs VISIBILITY only; it never authorises the action by itself —
+ * every controller re-checks verify_decision().
+ *
+ * @param int|null          $ownerUserId
+ * @param string|null|false $email
+ * @return bool
+ */
+function verify_can_show_buttons($ownerUserId, $email = false) {
+    return verify_decision($ownerUserId, $email === false ? '?' : $email) !== 'deny';
 }
 
 /**
@@ -69,9 +131,15 @@ function verify_can_show_buttons($ownerUserId) {
  *
  * Order of reasoning:
  *   1. Admins do anything.
- *   2. Registered-added content -> owner only (no challenge), everyone else denied.
- *   3. Unregistered-added content -> follow the admin's verification_method,
- *      but if there's no email stored there's nothing to verify against, so allow.
+ *   2. 'admins' method: nobody else — not even the owning account.
+ *   3. Registered-added content -> its owner only (no challenge), everyone
+ *      else denied.
+ *   4. Unregistered-added (guest) content, by method:
+ *        'none'       -> allowed to anyone (whatever the email);
+ *        'registered' -> denied: it is nobody's own, so it is left to admins;
+ *        email methods: with NO email there's nothing to verify against, so
+ *          noemail_edit_mode decides ('everyone' allows, 'admins' denies);
+ *          with an email, the method's challenge.
  *
  * @param int|null    $ownerUserId
  * @param string|null $email
@@ -80,19 +148,39 @@ function verify_can_show_buttons($ownerUserId) {
 function verify_decision($ownerUserId, $email) {
     if (is_admin()) return 'allow';
 
+    $method = opt('verification_method');
+    if ($method === 'admins') return 'deny';           // not even the owner
+
     // Registered-added content: only the owner, no challenge; nobody else.
     if ($ownerUserId !== null) {
-        return ((int)$ownerUserId === (int)verify_uid()) ? 'allow' : 'deny';
+        $uid = verify_uid();
+        return ($uid !== null && (int)$ownerUserId === (int)$uid) ? 'allow' : 'deny';
     }
 
     // Unregistered-added content: governed by the admin's verification method.
-    $method = opt('verification_method');
-    if ($method === 'none')                return 'allow';
-    if ($email === null || $email === '')  return 'allow';   // nothing to verify against
-    if ($method === 'registered')          return is_logged_in() ? 'allow' : 'deny';
-    if ($method === 'email_code')          return 'email_code';
-    if ($method === 'email_match')         return 'email_match';
+    if ($method === 'none')          return 'allow';
+    if ($method === 'registered')    return 'deny';    // only your OWN entries
+    if (verify_email_blank($email))  return verify_noemail_admins_only() ? 'deny' : 'allow';
+    if ($method === 'email_code')    return 'email_code';
+    if ($method === 'email_match')   return 'email_match';
     return 'allow';   // unknown/blank method -> permissive default
+}
+
+/**
+ * May the current visitor end this poll's voting early?
+ *
+ * Account-only by design: the proposer's own account, or an admin. Under the
+ * 'admins' method the proposer loses it too, like every other change.
+ *
+ * @param array $poll  A polls row.
+ * @return bool
+ */
+function verify_can_end_poll($poll) {
+    if (is_admin()) return true;
+    if (opt('verification_method') === 'admins') return false;
+    $uid = verify_uid();
+    return $uid !== null && (int)($poll['proposer_user_id'] ?? 0) !== 0
+        && (int)$poll['proposer_user_id'] === (int)$uid;
 }
 
 /* ---- email_match --------------------------------------------------------- *

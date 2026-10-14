@@ -14,7 +14,7 @@ require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/bgg.php';
 require __DIR__ . '/inc/polls.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 require __DIR__ . '/inc/notify.php';
 
 /* ---- Target: an EXISTING poll (live edit) or the in-progress draft --------

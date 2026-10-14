@@ -22,7 +22,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/notify.php';
 
@@ -36,7 +36,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 
 // Live event only, and the same button rule the poll card uses.
 if (!$event || (int)$event['is_archived'] === 1
-    || !verify_can_show_buttons($poll['proposer_user_id'])) {
+    || !verify_can_show_buttons($poll['proposer_user_id'], $poll['proposer_email'] ?? null)) {
     redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
@@ -202,7 +202,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // already full means the threshold now applies, which the resolve
             // check below acts on.
             $waitDeadline = isset($_POST['wait_deadline']) ? 1 : 0;
-            if ($waitDeadline !== (int)($poll['wait_for_deadline'] ?? 0)) {
+            /* Only while the box is on the form. With the option off it is not
+             * rendered, so it is never in the POST — and reading that as
+             * "unticked" would quietly stop an existing poll from waiting the
+             * next time anybody corrected its title. */
+            if (poll_wait_allowed() && $waitDeadline !== (int)($poll['wait_for_deadline'] ?? 0)) {
                 db_run('UPDATE polls SET wait_for_deadline = ? WHERE id = ?', [$waitDeadline, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' wait_for_deadline -> ' . $waitDeadline);
                 notify_poll_changed($poll, $waitDeadline

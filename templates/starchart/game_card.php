@@ -63,7 +63,7 @@
     ?>
     <article class="game-card" id="game-<?= (int)$g['id'] ?>">
         <div class="gc-info">
-            <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'])): // the classic top tabs ?>
+            <?php if (!$readonly && verify_can_show_buttons($g['added_by_user_id'], $g['brings_email'] ?? null)): // the classic top tabs ?>
                 <div class="gc-tabs">
                     <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                     <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
@@ -174,7 +174,7 @@
                         <?php if ($canMsg && !empty($p['email'])): ?>
                             <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                         <?php endif; ?>
-                        <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                        <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                             <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>" rel="nofollow"><?= e(t('resign')) ?></a>
                         <?php endif; ?>
                     </div>
@@ -204,7 +204,7 @@
                     <?php if ($canMsg && !empty($p['email'])): ?>
                         <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                     <?php endif; ?>
-                    <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                    <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                         <a class="gc-resign" href="delete_player.php?player=<?= (int)$p['id'] ?>" rel="nofollow"><?= e(t('resign')) ?></a>
                     <?php endif; ?>
                 </div>

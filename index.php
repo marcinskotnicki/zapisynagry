@@ -11,11 +11,12 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
+require_once __DIR__ . '/inc/sitepolls.php';   // the admin's opinion polls
 require __DIR__ . '/inc/mailing.php';   // the signup box under the timeline
 require __DIR__ . '/inc/captcha.php';   // ...which renders a captcha when one is required
 require __DIR__ . '/inc/polls.php';    // poll_resolve_expired() below (events.php only
                                        // loads it lazily, inside event_tables_full)
-require __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards
+require_once __DIR__ . '/inc/verify.php';   // verify_can_show_buttons() used inside the game cards
 require __DIR__ . '/inc/notify.php';   // a deadline resolution sends the conclusion email
 
 // POOR MAN'S CRON: shared hosting has no scheduler, so expired poll deadlines
@@ -90,11 +91,17 @@ if (home_event_list_enabled()
      * back to the site's default event, which is not the one being looked at. */
     $GLOBALS['footer_event'] = null;
     tpl_render('header', ['page_title' => t('app_name')]);
+    /* The admin's opinion polls, at the top or the bottom of the page — on this
+     * landing list as well as on an event, since this is the front page too. */
+    $spBack = 'index.php' . (($_SERVER['QUERY_STRING'] ?? '') !== '' ? '?' . $_SERVER['QUERY_STRING'] : '');
+    $spHtml = tpl_capture('site_polls', ['back' => $spBack]);
+    if (site_polls_position() === 'top') echo $spHtml;
     tpl_render('front_event_list', [
         'events' => $evListRows,
         'stats'  => $evStats,
         'by_day' => $evByDay,
     ]);
+    if (site_polls_position() === 'bottom') echo $spHtml;
     tpl_render('footer');
     exit;
 }
@@ -102,7 +109,12 @@ if (home_event_list_enabled()
 // No event at all yet -> the simple placeholder (prompt admin to create one).
 if (!$event) {
     tpl_render('header', ['page_title' => t('app_name')]);
+    /* Still the front page, so the admin's polls appear here too — a club
+     * between events is exactly when "which date suits you?" gets asked. */
+    $spHtml = tpl_capture('site_polls', ['back' => 'index.php']);
+    if (site_polls_position() === 'top') echo $spHtml;
     tpl_render('front_placeholder', ['event' => null]);
+    if (site_polls_position() === 'bottom') echo $spHtml;
     tpl_render('footer');
     exit;
 }
@@ -245,6 +257,14 @@ tpl_render('header', ['page_title' => $event['name']]);
 // the event the page landed on always has a tab. Only assembled when the
 // feature is on, so the usual single-event install pays nothing for it.
 $eventTabs = public_archives_enabled() ? events_active() : [];
+
+/* The admin's opinion polls. TOP: above the event. BOTTOM: after the timeline,
+ * so they are genuinely last rather than wedged between the tables and the
+ * timeline below them. */
+$spBack = 'index.php' . (($_SERVER['QUERY_STRING'] ?? '') !== '' ? '?' . $_SERVER['QUERY_STRING'] : '');
+$spHtml = tpl_capture('site_polls', ['back' => $spBack]);
+if (site_polls_position() === 'top') echo $spHtml;
+if (site_polls_position() === 'bottom') $timelineHtml = (string)$timelineHtml . $spHtml;
 
 tpl_render('front_event', [
     'event_tabs'  => $eventTabs,

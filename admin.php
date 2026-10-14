@@ -57,6 +57,10 @@ if (chat_enabled() || opt_bool('allow_discussions')) $TABS[] = 'chat';
 // than merely hidden, so ?tab=club_shelf on a site with it switched off falls
 // through instead of rendering a manager for a feature that is not running.
 if (club_shelf_enabled()) $TABS[] = 'club_shelf';
+/* The admin's opinion polls — only while the feature is on. Loaded here because
+ * site_polls_enabled() lives with the rest of that feature. */
+require_once __DIR__ . '/inc/sitepolls.php';
+if (site_polls_enabled()) $TABS[] = 'site_polls';
 $TABS[] = 'update';   // appended after the optional tabs so it stays last
 /* Help is ALWAYS in the whitelist, even when 'show_help_tab' is off. That option
  * removes the nav link only — see admin_shell.php. Deliberately unlike chat and

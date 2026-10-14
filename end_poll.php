@@ -13,6 +13,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
 require __DIR__ . '/inc/polls.php';
+require_once __DIR__ . '/inc/verify.php';   // verify_can_end_poll()
 require __DIR__ . '/inc/notify.php';   // resolution sends the conclusion email
 require_login();                       // proposer/admin are accounts by definition
 
@@ -25,10 +26,8 @@ $day   = db_one('SELECT day_index, event_id FROM event_days WHERE id = ?', [$pol
 $activeDay = (int)($day['day_index'] ?? 1);
 
 // Live event only, and only the proposer's own account or an admin.
-$u = current_user();
-$isOwner = ((int)$poll['proposer_user_id'] !== 0
-            && (int)$poll['proposer_user_id'] === (int)$u['id']);
-if (!$event || (int)$event['is_archived'] === 1 || (!$isOwner && !is_admin())) {
+// (verify_can_end_poll: under the 'admins' verification method, admins only.)
+if (!$event || (int)$event['is_archived'] === 1 || !verify_can_end_poll($poll)) {
     redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 

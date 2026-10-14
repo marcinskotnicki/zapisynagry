@@ -24,9 +24,8 @@
 // "end voting now" rule in particular is ACCOUNT-ONLY (a verified guest may
 // edit and delete but not force a resolve), which is easy to get subtly wrong.
 $uid = current_user()['id'] ?? 0;
-$canEnd = !$readonly && is_logged_in()
-          && (((int)$poll['proposer_user_id'] === (int)$uid && $uid) || is_admin());
-$canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id']);
+$canEnd = !$readonly && verify_can_end_poll($poll);
+$canEditPoll = !$readonly && verify_can_show_buttons($poll['proposer_user_id'], $poll['proposer_email'] ?? null);
 $canMsgAll   = !$readonly && messaging_allowed();
 $canAddCand  = !$readonly && poll_can_add_candidate($poll);
 // THE COLOUR KEY comes from the table NUMBER, not its row id. Two reasons:

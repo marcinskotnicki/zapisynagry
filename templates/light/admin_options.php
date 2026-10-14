@@ -148,7 +148,24 @@ $groupEnd = function () { echo '</div></details>'; };
         $textarea('game_languages');              // one dropdown choice per line
         $toggle('allow_polls');
         $text('poll_default_deadline_hours', 'number');   // polls close N hours before start
+        $toggle('allow_poll_wait');   // offer "keep voting open until the deadline"
         ?>
+        <p class="field-note"><?= e(t('opt_allow_poll_wait_note')) ?></p>
+
+        <?php /* The admin's OWN opinion polls — a separate thing from the game
+                 polls above, which belong to an event and become a game. These
+                 just ask the club a question. Placed here because "polls" is
+                 where an admin looks, with a note saying how they differ. */ ?>
+        <?php $toggle('site_polls_enabled'); ?>
+        <p class="field-note"><?= e(t('opt_site_polls_enabled_note')) ?></p>
+        <div class="field">
+            <label for="site_polls_position"><?= e(t('opt_site_polls_position')) ?></label>
+            <select id="site_polls_position" name="site_polls_position">
+                <?php foreach (['top', 'bottom'] as $spPos): ?>
+                    <option value="<?= $spPos ?>"<?= site_polls_position() === $spPos ? ' selected' : '' ?>><?= e(t('opt_site_polls_position_' . $spPos)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
         <?php // How long an OPEN poll is treated as running, on the timeline and for
               // "next free slot" on its table — nobody knows the winner yet, so this
               // is always an estimate. See poll_length_minutes(). ?>
@@ -188,12 +205,26 @@ $groupEnd = function () { echo '</div></details>'; };
         <div class="field">
             <label for="verification_method"><?= e(t('opt_verification_method')) ?></label>
             <select id="verification_method" name="verification_method">
-                <?php foreach (['none', 'registered', 'email_code', 'email_match'] as $m): ?>
+                <?php foreach (verify_methods() as $m): ?>
                     <option value="<?= e($m) ?>"<?= opt('verification_method') === $m ? ' selected' : '' ?>>
                         <?= e(t('opt_verification_' . $m)) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+            <p class="field-note"><?= e(t('opt_verification_note')) ?></p>
+        </div>
+        <?php // Guest entries with no email have nothing to verify against;
+              // this decides whether anyone or only admins may touch them. ?>
+        <div class="field">
+            <label for="noemail_edit_mode"><?= e(t('opt_noemail_edit_mode')) ?></label>
+            <select id="noemail_edit_mode" name="noemail_edit_mode">
+                <?php foreach (['everyone', 'admins'] as $m): ?>
+                    <option value="<?= e($m) ?>"<?= (opt('noemail_edit_mode') ?: 'everyone') === $m ? ' selected' : '' ?>>
+                        <?= e(t('opt_noemail_edit_' . $m)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_noemail_edit_note')) ?></p>
         </div>
         <?php
         $toggle('allow_custom_game_links');

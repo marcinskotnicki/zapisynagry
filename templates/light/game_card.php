@@ -46,7 +46,7 @@
         // (the column was mostly empty air under the image). The column renders
         // whenever there is an image OR buttons — so a manual game without a
         // thumbnail still gets its controls.
-        $canButtons = !$readonly && verify_can_show_buttons($g['added_by_user_id']);
+        $canButtons = !$readonly && verify_can_show_buttons($g['added_by_user_id'], $g['brings_email'] ?? null);
         /* The calendar icons live in this column too, and are for EVERYONE — so
          * a game with no picture, seen by somebody who cannot edit it, still
          * needs the column to exist to show them. Computed once and reused. */
@@ -118,7 +118,7 @@
                                 <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): // message this player ?>
                                     <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                                 <?php endif; ?>
-                                <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): // remove this signup ?>
+                                <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): // remove this signup ?>
                                     <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                                 <?php endif; ?>
                                 <?php /* "Signed up by X" — see player_signed_up_by() for which

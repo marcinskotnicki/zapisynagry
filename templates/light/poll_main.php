@@ -139,13 +139,16 @@
               // anything — poll_check_resolve() ignores it without one, so the
               // note spells that out rather than letting someone create a poll
               // that quietly can't finish. ?>
-        <div class="field field-check field-wait_deadline">
-            <label>
-                <input type="checkbox" name="wait_deadline" value="1" <?= (int)($draft['wait_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
-                <?= e(t('poll_wait_deadline')) ?>
-            </label>
-            <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
-        </div>
+        <?php // Only while the club offers it (allow_poll_wait). ?>
+        <?php if (poll_wait_allowed()): ?>
+            <div class="field field-check field-wait_deadline">
+                <label>
+                    <input type="checkbox" name="wait_deadline" value="1" <?= (int)($draft['wait_deadline'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_wait_deadline')) ?>
+                </label>
+                <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
+            </div>
+        <?php endif; ?>
 
         <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
             <div class="field field-check field-require_email">

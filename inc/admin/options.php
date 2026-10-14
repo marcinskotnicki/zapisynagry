@@ -24,6 +24,8 @@ require_once __DIR__ . '/../events.php';    // day_tab_formats(), for the tab-la
 require_once __DIR__ . '/../htaccess.php'; // the managed HTTPS-redirect block
 require_once __DIR__ . '/../polls.php';    // poll_game_length_modes(), for that select
 require_once __DIR__ . '/../notify.php';   // notify_modes(), for the notifications one
+require_once __DIR__ . '/../sitepolls.php'; // site_polls_position(), for where the polls go
+require_once __DIR__ . '/../verify.php';    // verify_methods(), for the verification select
 
 // Which keys are plain values vs on/off toggles. Adding a setting later means
 // adding it here (+ a label in the language files + a field in the template).
@@ -48,7 +50,7 @@ $OPTION_VALUES = [
     'poll_default_deadline_hours', 'poll_game_length_mode', 'login_days',
     'default_event_name', 'default_start_time', 'default_end_time',
     'default_language', 'default_template', 'registration_mode',
-    'verification_method', 'table_names_mode', 'require_email', 'header_button_style',
+    'verification_method', 'noemail_edit_mode', 'table_names_mode', 'require_email', 'header_button_style',
     'timezone',            // the venue's clock; validated below
     'email_subject_prefix',// 'venue' | 'event'; validated below
     'mailing_gdpr_text',   // '' means "don't ask for consent at all"
@@ -73,6 +75,7 @@ $OPTION_VALUES = [
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
     'chat_send_delay',
     'notify_mode',   // always|never|user_yes|user_no; validated below
+    'site_polls_position',   // top|bottom; validated below
     'archive_per_page', 'admin_per_page', 'auto_archive_days', 'library_per_page',
     'default_location_name', 'default_location_address',
     'event_description_mode',
@@ -114,7 +117,7 @@ unset($__oLang);
 
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
-    'allow_polls', 'allow_discussions',
+    'allow_polls', 'allow_poll_wait', 'site_polls_enabled', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'mailing_list', 'antibot_honeypot',
@@ -306,6 +309,9 @@ function option_sanitize($key, $val) {
         case 'event_description_mode':
             if (!in_array($val, event_description_modes(), true)) return null;
             break;
+        case 'site_polls_position':
+            if (!in_array($val, ['top', 'bottom'], true)) return null;
+            break;
         case 'notify_mode':
             if (!in_array($val, notify_modes(), true)) return null;
             break;
@@ -348,7 +354,11 @@ function option_sanitize($key, $val) {
             break;
         case 'verification_method':
             // Whitelist of the verification tree's method names.
-            if (!in_array($val, ['none', 'registered', 'email_code', 'email_match'], true)) return null;
+            if (!in_array($val, verify_methods(), true)) return null;
+            break;
+        case 'noemail_edit_mode':
+            // Who may edit/delete guest entries left without an email.
+            if (!in_array($val, ['everyone', 'admins'], true)) return null;
             break;
         case 'table_names_mode':
             // Whitelist of the table-name permission modes.

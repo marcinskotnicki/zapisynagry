@@ -19,7 +19,7 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 // captcha_html()/captcha_verify() for the optional challenge on the ask step.
 require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
@@ -36,7 +36,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 // Live event only, and re-check the button rule server-side (the card only
 // HIDES the button — the guard has to live here).
 if (!$event || (int)$event['is_archived'] === 1
-    || !verify_can_show_buttons($poll['proposer_user_id'])) {
+    || !verify_can_show_buttons($poll['proposer_user_id'], $poll['proposer_email'] ?? null)) {
     redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 

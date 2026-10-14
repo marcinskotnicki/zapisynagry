@@ -268,11 +268,16 @@ function poll_resolve_candidate($poll, $cand) {
  * @return bool
  */
 function poll_optin_relevant($poll = null) {
-    if (opt('verification_method') === 'none') return false;
+    require_once __DIR__ . '/verify.php';   // verify_noemail_admins_only()
+    $method = opt('verification_method');
+    if ($method === 'none')   return false;   // everyone may already
+    if ($method === 'admins' || $method === 'registered') return true;   // strangers never may
+    // An ownerless poll with no email has nothing to verify against: open to
+    // all, unless the admin locked such entries (noemail_edit_mode).
     if ($poll !== null
         && ($poll['proposer_user_id'] === null || $poll['proposer_user_id'] === '')
-        && empty($poll['proposer_email'])) {
-        return false;   // ownerless: nothing to verify against
+        && verify_email_blank($poll['proposer_email'] ?? null)) {
+        return verify_noemail_admins_only();
     }
     return true;
 }
@@ -341,6 +346,19 @@ function poll_can_restrict_to_library($poll, $userId) {
  * @param array $poll  A polls row.
  * @return bool
  */
+/**
+ * May a poll be set to keep voting open until its deadline?
+ *
+ * When off, the option is simply not offered — on the new-poll form or the edit
+ * form. Polls that already chose to wait are left alone; see allow_poll_wait
+ * in database.sql for why.
+ *
+ * @return bool
+ */
+function poll_wait_allowed() {
+    return opt_bool('allow_poll_wait');
+}
+
 function poll_can_manage($poll) {
     require_once __DIR__ . '/verify.php';   // verify_decision()
     if (verify_decision($poll['proposer_user_id'], $poll['proposer_email']) === 'allow') return true;

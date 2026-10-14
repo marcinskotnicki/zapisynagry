@@ -1642,3 +1642,39 @@ trix-toolbar .trix-button--dialog {
 /* The per-day Google links, when an event's days have a gap between them. The
    dates are spaced by margin for the same reason as the rest of this line. */
 .footer-calendar-days a { margin: 0 0.25rem; }
+
+/* =============================================================================
+ *  THE CLUB'S OWN POLLS (front page + admin tab)
+ * -------------------------------------------------------------------------- */
+.site-polls { max-width: var(--maxw, 72rem); margin: 1rem auto; }
+.site-poll { margin-bottom: 1rem; }
+.site-poll-title { margin: 0 0 0.6rem; }
+.sp-option { margin: 0.45rem 0; }
+.sp-option label { display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; }
+.sp-custom input[type="text"] { display: block; margin: 0.3rem 0 0 1.6rem; max-width: 22rem; width: calc(100% - 1.6rem); }
+.sp-status { font-style: italic; opacity: 0.8; }
+
+/* A bar per answer, its length the share of all votes cast. The track is drawn
+   in the text colour at low opacity, so it shows on dark themes and light ones
+   alike without a theme having to know these exist. */
+.sp-result { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.2rem; }
+.sp-bar { flex: 1 1 auto; max-width: 22rem; height: 0.55rem; border-radius: 999px;
+    background: rgba(127, 127, 127, 0.22); overflow: hidden; }
+.sp-bar > span { display: block; height: 100%; background: var(--primary); border-radius: inherit; }
+.sp-count { font-size: 0.85rem; opacity: 0.85; white-space: nowrap; }
+
+/* THE WINNER, once the poll has ended — bolder, and its bar in the success
+   colour. Every tied answer is marked: a tie is a real result. */
+.sp-option-winner .sp-option-text { font-weight: 700; }
+.sp-winner .sp-bar > span { background: var(--success, #2e9e57); }
+.sp-option-winner { padding-left: 0.5rem; border-left: 3px solid var(--success, #2e9e57); }
+
+/* Admin */
+.sp-new > summary { list-style: none; display: inline-block; cursor: pointer; }
+.sp-new > summary::-webkit-details-marker { display: none; }
+.sp-new[open] > summary { margin-bottom: 0.8rem; }
+.sp-custom-opts { margin-left: 1.6rem; }
+.sp-row-off { opacity: 0.6; }
+.sp-pending { background: rgba(230, 160, 0, 0.12); }
+.sp-settings { padding-left: 1.2rem; }
+.sp-add-option, .sp-delete-poll { margin-top: 1rem; }

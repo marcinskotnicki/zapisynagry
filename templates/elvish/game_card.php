@@ -46,7 +46,7 @@
 <?php else: ?>
     <?php
     $bucket     = weight_bucket($g['weight']);
-    $canButtons = !$readonly && verify_can_show_buttons($g['added_by_user_id']);
+    $canButtons = !$readonly && verify_can_show_buttons($g['added_by_user_id'], $g['brings_email'] ?? null);
     // Confirmed vs reserve, counted once: the vine below needs the confirmed
     // count to know how many buds to draw, and the signup label needs it to
     // know whether it is offering a seat or a place on the reserve list.
@@ -125,7 +125,7 @@
                             <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
-                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                                 <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                             <?php $signedBy = player_signed_up_by($p);
@@ -147,7 +147,7 @@
                             <?php if (!$readonly && messaging_allowed() && !empty($p['email'])): ?>
                                 <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
-                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'])): ?>
+                            <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
                                 <a class="player-del" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                         </li>

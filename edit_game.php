@@ -19,7 +19,7 @@
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/events.php';
-require __DIR__ . '/inc/verify.php';
+require_once __DIR__ . '/inc/verify.php';
 require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
@@ -35,7 +35,7 @@ $activeDay = (int)($day['day_index'] ?? 1);
 
 // Only active games on the live event are editable (also re-checks the button rule).
 if (!$event || (int)$event['is_archived'] === 1 || (int)$game['is_archived'] === 1
-    || !verify_can_show_buttons($game['added_by_user_id'])) {
+    || !verify_can_show_buttons($game['added_by_user_id'], $game['brings_email'] ?? null)) {
     redirect(front_url($activeDay, (int)($day['event_id'] ?? 0)));
 }
 
