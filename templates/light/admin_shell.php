@@ -79,9 +79,13 @@ if (club_shelf_enabled()) {
           + ['club_shelf' => 'tab_club_shelf']
           + array_slice($tabs, $pos, null, true);
 }
+// A moderator's panel is the Messages tab and nothing else.
+if (!empty($mod_only)) {
+    $tabs = ['chat' => 'tab_messages'];
+}
 ?>
 <div class="admin">
-    <h1><?= e(t('admin_panel')) ?></h1>
+    <h1><?= e(t(!empty($mod_only) ? 'mod_panel' : 'admin_panel')) ?></h1>
 
     <?php /* THE DATABASE IS DOWNLOADABLE. Shown on every admin screen and not
            * dismissable, because it means every password hash and email address

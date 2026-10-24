@@ -1678,3 +1678,37 @@ trix-toolbar .trix-button--dialog {
 .sp-pending { background: rgba(230, 160, 0, 0.12); }
 .sp-settings { padding-left: 1.2rem; }
 .sp-add-option, .sp-delete-poll { margin-top: 1rem; }
+
+/* New event: the "copy from an existing event" picker sits above the form,
+   set apart so it reads as its own step rather than one more field. */
+.newevent-copy {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.newevent-copy select { margin-bottom: .4rem; }
+
+/* "New messages" marker on the chat button. Sits on the button's outer top
+   corner so it never covers the icon. A fixed red rather than a theme colour:
+   it is a notification and has to stand out against every theme's button,
+   including the ones whose primary colour is already red. The ring in the
+   page's background colour separates it from the button underneath. */
+.chat-badge {
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: #d32f2f;
+    color: #fff;
+    font: 700 11px/18px system-ui, sans-serif;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--bg, #fff);
+    pointer-events: none;   /* clicks belong to the button */
+}
+/* 'dot' mode: no text, so a plain round marker. */
+.chat-badge:empty { min-width: 12px; width: 12px; height: 12px; padding: 0; top: -4px; right: -5px; }
+.chat-badge[hidden] { display: none; }

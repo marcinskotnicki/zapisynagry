@@ -2,7 +2,7 @@
 /* =============================================================================
  *  delete_comment.php — remove one comment from a discussion.
  * -----------------------------------------------------------------------------
- *  WHO: comment_can_manage() — an admin on any comment, and a member on one they
+ *  WHO: comment_can_delete() — an admin or moderator on any comment, and a member on one they
  *  wrote while logged in. That second half is why this is no longer admin-only:
  *  fixing your own remark should not need finding an admin.
  *
@@ -45,7 +45,8 @@ if ($kind === 'poll') {
 if (!$row) redirect('index.php');
 
 // Now the row is known, so the question can be asked.
-if (!comment_can_manage($row)) redirect('index.php');
+// comment_can_delete(): the managers, plus moderators (delete only).
+if (!comment_can_delete($row)) redirect('index.php');
 
 db_run($kind === 'poll'
         ? 'DELETE FROM poll_comments WHERE id = ?'

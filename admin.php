@@ -13,7 +13,13 @@
  *  ever be included — a stray "../../etc" can't reach the require below.
  * ============================================================================= */
 require __DIR__ . '/inc/bootstrap.php';
-require_admin();                       // everything here is admin-only
+/* Admins get the whole panel. MODERATORS get exactly one tab — Messages,
+ * where chat lines and comments are deleted — and only while there is
+ * something there to moderate. Everybody else is refused by require_admin()
+ * as before. */
+$MOD_ONLY = !is_admin() && is_moderator()
+         && (chat_enabled() || opt_bool('allow_discussions'));
+if (!$MOD_ONLY) require_admin();
 
 /* mailing_enabled() is needed below, to decide whether the Mailing tab exists
  * at all — but inc/mailing.php is not bootstrapped globally (see its own
@@ -69,6 +75,8 @@ $TABS[] = 'update';   // appended after the optional tabs so it stays last
  * who hid the link (or followed one from elsewhere) should still reach it. */
 $TABS[] = 'help';
 
+if ($MOD_ONLY) $TABS = ['chat'];   // a moderator's whole panel
+
 $tab = $_GET['tab'] ?? $TABS[0];
 if (!in_array($tab, $TABS, true)) $tab = $TABS[0];   // unknown tab -> the default one
 
@@ -89,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require __DIR__ . '/inc/admin/' . $tab . '.php';
 
 // Frame it in the admin shell (tab nav + flash + body).
-tpl_render('header', ['page_title' => t('admin_panel')]);
+tpl_render('header', ['page_title' => t($MOD_ONLY ? 'mod_panel' : 'admin_panel')]);
 tpl_render('admin_shell', [
     'active_tab' => $tab,
     'tab_body'   => $tab_body,
@@ -99,7 +107,8 @@ tpl_render('admin_shell', [
      * it must not run on every admin page load. Cached as a timestamp + state
      * rather than a bare flag, so a fixed install stops warning by itself on
      * the next check rather than needing anything cleared. */
-    'db_exposed' => db_exposure_is_exposed(),
+    'db_exposed' => !$MOD_ONLY && db_exposure_is_exposed(),   // admins' business
+    'mod_only'   => $MOD_ONLY,
     // A tab controller sets $needs_editor when its screen contains a rich-text
     // field, so the editor's assets load only where they are used.
     'needs_editor' => !empty($needs_editor),

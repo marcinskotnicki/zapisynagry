@@ -20,6 +20,12 @@
  *    $error    — message above the form, or null.
  *    $current  — the live event row, or null. When present, screen 1 shows a
  *                rename form for it above the create-event form.
+ *    $sources  — events offered in the "copy from" picker (screen 1).
+ *    $copy_from — id of the event being copied, 0 = none (carried hidden).
+ *    $copy_src — that event's row right after loading it, for the note.
+ *    $desc_mode — event_description_mode(): 'off' | 'event' | 'day'.
+ *    $desc     — the event description ('event' mode).
+ *    $highlight — copied default day, carried hidden.
  *
  *  Day labels: try a full localized label ('day_label_N'); if missing, fall
  *  back to the generic "Day N" pattern.
@@ -51,12 +57,38 @@ $dayLabel = function($i) {
         </p>
     <?php endif; ?>
 
+    <?php // COPY FROM AN EXISTING EVENT. A plain GET form: picking an event
+          // reloads this screen pre-filled from it, nothing is saved yet. ?>
+    <?php if (!empty($sources)): ?>
+        <form method="get" action="admin.php" class="newevent-copy">
+            <input type="hidden" name="tab" value="new_event">
+            <div class="field">
+                <label for="ev_copy"><?= e(t('newevent_copy')) ?></label>
+                <select id="ev_copy" name="copy">
+                    <option value="0"><?= e(t('newevent_copy_none')) ?></option>
+                    <?php foreach ($sources as $src): ?>
+                        <option value="<?= (int)$src['id'] ?>"<?= (int)($copy_from ?? 0) === (int)$src['id'] ? ' selected' : '' ?>>
+                            <?= e($src['name']) ?><?= !empty($src['first_date']) ? ' (' . e($src['first_date']) . ')' : '' ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-small"><?= e(t('newevent_copy_load')) ?></button>
+                <p class="field-note"><?= e(t('newevent_copy_note')) ?></p>
+            </div>
+        </form>
+    <?php endif; ?>
+    <?php if (!empty($copy_src)): ?>
+        <p class="msg msg-ok"><?= e(t('newevent_copied_from', $copy_src['name'])) ?></p>
+    <?php endif; ?>
+
     <?php // Screen 1: name + number of days, plus the optional details.
           // enctype, because the details include a file: without it the browser
           // posts only the filename and the upload silently never arrives. ?>
     <form method="post" action="admin.php?tab=new_event" class="newevent" enctype="multipart/form-data">
         <?= $csrf ?>
         <input type="hidden" name="stage" value="start">
+        <input type="hidden" name="copy_from" value="<?= (int)($copy_from ?? 0) ?>">
+        <input type="hidden" name="highlight_day" value="<?= (int)($highlight ?? 0) ?>">
 
         <div class="field">
             <label for="ev_name"><?= e(t('newevent_name')) ?></label>
@@ -66,6 +98,13 @@ $dayLabel = function($i) {
             <label for="ev_days"><?= e(t('newevent_days')) ?></label>
             <input type="number" id="ev_days" name="num_days" min="1" max="60" value="<?= e($num_days) ?>" required>
         </div>
+        <?php if (($desc_mode ?? 'off') === 'event'): // the event's own description ?>
+            <div class="field">
+                <label for="ev_desc"><?= e(t('event_description')) ?></label>
+                <textarea id="ev_desc" name="description" rows="4"><?= e($desc ?? '') ?></textarea>
+                <p class="field-note"><?= e(t('event_description_note')) ?></p>
+            </div>
+        <?php endif; ?>
 
         <?php /* OPTIONAL DETAILS — only when the admin turned them on. Prefilled
                  from the configured defaults, so the common case is to leave
@@ -87,7 +126,11 @@ $dayLabel = function($i) {
                       // this screen (a validation error, say) — show it, so it is
                       // clear the file is not waiting to be picked again. ?>
                 <?php if (!empty($thumb)): ?>
+                    <input type="hidden" name="thumbnail" value="<?= e($thumb) ?>">
                     <img class="event-thumb-preview" src="<?= e($thumb) ?>" alt="">
+                    <label class="checkbox">
+                        <input type="checkbox" name="thumb_clear" value="1"> <?= e(t('event_thumbnail_clear')) ?>
+                    </label>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -109,6 +152,11 @@ $dayLabel = function($i) {
         <input type="hidden" name="stage" value="days">
         <input type="hidden" name="name" value="<?= e($name) ?>">
         <input type="hidden" name="num_days" value="<?= e($num_days) ?>">
+        <input type="hidden" name="copy_from" value="<?= (int)($copy_from ?? 0) ?>">
+        <input type="hidden" name="highlight_day" value="<?= (int)($highlight ?? 0) ?>">
+        <?php if (($desc_mode ?? 'off') === 'event'): ?>
+            <input type="hidden" name="description" value="<?= e($desc ?? '') ?>">
+        <?php endif; ?>
         <?php // The details carry across the same way the name does. The picture
               // travels as the PATH screen 1 already produced, since a file input
               // cannot be refilled from markup. ?>
@@ -139,6 +187,12 @@ $dayLabel = function($i) {
                     <?php // Optional label for this day, offered only while the
                           // feature is on. Never required: an event where only
                           // some days are named is a normal thing to want. ?>
+                    <?php if (($desc_mode ?? 'off') === 'day'): // this day's description ?>
+                        <div class="field">
+                            <label><?= e(t('event_description')) ?></label>
+                            <textarea name="day_desc[]" rows="3"><?= e($row['desc'] ?? '') ?></textarea>
+                        </div>
+                    <?php endif; ?>
                     <?php if (day_names_enabled()): ?>
                         <div class="field">
                             <label><?= e(t('newevent_day_name')) ?></label>

@@ -41,6 +41,10 @@
         <div class="field field-check">
             <label><input type="checkbox" name="is_admin" value="1"> <?= e(t('users_make_admin')) ?></label>
         </div>
+        <div class="field field-check">
+            <label><input type="checkbox" name="is_moderator" value="1"> <?= e(t('users_make_mod')) ?></label>
+            <p class="field-note"><?= e(t('users_mod_note')) ?></p>
+        </div>
         <button type="submit" class="btn btn-primary"><?= e(t('users_create')) ?></button>
     </form>
 </fieldset>
@@ -72,7 +76,8 @@
             </td>
             <td data-label="<?= e(t('users_name')) ?>"><?= e($u['email']) ?></td>
             <td data-label="<?= e(t('users_role')) ?>">
-                <?= (int)$u['is_admin'] === 1 ? e(t('users_admin')) : e(t('users_user')) ?>
+                <?= (int)$u['is_admin'] === 1 ? e(t('users_admin'))
+                    : ((int)($u['is_moderator'] ?? 0) === 1 ? e(t('users_moderator')) : e(t('users_user'))) ?>
                 <?php if (!empty($activation_on) && (int)($u['is_verified'] ?? 1) !== 1): ?>
                     <?php // Says WHY they cannot sign in; without it an admin
                           // has no way to see who is waiting. ?>
@@ -100,6 +105,21 @@
                             <button class="btn btn-small"><?= e(t('users_promote')) ?></button>
                         <?php endif; ?>
                     </form>
+
+                    <?php // Moderator: offered on non-admin accounts only. ?>
+                    <?php if ((int)$u['is_admin'] !== 1): ?>
+                        <form method="post" action="admin.php?tab=users" class="inline">
+                            <?= $csrf ?>
+                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                            <?php if ((int)($u['is_moderator'] ?? 0) === 1): ?>
+                                <input type="hidden" name="action" value="mod_off">
+                                <button class="btn btn-small"><?= e(t('users_mod_off')) ?></button>
+                            <?php else: ?>
+                                <input type="hidden" name="action" value="mod_on">
+                                <button class="btn btn-small"><?= e(t('users_mod_on')) ?></button>
+                            <?php endif; ?>
+                        </form>
+                    <?php endif; ?>
 
                     <form method="post" action="admin.php?tab=users" class="inline">
                         <?= $csrf ?>

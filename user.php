@@ -99,8 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          * Written even when the feature is switched off site-wide, so an admin
          * turning it back on restores everyone's previous choice rather than
          * silently resetting it. */
-        db_run('UPDATE users SET notify_new_event = ? WHERE id = ?',
-               [empty($_POST['notify_new_event']) ? 0 : 1, $u['id']]);
+        /* Now two boxes, each shown only while its feature is on, so the form
+         * names the ones it carried ('present[]'). A form without that list
+         * is an older page still open somewhere: it only ever had the
+         * new-event box. */
+        $present = isset($_POST['present']) ? (array)$_POST['present'] : ['notify_new_event'];
+        foreach (['notify_new_event', 'chat_notify'] as $col) {
+            if (!in_array($col, $present, true)) continue;
+            db_run("UPDATE users SET $col = ? WHERE id = ?", [empty($_POST[$col]) ? 0 : 1, $u['id']]);
+        }
         flash_set(t('up_notify_saved'));
 
     } elseif ($action === 'password') {

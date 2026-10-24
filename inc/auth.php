@@ -479,6 +479,28 @@ function is_admin() {
 }
 
 /**
+ * Is the current visitor a MODERATOR (and not an admin)?
+ *
+ * A moderator is a member who may additionally delete anyone's comments and
+ * chat messages, and rename tables where renaming is admin-only — nothing
+ * else. Admins are not "moderators": they already have every right, and
+ * keeping the two apart makes the role shown in lists unambiguous.
+ * @return bool
+ */
+function is_moderator() {
+    $u = current_user();
+    return $u && (int)$u['is_admin'] !== 1 && (int)($u['is_moderator'] ?? 0) === 1;
+}
+
+/**
+ * May the current visitor moderate — an admin or a moderator?
+ * @return bool
+ */
+function can_moderate() {
+    return is_admin() || is_moderator();
+}
+
+/**
  * Guard for logged-in-only pages: bounce guests to login with a return target.
  * The `next` query param lets login.php send the user back where they started.
  * @return void  (redirects + exits for guests; returns for logged-in users)

@@ -258,6 +258,63 @@
 
         function fmt(tpl, fallback) { return tpl || fallback; }
 
+        /* ---- "New messages" marker -------------------------------------
+         * One number: the id of the newest message this person has seen.
+         * Kept in localStorage (per browser; keyed by account so two people
+         * sharing a computer do not clear each other's marker) and, for
+         * members, on the account as well — the larger of the two wins. */
+        var C       = window.APP_CHAT;
+        var badge   = document.getElementById('chat-badge');
+        var seenKey = 'chatSeen' + (C.member ? ':' + (C.who || 0) : '');
+        function readSeen() {
+            try { return parseInt(window.localStorage.getItem(seenKey) || '0', 10) || 0; }
+            catch (e) { return 0; }   // private mode / storage blocked
+        }
+        var seen = Math.max(C.seen || 0, readSeen());
+
+        function isOpen() { return panel.classList.contains('is-open'); }
+
+        function showBadge(n) {
+            if (!badge) return;
+            if (C.unread === 'off' || n <= 0 || isOpen()) {
+                badge.hidden = true;
+                badge.textContent = '';
+                toggle.classList.remove('has-unread');
+                return;
+            }
+            badge.hidden = false;
+            toggle.classList.add('has-unread');
+            // 'dot' says only THAT there is something; 'count' says how much.
+            badge.textContent = C.unread === 'count' ? (n > 99 ? '99+' : String(n)) : '';
+        }
+
+        // Everything up to $id has now been on screen.
+        function markSeen(id) {
+            showBadge(0);
+            if (!id || id <= seen) return;
+            seen = id;
+            try { window.localStorage.setItem(seenKey, String(id)); } catch (e) { /* ignore */ }
+            // Members: also on the account (other devices; and it re-arms the
+            // 'once' emails). Fire and forget — a lost one is caught next time.
+            if (C.member && C.csrf) {
+                var fd = new FormData();
+                fd.append('action', 'seen');
+                fd.append('id', String(id));
+                fd.append('csrf', C.csrf);
+                fetch('chat.php', { method: 'POST', body: fd, credentials: 'same-origin' })['catch'](function () {});
+            }
+        }
+
+        function checkUnread() {
+            // Not while reading the chat (it is all on screen), and not in a
+            // background tab nobody is looking at.
+            if (C.unread === 'off' || isOpen() || document.hidden) return;
+            fetch('chat.php?action=unread&after=' + encodeURIComponent(seen), { credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (d) { if (d && d.ok) showBadge(d.count); })
+                ['catch'](function () { /* transient: the next check retries */ });
+        }
+
         function renderMessage(m, prepend) {
             var line = document.createElement('p');
             line.className = 'chat-msg' + (m.admin ? ' chat-msg-admin' : (m.user ? ' chat-msg-user' : ''));
@@ -328,6 +385,7 @@
                 .then(function (d) {
                     apply(d, false, true);
                     loaded = true;
+                    markSeen(lastId);
                     if (!(d.messages || []).length && L.chatEmpty) {
                         var p = document.createElement('p');
                         p.className = 'chat-empty';
@@ -347,6 +405,7 @@
                 .then(function (d) {
                     var before = lastId;
                     apply(d, false, false);
+                    if (isOpen()) markSeen(lastId);
                     // Only auto-scroll if they were already at the bottom —
                     // yanking the view while someone reads back is worse than
                     // making them scroll.
@@ -373,7 +432,7 @@
             panel.classList.add('is-open');
             document.body.classList.add('chat-open');
             toggle.setAttribute('aria-expanded', 'true');
-            if (!loaded) load(); else scrollDown();
+            if (!loaded) load(); else { scrollDown(); markSeen(lastId); }
             start();
         }
         function closeChat() {
@@ -388,6 +447,14 @@
         toggle.addEventListener('click', function () {
             if (panel.classList.contains('is-open')) closeChat(); else openChat();
         });
+
+        // The marker: one check when the page loads — only if the page was
+        // rendered with something newer than what this person has seen — and
+        // then every few minutes, if the admin set an interval.
+        if (C.unread !== 'off') {
+            if ((C.lastId || 0) > seen) checkUnread();
+            if (C.unreadPoll > 0) window.setInterval(checkUnread, C.unreadPoll);
+        }
 
         // Optional: a click anywhere outside closes the panel.
         //

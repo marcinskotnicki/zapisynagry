@@ -621,6 +621,32 @@ $groupEnd = function () { echo '</div></details>'; };
         $text('chat_send_delay', 'number');        // pause after sending
         ?>
         <?php $toggle('chat_close_outside'); ?>
+        <?php // Email about new messages, for members who tick the box in
+              // their user panel. ?>
+        <div class="field">
+            <label for="chat_email_mode"><?= e(t('opt_chat_email_mode')) ?></label>
+            <select id="chat_email_mode" name="chat_email_mode">
+                <?php foreach (chat_email_modes() as $m): ?>
+                    <option value="<?= e($m) ?>"<?= chat_email_mode() === $m ? ' selected' : '' ?>><?= e(t('opt_chat_email_' . $m)) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('opt_chat_email_note')) ?></p>
+        </div>
+        <?php // The "new messages" marker on the chat button. ?>
+        <div class="field">
+            <label for="chat_unread_mode"><?= e(t('opt_chat_unread_mode')) ?></label>
+            <select id="chat_unread_mode" name="chat_unread_mode">
+                <?php foreach (chat_unread_modes() as $m): ?>
+                    <option value="<?= e($m) ?>"<?= chat_unread_mode() === $m ? ' selected' : '' ?>><?= e(t('opt_chat_unread_' . $m)) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="field">
+            <label for="chat_unread_poll_minutes"><?= e(t('opt_chat_unread_poll_minutes')) ?></label>
+            <input type="number" id="chat_unread_poll_minutes" name="chat_unread_poll_minutes" min="0" max="1440"
+                   value="<?= (int)chat_unread_poll_minutes() ?>">
+            <p class="field-note"><?= e(t('opt_chat_unread_poll_note')) ?></p>
+        </div>
         <?php
         ?>
     <?php $groupEnd(); ?>

@@ -506,8 +506,20 @@ function comment_can_manage($c) {
         && (int)$c['user_id'] === (int)$me['id'];
 }
 
+/**
+ * May the current visitor DELETE this comment? Everyone who may manage it
+ * (admin, own comment), plus moderators — who may remove anyone's comment but,
+ * deliberately, not rewrite it: putting words in someone else's mouth is a
+ * bigger power than taking them away.
+ * @param array $c
+ * @return bool
+ */
+function comment_can_delete($c) {
+    return comment_can_manage($c) || is_moderator();
+}
+
 function comment_delete_html($c, $kind) {
-    if (!comment_can_manage($c)) return '';
+    if (!comment_can_delete($c)) return '';
     /* Confirmed before it goes. The control is a small × sitting inside every
      * comment, which is exactly the shape of thing that gets hit by accident on
      * a phone — and a deleted comment cannot be brought back.
@@ -562,7 +574,7 @@ function comment_delete_html($c, $kind) {
  * @return string  '' when the viewer may do neither.
  */
 function comment_actions_html($c, $kind) {
-    if (!comment_can_manage($c)) return '';
+    if (!comment_can_delete($c)) return '';   // the broader of the two rights
     return '<span class="c-actions">'
          . comment_edit_html($c, $kind)
          . comment_delete_html($c, $kind)
@@ -1039,8 +1051,9 @@ function can_signup() {
 /**
  * Are table names in use at all? Driven by the 'table_names_mode' option:
  *   'off'     — feature disabled entirely.
- *   'admin'   — only admins may set and edit names.
- *   'add_any' — anyone may set a name when ADDING a table; only admins edit.
+ *   'admin'   — only admins (and moderators) may set and edit names.
+ *   'add_any' — anyone may set a name when ADDING a table; only admins
+ *               (and moderators) edit.
  *   'any'     — anyone may set and edit names.
  * @return bool
  */
@@ -1056,7 +1069,7 @@ function table_names_enabled() {
  */
 function table_names_can_set() {
     switch (opt('table_names_mode')) {
-        case 'admin':   return is_admin();
+        case 'admin':   return can_moderate();   // admins and moderators
         case 'add_any':
         case 'any':     return true;
         default:        return false;   // 'off' (or an unknown value)
@@ -1070,7 +1083,7 @@ function table_names_can_set() {
 function table_names_can_edit() {
     switch (opt('table_names_mode')) {
         case 'admin':
-        case 'add_any': return is_admin();
+        case 'add_any': return can_moderate();   // admins and moderators
         case 'any':     return true;
         default:        return false;   // 'off' (or an unknown value)
     }

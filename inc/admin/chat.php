@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && chat_enabled()) {
                 $flash = t('chat_admin_deleted');
             }
         }
-    } elseif ($act === 'purge') {
+    } elseif ($act === 'purge' && is_admin()) {   // clearing everything: admins only
         // Clearing the whole log. Separate action, and the button is a
         // btn-danger with its own confirm, because it is not undoable.
         $n = (int)db_val('SELECT COUNT(*) FROM chat_messages');

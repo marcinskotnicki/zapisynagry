@@ -84,6 +84,8 @@
                           // unlike archive/unarchive below, which only make sense when
                           // archiving is not already automatic. ?>
                     <a class="btn btn-small" href="admin.php?tab=archive&amp;event=<?= (int)$ev['id'] ?>"><?= e(t('events_edit')) ?></a>
+                    <?php // Start a new event pre-filled from this one (dates left empty). ?>
+                    <a class="btn btn-small" href="admin.php?tab=new_event&amp;copy=<?= (int)$ev['id'] ?>"><?= e(t('events_copy')) ?></a>
                     <?php if ($can_toggle): ?>
                         <?php // One button per row, showing the action rather than the
                               // state — the Status column already says which it is. ?>

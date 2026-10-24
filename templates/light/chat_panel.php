@@ -26,6 +26,9 @@
         aria-label="<?= e(t('chat_title')) ?>" title="<?= e(t('chat_title')) ?>">
     <span class="chat-toggle-open" aria-hidden="true">&#128172;</span>
     <span class="chat-toggle-close" aria-hidden="true">&times;</span>
+    <?php // The "new messages" marker, filled in by scripts.js. Empty and
+          // hidden until there is something to say. ?>
+    <span class="chat-badge" id="chat-badge" hidden></span>
 </button>
 
 <aside class="chat-panel<?= $logged_in ? ' chat-panel-auth' : '' ?>" id="chat-panel" hidden>

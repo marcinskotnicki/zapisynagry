@@ -69,6 +69,7 @@
                                  identically to one made on the event page. The
                                  'back' field brings the admin to this list
                                  rather than out to the event. */ ?>
+                        <?php if (is_admin()): // moderators delete, they do not rewrite ?>
                         <details class="c-edit">
                             <summary class="btn btn-small"><?= e(t('edit')) ?></summary>
                             <form method="post" action="edit_comment.php">
@@ -80,6 +81,7 @@
                                 <button type="submit" class="btn btn-small"><?= e(t('save')) ?></button>
                             </form>
                         </details>
+                        <?php endif; ?>
                         <?php /* Posts to the SAME endpoint the card's own × uses,
                                  rather than a second delete written here: one
                                  place to get the permission check right, and the

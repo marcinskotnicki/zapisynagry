@@ -112,6 +112,17 @@ $page_title = $page_title ?? t('app_name');
             'refresh'   => chat_refresh_seconds() * 1000,
             'sendDelay' => chat_send_delay() * 1000,
             'closeOutside' => opt_bool('chat_close_outside'),
+            // The "new messages" marker: mode, background re-check interval
+            // (0 = none), the newest message id right now, and — for members —
+            // what their account says they have seen, plus the token the
+            // 'seen' POST needs.
+            'unread'     => chat_unread_mode(),
+            'unreadPoll' => chat_unread_poll_minutes() * 60000,
+            'lastId'     => chat_last_id(),
+            'member'     => is_logged_in(),
+            'who'        => (int)(current_user()['id'] ?? 0),
+            'seen'       => (int)(current_user()['chat_seen_id'] ?? 0),
+            'csrf'       => is_logged_in() ? csrf_token() : '',
         ], JSON_UNESCAPED_UNICODE) ?>;
         <?php endif; ?>
     </script>
@@ -172,6 +183,9 @@ ob_start();
     }
     if (is_admin() && $hideHere('admin.php')) {         // admins: the panel link
         echo nav_link('admin.php', 'admin', t('admin'), $here === 'admin.php');
+    } elseif (is_moderator() && (chat_enabled() || opt_bool('allow_discussions'))
+              && $hideHere('admin.php')) {              // moderators: their one tab
+        echo nav_link('admin.php?tab=chat', 'admin', t('nav_moderation'), $here === 'admin.php');
     }
     if (is_logged_in()) {                               // panel (unless on it) + logout
         if ($hideHere('user.php')) {

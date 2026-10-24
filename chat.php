@@ -76,7 +76,30 @@ if ($action === 'post') {
         guest_identity_remember($row['name'], guest_identity()['email']);
     }
 
+    // Writing in the chat means looking at it: the author's own marker moves
+    // on, so they are neither shown their own line as new nor emailed in
+    // 'once' mode about a conversation they are in the middle of.
+    chat_mark_seen((int)$row['id']);
+    /* Email the members who asked for it. A failure here must not turn a
+     * message that WAS posted into an error for the person who posted it. */
+    try { chat_notify_new($row); } catch (Throwable $ex) { /* logged by send_mail's own path */ }
+
     chat_json(['ok' => true, 'message' => chat_row_public($row)]);
+}
+
+/* ---- The "new messages" marker --------------------------------------------
+ * 'seen'   (POST): the panel showed everything up to ?id — remember it on the
+ *                  account. Guests keep their marker in the browser only.
+ * 'unread' (GET) : how many are newer than ?after (or the account's marker).
+ * Both answer even when the marker is switched off: 'seen' is also what
+ * re-arms the 'once' emails, which do not depend on the marker. */
+if ($action === 'seen') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') chat_json(['ok' => false, 'error' => 'method'], 405);
+    csrf_check();
+    chat_json(['ok' => true, 'seen' => chat_mark_seen((int)($_POST['id'] ?? 0))]);
+}
+if ($action === 'unread') {
+    chat_json(['ok' => true, 'count' => chat_unread_count((int)($_GET['after'] ?? 0)), 'lastId' => chat_last_id()]);
 }
 
 if ($action === 'older') {

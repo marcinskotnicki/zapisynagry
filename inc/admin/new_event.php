@@ -11,6 +11,13 @@
  *  Screen 1 also carries a small RENAME form for the currently live event
  *  (stage 'rename'): just an UPDATE of events.name, no archiving involved.
  *
+ *  COPYING: ?copy=<event id> pre-fills screen 1 from an existing event (name,
+ *  day count, place, picture, description) and remembers the source in a
+ *  hidden 'copy_from' field, so screen 2 can pre-fill each day's hours, label
+ *  and description from the matching source day. Only the dates are left for
+ *  the admin. Nothing is copied from games, tables or sign-ups — a new event
+ *  starts empty.
+ *
  *  Stage is carried in a hidden 'stage' field so we know which screen posted.
  *  Creating a new event ARCHIVES the previous one (there's at most one live
  *  event at a time) — that's why archive links keep working afterwards.
@@ -37,12 +44,80 @@ $loc_name = opt('default_location_name');
 $loc_addr = opt('default_location_address');
 $thumb    = '';                  // relative path once an image has been processed
 $days     = [];   // list of ['date'=>, 'start'=>, 'end'=>] for screen 2 prefill
+$desc     = '';   // the event's own description ('event' description mode)
+$highlight = 0;   // copied "open this day by default"; 0 = none
+$copyFrom = 0;    // id of the event being copied, 0 = none
+$copySrc  = null; // its row, for the "copied from" note
 
 // day_names_enabled() / day_tab_formats() live here; this tab does not otherwise
 // need event data, so the dependency is stated explicitly.
 require_once __DIR__ . '/../events.php';
 require_once __DIR__ . '/../mail.php';      // send_mail(), which mailing.php calls
 require_once __DIR__ . '/../mailing.php';   // mailing_notify_new_event()
+
+/**
+ * Events offered in the "copy from" picker: every event, newest first, with
+ * its first day's date so same-named events can be told apart.
+ * @return array
+ */
+function newevent_copy_sources() {
+    return db_all('SELECT e.id, e.name, e.is_archived, e.is_deleted,
+                          (SELECT MIN(d.day_date) FROM event_days d WHERE d.event_id = e.id) AS first_date
+                     FROM events e ORDER BY e.id DESC');
+}
+
+/**
+ * Per-day prefill for screen 2. Dates are always left empty — the one thing a
+ * copy must not carry. When copying, day N takes source day N's hours, label
+ * and description; days beyond the source's length repeat its LAST day's hours
+ * (a club that adds a day usually keeps the same hours) with no label.
+ *
+ * @param int $numDays
+ * @param int $copyFrom  source event id, 0 = none
+ * @return array
+ */
+function newevent_day_prefill($numDays, $copyFrom) {
+    $src = $copyFrom
+        ? db_all('SELECT * FROM event_days WHERE event_id = ? ORDER BY day_index', [$copyFrom])
+        : [];
+    $out = [];
+    for ($i = 0; $i < $numDays; $i++) {
+        $d = $src[$i] ?? null;
+        $last = $src ? $src[count($src) - 1] : null;
+        $out[] = [
+            'date'  => '',
+            'start' => $d['start_time'] ?? ($last['start_time'] ?? opt('default_start_time')),
+            'end'   => $d['end_time']   ?? ($last['end_time']   ?? opt('default_end_time')),
+            'name'  => (string)($d['day_name'] ?? ''),
+            'desc'  => (string)($d['description'] ?? ''),
+        ];
+    }
+    return $out;
+}
+
+/* ---- ?copy=ID: pre-fill screen 1 from an existing event ------------------ */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && (int)($_GET['copy'] ?? 0) > 0) {
+    $copySrc = db_one('SELECT * FROM events WHERE id = ?', [(int)$_GET['copy']]);
+    if ($copySrc) {
+        $copyFrom  = (int)$copySrc['id'];
+        $name      = (string)$copySrc['name'];
+        $num_days  = max(1, (int)db_val('SELECT COUNT(*) FROM event_days WHERE event_id = ?', [$copyFrom]));
+        // The details and description only when their fields are on screen,
+        // matching what a create would store: a value the admin cannot see is
+        // a value they did not choose.
+        if (event_details_enabled()) {
+            $loc_name = (string)($copySrc['location_name'] ?? '');
+            $loc_addr = (string)($copySrc['location_address'] ?? '');
+            // Shared, not duplicated: thumbnails are never deleted from disk,
+            // so both events can point at the same file safely.
+            $thumb    = (string)($copySrc['thumbnail'] ?? '');
+        }
+        if (event_description_mode() === 'event') {
+            $desc = (string)($copySrc['description'] ?? '');
+        }
+        $highlight = (int)($copySrc['highlight_day'] ?? 0);
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postStage = $_POST['stage'] ?? '';
@@ -60,8 +135,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      * empty because the fields were never rendered. */
     $loc_name  = trim((string)($_POST['location_name'] ?? ''));
     $loc_addr  = trim((string)($_POST['location_address'] ?? ''));
-    // Screen 2 hands back the path screen 1 produced.
+    // Screen 2 hands back the path screen 1 produced (or the copied one).
     $thumb     = trim((string)($_POST['thumbnail'] ?? ''));
+    // Only paths this app produces: a hidden field is still a form field.
+    if ($thumb !== '' && !preg_match('#^thumbnails/[A-Za-z0-9_.-]+$#', $thumb)) $thumb = '';
+    if (!empty($_POST['thumb_clear'])) $thumb = '';
+    $desc      = trim((string)($_POST['description'] ?? ''));
+    $highlight = max(0, (int)($_POST['highlight_day'] ?? 0));
+    $copyFrom  = max(0, (int)($_POST['copy_from'] ?? 0));
+    if ($copyFrom && !db_val('SELECT 1 FROM events WHERE id = ?', [$copyFrom])) $copyFrom = 0;
 
     /* THE PICTURE is processed the moment it is uploaded, on screen 1, and only
      * its path travels on. A file input cannot be carried through a second form
@@ -79,14 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($postStage === 'start') {
         // Screen 1 submitted -> advance to screen 2 with one prefilled row per day.
         $stage = 'days';
-        for ($i = 1; $i <= $num_days; $i++) {
-            $days[] = [
-                'date'  => '',
-                'start' => opt('default_start_time'),
-                'end'   => opt('default_end_time'),
-                'name'  => '',
-            ];
-        }
+        $days  = newevent_day_prefill($num_days, $copyFrom);
 
     } elseif ($postStage === 'days') {
         // Screen 2 submitted -> validate the day rows, then (if OK) create.
@@ -96,6 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $inEnds   = $_POST['day_end']   ?? [];
         // Optional labels, only collected when the feature is on.
         $inNames  = $_POST['day_name']  ?? [];
+        // Per-day descriptions, only collected in 'day' description mode.
+        $inDescs  = $_POST['day_desc']  ?? [];
 
         $ok = true;
         for ($i = 0; $i < $num_days; $i++) {
@@ -103,7 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $s = trim($inStarts[$i] ?? '');
             $e = trim($inEnds[$i]   ?? '');
             $nm = day_names_enabled() ? trim((string)($inNames[$i] ?? '')) : '';
-            $days[] = ['date' => $d, 'start' => $s, 'end' => $e, 'name' => $nm];   // keep for re-render on error
+            $ds = event_description_mode() === 'day' ? trim((string)($inDescs[$i] ?? '')) : '';
+            $days[] = ['date' => $d, 'start' => $s, 'end' => $e, 'name' => $nm, 'desc' => $ds];   // keep for re-render on error
             // NB: end EARLIER than start is deliberately allowed — it means the
             // day runs past midnight (18:00 -> 03:00); day_rel_min() gives all
             // ordering/plotting that interpretation. So: no end>start check.
@@ -133,27 +211,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Unguessable share token for the read-only archive link later.
                 $token = bin2hex(random_bytes(16));
-                db_run('INSERT INTO events (name, num_days, access_token, location_name, location_address, thumbnail)
-                        VALUES (?,?,?,?,?,?)',
+                // The event description is only on the form in 'event' mode;
+                // the default day only means something if that day exists.
+                $evDesc = event_description_mode() === 'event' ? $desc : '';
+                $evHl   = ($highlight >= 1 && $highlight <= $num_days) ? $highlight : null;
+                db_run('INSERT INTO events (name, num_days, access_token, location_name, location_address, thumbnail,
+                                            description, highlight_day)
+                        VALUES (?,?,?,?,?,?,?,?)',
                        [$name, $num_days, $token,
                         // NULL rather than '' for "not given": one value in the
                         // column instead of two, same as day_name above.
                         $loc_name !== '' ? $loc_name : null,
                         $loc_addr !== '' ? $loc_addr : null,
-                        $thumb    !== '' ? $thumb    : null]);
+                        $thumb    !== '' ? $thumb    : null,
+                        $evDesc   !== '' ? $evDesc   : null,
+                        $evHl]);
                 $eventId = (int)db()->lastInsertId();
 
                 // Insert the days (1-based day_index).
                 $stmt = db()->prepare(
-                    'INSERT INTO event_days (event_id, day_index, day_date, day_name, start_time, end_time)
-                     VALUES (?,?,?,?,?,?)'
+                    'INSERT INTO event_days (event_id, day_index, day_date, day_name, start_time, end_time, description)
+                     VALUES (?,?,?,?,?,?,?)'
                 );
                 foreach ($days as $idx => $row) {
                     // Stored as NULL rather than '' when unnamed, so "no label"
                     // is one value in the column instead of two.
                     $nm = trim((string)($row['name'] ?? ''));
+                    $dd = trim((string)($row['desc'] ?? ''));
                     $stmt->execute([$eventId, $idx + 1, $row['date'],
-                                    $nm === '' ? null : $nm, $row['start'], $row['end']]);
+                                    $nm === '' ? null : $nm, $row['start'], $row['end'],
+                                    $dd === '' ? null : $dd]);
                 }
 
                 // Chat scoped to the event? Then a new event starts a new
@@ -173,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($error === null) {
-                log_action('event_create', $name);
+                log_action('event_create', $name . ($copyFrom ? ' (copy of #' . $copyFrom . ')' : ''));
                 /* After the commit, never inside it: a mail cannot be rolled
                  * back, so telling people about an event whose creation then
                  * failed would be unfixable. Returns 0 quietly when the feature
@@ -210,6 +297,12 @@ $tab_body = tpl_capture('admin_new_event', [
     'loc_addr' => $loc_addr,
     'thumb'    => $thumb,
     'details'  => event_details_enabled(),
+    'desc_mode'=> event_description_mode(),   // 'off' | 'event' | 'day'
+    'desc'     => $desc,
+    'highlight'=> $highlight,
+    'copy_from'=> $copyFrom,
+    'copy_src' => $copySrc,      // set only right after ?copy= loaded it
+    'sources'  => newevent_copy_sources(),
     'days'     => $days,         // prefill rows for screen 2
     'error'    => $error,
     'current'  => $current,      // live event row, or null (drives the rename form)

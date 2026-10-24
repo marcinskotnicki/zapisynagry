@@ -73,6 +73,7 @@ $OPTION_VALUES = [
     'github_branch',        // '' = inherit config.php's GITHUB_BRANCH
     'header_brand',         // auto|both|none; validated below
     'chat_scope', 'chat_max_messages', 'chat_initial_messages', 'chat_refresh_seconds',
+    'chat_email_mode', 'chat_unread_mode', 'chat_unread_poll_minutes',   // validated below
     'chat_send_delay',
     'notify_mode',   // always|never|user_yes|user_no; validated below
     'site_polls_position',   // top|bottom; validated below
@@ -280,6 +281,15 @@ function option_sanitize($key, $val) {
             // straight into the options table cannot produce a zero-row
             // page or an unbounded query.
             $val = (string)max(0, (int)$val);
+            break;
+        case 'chat_email_mode':
+            if (!in_array($val, chat_email_modes(), true)) return null;
+            break;
+        case 'chat_unread_mode':
+            if (!in_array($val, chat_unread_modes(), true)) return null;
+            break;
+        case 'chat_unread_poll_minutes':
+            $val = (string)min(1440, max(0, (int)$val));   // 0 = page loads only; at most daily
             break;
         case 'chat_max_messages':
         case 'chat_initial_messages':

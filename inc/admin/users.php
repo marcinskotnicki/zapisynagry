@@ -31,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name  = trim($_POST['display_name'] ?? '');
         $pass  = (string)($_POST['password'] ?? '');
         $admin = isset($_POST['is_admin']) ? 1 : 0;
+        // Moderator only for a non-admin account: an admin already has it all.
+        $mod   = (!$admin && isset($_POST['is_moderator'])) ? 1 : 0;
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $flash = t('users_email_invalid');
@@ -41,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($pass) < 6) {
             $flash = t('users_password_short');
         } else {
-            db_run('INSERT INTO users (email, password_hash, display_name, is_admin) VALUES (?,?,?,?)',
-                   [$email, password_hash($pass, PASSWORD_DEFAULT), $name, $admin]);
+            db_run('INSERT INTO users (email, password_hash, display_name, is_admin, is_moderator) VALUES (?,?,?,?,?)',
+                   [$email, password_hash($pass, PASSWORD_DEFAULT), $name, $admin, $mod]);
             log_action('user_create', $email);
             $flash = t('users_created');
         }
@@ -58,8 +60,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($action) {
 
             case 'promote':
-                db_run('UPDATE users SET is_admin = 1 WHERE id = ?', [$userId]);
+                // Moderation is part of being an admin; clearing the flag means
+                // a later "remove admin" leaves an ordinary member rather than
+                // silently bringing back an old moderator role.
+                db_run('UPDATE users SET is_admin = 1, is_moderator = 0 WHERE id = ?', [$userId]);
                 log_action('user_promote', $target['email']);
+                $flash = t('users_updated');
+                break;
+
+            case 'mod_on':
+                // Only for non-admins: on an admin it would be meaningless.
+                if ((int)$target['is_admin'] !== 1) {
+                    db_run('UPDATE users SET is_moderator = 1 WHERE id = ?', [$userId]);
+                    log_action('user_mod_on', $target['email']);
+                    $flash = t('users_updated');
+                }
+                break;
+
+            case 'mod_off':
+                db_run('UPDATE users SET is_moderator = 0 WHERE id = ?', [$userId]);
+                log_action('user_mod_off', $target['email']);
                 $flash = t('users_updated');
                 break;
 
@@ -200,7 +220,7 @@ $page    = max(1, min($pages, (int)($_GET['page'] ?? 1)));
 $users   = db_all(
     // is_verified too, or the template's ?? 1 fallback reads every pending
     // account as approved and shows the wrong button on every row.
-    'SELECT id, email, display_name, is_admin, is_blocked, is_verified, created_at
+    'SELECT id, email, display_name, is_admin, is_moderator, is_blocked, is_verified, created_at
        FROM users ORDER BY display_name COLLATE NOCASE LIMIT ? OFFSET ?',
     [$perPage, ($page - 1) * $perPage]);
 

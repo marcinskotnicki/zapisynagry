@@ -159,11 +159,19 @@ $uid_field   = $as_admin
         <?php /* New-event notifications. Only offered when the admin has enabled
                  the feature AND the site actually sends mail — a checkbox that
                  silently does nothing is worse than no checkbox. */ ?>
-        <?php if (opt_bool('notify_new_event') && notify_enabled()): ?>
+        <?php /* Each box only while its feature is on; the card while either is.
+                 'present[]' tells the save which boxes were on the form, so an
+                 unticked box (which posts nothing) is told apart from one that
+                 was never shown — the hidden one keeps its value. */ ?>
+        <?php $showNewEvent = opt_bool('notify_new_event') && notify_enabled(); ?>
+        <?php $showChatMail = chat_email_enabled(); ?>
+        <?php if ($showNewEvent || $showChatMail): ?>
         <form method="post" action="<?= e($self_url) ?>" class="card profile-card">
             <h3><?= e(t('up_notifications')) ?></h3>
             <?= csrf_field() ?><?= $uid_field ?>
             <input type="hidden" name="action" value="notify">
+            <?php if ($showNewEvent): ?>
+            <input type="hidden" name="present[]" value="notify_new_event">
             <div class="field field-check field-notify_new_event">
                 <label>
                     <input type="checkbox" name="notify_new_event" value="1"<?=
@@ -171,6 +179,18 @@ $uid_field   = $as_admin
                     <?= e(t('up_notify_new_event')) ?>
                 </label>
             </div>
+            <?php endif; ?>
+            <?php if ($showChatMail): ?>
+            <input type="hidden" name="present[]" value="chat_notify">
+            <div class="field field-check field-chat_notify">
+                <label>
+                    <input type="checkbox" name="chat_notify" value="1"<?=
+                        (int)($user['chat_notify'] ?? 0) === 1 ? ' checked' : '' ?>>
+                    <?= e(t('up_chat_notify')) ?>
+                </label>
+                <p class="field-note"><?= e(t(chat_email_mode() === 'once' ? 'up_chat_notify_once' : 'up_chat_notify_every')) ?></p>
+            </div>
+            <?php endif; ?>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary"><?= e(t('up_save')) ?></button>
             </div>

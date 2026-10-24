@@ -75,10 +75,12 @@
 
     <?php // Clearing everything, kept away from the per-row buttons and behind a
           // confirm: it cannot be undone, and the rows are the only copy. ?>
+    <?php if (is_admin()): // moderators delete single lines, never the whole log ?>
     <form method="post" action="admin.php?tab=chat" class="chat-admin-purge"
           onsubmit="return confirm('<?= e(t('chat_admin_purge_confirm')) ?>');">
         <?= $csrf ?>
         <input type="hidden" name="action" value="purge">
         <button class="btn btn-small btn-danger"><?= e(t('chat_admin_purge')) ?></button>
     </form>
+    <?php endif; ?>
 <?php endif; ?>

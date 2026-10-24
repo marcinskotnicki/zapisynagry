@@ -348,3 +348,138 @@ function chat_format_time($utc) {
     $dt = chat_local_time($utc);
     return $dt === null ? (string)$utc : $dt->format('d.m H:i');
 }
+
+
+/* ---- New-message marker and email notifications ---------------------------
+ * Both rest on one number per person: the id of the newest message they have
+ * SEEN. Message ids only grow (trimming deletes the oldest, never reuses), so
+ * "is there anything newer than what I saw" is a single comparison with no
+ * clocks or time zones involved. Guests keep that number in their browser;
+ * members keep it on their account too, so reading the chat on one device
+ * clears the marker on the others.
+ * --------------------------------------------------------------------------- */
+
+/** @return string[]  The email modes, in dropdown order. */
+function chat_email_modes() { return ['off', 'once', 'every']; }
+
+/** @return string[]  The marker modes, in dropdown order. */
+function chat_unread_modes() { return ['off', 'dot', 'count']; }
+
+/** @return string  'off' | 'once' | 'every' (unknown values read as 'off'). */
+function chat_email_mode() {
+    $m = (string)opt('chat_email_mode', 'off');
+    return in_array($m, chat_email_modes(), true) ? $m : 'off';
+}
+
+/** @return string  'off' | 'dot' | 'count' (unknown values read as 'off'). */
+function chat_unread_mode() {
+    $m = (string)opt('chat_unread_mode', 'off');
+    return in_array($m, chat_unread_modes(), true) ? $m : 'off';
+}
+
+/** @return int  Minutes between background checks; 0 = page loads only. */
+function chat_unread_poll_minutes() {
+    return min(1440, max(0, opt_int('chat_unread_poll_minutes', 5)));
+}
+
+/**
+ * Do chat emails go out at all? Needs the chat, the mode, and the site's mail
+ * not being switched off as a whole.
+ * @return bool
+ */
+function chat_email_enabled() {
+    require_once __DIR__ . '/helpers.php';
+    return chat_enabled() && chat_email_mode() !== 'off' && notify_enabled();
+}
+
+/**
+ * Record that the current member has seen everything up to $id. Never moves
+ * backwards (an older tab reporting late must not resurrect the marker), and
+ * never past the newest message that exists. Guests: nothing to store here.
+ * @param int $id
+ * @return int  The stored value (0 for guests).
+ */
+function chat_mark_seen($id) {
+    $u = current_user();
+    if (!$u) return 0;
+    $id = min((int)$id, chat_last_id());
+    /* CAST, because PDO binds the value as TEXT and SQLite's two-argument
+     * MAX() sorts any text above any number — without it, MAX(9, '1') is
+     * '1' and a late report from an old tab would move the marker BACK. */
+    db_run('UPDATE users SET chat_seen_id = MAX(chat_seen_id, CAST(? AS INTEGER)) WHERE id = ?', [max(0, $id), (int)$u['id']]);
+    return (int)db_val('SELECT chat_seen_id FROM users WHERE id = ?', [(int)$u['id']]);
+}
+
+/**
+ * How many messages are newer than $after (or than the member's stored
+ * marker, whichever is later)? A member's OWN messages never count — nobody
+ * needs telling about what they just wrote.
+ * @param int $after  The browser's marker; 0 when it has none.
+ * @return int
+ */
+function chat_unread_count($after) {
+    $after = max(0, (int)$after);
+    $u = current_user();
+    if ($u) {
+        $after = max($after, (int)($u['chat_seen_id'] ?? 0));
+        return (int)db_val('SELECT COUNT(*) FROM chat_messages WHERE id > ? AND (user_id IS NULL OR user_id <> ?)',
+                           [$after, (int)$u['id']]);
+    }
+    return (int)db_val('SELECT COUNT(*) FROM chat_messages WHERE id > ?', [$after]);
+}
+
+/**
+ * Email the members who asked to hear about new chat messages.
+ *
+ * 'every' — everyone who ticked the box, about each message.
+ * 'once'  — only those who have looked at the chat since their previous email
+ *           (chat_notified_id <= chat_seen_id; both start at 0, so the first
+ *           message after ticking the box does reach them). The same
+ *           statement then records which message they were told about.
+ *
+ * Never the author. Never blocked or not-yet-approved accounts.
+ *
+ * chat_notify_recipients() is the WHO, kept separate so it can be asked
+ * without sending anything.
+ *
+ * @param array $row  The chat_messages row just written.
+ * @return array  rows of (id, email) — chat_notify_recipients()
+ */
+function chat_notify_recipients($row) {
+    if (!chat_email_enabled()) return [];
+    $sql = "SELECT id, email FROM users
+             WHERE chat_notify = 1 AND is_blocked = 0 AND is_verified = 1
+               AND TRIM(email) <> '' AND id <> ?";
+    if (chat_email_mode() === 'once') $sql .= ' AND chat_notified_id <= chat_seen_id';
+    return db_all($sql, [(int)($row['user_id'] ?? 0)]);
+}
+
+/** Send them. @return int  How many emails went out. */
+function chat_notify_new($row) {
+    if (!chat_email_enabled()) return 0;
+    require_once __DIR__ . '/mail.php';
+
+    $mode   = chat_email_mode();
+    $msgId  = (int)$row['id'];
+    $people = chat_notify_recipients($row);
+    if (!$people) return 0;
+
+    $subject = t('chat_ntf_subject');
+    $body    = t('chat_ntf_body') . "\n\n" . $row['name'] . ': ' . $row['message'];
+    if ($mode === 'once') $body .= "\n\n" . t('chat_ntf_once_note');
+    $base = site_base_url();
+    if ($base !== '') {
+        $body .= "\n\n" . rtrim($base, '/') . '/index.php';
+        $body .= "\n\n---\n" . t('chat_ntf_off') . "\n" . rtrim($base, '/') . '/user.php';
+    }
+
+    $sent = 0;
+    foreach ($people as $p) {
+        if ($mode === 'once') {
+            db_run('UPDATE users SET chat_notified_id = ? WHERE id = ?', [$msgId, (int)$p['id']]);
+        }
+        if (send_mail($p['email'], $subject, $body)) $sent++;
+    }
+    return $sent;
+}
+

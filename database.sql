@@ -218,6 +218,15 @@ INSERT INTO options (key, value) VALUES
     -- worse than an extra press of the toggle.
     ('chat_close_outside',    '0'),
     ('chat_logged_in_only',   '0'),
+    -- Email about new chat messages, for members who ticked the box in their
+    -- user panel: 'off' (default) | 'once' = one email, then nothing more
+    -- until they have looked at the chat | 'every' = one per message.
+    ('chat_email_mode',       'off'),
+    -- "New messages" marker on the chat button: 'off' (default) | 'dot' |
+    -- 'count'. And how often an open page re-checks for it, in minutes
+    -- (0 = only when a page loads).
+    ('chat_unread_mode',      'off'),
+    ('chat_unread_poll_minutes', '5'),
     ('notify_new_event',      '0'),
     ('custom_css',            ''),
     ('club_library',          '0'),
@@ -523,6 +532,19 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,                 -- password_hash() bcrypt output
     display_name  TEXT NOT NULL,
     is_admin      INTEGER NOT NULL DEFAULT 0,    -- 0/1
+    -- Moderator: an ordinary member who may ALSO delete anyone's comments and
+    -- chat messages, and rename tables where renaming is admin-only. Nothing
+    -- else from the admin panel. Ignored on an admin account (admins can do
+    -- all of it anyway). DEFAULT 0, so no existing account gains anything.
+    is_moderator  INTEGER NOT NULL DEFAULT 0,    -- 0/1
+    -- Chat: the member's "email me about new chat messages" choice (opt-in,
+    -- so nobody starts getting mail because a site upgraded); the id of the
+    -- newest chat message they have SEEN (ids only grow, so no clock is
+    -- involved); and the id of the message they were last emailed about,
+    -- which in 'once' mode keeps them quiet until they have looked.
+    chat_notify      INTEGER NOT NULL DEFAULT 0,
+    chat_seen_id     INTEGER NOT NULL DEFAULT 0,
+    chat_notified_id INTEGER NOT NULL DEFAULT 0,
     is_blocked    INTEGER NOT NULL DEFAULT 0,    -- 0/1; blocked accounts cannot log in
     -- Opt-in mail when a new event is created. Defaults to 0: nobody is signed
     -- up to anything by having an account, and existing accounts must not start
