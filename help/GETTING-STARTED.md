@@ -16,7 +16,7 @@ just sections 1–4 (fifteen minutes) and come back to the rest later.
 
 1. [The two addresses you need](#1-the-two-addresses-you-need)
 2. [Changing your own password and email](#2-changing-your-own-password-and-email)
-3. [Adding more administrators](#3-adding-more-administrators)
+3. [Adding more administrators](#3-adding-more-administrators) (and moderators)
 4. [Basic club settings](#4-basic-club-settings)
 5. [Appearance: logo, name, theme](#5-appearance-logo-name-theme)
 6. [Fallback pictures for games](#6-fallback-pictures-for-games)
@@ -26,9 +26,10 @@ just sections 1–4 (fifteen minutes) and come back to the rest later.
 10. [Consent and a privacy policy](#10-consent-and-a-privacy-policy)
 11. [Who may add games and sign up](#11-who-may-add-games-and-sign-up)
 12. [Sending email](#12-sending-email)
-13. [Before you send the link to your club](#13-before-you-send-the-link-to-your-club)
-14. [Everyday use](#14-everyday-use)
-15. [Common questions](#15-common-questions)
+13. [Chat and comments](#13-chat-and-comments)
+14. [Before you send the link to your club](#14-before-you-send-the-link-to-your-club)
+15. [Everyday use](#15-everyday-use)
+16. [Common questions](#16-common-questions)
 
 ---
 
@@ -104,6 +105,42 @@ password and other details if they need help.
 > The system will not let you remove rights from, or delete, the last remaining
 > administrator. That is deliberate — otherwise it would be possible to lock the
 > door from the inside by accident.
+
+### Moderators — help without the whole panel
+
+If you want somebody to keep the comments and chat tidy without giving them the
+whole admin panel, make them a **moderator**. In the **Users** tab, press
+**Make moderator** next to their name (the button then becomes **Remove
+moderator**). You can also create a new account as a moderator straight away —
+tick **Moderator account** in the form at the top.
+
+**A moderator can:**
+
+- **delete comments** on games and polls — anyone's, not just their own,
+- **delete single chat messages**,
+- **set and change table names**, if the **Table names** option says only
+  administrators may.
+
+Moderators get a **Moderation** link in the top menu. It leads to one tab,
+**Messages**, listing the chat messages and comments, each with a delete
+button. They can also delete a comment with the little cross right under the
+game, just as you can.
+
+**A moderator cannot:**
+
+- **edit other people's comments** — only delete them (their own they can edit
+  like anyone else),
+- **clear the whole chat at once** — that stays with administrators,
+- **edit or delete other people's games, sign-ups or polls**,
+- **open any other tab of the panel** — options, events, users, logs and the
+  rest.
+
+Apart from that, a moderator is an ordinary user.
+
+> The **Moderation** link only appears while the chat or comments are switched
+> on — without them there is nothing to moderate. If you make a moderator an
+> administrator, the moderator role goes; take the admin rights away later and
+> they are left an ordinary user, not a moderator.
 
 ---
 
@@ -216,18 +253,40 @@ plainer.
 
 ## 7. Your first event
 
-The **New event** tab.
+The **Events** tab, **New event** button at the top of the list.
 
-An event is a single meetup — or a convention lasting several days. You create
-one by giving:
+An event is a single meetup — or a convention lasting several days. Creating
+one takes two steps:
 
-1. a **name** (the default from section 4 will be suggested),
-2. the **number of days**,
-3. the **hours** for each day (also suggested),
-4. the **number of tables**.
+1. On the first screen you give a **name** (the default from section 4 will be
+   suggested) and the **number of days**. If you have switched on additional
+   event details or an event description, the place, address, picture and
+   description go here too.
+2. After **Next**, you give each day a **date** and **hours** (the default
+   hours are suggested). Type in the first day's date and the following days
+   fill themselves in, one day after another (if your days are not
+   consecutive, correct them by hand).
+3. Press **Create event**.
 
-Once saved, the event appears on the club page immediately. Members can add
-games to tables, and others can sign up to them.
+Once saved, the event appears on the club page immediately.
+
+**Tables are not set up in advance.** They are added on the event page with
+the **Add a new table** button — as many as are needed. Anyone who may add
+games can add one. To limit how many there can be, set **Max gaming tables**
+in the **Basic settings** group (0 = unlimited).
+
+### Copying an earlier event
+
+When your meetups repeat, there is no need to type everything in again. At the
+very top of the new-event screen there is a **Copy an existing event** list —
+pick an earlier meetup and press **Load**. The form fills itself in with its
+name, number of days, hours, day names, place, description and picture. You
+only enter the new dates (and change the name, if needed).
+
+The **Copy** button next to an event in the **Events** tab does the same.
+
+Games, tables and sign-ups are not copied — the new event starts empty, and the
+one you copied from is left untouched.
 
 Events are changed and deleted in the **Events** tab. That is also where you add
 an extra day to an existing meetup, if something runs on.
@@ -387,6 +446,37 @@ The **Allow users to delete their account** option adds a section to the user
 panel for closing an account. That person's games and sign-ups stay on the board
 under their name — closing an account does not change what already happened.
 
+### Who may change and delete entries
+
+When somebody adds a game or signs up without logging in, the system does not
+know who they are. The **Verification for edit/delete** option (in the
+**Basic settings** group) decides who may change or delete such an entry
+afterwards:
+
+- **No verification** — anyone. The simplest, and the easiest to prank.
+- **Registered users only** — guests cannot change or delete anything, and
+  logged-in users only their own entries. Entries added without logging in can
+  then only be changed by an administrator.
+- **Send code to email** (the default) — whoever wants to change an entry gets
+  a code at the address given when it was added, and has to type it in.
+- **Input matching email** — typing the same address that was given when the
+  entry was added is enough. More convenient, but weaker: knowing somebody's
+  address is all it takes.
+- **Only admins can edit/delete** — nobody but administrators, not even
+  logged-in people on their own entries.
+
+Entries added by logged-in people are changed by their author with one click
+and no confirmation — under every method except the last. Nobody else apart
+from administrators can touch them.
+
+Right below is **Games and sign-ups without an email**. It only matters with
+the email methods (code or matching email): an entry without an address has
+nothing to be verified against, so here you decide whether **everyone** may
+change it (the default) or **only admins**. The second is handy at primary
+school events, for instance — children often have no email, and enjoy
+pranking each other by deleting one another's games. With the other methods
+this setting is ignored.
+
 ---
 
 ## 12. Sending email
@@ -414,7 +504,50 @@ an unsubscribe link.
 
 ---
 
-## 13. Before you send the link to your club
+## 13. Chat and comments
+
+Two switches in the **Basic settings** group:
+
+- **Allow discussions** — comments under games and polls,
+- **Enable chat** — a small speech-bubble window at the edge of the screen,
+  for writing to everyone who happens to be looking at the page.
+
+The chat's details are in the **Chat** group:
+
+**Keep messages** — whether the chat is cleared with each new event, or kept
+(then the oldest messages only go once the message cap is reached). If you run
+several events at once (section 8), choose **Across all events**.
+
+**New-message marker on the chat button** — when something new arrives, the
+chat button shows a red **dot** or the **number** of new messages. It goes
+away once the chat is opened. Next to it you set **how many minutes** an open
+page waits between checks (5 by default; 0 = only when a page loads).
+
+**Email notifications about new chat messages** — logged-in users can tick a
+box in their user panel to be emailed about new messages. The choices:
+
+- **One email, then quiet until they look at the chat** — recommended: one
+  email, and the next only once the person has actually looked at the chat,
+- **An email for every message** — fine for a very quiet chat; a busy one will
+  flood people's inboxes.
+
+It needs working email (section 12). Nobody is emailed about their own message.
+
+The **Only logged-in users can post in the chat** option (in the **Accounts
+and permissions** group) lets guests read but not write.
+
+### Keeping things tidy
+
+In the panel, the **Messages** tab has two sub-tabs: **Chat** and
+**Comments**. In the chat you delete single messages, or clear the whole chat
+at once; comments can be edited and deleted. You can also delete a comment
+with the little cross right under the game.
+
+If you would rather not do it yourself, appoint a moderator (section 3).
+
+---
+
+## 14. Before you send the link to your club
 
 A short checklist:
 
@@ -426,6 +559,7 @@ A short checklist:
 - [ ] Your password changed from the one you were given
 - [ ] Theme chosen, logo uploaded (if you have one)
 - [ ] A test event created, clicked around, and deleted
+- [ ] Verification for edit/delete chosen deliberately (section 11)
 - [ ] Consent text written, if you collect email addresses
 - [ ] Privacy policy page added, if you need one
 
@@ -437,12 +571,13 @@ Check how it looks on a phone, too. That is where most people will open it.
 
 ---
 
-## 14. Everyday use
+## 15. Everyday use
 
 Once everything is set up, your job is usually:
 
-**Before a meetup** — create the event (the *New event* tab) and send the link
-round. A few clicks, because the defaults are already in place.
+**Before a meetup** — create the event (the *Events* tab, *New event* button)
+and send the link round. Quickest of all: copy the previous meetup (section 7)
+and enter only the new dates.
 
 **During** — usually nothing. People add games and sign up themselves. If
 somebody needs help, you can correct or remove any game or sign-up.
@@ -459,16 +594,23 @@ when you need to work out what happened to somebody's game.
 
 ---
 
-## 15. Common questions
+## 16. Common questions
 
 **I changed a setting and nothing happened.**
 Refresh the club page (F5). If you are looking at it in a second tab, it will
 not reload by itself.
 
 **Somebody signed up and now cannot cancel.**
-Cancelling works for the person who signed up. If they signed up as a guest from
-a different phone, or got their name wrong, just remove the entry from the
-panel — there is a delete button beside every name.
+Cancelling works for the person who signed up — as far as the chosen
+verification allows (section 11). If they signed up as a guest from a different
+phone, or got their name wrong, just remove the entry yourself: while you are
+logged in as an administrator, there is a delete button beside every name on
+the event page.
+
+**People keep deleting each other's games as a joke.**
+Change **Verification for edit/delete** (section 11) — for example to
+**Registered users only** or **Only admins can edit/delete**. With the email
+methods, also set **Games and sign-ups without an email** to **Only admins**.
 
 **A game has disappeared / somebody deleted it.**
 Look in the **Logs** tab. It will show who deleted it and when.
@@ -479,6 +621,8 @@ stay where they are.
 
 **Somebody posted an unpleasant comment.**
 Any comment can be deleted from the panel, exactly like a game or a sign-up.
+If you would rather not police it yourself, appoint a moderator (section 3) —
+they can delete comments and chat messages too.
 
 **I have forgotten my password and there is no second administrator.**
 This is why section 3 comes so early in this guide. If it has already happened,

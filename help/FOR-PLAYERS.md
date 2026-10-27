@@ -96,6 +96,10 @@ If you were logged in, the site already knows it is you. If you signed up as a
 guest, it may ask you to confirm — see
 [section 9](#9-why-give-an-email-address).
 
+> **No Resign button?** Some clubs set things up so that only logged-in people,
+> or only the organiser, can change sign-ups. Then write to the organiser — they
+> will take you off the list.
+
 ---
 
 ## 5. Adding a game of your own
@@ -196,6 +200,11 @@ address it has: it will ask for that same address, or send a short code to it.
 people can send you a message through the site, but they do not see where it
 went.
 
+> **Every club sets this up its own way.** In some — at school events, for
+> example — games and sign-ups added without an email can only be changed or
+> deleted by the organiser. That is so nobody can delete somebody else's game
+> as a joke.
+
 ---
 
 ## 10. Accounts — why bother
@@ -207,7 +216,8 @@ But an account is more convenient:
 
 - **Your entries are yours.** Nobody else can cancel your seat or delete
   something you added — and you can change your own with one click, without
-  confirming anything.
+  confirming anything. (Unless your club has decided that only the organiser
+  makes changes — then that applies to everyone equally.)
 - **You do not type your name every time** — it fills itself in.
 - **You get your own game library** ([section 12](#12-your-game-library)).
 - **You control your own notifications** ([section 11](#11-email-notifications)).
@@ -232,10 +242,15 @@ If you gave an email address, you can be told when:
 - **a poll you took part in is decided** — you get told what you are actually
   playing,
 - **something new appears at a meetup** you are waiting for — if the club has
-  switched that list on, there is a box under the table plan for subscribing.
+  switched that list on, there is a box under the table plan for subscribing,
+- **somebody writes in the chat** — for people with an account only: tick
+  **Email me about new chat messages** in your user panel (if the club has
+  switched this on). Usually you get one email, and the next only once you
+  have looked at the chat — so your inbox is not flooded.
 
 Every one of those emails has an unsubscribe link at the bottom. One click and
-it stops — you do not have to ask anyone.
+it stops — you do not have to ask anyone. Chat emails are switched off with
+the same box in your user panel that switched them on.
 
 Notifications are per **meetup**. Subscribing to news about the April game night
 does not subscribe you to the May one.
@@ -287,8 +302,16 @@ corner of the screen. You click it, type your name, and write to everyone who
 happens to be looking at the page. Good for small things like "I am at the
 door" or "anyone fancy something short before 18:00?".
 
-You do not need an account. New messages appear on their own, without
+Usually you do not need an account (some clubs let only logged-in people
+write — then anyone can still read). New messages appear on their own, without
 refreshing the page.
+
+If somebody has written something since you last looked at the chat, the chat
+button may show a **red dot** or the **number of new messages**. It goes away
+when you open the chat.
+
+> Inappropriate comments and chat messages are removed by the organiser, or by
+> a moderator your club has appointed.
 
 > **Cannot see that window?** It means the organiser has not switched chat on
 > for your club. Nothing is broken — the feature is simply turned off.
@@ -305,6 +328,11 @@ reserve list.
 You signed up as a guest, so the site is making sure it is you. Give the same
 address you used when signing up. Do not remember it? Ask the organiser — they
 can remove anyone.
+
+**I cannot see any buttons for changing or deleting.**
+That is how your club has set things up — changes may be limited to logged-in
+people, or to the organiser. Write to the organiser and they will sort it out
+for you.
 
 **I signed up twice / I typed my name wrong.**
 Resign and sign up again. If that will not work, the organiser can fix it.

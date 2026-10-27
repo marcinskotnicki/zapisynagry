@@ -16,7 +16,7 @@ punkty 1–4 (piętnaście minut) i wrócić do reszty później.
 
 1. [Adresy, które musisz znać](#1-adresy-które-musisz-znać)
 2. [Zmiana własnego hasła i e-maila](#2-zmiana-własnego-hasła-i-e-maila)
-3. [Dodanie kolejnych administratorów](#3-dodanie-kolejnych-administratorów)
+3. [Dodanie kolejnych administratorów](#3-dodanie-kolejnych-administratorów) (i moderatorów)
 4. [Podstawowe ustawienia klubu](#4-podstawowe-ustawienia-klubu)
 5. [Wygląd: logo, nazwa, motyw](#5-wygląd-logo-nazwa-motyw)
 6. [Obrazki zapasowe do gier](#6-obrazki-zapasowe-do-gier)
@@ -26,9 +26,10 @@ punkty 1–4 (piętnaście minut) i wrócić do reszty później.
 10. [Zgoda RODO i polityka prywatności](#10-zgoda-rodo-i-polityka-prywatności)
 11. [Kto może dodawać gry i się zapisywać](#11-kto-może-dodawać-gry-i-się-zapisywać)
 12. [Wysyłanie e-maili](#12-wysyłanie-e-maili)
-13. [Zanim wyślesz link członkom klubu](#13-zanim-wyślesz-link-członkom-klubu)
-14. [Codzienne używanie](#14-codzienne-używanie)
-15. [Najczęstsze pytania](#15-najczęstsze-pytania)
+13. [Czat i komentarze](#13-czat-i-komentarze)
+14. [Zanim wyślesz link członkom klubu](#14-zanim-wyślesz-link-członkom-klubu)
+15. [Codzienne używanie](#15-codzienne-używanie)
+16. [Najczęstsze pytania](#16-najczęstsze-pytania)
 
 ---
 
@@ -104,6 +105,42 @@ dane, gdyby ktoś potrzebował pomocy.
 > System nie pozwoli Ci odebrać uprawnień ani usunąć konta ostatniemu
 > administratorowi. To celowe zabezpieczenie — inaczej dałoby się przypadkiem
 > zamknąć drzwi od środka.
+
+### Moderatorzy — pomoc bez pełnego panelu
+
+Jeśli chcesz, żeby ktoś pilnował porządku w komentarzach i na czacie, ale nie
+miał dostępu do całego panelu, zrób go **moderatorem**. W zakładce
+**Użytkownicy** kliknij przy jego imieniu **Nadaj moderatora** (przycisk zmieni
+się w **Odbierz moderatora**). Nowe konto możesz też od razu założyć jako
+moderatorskie — zaznacz **Konto moderatora** w formularzu na górze.
+
+**Moderator może:**
+
+- **usuwać komentarze** pod grami i głosowaniami — każde, nie tylko swoje,
+- **usuwać pojedyncze wiadomości z czatu**,
+- **nadawać i zmieniać nazwy stołów**, jeśli w opcji **Nazwy stołów** ustawiono,
+  że robią to tylko administratorzy.
+
+Moderator ma w górnym menu link **Moderacja**. Prowadzi on do jednej zakładki,
+**Wiadomości**, z listą wiadomości z czatu i komentarzy, gdzie przy każdej
+pozycji jest przycisk usuwania. Komentarze może też usuwać krzyżykiem prosto
+pod grą, tak jak Ty.
+
+**Moderator nie może:**
+
+- **poprawiać cudzych komentarzy** — może je tylko usunąć (swoje własne
+  poprawia jak każdy),
+- **wyczyścić całego czatu naraz** — to zostaje dla administratorów,
+- **edytować ani usuwać cudzych gier, zapisów i głosowań**,
+- **zaglądać do pozostałych zakładek panelu** — opcji, wydarzeń, użytkowników,
+  logów i reszty.
+
+Poza tym moderator jest zwykłym użytkownikiem.
+
+> Link **Moderacja** pojawia się tylko wtedy, gdy czat albo komentarze są
+> włączone — bez nich moderator nie ma czego pilnować. Jeśli moderatorowi nadasz
+> uprawnienia administratora, rola moderatora znika; gdy później je odbierzesz,
+> zostanie zwykłym użytkownikiem, a nie moderatorem.
 
 ---
 
@@ -217,18 +254,41 @@ ubożej.
 
 ## 7. Pierwsze wydarzenie
 
-Zakładka **Nowe wydarzenie**.
+Zakładka **Wydarzenia**, przycisk **Nowe wydarzenie** na górze listy.
 
-Wydarzenie to jedno spotkanie — albo kilkudniowy konwent. Zakładasz je,
-podając:
+Wydarzenie to jedno spotkanie — albo kilkudniowy konwent. Zakłada się je w
+dwóch krokach:
 
-1. **nazwę** (podpowie się ta domyślna z punktu 4),
-2. **liczbę dni**,
-3. **godziny** każdego dnia (też się podpowiedzą),
-4. **liczbę stołów**.
+1. Na pierwszym ekranie podajesz **nazwę** (podpowie się ta domyślna z
+   punktu 4) i **liczbę dni**. Jeśli masz włączone dodatkowe informacje o
+   wydarzeniu albo opis wydarzenia, wpiszesz tu też miejsce, adres, obrazek
+   i opis.
+2. Po kliknięciu **Dalej** podajesz dla każdego dnia **datę** i **godziny**
+   (godziny podpowiedzą się domyślne). Wystarczy wpisać datę pierwszego dnia —
+   kolejne uzupełnią się same, dzień po dniu (jeśli dni nie idą po kolei,
+   popraw je ręcznie).
+3. Klikasz **Utwórz wydarzenie**.
 
-Po zapisaniu wydarzenie od razu widać na stronie klubu. Członkowie mogą
-dodawać gry do stołów, a inni się na nie zapisywać.
+Po zapisaniu wydarzenie od razu widać na stronie klubu.
+
+**Stołów nie ustawia się z góry.** Dodaje się je na stronie wydarzenia
+przyciskiem **Dodaj nowy stół** — tyle, ile akurat trzeba. Może to zrobić
+każdy, kto może dodawać gry. Jeśli chcesz ograniczyć ich liczbę, ustaw
+**Maks. liczba stołów** w grupie **Ustawienia podstawowe** (0 = bez limitu).
+
+### Kopiowanie wcześniejszego wydarzenia
+
+Gdy spotkania się powtarzają, nie trzeba wszystkiego wpisywać od nowa. Na
+samej górze ekranu nowego wydarzenia jest lista **Skopiuj z istniejącego
+wydarzenia** — wybierz wcześniejsze spotkanie i kliknij **Wczytaj**. Formularz
+wypełni się jego nazwą, liczbą dni, godzinami, nazwami dni, miejscem, opisem i
+obrazkiem. Ty podajesz tylko nowe daty (i ewentualnie zmieniasz nazwę).
+
+Ten sam efekt daje przycisk **Kopiuj** przy wydarzeniu na liście w zakładce
+**Wydarzenia**.
+
+Gry, stoły i zapisy nie są kopiowane — nowe wydarzenie zaczyna się puste, a
+to, z którego kopiujesz, zostaje nietknięte.
 
 Wydarzenia zmienia się i kasuje w zakładce **Wydarzenia**. Tam też dodaje się
 dodatkowy dzień do już istniejącego spotkania, gdyby coś się przeciągnęło.
@@ -386,10 +446,39 @@ nigdy niepotrzebny, czy decyduje o tym osoba dodająca grę. E-mail przydaje si�
 do dwóch rzeczy: powiadomień o zapisach na swoją grę i późniejszej edycji wpisu
 bez konta.
 
-Nowa opcja **Pozwól użytkownikom usuwać swoje konto** dodaje do panelu
+Opcja **Pozwól użytkownikom usuwać swoje konto** dodaje do panelu
 użytkownika sekcję do zamknięcia konta. Gry i zapisy takiej osoby zostają na
 tablicy pod jej imieniem — usunięcie konta nie zmienia tego, co już się
 wydarzyło.
+
+### Kto może poprawiać i usuwać wpisy
+
+Gdy ktoś dodaje grę albo zapisuje się bez logowania, system nie wie, kim ta
+osoba jest. Opcja **Weryfikacja edycji/usuwania** (w grupie **Ustawienia
+podstawowe**) decyduje, kto może potem taki wpis poprawić albo usunąć:
+
+- **Bez weryfikacji** — każdy. Najprościej, ale też najłatwiej o psikusy.
+- **Tylko zalogowani** — niezalogowani nie mogą niczego poprawiać ani usuwać,
+  a zalogowani tylko swoje wpisy. Wpisy dodane bez logowania może wtedy
+  zmienić już tylko administrator.
+- **Wyślij kod na e-mail** (ustawienie domyślne) — kto chce zmienić wpis,
+  dostaje kod na adres podany przy dodawaniu i musi go przepisać.
+- **Podaj zgodny e-mail** — wystarczy wpisać ten sam adres, który podano przy
+  dodawaniu. Wygodniejsze, ale słabsze: wystarczy znać czyjś adres.
+- **Tylko administratorzy mogą edytować/usuwać** — nikt poza
+  administratorami, nawet zalogowani autorzy własnych wpisów.
+
+Wpisy dodane przez zalogowanych poprawia ich autor, jednym kliknięciem i bez
+potwierdzania — przy każdej metodzie poza ostatnią. Nikt inny poza
+administratorami ich nie ruszy.
+
+Tuż pod spodem jest **Gry i zapisy bez adresu e-mail**. Ma znaczenie tylko
+przy metodach e-mailowych (kod albo zgodny e-mail): wpis bez adresu nie ma
+czym się zweryfikować, więc tu decydujesz, czy może go zmienić **każdy**
+(domyślnie), czy **tylko administratorzy**. To drugie przydaje się np. na
+spotkaniach w szkołach podstawowych — dzieci często nie mają e-maila, za to
+lubią robić sobie psikusy i usuwać nawzajem swoje gry. Przy pozostałych
+metodach to ustawienie jest pomijane.
 
 ---
 
@@ -419,7 +508,54 @@ link do wypisania się.
 
 ---
 
-## 13. Zanim wyślesz link członkom klubu
+## 13. Czat i komentarze
+
+Dwa przełączniki w grupie **Ustawienia podstawowe**:
+
+- **Zezwól na dyskusje** — komentarze pod grami i głosowaniami,
+- **Włącz czat** — małe okienko z dymkiem przy krawędzi ekranu, w którym
+  można pisać do wszystkich, którzy akurat oglądają stronę.
+
+Szczegóły czatu są w grupie **Czat**:
+
+**Przechowuj wiadomości** — czy czat czyści się przy każdym nowym wydarzeniu,
+czy zostaje na stałe (wtedy najstarsze wiadomości znikają dopiero po
+przekroczeniu limitu). Jeśli prowadzicie kilka wydarzeń naraz (punkt 8),
+wybierz **Dla wszystkich wydarzeń**.
+
+**Znacznik nowych wiadomości na przycisku czatu** — gdy pojawi się coś
+nowego, na przycisku czatu wyświetli się czerwona **kropka** albo **liczba**
+nowych wiadomości. Znika, gdy ktoś otworzy czat. Obok ustawiasz, **co ile
+minut** otwarta strona sprawdza, czy coś przyszło (domyślnie 5; 0 = tylko przy
+wczytaniu strony).
+
+**Powiadomienia e-mail o nowych wiadomościach na czacie** — zalogowani
+użytkownicy mogą zaznaczyć w swoim panelu, że chcą dostawać e-mail o nowych
+wiadomościach. Do wyboru:
+
+- **Jeden e-mail, potem cisza aż do zajrzenia na czat** — polecane: jedna
+  wiadomość, a kolejna dopiero wtedy, gdy ktoś faktycznie zajrzy na czat,
+- **E-mail o każdej wiadomości** — dobre przy bardzo spokojnym czacie, przy
+  ruchliwym zasypie ludzi pocztą.
+
+Wymaga działającej poczty (punkt 12). Nikt nie dostaje e-maila o własnej
+wiadomości.
+
+Opcja **Z czatu mogą korzystać tylko zalogowani** (w grupie **Konta i
+uprawnienia**) sprawia, że goście mogą czytać, ale nie pisać.
+
+### Pilnowanie porządku
+
+W panelu zakładka **Wiadomości** ma dwie podzakładki: **Czat** i
+**Komentarze**. Na czacie usuwasz pojedyncze wiadomości albo czyścisz cały
+czat naraz; komentarze możesz poprawiać i usuwać. Komentarz usuniesz też
+krzyżykiem prosto pod grą.
+
+Jeśli nie chcesz robić tego sam(a), wyznacz moderatora (punkt 3).
+
+---
+
+## 14. Zanim wyślesz link członkom klubu
 
 Krótka lista kontrolna:
 
@@ -431,6 +567,7 @@ Krótka lista kontrolna:
 - [ ] Hasło zmienione z tego, które dostałeś/aś
 - [ ] Motyw wybrany, logo wgrane (jeśli macie)
 - [ ] Testowe wydarzenie założone, poklikane i usunięte
+- [ ] Weryfikacja edycji/usuwania wybrana świadomie (punkt 11)
 - [ ] Zgoda RODO wpisana, jeśli zbieracie e-maile
 - [ ] Strona z polityką prywatności dodana, jeśli jest potrzebna
 
@@ -444,12 +581,13 @@ właśnie tam.
 
 ---
 
-## 14. Codzienne używanie
+## 15. Codzienne używanie
 
 Gdy wszystko jest już ustawione, Twoja praca to zwykle:
 
-**Przed spotkaniem** — założyć wydarzenie (zakładka *Nowe wydarzenie*) i wysłać
-link klubowi. Kilka kliknięć, bo domyślne wartości już masz ustawione.
+**Przed spotkaniem** — założyć wydarzenie (zakładka *Wydarzenia*, przycisk
+*Nowe wydarzenie*) i wysłać link klubowi. Najszybciej skopiować poprzednie
+spotkanie (punkt 7) i podać tylko nowe daty.
 
 **W trakcie** — zwykle nic. Ludzie sami dodają gry i sami się zapisują.
 Gdyby ktoś potrzebował pomocy, każdą grę i zapis możesz poprawić lub usunąć.
@@ -466,16 +604,24 @@ Przydaje się, gdy trzeba ustalić, co się stało z czyjąś grą.
 
 ---
 
-## 15. Najczęstsze pytania
+## 16. Najczęstsze pytania
 
 **Zmieniłem/am ustawienie i nic się nie stało.**
 Odśwież stronę klubu (F5). Jeśli patrzysz na nią w drugiej karcie, ona sama się
 nie przeładuje.
 
 **Ktoś się zapisał, a teraz nie może zrezygnować.**
-Rezygnacja działa dla osoby, która się zapisała. Jeśli ktoś zapisał się jako
-gość z innego telefonu albo pomylił imię, po prostu usuń ten wpis z panelu —
-przy każdym nazwisku jest przycisk usuwania.
+Rezygnacja działa dla osoby, która się zapisała — o ile pozwala na to
+ustawiona weryfikacja (punkt 11). Jeśli ktoś zapisał się jako gość z innego
+telefonu albo pomylił imię, po prostu usuń ten wpis sam(a): będąc
+zalogowanym administratorem, przy każdym nazwisku na stronie wydarzenia masz
+przycisk usuwania.
+
+**Ludzie usuwają sobie nawzajem gry dla żartu.**
+Zmień **Weryfikację edycji/usuwania** (punkt 11) — na przykład na **Tylko
+zalogowani** albo **Tylko administratorzy mogą edytować/usuwać**. Przy
+metodach e-mailowych ustaw też **Gry i zapisy bez adresu e-mail** na **Tylko
+administratorzy**.
 
 **Gra zniknęła / ktoś ją skasował.**
 Zajrzyj do zakładki **Logi**. Zobaczysz, kto i kiedy ją usunął.
@@ -486,6 +632,8 @@ dodane zostają na swoich miejscach.
 
 **Ktoś wpisał brzydki komentarz.**
 Każdy komentarz można usunąć z poziomu panelu, tak samo jak grę czy zapis.
+Jeśli nie chcesz pilnować tego sam(a), wyznacz moderatora (punkt 3) — on też
+może usuwać komentarze i wiadomości z czatu.
 
 **Zapomniałem/am hasła i nie mam drugiego administratora.**
 Dlatego punkt 3 jest tak wcześnie w tym poradniku. Jeśli już się to stało,

@@ -94,6 +94,10 @@ Jeśli byłeś/aś zalogowany(a), system od razu wie, że to Ty. Jeśli zapisywa
 się jako gość, może poprosić o potwierdzenie — patrz
 [punkt 9](#9-po-co-podawać-e-mail).
 
+> **Nie widzisz przycisku Wypisz się?** Część klubów ustawia, że zmiany w
+> zapisach wprowadzają tylko zalogowani albo tylko organizator. Wtedy napisz do
+> organizatora — on Cię wypisze.
+
 ---
 
 ## 5. Dodanie własnej gry do stołu
@@ -191,6 +195,11 @@ poprosi o podanie tego samego adresu albo wyśle na niego krótki kod.
 **Czy ktoś zobaczy mój adres?** Nie. Adresy nie są nigdzie pokazywane. Inni
 mogą wysłać Ci wiadomość przez stronę, ale nie zobaczą, na jaki adres poszła.
 
+> **Każdy klub ustawia to po swojemu.** W niektórych — na przykład na
+> spotkaniach w szkołach — gry i zapisy dodane bez e-maila może zmieniać albo
+> usuwać tylko organizator. Tak jest po to, żeby nikt nie mógł dla żartu
+> skasować cudzej gry.
+
 ---
 
 ## 10. Konto — po co je zakładać
@@ -202,7 +211,8 @@ Ale z kontem jest wygodniej:
 
 - **Twoje wpisy są Twoje.** Nikt inny nie wypisze Cię z gry ani nie usunie
   dodanej przez Ciebie pozycji — a Ty poprawisz swoje jednym kliknięciem, bez
-  żadnego potwierdzania.
+  żadnego potwierdzania. (Chyba że klub ustawił, że zmiany wprowadza tylko
+  organizator — wtedy dotyczy to wszystkich po równo.)
 - **Nie wpisujesz imienia za każdym razem** — podpowiada się samo.
 - **Masz własną bibliotekę gier** ([punkt 12](#12-twoja-biblioteka-gier)).
 - **Sam(a) ustawiasz powiadomienia** ([punkt 11](#11-powiadomienia-e-mail)).
@@ -227,10 +237,15 @@ Jeśli podałeś/aś adres e-mail, możesz dostawać wiadomości, gdy:
 - **rozstrzygnie się głosowanie**, w którym brałeś/aś udział — dostajesz
   wiadomość, w co ostatecznie gracie,
 - **pojawi się coś nowego na spotkaniu**, na które czekasz — jeśli klub włączył
-  taką listę, pod planem stołów jest okienko do zapisania się na powiadomienia.
+  taką listę, pod planem stołów jest okienko do zapisania się na powiadomienia,
+- **ktoś napisze na czacie** — to tylko dla osób z kontem: w swoim panelu
+  użytkownika zaznaczasz **Wysyłaj mi e-mail o nowych wiadomościach na
+  czacie** (jeśli klub włączył tę możliwość). Zwykle dostajesz jeden e-mail, a
+  kolejny dopiero wtedy, gdy zajrzysz na czat — żeby nie zasypać Ci skrzynki.
 
 Każda taka wiadomość ma na dole link do wypisania się. Jedno kliknięcie i koniec
-— nie trzeba nikogo o to prosić.
+— nie trzeba nikogo o to prosić. E-maile o czacie wyłączasz, odznaczając to
+samo pole w panelu użytkownika.
 
 Powiadomienia dotyczą **jednego spotkania**. Zapisanie się na powiadomienia o
 kwietniowym graniu nie zapisuje Cię na majowe.
@@ -282,8 +297,16 @@ ekranu. Klikasz, wpisujesz imię i piszesz do wszystkich, którzy akurat patrzą
 na stronę. Przydaje się do drobiazgów w rodzaju „jestem pod drzwiami” albo
 „ktoś ma ochotę na coś krótkiego przed 18:00?”.
 
-Nie musisz mieć konta. Nowe wiadomości pojawiają się same, bez odświeżania
-strony.
+Zwykle nie musisz mieć konta (niektóre kluby pozwalają pisać tylko
+zalogowanym — wtedy czytać może każdy). Nowe wiadomości pojawiają się same, bez
+odświeżania strony.
+
+Jeśli od Twojej ostatniej wizyty na czacie ktoś coś napisał, na przycisku
+czatu może pojawić się **czerwona kropka** albo **liczba nowych wiadomości**.
+Znika, gdy otworzysz czat.
+
+> Niestosowne komentarze i wiadomości z czatu usuwa organizator albo
+> wyznaczony przez klub moderator.
 
 > **Nie widzisz takiego okienka?** To znaczy, że organizator nie włączył czatu w
 > Waszym klubie. Nic się nie zepsuło — po prostu ta funkcja jest wyłączona.
@@ -300,6 +323,10 @@ rezerwy.
 Zapisywałeś/aś się jako gość, więc system upewnia się, że to Ty. Podaj ten sam
 adres, którego użyłeś/aś przy zapisie. Nie pamiętasz? Poproś organizatora — on
 może wypisać każdego.
+
+**Nie widzę przycisków do poprawiania ani usuwania.**
+Tak ustawił Twój klub — zmiany mogą wprowadzać na przykład tylko zalogowani
+albo tylko organizator. Napisz do organizatora, poprawi to za Ciebie.
 
 **Zapisałem/am się dwa razy / źle wpisałem/am imię.**
 Wypisz się i zapisz jeszcze raz. Jeśli nie da rady — organizator poprawi.
