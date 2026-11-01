@@ -459,6 +459,43 @@ function rich_text_html($raw) {
 }
 
 /**
+ * Tooltip for the "message this player" envelope. For an ADMIN, and only with
+ * 'admin_show_player_emails' on, it also names the address — a quick way to
+ * spot a made-up one. Everyone else gets the plain wording; an address is
+ * never put into a page anybody but an admin can see.
+ *
+ * @param array $p  A players row.
+ * @return string  Plain text (escape it when printing).
+ */
+function player_msg_title($p) {
+    $title = t('msgbtn_player');
+    $email = trim((string)($p['email'] ?? ''));
+    if ($email !== '' && opt_bool('admin_show_player_emails') && is_admin()) {
+        $title .= ' (' . $email . ')';
+    }
+    return $title;
+}
+
+/**
+ * The small pen that opens edit_player.php for one sign-up, or '' when there is
+ * none to show: the feature is off ('allow_player_edit'), or this visitor may
+ * not change that sign-up. The permission is the SAME as resigning —
+ * verify_can_show_buttons() — so the pen appears exactly where the remove
+ * button does. edit_player.php checks it all again; this only hides.
+ *
+ * @param array $p  A players row.
+ * @return string  HTML.
+ */
+function player_edit_html($p) {
+    if (!opt_bool('allow_player_edit')) return '';
+    if (!function_exists('verify_can_show_buttons')
+        || !verify_can_show_buttons($p['user_id'] ?? null, $p['email'] ?? null)) return '';
+    $label = e(t('editplayer_btn'));
+    return '<a class="player-edit" href="edit_player.php?player=' . (int)$p['id'] . '" title="' . $label
+         . '" aria-label="' . $label . '" rel="nofollow">&#9998;</a>';
+}
+
+/**
  * Who signed this player up, or '' when they signed themselves up.
  *
  * ONE function because TWELVE themes fork game_card.php and every one of them

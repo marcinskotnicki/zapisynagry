@@ -213,6 +213,8 @@ $groupEnd = function () { echo '</div></details>'; };
             </select>
             <p class="field-note"><?= e(t('opt_verification_note')) ?></p>
         </div>
+        <?php // Editing a sign-up — follows the verification above exactly. ?>
+        <?php $toggle('allow_player_edit', 'opt_allow_player_edit_note'); ?>
         <?php // Guest entries with no email have nothing to verify against;
               // this decides whether anyone or only admins may touch them. ?>
         <div class="field">
@@ -715,6 +717,7 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('signup_proxy_members', 'opt_note_proxy_off');
         $toggle('chat_logged_in_only',          'opt_note_guest_only_inert');
         $toggle('allow_guest_messaging');      // messaging open to guests too, not just accounts
+        $toggle('admin_show_player_emails', 'opt_admin_show_player_emails_note');   // admins: address in the envelope tooltip
         $toggle('allow_user_template', 'opt_note_guest_only_accounts');   // theme via user panel
         $toggle('allow_guest_template');       // guests may pick a theme (topbar)
         $toggle('allow_user_language', 'opt_note_guest_only_accounts');   // language via user panel

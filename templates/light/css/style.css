@@ -1712,3 +1712,16 @@ trix-toolbar .trix-button--dialog {
 /* 'dot' mode: no text, so a plain round marker. */
 .chat-badge:empty { min-width: 12px; width: 12px; height: 12px; padding: 0; top: -4px; right: -5px; }
 .chat-badge[hidden] { display: none; }
+
+/* Edit-a-sign-up pen, next to the remove button. Deliberately quiet — it will
+   be used rarely. `color: inherit` rather than a theme colour, so it reads on
+   whatever the player row or slot sits on in every theme. */
+.player-edit {
+    color: inherit;
+    opacity: 0.55;
+    font-size: 0.85em;
+    line-height: 1;
+    text-decoration: none;
+    margin: 0 0.1rem;
+}
+.player-edit:hover { opacity: 1; text-decoration: none; }

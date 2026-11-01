@@ -120,6 +120,7 @@ $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
     'allow_polls', 'allow_poll_wait', 'site_polls_enabled', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
+    'allow_player_edit', 'admin_show_player_emails',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',
     'allow_start_outside_hours', 'mailing_list', 'antibot_honeypot',
     // show_venue_name is NOT here any more: the header_brand dropdown replaced

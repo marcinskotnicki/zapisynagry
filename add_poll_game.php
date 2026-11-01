@@ -97,10 +97,18 @@ if ($editId > 0 && $livePoll) {
                        [$editId, (int)$livePoll['id']]);
     if (!$editCand) redirect('edit_poll.php?poll=' . (int)$livePoll['id']);
 }
-// The form posts back here; cancelling returns to wherever the flow started.
-$candCancel = $editCand
+/* Where "back" / "cancel" return to: the poll this game is being added to.
+ * An EXISTING poll -> its edit page; a poll still being created -> the
+ * new-poll form, where the draft is waiting. Used by the first screen (the
+ * BGG / library / manual choice) and by the candidate form alike.
+ *
+ * It used to send an existing poll's cancel to add_poll.php too, which
+ * starts a brand-new poll on that table rather than returning to the one
+ * being edited — only editing a candidate went back to the right place. */
+$pollBack   = $livePoll
     ? 'edit_poll.php?poll=' . (int)$livePoll['id']
     : 'add_poll.php?table=' . $tableId;
+$candCancel = $pollBack;
 
 /**
  * Default candidate prefill. required_players defaults to the max — the poll
@@ -317,6 +325,7 @@ if (isset($_GET['id'])) {
     }
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('poll_candidate_form', [
+        'cancel_url' => $candCancel,   // back to the poll, not a new one
         'table' => $table, 'cand' => $cand, 'source' => 'bgg',
         'thumbs' => [], 'error' => null, 'csrf' => csrf_field(),   // image locked to BGG
     
@@ -349,6 +358,7 @@ if (isset($_GET['mine'])) {
     $cand = club_shelf_prefill(poll_candidate_defaults(), $mineRow);
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('poll_candidate_form', [
+        'cancel_url' => $candCancel,   // back to the poll, not a new one
         'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
         'thumbs' => $cand['source'] === 'bgg'
             ? []
@@ -371,6 +381,7 @@ if (isset($_GET['club'])) {
     $cand['from_club'] = 1;
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('poll_candidate_form', [
+        'cancel_url' => $candCancel,   // back to the poll, not a new one
         'table' => $table, 'cand' => $cand, 'source' => $cand['source'],
         'thumbs' => $cand['source'] === 'bgg'
             ? []                                  // image locked to the BGG one
@@ -417,6 +428,7 @@ if ($go === 'manual') {
     $cand['name'] = trim($_POST['name'] ?? '');      // carry the gate's typed name
     tpl_render('header', ['page_title' => t('addpoll_candidate_title')]);
     tpl_render('poll_candidate_form', [
+        'cancel_url' => $candCancel,   // back to the poll, not a new one
         'table' => $table, 'cand' => $cand, 'source' => 'manual',
         'thumbs' => db_all('SELECT id, filename FROM predefined_thumbnails ORDER BY id DESC'),
         'error' => null, 'csrf' => csrf_field(),
@@ -470,6 +482,7 @@ tpl_render('add_game_gate', [
         ? (string)($livePoll['proposer_name'] ?? '')
         : '',
     'action'    => 'add_poll_game.php',
+    'back'      => $pollBack,        // Back returns to the poll, not the home page
     'show_poll' => false,            // no nested-poll button when adding a candidate
     'title'     => t('addpoll_candidate_title'),
 ]);

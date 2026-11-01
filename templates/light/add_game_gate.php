@@ -13,6 +13,8 @@
  *    $action    — target script (default 'add_game.php'; 'add_poll_game.php' for
  *                 the candidate gate).
  *    $show_poll — show the "start a poll instead" button (game gate only).
+ *    $back      — where the Back link goes (default 'index.php'; the poll's
+ *                 own page when choosing a game for a poll).
  *    $title     — heading (default add-game title).
  * ============================================================================= */
 $action    = $action    ?? 'add_game.php';   // where the gate buttons post to
@@ -33,6 +35,25 @@ $title      = $title     ?? t('addgame_title');
     <form method="post" action="<?= e($action) ?>?table=<?= (int)$table['id'] ?>" class="gate-form" id="gate-form">
         <?= $csrf ?>
         <input type="hidden" name="table" value="<?= (int)$table['id'] ?>">
+
+        <?php /* PRESSING ENTER IN THE NAME BOX MUST SEARCH. A browser answers
+               * Enter by "clicking" the form's FIRST submit button in markup
+               * order — and the library buttons come before the search box,
+               * so typing a title and pressing Enter opened the library
+               * instead. This copy of the search button is first, invisible,
+               * and out of the tab order and the screen-reader tree, so it
+               * changes nothing but what Enter does. Not display:none: some
+               * browsers skip a hidden default button and fall through to the
+               * next one, which is exactly the bug. Only where the search
+               * itself is offered.
+               *
+               * Disabled while the box is empty, like the visible one: the
+               * guard in scripts.js (initBggSearchGuard) covers every
+               * go=bgg button, so Enter on an empty box does nothing. */ ?>
+        <?php if (empty($library_only) && bgg_configured()): ?>
+            <button type="submit" name="go" value="bgg" class="sr-only gate-enter-default"
+                    tabindex="-1" aria-hidden="true"><?= e(t('addgame_from_bgg')) ?></button>
+        <?php endif; ?>
 
         <?php // The club-shelf button. It is the same KIND of step as the BGG
               // search — pick a known game — so it looks the same; only its
@@ -126,5 +147,8 @@ $title      = $title     ?? t('addgame_title');
         </p>
     <?php endif; ?>
 
-    <p><a class="btn" href="index.php"><?= e(t('back')) ?></a></p>
+    <?php // Back: the page that sent them here. When this gate is choosing a
+          // game for a POLL, that is the poll (add_poll_game.php passes it);
+          // for an ordinary game, the home page as before. ?>
+    <p><a class="btn" href="<?= e($back ?? 'index.php') ?>"><?= e(t('back')) ?></a></p>
 </div>

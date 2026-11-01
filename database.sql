@@ -163,6 +163,10 @@ INSERT INTO options (key, value) VALUES
     -- the same place every time, so typing it once is enough.
     ('default_location_name',    ''),
     ('default_location_address', ''),
+    -- 1 = a small pen next to each signed-up player lets them change their
+    -- sign-up (name, email, rules knowledge), under the same rules as
+    -- resigning. Off by default.
+    ('allow_player_edit',     '0'),
     ('allow_custom_game_links', '1'),  -- 1 = non-BGG games may carry a user-supplied link
     -- allow_manual_links: 1 = the person bringing a game may attach a rules /
     -- manual URL (a PDF, a video) which shows as a button on the card. Off
@@ -505,7 +509,11 @@ inna'),                                -- game-language dropdown options, ONE PE
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
     ('allow_messaging',              '0'),
-    ('allow_guest_messaging',        '0'),  -- 1 = anyone may send messages; 0 = logged-in accounts only
+    ('allow_guest_messaging',        '0'),
+    -- 1 = for ADMINS ONLY, the "message this player" envelope's tooltip also
+    -- shows the address it would go to, so a made-up one can be spotted.
+    -- Nobody else ever sees an address. Off by default.
+    ('admin_show_player_emails',     '0'),  -- 1 = anyone may send messages; 0 = logged-in accounts only
     ('allow_user_template',          '1'),  -- 1 = logged-in users may pick a theme (user panel)
     ('allow_guest_template',         '1'),  -- 1 = guests may pick a theme (topbar dropdown)
     ('allow_user_language',          '1'),  -- 1 = logged-in users may pick a language (user panel)

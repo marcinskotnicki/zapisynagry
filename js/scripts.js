@@ -170,6 +170,10 @@
     function pad2(n) { return String(n).padStart(2, '0'); }
 
     // 6. BGG search guard: disable "search" until something is typed.
+    // EVERY go=bgg button, deliberately: the add-game gate also starts with an
+    // invisible copy of the search button (the one Enter "clicks"), and it must
+    // be disabled with the visible one, or Enter on an empty box would search
+    // for nothing. A disabled default button makes Enter do nothing at all.
     function initBggSearchGuard() {
         document.querySelectorAll('button[name="go"][value="bgg"]').forEach(function (btn) {
             var form = btn.form;

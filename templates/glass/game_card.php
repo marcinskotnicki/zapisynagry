@@ -190,10 +190,11 @@
                                 <span class="p-signedby"><?= e(t('player_signed_by', $signedBy)) ?></span>
                             <?php endif; ?>
                             <?php if ($canMsg && !empty($p['email'])): ?>
-                                <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
+                                <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(player_msg_title($p)) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
                             <?php // Last, so the auto-margin parks it at the chip's right edge. ?>
                             <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
+                                <?= player_edit_html($p) /* pen: same rule as the remove button */ ?>
                                 <a class="sc-slot-x" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                         <?php else: ?>
@@ -215,9 +216,10 @@
                             <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
                             <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="sc-dot rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"></span><?php endif; ?>
                             <?php if ($canMsg && !empty($p['email'])): ?>
-                                <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('msgbtn_player')) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
+                                <a class="msg-icon" href="message.php?player=<?= (int)$p['id'] ?>" title="<?= e(player_msg_title($p)) ?>" aria-label="<?= e(t('msgbtn_player')) ?>">&#9993;</a>
                             <?php endif; ?>
                             <?php if (!$readonly && verify_can_show_buttons($p['user_id'], $p['email'] ?? null)): ?>
+                                <?= player_edit_html($p) /* pen: same rule as the remove button */ ?>
                                 <a class="sc-slot-x" href="delete_player.php?player=<?= (int)$p['id'] ?>" title="<?= e(t('delete')) ?>" rel="nofollow">&times;</a>
                             <?php endif; ?>
                         </span>
