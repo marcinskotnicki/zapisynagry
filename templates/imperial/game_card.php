@@ -175,7 +175,7 @@
                 <?php if ($p !== null): ?>
                     <div class="gc-slot im-assigned">
                         <span class="im-line-no"><?= str_pad((string)($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
-                        <strong><?= e($p['name']) ?></strong>
+                        <strong><?= player_name_html($p) ?></strong>
                         <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?>
                             <span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"><?= e(knows_rules_label($p['knows_rules'])) ?></span>
                         <?php endif; ?>
@@ -220,7 +220,7 @@
             <?php foreach ($reserves as $p): ?>
                 <div class="gc-slot gc-reserve im-assigned">
                     <span class="im-line-no">R</span>
-                    <strong><?= e($p['name']) ?></strong>
+                    <strong><?= player_name_html($p) ?></strong>
                     <?php // A reserve's rules knowledge matters as much as a confirmed player's: they are who steps in when somebody drops out. Same markup the confirmed rows above use. ?>
                     <?php if ($p['knows_rules'] !== null && $p['knows_rules'] !== ''): ?><span class="gc-knows rules-<?= rules_tone($p['knows_rules']) ?>" title="<?= e(knows_rules_label($p['knows_rules'])) ?>"><?= e(knows_rules_label($p['knows_rules'])) ?></span><?php endif; ?>
                     <?php if ($canMsg && !empty($p['email'])): ?>

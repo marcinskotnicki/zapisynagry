@@ -280,6 +280,10 @@ input[type="checkbox"], input[type="radio"]{width:auto;flex:0 0 auto;}
     padding-bottom:10px;
 }
 .event-header h1 { margin-bottom: 0.2rem; }
+/* A single word wider than the screen (big spaced-out capitals in some
+   themes, on a narrow phone) breaks instead of widening the whole page.
+   Only such a word: normal titles wrap between words as always. */
+.event-header h1 { overflow-wrap: break-word; }
 .event-date { color: var(--text-muted); margin-top: 0; margin-bottom:0; font-size:1.1rem;font-weight:700;}
 
 .event-hours { color: var(--text-muted); font-size: 0.9rem; margin: 0.1rem 0 10px; font-weight:600}
@@ -1156,7 +1160,14 @@ trix-toolbar .trix-button--dialog {
 
     .topbar-inner { flex-wrap: wrap; row-gap: 0.35rem; }
 
-    .brand, .brand-logo { order: 1; flex: 0 1 auto; min-width: 0; overflow: hidden; }
+    /* The venue name takes only the room left beside the buttons and ends in
+       "…" — the menu stays at the top right, whatever the name's length. With
+       a content-sized basis, a long name (spaced-out capitals in some themes)
+       filled the first line on its own and pushed the menu to the next one:
+       a wrapping row breaks lines BEFORE anything is shrunk. A logo keeps its
+       natural size. */
+    .brand, .brand-logo { order: 1; flex: 1 1 0; min-width: 0; overflow: hidden; }
+    .brand-logo { flex: 0 1 auto; }
     .brand { text-overflow: ellipsis; white-space: nowrap; }
     .brand-spacer { order: 1; flex: 0 1 auto; }
 

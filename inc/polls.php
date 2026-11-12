@@ -385,10 +385,16 @@ function poll_full($pollRow) {
          * they are the one part of a poll that is nobody else's business by
          * default. Names only; the email a guest gave when voting is not the
          * club's to publish. */
-        $c['voters'] = $showVoters
-            ? array_column(db_all('SELECT name FROM poll_votes WHERE poll_game_id = ? ORDER BY id',
-                                  [$c['id']]), 'name')
+        $voterRows = $showVoters
+            ? db_all('SELECT v.name, v.user_id, u.is_admin AS account_is_admin,
+                             u.is_moderator AS account_is_moderator
+                        FROM poll_votes v LEFT JOIN users u ON u.id = v.user_id
+                       WHERE v.poll_game_id = ? ORDER BY v.id', [$c['id']])
             : [];
+        $c['voters']     = array_column($voterRows, 'name');   // names, as before
+        // The same rows with their account role, for player_name_html() —
+        // still no emails.
+        $c['voter_rows'] = $voterRows;
     }
     unset($c);                                    // break the reference from the loop
     $pollRow['games'] = $cands;

@@ -109,6 +109,10 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
             ?>
                 <li class="poll-option sc-module<?= $full ? ' sc-module-full' : '' ?>">
                     <div class="sc-module-head">
+                        <?php // Tiny box art beside the name, when the candidate has one. ?>
+                        <?php if (!empty($c['thumbnail'])): ?>
+                            <img class="poll-opt-thumb" src="<?= e($c['thumbnail']) ?>" alt="" loading="lazy">
+                        <?php endif; ?>
                         <?php $cLink = game_link($c); ?>
                         <?php // game_link() rather than a hand-built BGG URL: it also honours
                               // a custom link on a non-BGG candidate, and re-checks the admin
@@ -140,7 +144,7 @@ $canAddCand  = !$readonly && poll_can_add_candidate($poll);
                        * the email a guest gave when voting is not the club's to
                        * publish, and nothing here needs it. */ ?>
                 <?php if (!empty($poll['show_results']) && !empty($c['voters'])): ?>
-                    <span class="poll-opt-voters"><span class="poll-opt-voters-label"><?= e(t('poll_voters_label')) ?></span> <?= e(implode(', ', $c['voters'])) ?></span>
+                    <span class="poll-opt-voters"><span class="poll-opt-voters-label"><?= e(t('poll_voters_label')) ?></span> <?= poll_voters_html($c) ?></span>
                 <?php endif; ?>
                     <?php if (!$readonly): ?>
                         <?php if ($mine): ?>

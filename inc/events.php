@@ -917,7 +917,10 @@ function event_tables_full($dayId) {
             // account_name rides along so admins can SEE which entries are bound
             // to an account (the @ marker in the cards) — NULL for guest entries.
             $g['players'] = db_all(
-                'SELECT p.*, u.display_name AS account_name
+                // The account's role too, for the player-admin /
+                // player-moderator classes (player_name_html()).
+                'SELECT p.*, u.display_name AS account_name,
+                        u.is_admin AS account_is_admin, u.is_moderator AS account_is_moderator
                  FROM players p LEFT JOIN users u ON u.id = p.user_id
                  WHERE p.game_id = ? ORDER BY p.is_reserve, p.id', [$g['id']]);
             // Only pay for the comments query when discussions are enabled.

@@ -540,7 +540,22 @@ body.tpl-schematic-compact {
 }
 .tpl-schematic-compact .sc-module-full { border-left-color: #2f7f4a; }
 
-.tpl-schematic-compact .sc-module-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* flex-basis 0: the name takes whatever the row has left and ends in "…",
+   instead of its full length deciding the layout. Matters now the row may
+   wrap (for the voter list below). */
+.tpl-schematic-compact .sc-module-head { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Tiny box art in front of the name. Its own size, not the base theme's 50px
+   square, so the row keeps its height. */
+.tpl-schematic-compact .sc-module-head .poll-opt-thumb {
+    width: 22px; height: 22px; object-fit: contain;
+    vertical-align: middle; margin-right: 0.35rem;
+}
+/* WHO voted: its own line under the row, wrapping freely. The base theme
+   already gives it a full-width basis and puts it last; the row has to be
+   allowed to wrap for that to happen — on one line the list squeezed the
+   game's name out of sight on a phone. */
+.tpl-schematic-compact .sc-module { flex-wrap: wrap; }
+.tpl-schematic-compact .poll-opt-voters { white-space: normal; overflow-wrap: anywhere; line-height: 1.3; }
 .tpl-schematic-compact .poll-opt-name, .tpl-schematic-compact a.poll-opt-name {
     color: var(--ink);
     font-weight: 700;
@@ -655,7 +670,7 @@ body.tpl-schematic-compact {
     }
     .tpl-schematic-compact .sc-slot-name { max-width: 8rem; }
 
-    .tpl-schematic-compact .sc-module { flex-wrap: nowrap; row-gap: 0; }
+    .tpl-schematic-compact .sc-module { flex-wrap: wrap; row-gap: 0.15rem; }   /* voters wrap below */
     .tpl-schematic-compact .sc-module > .btn,
     .tpl-schematic-compact .sc-module > form.inline { flex: 0 0 auto; margin-top: 0; }
     .tpl-schematic-compact .sc-module > form.inline .btn { width: auto; }

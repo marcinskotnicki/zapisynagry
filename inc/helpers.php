@@ -459,6 +459,46 @@ function rich_text_html($raw) {
 }
 
 /**
+ * A player's (or poll voter's) name, wrapped in a span whose classes say what
+ * kind of entry it is — a hook for a club's custom CSS. Nothing in the shipped
+ * themes styles these.
+ *
+ *   player-name        always
+ *   player-registered  signed up from an account (while logged in)
+ *   player-moderator   ...and that account is a moderator
+ *   player-admin       ...and that account is an admin
+ *
+ * The role is the ACCOUNT'S, joined in by the query that loads the rows
+ * (account_is_admin / account_is_moderator); a guest entry gets player-name
+ * only. Admin wins over moderator, as everywhere else.
+ *
+ * @param array $p  A players / poll_votes row.
+ * @return string  HTML (the name escaped).
+ */
+function player_name_html($p) {
+    $cls = 'player-name';
+    if (!empty($p['user_id'])) {
+        $cls .= ' player-registered';
+        if ((int)($p['account_is_admin'] ?? 0) === 1) {
+            $cls .= ' player-admin';
+        } elseif ((int)($p['account_is_moderator'] ?? 0) === 1) {
+            $cls .= ' player-moderator';
+        }
+    }
+    return '<span class="' . $cls . '">' . e((string)($p['name'] ?? '')) . '</span>';
+}
+
+/**
+ * The voters on a poll option as comma-separated names, each through
+ * player_name_html().
+ * @param array $c  A candidate with 'voter_rows'.
+ * @return string  HTML.
+ */
+function poll_voters_html($c) {
+    return implode(', ', array_map('player_name_html', $c['voter_rows'] ?? []));
+}
+
+/**
  * Tooltip for the "message this player" envelope. For an ADMIN, and only with
  * 'admin_show_player_emails' on, it also names the address — a quick way to
  * spot a made-up one. Everyone else gets the plain wording; an address is
