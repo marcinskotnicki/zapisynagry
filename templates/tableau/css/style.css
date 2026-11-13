@@ -200,6 +200,20 @@ body.tpl-tableau {
     font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
 }
+/* The start time carries a clock on game AND poll cards alike: a flat line
+   clock in the band's text colour (mask + currentColor), replacing the base
+   theme's colour emoji, which clashed with the flat colour bands. */
+.tpl-tableau .gc-time::before,
+.tpl-tableau .poll-card .game-time::before {
+    content: '';
+    display: inline-block;
+    width: 0.8em; height: 0.8em;
+    margin-right: 0.3em;
+    vertical-align: -0.04em;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.7'/%3E%3Cpath d='M12 6.5V12l3.6 2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.7'/%3E%3Cpath d='M12 6.5V12l3.6 2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .tpl-tableau .gc-num { font-size: 0.62rem; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
 .tpl-tableau .game-cal-icons { color: var(--ink-2); margin: 0.3rem 0 0; }
 
