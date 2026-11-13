@@ -459,6 +459,20 @@ function rich_text_html($raw) {
 }
 
 /**
+ * A colour slot for a table, 1..5, cycling with the table number — for themes
+ * that give each table its own colour (tableau, schematic). As a class,
+ * "table-chan-N"; '' when the table number is not known. Themes that do not
+ * use it simply ignore the class.
+ *
+ * @param int|null $tableNo  The table's number (not its id).
+ * @return string
+ */
+function table_chan_class($tableNo) {
+    $n = (int)$tableNo;
+    return $n > 0 ? 'table-chan-' . ((($n - 1) % 5) + 1) : '';
+}
+
+/**
  * A player's (or poll voter's) name, wrapped in a span whose classes say what
  * kind of entry it is — a hook for a club's custom CSS. Nothing in the shipped
  * themes styles these.

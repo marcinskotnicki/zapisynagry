@@ -28,7 +28,9 @@
  * ============================================================================= */
 $canVote = !$readonly && can_signup();
 ?>
-<article class="poll-card" id="poll-<?= (int)$poll['id'] ?>">
+<?php // table-chan-N: a colour slot per table, for themes that colour by table
+      // (the tableau theme does); the others ignore it. ?>
+<article class="poll-card <?= table_chan_class($table_no ?? null) ?>" id="poll-<?= (int)$poll['id'] ?>">
     <?php
     // "End voting now": the proposer's own account, or an admin. Accounts only —
     // guest-created polls just wait for their threshold or deadline.

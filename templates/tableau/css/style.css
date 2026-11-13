@@ -1,0 +1,585 @@
+/* =============================================================================
+ *  TABLEAU — classic's layout in the language of modern board game graphic
+ *  design: cream card stock laid out on a dark gaming table, a colour per
+ *  table, small spaced-out capitals for every label, data in labelled cells,
+ *  hatched free seats, clipped "ticket" corners. Loaded after the base
+ *  (templates/light/css/style.css); every rule is scoped to .tpl-tableau.
+ * ============================================================================= */
+.tpl-tableau {
+    --table:     #17222a;     /* the dark table the cards lie on */
+    --table-2:   #1f2d37;
+    --table-3:   #2a3b47;
+    --stock:     #f0e9d8;     /* card stock */
+    --stock-2:   #faf6ec;
+    --stock-3:   #e2dac7;
+    --ink:       #1e2328;
+    --ink-2:     #4c5460;     /* muted text: >= 4.5:1 on every card tint */
+    --rule:      #bdb39d;
+    --gilt:      #c99a2e;     /* the gold hairline that frames the cards */
+    --mist:      #9fb0bd;     /* muted text on the dark table */
+
+    /* One colour per table, cycling 1..5 (table_chan_class()). */
+    --ch1: #c2432a;           /* vermilion */
+    --ch2: #d4931c;           /* saffron   */
+    --ch3: #1d7a63;           /* jade      */
+    --ch4: #2d5c9e;           /* cobalt    */
+    --ch5: #8a3f78;           /* plum      */
+    --chan: var(--ch3);
+    /* Text ON the table colour. White, except on saffron, where white measures
+       2.63:1 — that one band carries dark ink instead (6:1). Every pair is
+       at least 4.5:1, so even the small "#001" reads. */
+    --chan-ink: #fff;
+
+    --font-tb: 'Roboto Condensed', 'Archivo Narrow', 'Helvetica Neue',
+               'Segoe UI', Arial, sans-serif;
+
+    /* The base theme's variables, so every other page follows. */
+    --bg:           var(--table);
+    --surface:      var(--stock);
+    --surface-2:    var(--stock-3);
+    --border:       var(--rule);
+    --text:         var(--ink);
+    --text-muted:   var(--ink-2);
+    --primary:      var(--ink);
+    --primary-text: var(--stock-2);
+    --ok:           #2f7f4a;
+    --error:        #b2343f;
+    --radius:       0;
+}
+
+.tpl-tableau .table-chan-1 { --chan: var(--ch1); }
+.tpl-tableau .table-chan-2 { --chan: var(--ch2); --chan-ink: var(--ink); }
+.tpl-tableau .table-chan-3 { --chan: var(--ch3); }
+.tpl-tableau .table-chan-4 { --chan: var(--ch4); }
+.tpl-tableau .table-chan-5 { --chan: var(--ch5); }
+
+/* ---- the table ------------------------------------------------------------ */
+body.tpl-tableau {
+    background-color: var(--table);
+    background-image:
+        url("../img/medallion.svg"),
+        url("../img/tile.svg"),
+        radial-gradient(ellipse at 50% -10%, rgba(201, 154, 46, .10), transparent 55%);
+    background-repeat: no-repeat, repeat, no-repeat;
+    background-size: 640px 640px, 96px 96px, 100% 100%;
+    background-position: left -220px bottom -220px, top left, top center;
+    background-attachment: fixed, fixed, fixed;
+    color: var(--stock);
+    font-family: var(--font-tb);
+}
+.tpl-tableau h1, .tpl-tableau h2, .tpl-tableau h3,
+.tpl-tableau .btn, .tpl-tableau input, .tpl-tableau select, .tpl-tableau textarea { font-family: var(--font-tb); }
+
+/* Classic's full-width page. */
+.tpl-tableau .content { max-width: none; width: 100%; }
+.tpl-tableau .content .admin { max-width: 1200px; margin: 0 auto; }
+.tpl-tableau .content > .card { max-width: 99%; width: 1200px; margin: 0 auto; }
+.tpl-tableau .content > .card.archive-page { max-width: none; width: auto; }
+.tpl-tableau .topbar-inner { max-width: none; }
+
+.tpl-tableau .topbar { background: var(--table-2); border-bottom: 1px solid rgba(201, 154, 46, .35); }
+.tpl-tableau .topbar a, .tpl-tableau .brand { color: var(--stock-2); }
+.tpl-tableau .brand { letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
+
+/* ---- event header and day tabs ------------------------------------------- */
+.tpl-tableau .event-header { text-align: center; }
+.tpl-tableau .event-header h1 {
+    color: var(--stock-2);
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+/* The colour key under the title: one block per table colour, framed by gold. */
+.tpl-tableau .event-header h1::after {
+    content: "";
+    display: block;
+    height: 5px;
+    width: 260px;
+    max-width: 80%;
+    margin: 0.6rem auto 0;
+    background: linear-gradient(90deg,
+        var(--ch1) 0 20%, var(--ch2) 20% 40%, var(--ch3) 40% 60%,
+        var(--ch4) 60% 80%, var(--ch5) 80% 100%);
+    box-shadow: 0 0 0 1px var(--table), 0 0 0 2px rgba(201, 154, 46, .6);
+}
+.tpl-tableau .event-date, .tpl-tableau .event-hours {
+    color: var(--mist); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.78rem;
+}
+.tpl-tableau .event-desc { color: var(--ink); }
+
+.tpl-tableau .day-tabs { justify-content: safe center; border-bottom: 1px solid rgba(201, 154, 46, .35); gap: 3px; }
+.tpl-tableau .day-tab {
+    color: var(--mist);
+    background: var(--table-2);
+    border: 1px solid rgba(189, 179, 157, .25);
+    border-bottom: none;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px);
+}
+.tpl-tableau .day-tab:hover { background: var(--table-3); color: var(--stock-2); }
+.tpl-tableau .day-tab-active,
+.tpl-tableau .day-tab-active:hover { color: var(--ink); background: var(--stock); border-color: var(--rule); }
+.tpl-tableau .day-tab-date, .tpl-tableau .day-tab-hours { color: inherit; opacity: 0.75; }
+
+/* ---- a table -------------------------------------------------------------- */
+.tpl-tableau .table-block {
+    background: rgba(31, 45, 55, .78);
+    border: 1px solid rgba(189, 179, 157, .22);
+    border-top: 3px solid var(--gilt);
+    border-radius: 0;
+    box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
+}
+.tpl-tableau .table-title {
+    color: var(--stock-2);
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    text-align: center;
+    padding-bottom: 10px;
+}
+.tpl-tableau .table-title a, .tpl-tableau .table-title .table-rename-btn { color: var(--stock-2); }
+.tpl-tableau .no-games { color: var(--mist); text-align: center; padding-bottom: 10px; }
+.tpl-tableau .add-table-form { justify-content: center; }
+.tpl-tableau .add-game-btn { margin: 2rem auto 1rem; }
+
+/* Classic's arrangement: cards side by side, centred, wrapping. */
+.tpl-tableau .game-list {
+    display: flex; flex-direction: row; flex-wrap: wrap;
+    gap: 1.6em; align-items: flex-start; justify-content: center;
+}
+
+/* ---- the game card (classic's portrait card + seat sheet) ----------------- */
+.tpl-tableau .game-card {
+    display: flex; align-items: flex-start; gap: 0;
+    flex: 0 0 auto;
+    background: transparent; border: none; padding: 0; box-shadow: none;
+    color: var(--ink);
+}
+
+.tpl-tableau .gc-info {
+    position: relative; z-index: 1;
+    width: 240px; flex: 0 0 240px;
+    box-sizing: border-box;
+    background: var(--stock);
+    color: var(--ink);
+    text-align: center;
+    padding: 0 0 0.6rem;
+    /* gold hairline inside a cream margin: the printed card's frame */
+    box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt), 0 3px 10px rgba(0, 0, 0, .5);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+
+.tpl-tableau .gc-tabs {
+    display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-start; align-items: center;
+    padding: 0.45rem 1rem 0.35rem 0.5rem;
+}
+.tpl-tableau .gc-tab {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.15rem 0.35rem; text-decoration: none;
+    color: var(--ink); background: var(--stock-2); border: 1px solid var(--ink);
+}
+.tpl-tableau .gc-tab:hover { background: var(--ink); color: var(--stock-2); text-decoration: none; }
+.tpl-tableau .gc-tab-del { background: var(--error); border-color: var(--error); color: #fff; }
+.tpl-tableau .gc-tab-del:hover { background: #8e2731; border-color: #8e2731; color: #fff; }
+
+/* The colour band: the table's colour, start time large. */
+.tpl-tableau .gc-band-top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+    background: var(--chan);
+    color: var(--chan-ink);
+    margin: 0 5px;
+    padding: 0.35rem 0.7rem;
+}
+.tpl-tableau .gc-tabs + .gc-band-top { margin-top: 0; }
+.tpl-tableau .gc-info > .gc-band-top:first-child { margin-top: 5px; }
+.tpl-tableau .gc-time {
+    font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+}
+.tpl-tableau .gc-num { font-size: 0.62rem; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
+.tpl-tableau .game-cal-icons { color: var(--ink-2); margin: 0.3rem 0 0; }
+
+.tpl-tableau .gc-thumb { padding: 0.65rem 0 0.2rem; }
+.tpl-tableau .gc-thumb img {
+    max-width: 150px; max-height: 180px;
+    background: var(--stock-2);
+    padding: 3px;
+    border: 1px solid var(--rule);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+
+.tpl-tableau .gc-name {
+    color: var(--ink);
+    font-size: 1rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 0.45rem 0.8rem 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--rule);
+}
+.tpl-tableau .gc-name a { color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--chan); }
+.tpl-tableau .gc-name a:hover { color: var(--chan); }
+
+/* Labelled cells: a small spaced key over a bold value. */
+.tpl-tableau .gc-cells {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    margin: 0 0.6rem 0.45rem; text-align: left;
+}
+.tpl-tableau .gc-cell {
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 1px;
+    min-width: 0;
+    padding: 0.2rem 0.4rem;
+    background: var(--stock-2);
+    border: 1px solid var(--rule);
+}
+.tpl-tableau .gc-cell-wide { grid-column: 1 / -1; }
+.tpl-tableau .gc-key {
+    display: block;
+    font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink-2); line-height: 1.15;
+}
+.tpl-tableau .gc-val {
+    font-size: 0.9rem; font-weight: 700; color: var(--ink); line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+.tpl-tableau .gc-cell-weight { border-left-width: 5px; }
+.tpl-tableau .gc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
+.tpl-tableau .gc-cell-weight.weight-2 { border-left-color: #86b300; }
+.tpl-tableau .gc-cell-weight.weight-3 { border-left-color: #d6a400; }
+.tpl-tableau .gc-cell-weight.weight-4 { border-left-color: #e0701a; }
+.tpl-tableau .gc-cell-weight.weight-5 { border-left-color: #cf3b2e; }
+
+.tpl-tableau .gc-rules {
+    margin: 0 0.6rem 0.4rem; padding: 0.25rem 0.4rem;
+    background: var(--stock-3);
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em;
+}
+.tpl-tableau .gc-rules.rules-good { color: #246139; }
+.tpl-tableau .gc-rules.rules-mid  { color: #6b4705; }
+.tpl-tableau .gc-rules.rules-bad  { color: #9e2833; }
+
+.tpl-tableau .gc-comment {
+    margin: 0 0.6rem 0.4rem; padding: 0.3rem 0.5rem;
+    background: var(--stock-2); border-left: 3px solid var(--chan);
+    text-align: left; font-size: 0.82rem; line-height: 1.35;
+}
+.tpl-tableau .gc-note { padding: 0.3rem 0.6rem; font-size: 0.85rem; color: var(--ink-2); }
+
+/* Discussion on the card. */
+.tpl-tableau .gc-info .discussion { border-top: none; margin: 0 0.6rem; padding: 0; text-align: left; }
+.tpl-tableau .comment-list { list-style: none; padding: 0; margin: 0.3rem 0; gap: 2px; }
+.tpl-tableau .comment-list li {
+    background: var(--stock-2);
+    border: none; border-left: 2px solid var(--rule); border-radius: 0;
+    color: var(--ink); font-size: 0.8rem; margin-bottom: 2px;
+}
+.tpl-tableau .comment-list .c-name { color: var(--ink); font-weight: 700; box-shadow: inset 0 -2px 0 var(--chan); }
+.tpl-tableau .comment-add { margin-top: 0.4rem; text-align: center; }
+.tpl-tableau .comment-add summary {
+    display: inline-block; cursor: pointer; list-style: none;
+    color: var(--ink); background: var(--stock-3); border: 1px solid var(--rule);
+    padding: 0.15rem 0.6rem;
+    font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+}
+.tpl-tableau .comment-add summary::before { content: "+ "; }
+.tpl-tableau .comment-add summary:hover { background: var(--ink); color: var(--stock-2); }
+.tpl-tableau .comment-add summary::-webkit-details-marker { display: none; }
+.tpl-tableau .comment-add form { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem 0; text-align: left; }
+.tpl-tableau .comment-add input, .tpl-tableau .comment-add textarea { width: 100%; box-sizing: border-box; }
+
+/* The seat sheet, tucked under the card's edge as in classic. */
+.tpl-tableau .gc-players {
+    background: var(--stock-3);
+    border: 1px solid var(--rule);
+    border-top: 4px solid var(--chan);
+    padding: 0.55rem 0.6rem 0.6rem 1.15rem;
+    margin-left: -0.6rem; margin-top: 2rem;
+    min-width: 290px;
+    color: var(--ink);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+.tpl-tableau .gc-sheet-head {
+    display: flex; align-items: baseline; gap: 0.45rem; flex-wrap: wrap;
+    margin-bottom: 0.4rem;
+}
+.tpl-tableau .gc-sheet-head .gc-key { font-size: 0.62rem; }
+.tpl-tableau .gc-fill {
+    flex: 1 1 100%;
+    display: block; height: 4px;
+    background: var(--stock-2); border: 1px solid var(--rule);
+}
+.tpl-tableau .gc-fill > span { display: block; height: 100%; background: var(--chan); }
+.tpl-tableau .gc-full .gc-fill > span { background: var(--ch1); }
+
+.tpl-tableau .gc-slot {
+    display: flex; align-items: center; gap: 0.4rem;
+    min-height: 26px;
+    background: var(--stock-2);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--chan);
+    padding: 0.2rem 0.45rem 0.2rem 0.3rem;
+    margin-bottom: 3px;
+    font-size: 0.85rem;
+}
+.tpl-tableau .gc-seat-n {
+    flex: 0 0 auto;
+    min-width: 1.3rem;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--ink-2); text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+.tpl-tableau .gc-who { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.tpl-tableau .gc-who strong { color: var(--ink); }
+.tpl-tableau .gc-knows { display: block; font-size: 0.72rem; letter-spacing: 0.03em; line-height: 1.25; }
+.tpl-tableau .gc-knows::before { content: "●"; margin-right: 0.2rem; font-size: 0.65rem; }
+.tpl-tableau .gc-knows.rules-good { color: #246139; }
+.tpl-tableau .gc-knows.rules-mid  { color: #6b4705; }
+.tpl-tableau .gc-knows.rules-bad  { color: #9e2833; }
+.tpl-tableau .p-signedby { display: block; color: var(--ink-2); font-size: 0.7rem; }
+.tpl-tableau .p-acct { color: var(--ink-2); font-size: 0.7rem; }
+
+.tpl-tableau .gc-resign {
+    margin-left: auto;
+    flex: 0 0 auto;
+    background: transparent; color: var(--error);
+    border: 1px solid var(--error);
+    font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 0.1rem 0.35rem; text-decoration: none; white-space: nowrap;
+}
+.tpl-tableau .gc-resign:hover { background: var(--error); color: #fff; text-decoration: none; }
+
+/* A free seat: hatched, like an empty space on a board. */
+.tpl-tableau .gc-signup {
+    display: flex; align-items: center; gap: 0.4rem;
+    min-height: 26px; box-sizing: border-box;
+    padding: 0.2rem 0.45rem 0.2rem 0.3rem; margin-bottom: 3px;
+    background: repeating-linear-gradient(45deg, var(--stock-2) 0 6px, var(--stock-3) 6px 12px);
+    border: 1px dashed var(--ink-2);
+    color: var(--ink);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none;
+}
+.tpl-tableau .gc-signup:hover { background: var(--chan); border: 1px solid var(--chan); color: var(--chan-ink); text-decoration: none; }
+.tpl-tableau .gc-signup:hover .gc-seat-n { color: var(--chan-ink); }
+.tpl-tableau .gc-signup-reserve { justify-content: center; background: var(--ink); border: 1px solid var(--ink); color: var(--stock-2); margin-top: 0.4rem; }
+.tpl-tableau .gc-seat-empty { background: repeating-linear-gradient(45deg, var(--stock-2) 0 6px, var(--stock-3) 6px 12px); border-left-color: var(--rule); }
+
+.tpl-tableau .gc-reserve-head {
+    margin: 0.5rem 0 0.25rem;
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+}
+.tpl-tableau .gc-reserve { border-left-color: var(--ink-2); font-style: italic; opacity: 0.9; }
+.tpl-tableau .gc-more-slots { font-size: 0.76rem; color: var(--ink-2); font-style: italic; margin: 0.15rem 0 0.4rem 0.2rem; }
+
+.tpl-tableau .msg-icon { color: var(--chan); }
+.tpl-tableau .msg-icon-all { margin-left: auto; color: var(--chan); }
+.tpl-tableau .player-edit { color: var(--ink-2); }
+
+.tpl-tableau .game-archived .gc-info { opacity: 0.55; }
+.tpl-tableau .game-archived .gc-name { text-decoration: line-through; }
+.tpl-tableau .game-deleted .gc-info { background: #ecd6cf; }
+
+/* ---- polls: the base poll card as a printed card -------------------------- */
+.tpl-tableau .poll-card {
+    position: relative;
+    background: var(--stock);
+    color: var(--ink);
+    border: none; border-radius: 0;
+    padding: 0 0 0.5rem;
+    box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt), 0 3px 10px rgba(0, 0, 0, .5);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+.tpl-tableau .poll-head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+    margin: 5px 5px 0; padding: 0.4rem 0.7rem;
+    color: var(--chan-ink);
+    /* a poll is not decided yet: the table's colour, striped */
+    background: repeating-linear-gradient(135deg, transparent 0 12px, rgba(0, 0, 0, .08) 12px 24px), var(--chan);
+}
+.tpl-tableau .poll-tag {
+    background: rgba(0, 0, 0, .32); color: #fff; border: none; border-radius: 0;
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 0.12rem 0.4rem;
+}
+.tpl-tableau .poll-card .game-time { color: var(--chan-ink); font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tpl-tableau .poll-by { padding: 0.35rem 0.75rem 0; font-size: 0.82rem; color: var(--ink-2); }
+.tpl-tableau .poll-by strong { color: var(--ink); }
+/* ...but in the striped header it sits on the table colour: white. */
+.tpl-tableau .poll-head .poll-by { padding: 0; color: var(--chan-ink); }
+.tpl-tableau .poll-head .poll-by strong { color: var(--chan-ink); }
+.tpl-tableau .poll-actions { display: flex; flex-wrap: wrap; gap: 3px; padding: 0.35rem 0.7rem 0; margin: 0; }
+/* The poll's tools match the game card's small tool buttons. */
+.tpl-tableau .poll-actions .btn-small { font-size: 0.6rem; letter-spacing: 0.06em; padding: 0.15rem 0.35rem; }
+.tpl-tableau .poll-deadline,
+.tpl-tableau .poll-card .game-rules,
+.tpl-tableau .poll-card .game-comment {
+    margin: 0.35rem 0.7rem 0; padding: 0.25rem 0.45rem;
+    background: var(--stock-3); font-size: 0.82rem;
+}
+.tpl-tableau .poll-card .game-rules { font-weight: 700; }
+.tpl-tableau .poll-card .game-rules.rules-good { color: #246139; }
+.tpl-tableau .poll-card .game-rules.rules-mid  { color: #6b4705; }
+.tpl-tableau .poll-card .game-rules.rules-bad  { color: #9e2833; }
+.tpl-tableau .poll-card .game-comment { background: var(--stock-2); border-left: 3px solid var(--chan); }
+
+.tpl-tableau .poll-options { margin: 0.45rem 0.7rem 0.3rem; padding: 0; gap: 3px; }
+.tpl-tableau .poll-option {
+    position: relative;
+    background: var(--stock-2);
+    border: 1px solid var(--rule); border-left: 4px solid var(--chan); border-radius: 0;
+    padding: 0.3rem 0.5rem 0.45rem;
+    font-size: 0.85rem; color: var(--ink);
+}
+.tpl-tableau .poll-opt-thumb { width: 34px; height: 34px; border: 1px solid var(--rule); background: #fff; }
+.tpl-tableau .poll-opt-name, .tpl-tableau a.poll-opt-name { color: var(--ink); font-weight: 700; text-decoration: none; }
+.tpl-tableau a.poll-opt-name { border-bottom: 1px solid var(--chan); }
+.tpl-tableau .poll-opt-meta, .tpl-tableau .poll-opt-votes { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tpl-tableau .weight-badge { border-radius: 0; }
+.tpl-tableau .poll-opt-bar { height: 4px; background: var(--stock-3); border-radius: 0; }
+.tpl-tableau .poll-opt-bar > span { background: var(--chan); border-radius: 0; }
+.tpl-tableau .poll-opt-bar.is-full > span { background: #2f7f4a; }
+.tpl-tableau .poll-card .discussion { margin: 0.3rem 0.7rem 0; border-top: none; padding: 0; }
+.tpl-tableau .poll-card .msg-icon { color: var(--chan); }
+.tpl-tableau .poll-head .msg-icon { color: var(--chan-ink); }
+
+/* Desktop: a fixed card width, as classic. */
+@media (min-width: 701px) {
+    .tpl-tableau .game-list > article { width: 540px; }
+}
+
+/* ---- buttons, forms, cards (every page) ----------------------------------- */
+.tpl-tableau .btn {
+    background: var(--stock-2);
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.72rem; font-weight: 700;
+    border-radius: 0;
+    padding: 0.22rem 0.55rem;
+}
+.tpl-tableau .btn:hover { background: var(--ink); color: var(--stock-2); text-decoration: none; }
+.tpl-tableau .btn-primary { background: var(--ink); border-color: var(--ink); color: var(--stock-2); }
+.tpl-tableau .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: var(--chan-ink); }
+.tpl-tableau .btn-primary.add-game-btn,
+.tpl-tableau .add-table-form .btn-primary { background: var(--gilt); border-color: var(--gilt); color: var(--ink); }
+.tpl-tableau .btn-primary.add-game-btn:hover,
+.tpl-tableau .add-table-form .btn-primary:hover { background: var(--stock-2); border-color: var(--stock-2); color: var(--ink); }
+.tpl-tableau .btn-danger,
+.tpl-tableau .btn-danger:hover { background: var(--error); border-color: var(--error); color: #fff; }
+.tpl-tableau .btn-small.game-manual { font-size: 0.62rem; padding: 0.15rem 0.45rem; margin-bottom: 0.4rem; }
+
+.tpl-tableau input, .tpl-tableau select, .tpl-tableau textarea {
+    background-color: var(--stock-2);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    border-radius: 0;
+}
+.tpl-tableau input:focus, .tpl-tableau select:focus, .tpl-tableau textarea:focus {
+    border-color: var(--ink); outline: none; box-shadow: 0 0 0 2px rgba(201, 154, 46, .45);
+}
+.tpl-tableau select option { background: var(--stock-2); color: var(--ink); }
+
+.tpl-tableau .card {
+    background: var(--stock);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--gilt);
+    border-radius: 0;
+}
+.tpl-tableau .card label, .tpl-tableau .card .field-note { color: var(--ink-2); }
+.tpl-tableau label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
+.tpl-tableau .mailing-box { background: var(--stock); color: var(--ink); border: 1px solid var(--rule); border-radius: 0; }
+.tpl-tableau .event-msg { background: var(--stock-3); color: var(--ink); }
+
+/* Admin and the user panel sit on the dark table: their headings in cream,
+   the tab bodies on card stock. */
+.tpl-tableau .admin .tab-body, .tpl-tableau .userpanel { color: var(--ink); }
+.tpl-tableau .userpanel h1, .tpl-tableau .userpanel > h2, .tpl-tableau .admin > h1 { color: var(--stock-2); }
+.tpl-tableau .admin .tab { color: var(--stock); }
+.tpl-tableau .admin .tab-active, .tpl-tableau .admin .tab:hover { color: var(--ink); }
+
+/* ---- timeline ------------------------------------------------------------- */
+.tpl-tableau .timeline { background: rgba(31, 45, 55, .8); border: 1px solid rgba(189, 179, 157, .25); border-radius: 0; }
+.tpl-tableau .tl-scroll { background: transparent; border-color: rgba(189, 179, 157, .25); }
+.tpl-tableau .timeline-title { color: var(--stock-2); letter-spacing: 0.2em; text-transform: uppercase; }
+.tpl-tableau .tl-hours { border-bottom-color: rgba(189, 179, 157, .25); }
+.tpl-tableau .tl-hour { color: var(--mist); font-variant-numeric: tabular-nums; }
+.tpl-tableau .tl-hour::before { border-left-color: rgba(189, 179, 157, .28); }
+.tpl-tableau .tl-table-no { background: rgba(0, 0, 0, .35); color: var(--mist); }
+.tpl-tableau .tl-game {
+    background: var(--stock); color: var(--ink);
+    border: 1px solid var(--rule); border-left: 4px solid var(--gilt); border-radius: 0;
+    font-weight: 700;
+}
+.tpl-tableau .tl-game:hover { background: var(--stock-2); }
+.tpl-tableau .tl-game.tl-poll {
+    background: repeating-linear-gradient(135deg, rgba(31, 45, 55, .92) 0 6px, rgba(42, 59, 71, .92) 6px 12px);
+    color: var(--stock-2); border: 1px dashed rgba(201, 154, 46, .6);
+}
+.tpl-tableau .tl-game.tl-poll .tl-sub { color: var(--mist); }
+.tpl-tableau .tl-count-full { color: var(--error); }
+
+/* ---- chat ----------------------------------------------------------------- */
+.tpl-tableau .chat-toggle { background: var(--gilt); color: var(--ink); }
+.tpl-tableau .chat-panel { border-right: 1px solid var(--rule); }
+.tpl-tableau .chat-head { background: var(--stock-3); border-bottom: 1px solid var(--rule); }
+.tpl-tableau .chat-msg-time { color: var(--ink-2); }
+.tpl-tableau .chat-msg-user .chat-msg-name { color: var(--ch4); }
+.tpl-tableau .chat-msg-admin .chat-msg-name { color: var(--ch1); }
+
+/* FOOTER LINKS: the footer sits on the dark table, so its text takes the
+   card-stock cream rather than --primary (dark ink, meant for the cards). */
+.tpl-tableau .footer-pages,
+.tpl-tableau .footer-calendar,
+.tpl-tableau .footer-pages a,
+.tpl-tableau .footer-calendar a { color: var(--stock); }
+.tpl-tableau .footer-pages a:hover,
+.tpl-tableau .footer-calendar a:hover { text-decoration: underline; }
+
+.tpl-tableau a:focus-visible,
+.tpl-tableau button:focus-visible,
+.tpl-tableau input:focus-visible,
+.tpl-tableau select:focus-visible,
+.tpl-tableau textarea:focus-visible,
+.tpl-tableau summary:focus-visible { outline: 2px solid var(--gilt); outline-offset: 2px; }
+
+/* ---- phones --------------------------------------------------------------- */
+@media (max-width: 700px) {
+    .tpl-tableau .game-list > article { width: 100%; }
+    .tpl-tableau .game-card { flex-direction: column; width: 100%; }
+    /* Card and seat sheet are ONE piece on a phone: no gap between them, one
+       shadow around both (drop-shadow follows the clipped shape, which
+       box-shadow cannot), and the bottom-left cut corner moves from the card
+       to the bottom of the sheet. The card keeps its top-right one. */
+    .tpl-tableau .game-card { filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .5)); }
+    .tpl-tableau .gc-info {
+        width: 100%; flex-basis: auto;
+        clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+        box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt);
+    }
+    .tpl-tableau .gc-players {
+        margin-left: 0; margin-top: 0;
+        width: 100%; box-sizing: border-box; min-width: 0;
+        padding: 0.55rem 0.6rem 0.9rem;
+        box-shadow: none;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    }
+    .tpl-tableau .day-tabs { justify-content: flex-start; }
+    .tpl-tableau .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
+}
+
+/* ---- readability details (measured, WCAG 4.5:1) -------------------------- */
+/* The base weight badge is white on its colour; on the two light colours that
+   falls short, so those carry dark ink. */
+.tpl-tableau .weight-badge.weight-2,
+.tpl-tableau .weight-badge.weight-3 { color: var(--ink); }
+/* Things that sit straight on the dark table. */
+.tpl-tableau .footer-prefs-item > span,
+.tpl-tableau .topbar-prefs-item > span { color: var(--mist); }
+.tpl-tableau .table-del-btn { color: var(--stock); opacity: 0.75; }
+.tpl-tableau .table-del-btn:hover { color: #ff8f80; opacity: 1; }
+
