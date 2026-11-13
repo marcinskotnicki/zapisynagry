@@ -159,7 +159,9 @@ require_once __DIR__ . '/../../inc/calendar.php';
         <?php // id anchor: the rename edit/cancel links and the post-save redirect
               // append #table-<id> so the browser jumps back here instead of the
               // page top (these are full navigations, not AJAX). ?>
-        <section class="table-block" id="table-<?= (int)$tbl['id'] ?>">
+        <?php // table-chan-N: the table's colour slot, for themes that colour by
+              // table (tableau); the others ignore it. ?>
+        <section class="table-block <?= table_chan_class($tbl['table_number'] ?? null) ?>" id="table-<?= (int)$tbl['id'] ?>">
             <?php if ((int)$rename_table === (int)$tbl['id']): // this table's inline rename form is open ?>
                 <form method="post" action="index.php?day=<?= (int)$active_day ?><?= $tokenQS ?>" class="table-rename-form">
                     <?= $csrf ?>

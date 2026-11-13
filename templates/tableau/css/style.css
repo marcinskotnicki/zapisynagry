@@ -128,7 +128,7 @@ body.tpl-tableau {
 .tpl-tableau .table-block {
     background: rgba(31, 45, 55, .78);
     border: 1px solid rgba(189, 179, 157, .22);
-    border-top: 3px solid var(--gilt);
+    border-top: 3px solid var(--chan);   /* the table's own colour */
     border-radius: 0;
     box-shadow: 0 2px 18px rgba(0, 0, 0, .45);
 }
@@ -470,10 +470,11 @@ body.tpl-tableau {
 .tpl-tableau .btn:hover { background: var(--ink); color: var(--stock-2); text-decoration: none; }
 .tpl-tableau .btn-primary { background: var(--ink); border-color: var(--ink); color: var(--stock-2); }
 .tpl-tableau .btn-primary:hover { background: var(--chan); border-color: var(--chan); color: var(--chan-ink); }
-.tpl-tableau .btn-primary.add-game-btn,
 .tpl-tableau .add-table-form .btn-primary { background: var(--gilt); border-color: var(--gilt); color: var(--ink); }
-.tpl-tableau .btn-primary.add-game-btn:hover,
 .tpl-tableau .add-table-form .btn-primary:hover { background: var(--stock-2); border-color: var(--stock-2); color: var(--ink); }
+/* "Add a game to this table" belongs to its table: the table's colour. */
+.tpl-tableau .btn-primary.add-game-btn { background: var(--chan); border-color: var(--chan); color: var(--chan-ink); }
+.tpl-tableau .btn-primary.add-game-btn:hover { background: var(--stock-2); border-color: var(--stock-2); color: var(--ink); }
 .tpl-tableau .btn-danger,
 .tpl-tableau .btn-danger:hover { background: var(--error); border-color: var(--error); color: #fff; }
 .tpl-tableau .btn-small.game-manual { font-size: 0.62rem; padding: 0.15rem 0.45rem; margin-bottom: 0.4rem; }
@@ -518,13 +519,22 @@ body.tpl-tableau {
 .tpl-tableau .tl-table-no { background: rgba(0, 0, 0, .35); color: var(--mist); }
 .tpl-tableau .tl-game {
     background: var(--stock); color: var(--ink);
-    border: 1px solid var(--rule); border-left: 4px solid var(--gilt); border-radius: 0;
+    border: 1px solid var(--rule); border-left: 4px solid var(--chan); border-radius: 0;
     font-weight: 700;
 }
+/* The timeline's own colour classes count tables one step differently
+   (tl-chan-N = table number % 5 + 1, shared with schematic). Mapped here so a
+   table has the same colour in the timeline as on its cards. */
+.tpl-tableau .tl-chan-1 { --chan: var(--ch5); }
+.tpl-tableau .tl-chan-2 { --chan: var(--ch1); }
+.tpl-tableau .tl-chan-3 { --chan: var(--ch2); }
+.tpl-tableau .tl-chan-4 { --chan: var(--ch3); }
+.tpl-tableau .tl-chan-5 { --chan: var(--ch4); }
 .tpl-tableau .tl-game:hover { background: var(--stock-2); }
 .tpl-tableau .tl-game.tl-poll {
     background: repeating-linear-gradient(135deg, rgba(31, 45, 55, .92) 0 6px, rgba(42, 59, 71, .92) 6px 12px);
     color: var(--stock-2); border: 1px dashed rgba(201, 154, 46, .6);
+    border-left: 4px solid var(--chan);
 }
 .tpl-tableau .tl-game.tl-poll .tl-sub { color: var(--mist); }
 .tpl-tableau .tl-count-full { color: var(--error); }
