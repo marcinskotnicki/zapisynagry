@@ -224,18 +224,24 @@ body.tpl-tableau {
 .tpl-tableau .gc-name a:hover { color: var(--chan); }
 
 /* Labelled cells: a small spaced key over a bold value. */
+/* Three to a row; a row that is not full SHARES the whole width instead of
+   leaving gaps (one leftover box -> the full row, two -> half each). Done by
+   wrapping boxes that start at a third and grow, rather than a fixed 3-column
+   grid, where a lone fourth box sat at a third of the width. */
 .tpl-tableau .gc-cells {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    display: flex; flex-wrap: wrap; gap: 2px;
     margin: 0 0.6rem 0.45rem; text-align: left;
 }
 .tpl-tableau .gc-cell {
+    flex: 1 1 calc((100% - 4px) / 3);   /* 4px = the two gaps in a row of three */
+    box-sizing: border-box;
     display: flex; flex-direction: column; justify-content: flex-end; gap: 1px;
     min-width: 0;
     padding: 0.2rem 0.4rem;
     background: var(--stock-2);
     border: 1px solid var(--rule);
 }
-.tpl-tableau .gc-cell-wide { grid-column: 1 / -1; }
+.tpl-tableau .gc-cell-wide { flex-basis: 100%; }
 .tpl-tableau .gc-key {
     display: block;
     font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase;
