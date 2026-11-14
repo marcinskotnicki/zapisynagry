@@ -174,8 +174,8 @@ body.tpl-tableau {
     color: var(--ink);
     text-align: center;
     padding: 0 0 0.6rem;
-    /* gold hairline inside a cream margin: the printed card's frame */
-    box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt), 0 3px 10px rgba(0, 0, 0, .5);
+    /* The gold hairline inside a cream margin (the printed card's frame) is
+       drawn by the two layers below, so it can follow the cut corners. */
     clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
 }
 
@@ -416,9 +416,36 @@ body.tpl-tableau {
     color: var(--ink);
     border: none; border-radius: 0;
     padding: 0 0 0.5rem;
-    box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt), 0 3px 10px rgba(0, 0, 0, .5);
+    isolation: isolate;   /* the frame layers below sit under the content */
     clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
 }
+/* ---- the card frame: a gold hairline 4px in, that follows the cut corners --
+   An inset box-shadow would draw it, but only as a rectangle: the clip-path
+   slices it off at each cut corner, leaving the frame open there. Instead two
+   layers under the content — a gold one 4px in, the card colour 5px in — each
+   clipped to the card's own shape, so what shows between them is a 1px line
+   with a diagonal at every cut.
+   The diagonal legs are shorter than the card's 18px: moving a 45-degree edge
+   in by d shortens its legs by d * (2 - sqrt 2), so 15.66px at 4px and 15.07px
+   at 5px keep the diagonal exactly as far in as the straight edges. */
+.tpl-tableau .gc-info::before, .tpl-tableau .gc-info::after,
+.tpl-tableau .poll-card::before, .tpl-tableau .poll-card::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+}
+.tpl-tableau .gc-info::before, .tpl-tableau .poll-card::before {
+    inset: 4px;
+    background: var(--gilt);
+    clip-path: polygon(0 0, calc(100% - 15.66px) 0, 100% 15.66px, 100% 100%, 15.66px 100%, 0 calc(100% - 15.66px));
+}
+.tpl-tableau .gc-info::after, .tpl-tableau .poll-card::after {
+    inset: 5px;
+    background: inherit;   /* the card's own colour, a deleted card's included */
+    clip-path: polygon(0 0, calc(100% - 15.07px) 0, 100% 15.07px, 100% 100%, 15.07px 100%, 0 calc(100% - 15.07px));
+}
+
 .tpl-tableau .poll-head {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
     margin: 5px 5px 0; padding: 0.4rem 0.7rem;
@@ -595,14 +622,39 @@ body.tpl-tableau {
     .tpl-tableau .gc-info {
         width: 100%; flex-basis: auto;
         clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
-        box-shadow: inset 0 0 0 4px var(--stock), inset 0 0 0 5px var(--gilt);
+    }
+    /* Its frame keeps only the top-right cut, like the card. */
+    .tpl-tableau .gc-info::before {
+        clip-path: polygon(0 0, calc(100% - 15.66px) 0, 100% 15.66px, 100% 100%, 0 100%);
+    }
+    .tpl-tableau .gc-info::after {
+        clip-path: polygon(0 0, calc(100% - 15.07px) 0, 100% 15.07px, 100% 100%, 0 100%);
     }
     .tpl-tableau .gc-players {
+        position: relative; isolation: isolate;
         margin-left: 0; margin-top: 0;
         width: 100%; box-sizing: border-box; min-width: 0;
         padding: 0.55rem 0.6rem 0.9rem;
         box-shadow: none;
+        /* Its 1px edge is drawn by the layers below, so it follows the cut. */
+        border-left: none; border-right: none; border-bottom: none;
         clip-path: polygon(0 0, 100% 0, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    }
+    /* The sheet's 1px edge round the bottom-left cut: the same two-layer
+       trick, the rule colour 0px in and the sheet colour 1px in (no side
+       borders, so the padding box is the sheet's own outline). */
+    .tpl-tableau .gc-players::before, .tpl-tableau .gc-players::after {
+        content: ""; position: absolute; z-index: -1; pointer-events: none;
+    }
+    .tpl-tableau .gc-players::before {
+        inset: 0;
+        background: var(--rule);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    }
+    .tpl-tableau .gc-players::after {
+        inset: 0 1px 1px;
+        background: inherit;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 17.41px 100%, 0 calc(100% - 17.41px));
     }
     .tpl-tableau .day-tabs { justify-content: flex-start; }
     .tpl-tableau .event-header h1 { font-size: 1.5rem; letter-spacing: 0.1em; }
