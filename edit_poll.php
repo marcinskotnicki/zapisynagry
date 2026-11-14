@@ -136,6 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $reqEmail = email_require_mode() === 2
             ? (isset($_POST['require_email']) ? 1 : 0)
             : (int)($poll['require_email'] ?? 0);
+        // "Email me about every vote": on the form only while the club sends
+        // notifications; otherwise keep what is stored, as above.
+        $notifyVotes = notify_enabled()
+            ? (isset($_POST['notify_votes']) ? 1 : 0)
+            : (int)($poll['notify_votes'] ?? 0);
 
         if (!is_valid_time($start)) {
             $error = t('error_time_invalid');
@@ -149,6 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Globally required, or the proposer demands emails from voters — in
             // which case their own is mandatory too, same rule as add_poll.php.
             $error = t('error_email_required');
+        } elseif ($notifyVotes === 1 && $pEmail === '') {
+            $error = t('error_notify_votes_email');  // asked for mail, gave no address
         } elseif ($pEmail !== '' && !email_valid($pEmail)) {
             $error = t('error_email_invalid');       // non-empty but not X@Y.Z-shaped
         } else {
@@ -190,6 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($othersLib !== (int)($poll['others_from_library'] ?? 0)) {
                 db_run('UPDATE polls SET others_from_library = ? WHERE id = ?', [$othersLib, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' others_from_library -> ' . $othersLib);
+            }
+            if ($notifyVotes !== (int)($poll['notify_votes'] ?? 0)) {
+                db_run('UPDATE polls SET notify_votes = ? WHERE id = ?', [$notifyVotes, $pollId]);
+                log_action('poll_edit', 'Poll #' . $pollId . ' notify_votes -> ' . $notifyVotes);
             }
             $showResults = isset($_POST['show_results']) ? 1 : 0;
             if ($showResults !== (int)($poll['show_results'] ?? 0)) {

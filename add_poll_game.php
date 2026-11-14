@@ -273,14 +273,25 @@ if ($mode === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
              (int)($cand['from_club'] ?? 0)]
         );
         log_action('poll_cand_added', $cand['name'] . ' (poll #' . $livePollId . ')');
-        // Voters always hear about it; the proposer is added to the list when
-        // it wasn't them doing the adding (the "let others add" path), since
-        // that's exactly the change they'd want to know about.
-        $tell = notify_poll_voter_emails($livePollId);
-        $byOwner = (verify_decision($livePoll['proposer_user_id'], $livePoll['proposer_email']) === 'allow')
-                   || !empty($_SESSION['poll_edit_ok'][$livePollId]);
-        if (!$byOwner && !empty($livePoll['proposer_email'])) { $tell[] = $livePoll['proposer_email']; }
-        notify_poll_changed($livePoll, t('ntf_pollchg_added', $cand['name']), $tell);
+        // Voters always hear about it.
+        notify_poll_changed($livePoll, t('ntf_pollchg_added', $cand['name']), notify_poll_voter_emails($livePollId));
+        /* The proposer hears about an option somebody ELSE added only when they
+         * ticked "email me about every vote" on this poll — it is the same kind
+         * of activity, and a busy poll was otherwise a stream of mail nobody
+         * had asked for. (It used to go to them unasked, worded as if they
+         * had voted in their own poll.)
+         *
+         * "Somebody else" includes an admin or moderator: being ABLE to manage
+         * the poll does not make it theirs. The owner is the same account, or
+         * a guest who passed this poll's edit gate. */
+        $adder = current_user();
+        $adderIsOwner = ($adder && (int)($livePoll['proposer_user_id'] ?? 0) > 0
+                         && (int)$livePoll['proposer_user_id'] === (int)$adder['id'])
+                        || !empty($_SESSION['poll_edit_ok'][$livePollId]);
+        $guestWho = guest_identity();
+        notify_poll_option_added($livePoll, $cand['name'],
+            (string)($adder['display_name'] ?? $guestWho['name']), $adderIsOwner,
+            (int)($adder['id'] ?? 0), (string)($adder['email'] ?? $guestWho['email']));
         unset($_SESSION['poll_live_edit']);           // one candidate per trip
         redirect('edit_poll.php?poll=' . $livePollId);
     }

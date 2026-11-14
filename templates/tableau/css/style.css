@@ -90,21 +90,27 @@ body.tpl-tableau {
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }
-/* The colour key under the title: one block per table colour, framed by gold. */
+/* The colour key under the title: one block per table colour. A thin rule,
+   unframed, so it reads as a key rather than a control. */
 .tpl-tableau .event-header h1::after {
     content: "";
     display: block;
-    height: 5px;
+    height: 3px;
     width: 260px;
     max-width: 80%;
     margin: 0.6rem auto 0;
     background: linear-gradient(90deg,
         var(--ch1) 0 20%, var(--ch2) 20% 40%, var(--ch3) 40% 60%,
         var(--ch4) 60% 80%, var(--ch5) 80% 100%);
-    box-shadow: 0 0 0 1px var(--table), 0 0 0 2px rgba(201, 154, 46, .6);
 }
 .tpl-tableau .event-date, .tpl-tableau .event-hours {
     color: var(--mist); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.78rem;
+}
+/* A one-day event's date is its headline fact after the name: larger, and in
+   the bright paper colour. The hours under it stay small. */
+.tpl-tableau .event-date {
+    color: var(--stock-2); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
 }
 .tpl-tableau .event-desc { color: var(--ink); }
 

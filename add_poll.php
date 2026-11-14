@@ -58,6 +58,7 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'show_results'  => 0,           // opt-in: show who voted for what
         'others_library'=> 0,           // opt-in: others may only add from MY library
         'wait_deadline' => 0,           // opt-in: run to the deadline instead of ending on the first full candidate
+        'notify_votes'  => 0,           // opt-in: email me about every vote (and options others add)
         // Voting closes this many hours BEFORE the poll's start; admin default,
         // overridable per poll on the form. 0 = no automatic deadline.
         'deadline_hours' => opt_int('poll_default_deadline_hours'),
@@ -96,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // on something the form no longer shows.
     $draft['wait_deadline'] = poll_wait_allowed() && isset($_POST['wait_deadline']) ? 1 : 0;
     $draft['deadline_hours'] = max(0, (int)($_POST['deadline_hours'] ?? $draft['deadline_hours']));
+    // Only while the club sends notifications at all — the box is not on the
+    // form otherwise, and a hand-built POST must not store a promise of mail.
+    $draft['notify_votes'] = notify_enabled() && isset($_POST['notify_votes']) ? 1 : 0;
 
     if ($do === 'addgame') {
         redirect('add_poll_game.php?table=' . $tableId);   // go append a candidate
@@ -126,6 +130,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ((int)$draft['require_email'] === 1 && $draft['email'] === '') {
             // The proposer demands emails from voters -> their own is mandatory.
             $error = t('error_email_required');
+        } elseif ((int)($draft['notify_votes'] ?? 0) === 1 && $draft['email'] === '') {
+            // Asked to be emailed, but gave nowhere to send it.
+            $error = t('error_notify_votes_email');
         } elseif ($draft['email'] !== '' && !email_valid($draft['email'])) {
             $error = t('error_email_invalid');             // non-empty but not X@Y.Z-shaped
         } else {
@@ -139,8 +146,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline,notify_owner)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline,notify_owner,notify_votes)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -154,6 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $deadline,
                         // Whether the proposer wants the emails about it.
                         notify_flag_from_post($_POST),
+                        // ...and the per-vote ones, asked separately.
+                        (int)($draft['notify_votes'] ?? 0),
                     ]
                 );
                 $pollId = (int)db()->lastInsertId();

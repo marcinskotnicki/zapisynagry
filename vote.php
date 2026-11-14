@@ -113,6 +113,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Did this vote push the candidate over its threshold? If so it's now a game.
         $newGameId = poll_check_resolve($cand['poll_id']);
+        /* Tell the proposer, when they asked to hear about every vote — but
+         * not about the vote that just ENDED the poll: the conclusion email
+         * has already gone to them, and says more. $poll was read before the
+         * vote, which is fine: only its settings are used, and the count is
+         * read fresh. */
+        if (!$newGameId) {
+            notify_poll_vote($poll, $cand, $form['name'], $form['email'], (int)($uid ?? 0));
+        }
         if ($newGameId) {
             redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId);
         }

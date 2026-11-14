@@ -97,6 +97,20 @@
             </label>
         </div>
 
+        <?php /* "Email me about every vote" — the proposer's own, per poll, off by
+               * default: a busy poll can mean a lot of mail. Also covers
+               * options somebody else adds. Only while the club sends
+               * notifications at all. */ ?>
+        <?php if (notify_enabled()): ?>
+            <div class="field field-check field-notify_votes">
+                <label>
+                    <input type="checkbox" name="notify_votes" value="1" <?= (int)($draft['notify_votes'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_notify_votes')) ?>
+                </label>
+                <p class="field-note"><?= e(t('poll_notify_votes_note')) ?></p>
+            </div>
+        <?php endif; ?>
+
         <?php // Opt-in (off by default): anyone may add candidate games. The
               // proposer can still remove any of them from the edit screen.
               // Hidden when it wouldn't restrict anyone anyway (see the helper). ?>

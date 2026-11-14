@@ -23,6 +23,30 @@
  * @param int $pollGameId  A poll_games row id.
  * @return int
  */
+/**
+ * "Saturday 2026-11-21 18:00" — the day a poll sits on plus its start time, for
+ * emails. Somebody at a club running several events can have more than one
+ * poll going, and "your poll" alone does not say which.
+ *
+ * Assembled defensively: a missing day row gives '' (callers then use their
+ * shorter wording) rather than a sentence with a gap in it.
+ *
+ * @param array $poll  polls row (needs day_id, start_time).
+ * @return string
+ */
+function poll_when_text($poll) {
+    $dayRow = db_one('SELECT * FROM event_days WHERE id = ?', [(int)($poll['day_id'] ?? 0)]);
+    if (!$dayRow) return '';
+    require_once __DIR__ . '/events.php';
+    $weekday = function_exists('day_weekday_label') ? trim((string)day_weekday_label($dayRow)) : '';
+    $date    = trim((string)($dayRow['day_date'] ?? ''));
+    $when    = trim($weekday . ' ' . $date);
+    if (($poll['start_time'] ?? '') !== '' && $poll['start_time'] !== null) {
+        $when = trim($when . ' ' . substr((string)$poll['start_time'], 0, 5));
+    }
+    return $when;
+}
+
 function poll_candidate_votes($pollGameId) {
     return (int)db_val('SELECT COUNT(*) FROM poll_votes WHERE poll_game_id = ?', [$pollGameId]);
 }
@@ -210,17 +234,7 @@ function poll_resolve_candidate($poll, $cand) {
          *
          * Assembled defensively: a missing day row gives an empty string and
          * the shorter wording, rather than a sentence with a gap in it. */
-        $whenText = '';
-        $dayRow = db_one('SELECT * FROM event_days WHERE id = ?', [$poll['day_id']]);
-        if ($dayRow) {
-            require_once __DIR__ . '/events.php';
-            $weekday = function_exists('day_weekday_label') ? trim((string)day_weekday_label($dayRow)) : '';
-            $date    = trim((string)($dayRow['day_date'] ?? ''));
-            $whenText = trim($weekday . ' ' . $date);
-            if ($poll['start_time'] !== '' && $poll['start_time'] !== null) {
-                $whenText = trim($whenText . ' ' . substr((string)$poll['start_time'], 0, 5));
-            }
-        }
+        $whenText = poll_when_text($poll);
         notify_poll_concluded($notifyEmails, $cand['name'], $whenText, $gameId);
     }
     return $gameId;

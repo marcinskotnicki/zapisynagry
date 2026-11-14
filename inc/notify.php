@@ -383,6 +383,89 @@ function notify_poll_comment_recipients($poll, $authorEmail = '') {
     return $out;
 }
 
+/**
+ * WHO hears about activity on a poll — votes, and options somebody else adds:
+ * the proposer, and only when they ticked "email me about every vote" on that
+ * poll. Returns their address, or '' for nobody.
+ *
+ * NEVER TOLD ABOUT THEMSELVES. A proposer voting in their own poll, or adding
+ * an option to it, does not get a mail about it. Recognised three ways, any of
+ * which is enough: the same account, the same address (case-insensitive — the
+ * address is the one identity a guest has), or the caller already knowing the
+ * actor is the owner (a guest who passed the edit gate for this poll).
+ *
+ * The box is an explicit, per-poll request, so it stands on its own: it does
+ * not also need the general "email me about this" answer (notify_owner). The
+ * only thing above it is the club switching notifications off altogether.
+ *
+ * Separated from the sending so the rule can be checked directly.
+ *
+ * @param array  $poll         polls row.
+ * @param string $actorEmail   The voter's / adder's address; '' if none.
+ * @param int    $actorUserId  Their account; 0 for a guest.
+ * @param bool   $actorIsOwner The caller already knows it is the proposer.
+ * @return string
+ */
+function notify_poll_activity_recipient($poll, $actorEmail = '', $actorUserId = 0, $actorIsOwner = false) {
+    if (!notify_enabled() || (int)($poll['notify_votes'] ?? 0) !== 1) return '';
+    $to = trim((string)($poll['proposer_email'] ?? ''));
+    if ($to === '' || $actorIsOwner) return '';
+    $owner = (int)($poll['proposer_user_id'] ?? 0);
+    if ($owner > 0 && (int)$actorUserId === $owner) return '';
+    if ($actorEmail !== '' && strcasecmp(trim((string)$actorEmail), $to) === 0) return '';
+    return $to;
+}
+
+/**
+ * Somebody voted in your poll. -> the proposer, if they asked (see above).
+ *
+ * Says who, for which option, and where that option now stands — the number a
+ * proposer actually watches. Not sent for the vote that ENDS the poll: the
+ * caller skips it then, as the conclusion email says it better.
+ *
+ * @param array  $poll
+ * @param array  $cand        poll_games row voted for.
+ * @param string $voterName
+ * @param string $voterEmail  '' when they left none.
+ * @param int    $voterUserId 0 for a guest.
+ * @return void
+ */
+function notify_poll_vote($poll, $cand, $voterName, $voterEmail = '', $voterUserId = 0) {
+    $to = notify_poll_activity_recipient($poll, $voterEmail, $voterUserId);
+    if ($to === '') return;
+    if (!function_exists('poll_candidate_votes')) require_once __DIR__ . '/polls.php';
+    $when  = poll_when_text($poll);
+    $votes = poll_candidate_votes((int)$cand['id']);
+    $need  = max(1, (int)($cand['required_players'] ?? 1));
+    send_mail($to,
+        t('ntf_pollvote_subject', $cand['name']),
+        t('ntf_pollvote_body', $voterName !== '' ? $voterName : t('ntf_someone'), $cand['name'],
+          $when !== '' ? ' (' . $when . ')' : '', $votes, $need));
+}
+
+/**
+ * Somebody else added an option to your poll (the "let others add games"
+ * path). -> the proposer, if they asked. Same rule, same skip-yourself.
+ *
+ * @param array  $poll
+ * @param string $candName
+ * @param string $adderName    '' when unknown (a guest who never gave a name).
+ * @param bool   $adderIsOwner The adder is the proposer (account or edit gate).
+ * @param int    $adderUserId
+ * @param string $adderEmail
+ * @return void
+ */
+function notify_poll_option_added($poll, $candName, $adderName, $adderIsOwner, $adderUserId = 0, $adderEmail = '') {
+    $to = notify_poll_activity_recipient($poll, $adderEmail, $adderUserId, $adderIsOwner);
+    if ($to === '') return;
+    if (!function_exists('poll_when_text')) require_once __DIR__ . '/polls.php';
+    $when = poll_when_text($poll);
+    send_mail($to,
+        t('ntf_polladd_subject', $candName),
+        t('ntf_polladd_body', $adderName !== '' ? $adderName : t('ntf_someone'), $candName,
+          $when !== '' ? ' (' . $when . ')' : ''));
+}
+
 function notify_poll_changed($poll, $what, $emails = null) {
     if (!notify_enabled()) return;
     if ($emails === null) $emails = notify_poll_voter_emails((int)$poll['id']);

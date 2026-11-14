@@ -99,6 +99,20 @@
             </select>
         </div>
 
+        <?php /* "Email me about every vote" — the proposer's own, per poll, off by
+               * default: a busy poll can mean a lot of mail. Also covers
+               * options somebody else adds. Only while the club sends
+               * notifications at all. */ ?>
+        <?php if (notify_enabled()): ?>
+            <div class="field field-check field-notify_votes">
+                <label>
+                    <input type="checkbox" name="notify_votes" value="1" <?= (int)($poll['notify_votes'] ?? 0) === 1 ? 'checked' : '' ?>>
+                    <?= e(t('poll_notify_votes')) ?>
+                </label>
+                <p class="field-note"><?= e(t('poll_notify_votes_note')) ?></p>
+            </div>
+        <?php endif; ?>
+
         <?php // Per-poll email rule — only exists in option mode 2, where the
               // proposer decides. In the other modes the box isn't rendered and
               // the controller leaves the stored value alone. ?>

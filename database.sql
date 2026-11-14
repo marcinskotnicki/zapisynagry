@@ -911,6 +911,11 @@ CREATE TABLE polls (
     -- every row that existed before the choice did, so nothing goes quiet at
     -- the moment a club updates.
     notify_owner     INTEGER NOT NULL DEFAULT 1,
+    -- 0/1; the proposer's own "email me about every vote" box — one mail per
+    -- vote, and per option somebody ELSE adds. Separate from notify_owner (the
+    -- occasional mails: comments, the result) because a busy poll can mean a
+    -- lot of these, so it is opt-in per poll and OFF by default.
+    notify_votes     INTEGER NOT NULL DEFAULT 0,
     proposer_user_id INTEGER,
     comment          TEXT,
     start_time       TEXT NOT NULL,              -- 'HH:MM'
