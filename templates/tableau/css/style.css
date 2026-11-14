@@ -272,7 +272,7 @@ body.tpl-tableau {
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
 }
-.tpl-tableau .gc-cell-weight { border-left-width: 5px; }
+.tpl-tableau .gc-cell-weight { border-left-width: 7px; }
 .tpl-tableau .gc-cell-weight.weight-1 { border-left-color: #2e9e5b; }
 .tpl-tableau .gc-cell-weight.weight-2 { border-left-color: #86b300; }
 .tpl-tableau .gc-cell-weight.weight-3 { border-left-color: #d6a400; }
