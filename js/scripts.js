@@ -309,10 +309,22 @@
             }
         }
 
+        /* Another tab may have read the chat since this one last looked: the
+         * marker in localStorage is shared, the copy in `seen` is not. Without
+         * catching up first, a tab left open in the background kept asking
+         * "anything after <what I knew when I loaded>?" and lit the dot for
+         * messages already read elsewhere. (Members were covered by the
+         * account's marker on the server; guests have only this one.) */
+        function syncSeen() {
+            var stored = readSeen();
+            if (stored > seen) seen = stored;
+        }
+
         function checkUnread() {
             // Not while reading the chat (it is all on screen), and not in a
             // background tab nobody is looking at.
             if (C.unread === 'off' || isOpen() || document.hidden) return;
+            syncSeen();
             fetch('chat.php?action=unread&after=' + encodeURIComponent(seen), { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (d) { if (d && d.ok) showBadge(d.count); })
@@ -436,7 +448,15 @@
             panel.classList.add('is-open');
             document.body.classList.add('chat-open');
             toggle.setAttribute('aria-expanded', 'true');
-            if (!loaded) load(); else { scrollDown(); markSeen(lastId); }
+            /* Reopening: fetch what arrived while the panel was closed NOW,
+             * not at the next refresh tick. The poll stops while the panel is
+             * closed, so before this the reopened panel showed the old list —
+             * and closing it again within the refresh interval left those new
+             * messages unread, so the dot came straight back over a chat that
+             * had looked as if it held nothing new. markSeen() covers what is
+             * already on screen; the poll marks the rest when it lands (it
+             * checks the panel is still open). */
+            if (!loaded) load(); else { scrollDown(); markSeen(lastId); poll(); }
             start();
         }
         function closeChat() {
@@ -458,6 +478,20 @@
         if (C.unread !== 'off') {
             if ((C.lastId || 0) > seen) checkUnread();
             if (C.unreadPoll > 0) window.setInterval(checkUnread, C.unreadPoll);
+
+            /* Read in another tab of this browser: catch up straight away.
+             * Nothing to ask the server if the dot is not even showing.
+             * (The storage event fires only in the OTHER tabs.) */
+            window.addEventListener('storage', function (ev) {
+                if (ev.key !== seenKey) return;
+                syncSeen();
+                if (toggle.classList.contains('has-unread')) checkUnread();
+            });
+            /* Coming back to a tab whose dot may be out of date — it is not
+             * re-checked while hidden. Again only when it is showing. */
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden && toggle.classList.contains('has-unread')) checkUnread();
+            });
         }
 
         // Optional: a click anywhere outside closes the panel.
