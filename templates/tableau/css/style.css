@@ -378,20 +378,29 @@ body.tpl-tableau {
 }
 .tpl-tableau .gc-resign:hover { background: var(--error); color: #fff; text-decoration: none; }
 
-/* A free seat: hatched, like an empty space on a board. */
+/* A free seat you can take: a solid ink plate, the strongest thing on the
+   sheet — it is the main action. The reserve-list offer is the weaker,
+   second-choice one, so IT gets the hatching of an empty board space.
+   (These were the other way round.) */
 .tpl-tableau .gc-signup {
     display: flex; align-items: center; gap: 0.4rem;
     min-height: 26px; box-sizing: border-box;
     padding: 0.2rem 0.45rem 0.2rem 0.3rem; margin-bottom: 3px;
-    background: repeating-linear-gradient(45deg, var(--stock-2) 0 6px, var(--stock-3) 6px 12px);
-    border: 1px dashed var(--ink-2);
-    color: var(--ink);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    color: var(--stock-2);
     font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
     text-decoration: none;
 }
+.tpl-tableau .gc-signup .gc-seat-n { color: var(--stock-3); }
+.tpl-tableau .gc-signup-reserve {
+    justify-content: center; margin-top: 0.4rem;
+    background: repeating-linear-gradient(45deg, var(--stock-2) 0 6px, var(--stock-3) 6px 12px);
+    border: 1px dashed var(--ink-2);
+    color: var(--ink);
+}
 .tpl-tableau .gc-signup:hover { background: var(--chan); border: 1px solid var(--chan); color: var(--chan-ink); text-decoration: none; }
 .tpl-tableau .gc-signup:hover .gc-seat-n { color: var(--chan-ink); }
-.tpl-tableau .gc-signup-reserve { justify-content: center; background: var(--ink); border: 1px solid var(--ink); color: var(--stock-2); margin-top: 0.4rem; }
 .tpl-tableau .gc-seat-empty { background: repeating-linear-gradient(45deg, var(--stock-2) 0 6px, var(--stock-3) 6px 12px); border-left-color: var(--rule); }
 
 .tpl-tableau .gc-reserve-head {
