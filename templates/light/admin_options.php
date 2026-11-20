@@ -153,6 +153,10 @@ $groupEnd = function () { echo '</div></details>'; };
         <p class="field-note"><?= e(t('opt_allow_poll_wait_note')) ?></p>
         <?php $toggle('allow_poll_reopen');   // the "reopen the poll" button on a game a poll became ?>
         <p class="field-note"><?= e(t('opt_allow_poll_reopen_note')) ?></p>
+        <?php $toggle('poll_owner_remove_votes');   // owners may remove single votes (admins always may) ?>
+        <p class="field-note"><?= e(t('opt_poll_owner_remove_votes_note')) ?></p>
+        <?php $toggle('notify_vote_removed');       // tell the voter when their vote is removed ?>
+        <p class="field-note"><?= e(t('opt_notify_vote_removed_note')) ?></p>
 
         <?php /* The admin's OWN opinion polls — a separate thing from the game
                  polls above, which belong to an event and become a game. These
@@ -362,6 +366,7 @@ $groupEnd = function () { echo '</div></details>'; };
             </select>
             <p class="field-note"><?= e(t('opt_deleted_games_display_note')) ?></p>
         </div>
+        <?php $toggle('group_deleted_games', 'opt_group_deleted_games_note');   // deleted games together below the tables ?>
 
         <?php // Optional per-day labels. Off by default; switching it off later
               // hides existing names without deleting them, so it is safe to try. ?>

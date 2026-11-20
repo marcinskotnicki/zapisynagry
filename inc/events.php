@@ -1261,6 +1261,16 @@ function deleted_games_display() {
     return in_array($m, deleted_games_displays(), true) ? $m : 'name';
 }
 
+/**
+ * Are soft-deleted games listed together below the tables (in a "deleted
+ * games" block that exists only on the page), rather than at their own tables?
+ * Appearance option, off by default. See front_event.php.
+ * @return bool
+ */
+function group_deleted_games() {
+    return opt_bool('group_deleted_games');
+}
+
 /** The tab layouts an admin can choose between, in the order they are offered. */
 function day_tab_formats() {
     return ['num_date_hours', 'num_weekday_date_hours', 'weekday_date_hours_name',

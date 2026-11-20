@@ -565,7 +565,10 @@ body.tpl-schematic {
 .tpl-schematic .card label, .tpl-schematic .card .field-note { color: var(--ink-2); }
 .tpl-schematic label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
 
-.tpl-schematic .comment-add summary {
+/* "> summary", not " summary": in this theme the comment list sits INSIDE the
+   folding section, and a descendant selector also dressed each comment's own
+   edit pencil (a <summary> too) as this header button. */
+.tpl-schematic .comment-add > summary {
     display: inline-block;
     cursor: pointer;
     list-style: none;
@@ -578,11 +581,11 @@ body.tpl-schematic {
     text-transform: uppercase;
     font-weight: 700;
 }
-.tpl-schematic .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
-.tpl-schematic .comment-add summary::-webkit-details-marker { display: none; }
-.tpl-schematic .comment-add summary.has-comments::before { content: "\1F5E9  "; color: var(--chan); }
-.tpl-schematic .comment-add summary.has-comments:hover::before { color: inherit; }
-.tpl-schematic .comment-add summary.has-comments { border-color: var(--chan); }
+.tpl-schematic .comment-add > summary:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic .comment-add > summary::-webkit-details-marker { display: none; }
+.tpl-schematic .comment-add > summary.has-comments::before { content: "\1F5E9  "; color: var(--chan); }
+.tpl-schematic .comment-add > summary.has-comments:hover::before { color: inherit; }
+.tpl-schematic .comment-add > summary.has-comments { border-color: var(--chan); }
 
 .tpl-schematic .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .tpl-schematic .comment-list li {

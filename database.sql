@@ -87,6 +87,11 @@ INSERT INTO options (key, value) VALUES
     --   that poll ended at its deadline, was ended by hand, or lost a player
     --   it needed. OFF by default. See poll_reopen_check() in inc/polls.php.
     ('allow_poll_reopen',            '0'),
+    -- poll_owner_remove_votes: a poll's owner may remove single votes on the
+    --   poll's edit page (admins always may). ON by default.
+    ('poll_owner_remove_votes',      '1'),
+    -- notify_vote_removed: email the voter when their vote is removed. OFF.
+    ('notify_vote_removed',          '0'),
     -- site_polls_enabled: the admin's own opinion polls ("which day suits you
     --   best?"), shown on the front page. Nothing to do with the GAME polls —
     --   those decide what is played at a table; these just ask the club
@@ -511,6 +516,13 @@ inna'),                                -- game-language dropdown options, ONE PE
     -- How a soft-deleted game appears: just its name, or the whole card
     -- greyed out with its sign-ups still visible.
     ('deleted_games_display', 'name'),
+    -- group_deleted_games: list soft-deleted games together below the tables,
+    --   in a "deleted games" block (display only), instead of at their own
+    --   tables. OFF by default.
+    ('group_deleted_games', '0'),
+    -- club_bgg_collection: the BGG link the club shelf was last synced from,
+    --   pre-filled in the admin's sync form. Set by the sync itself.
+    ('club_bgg_collection', ''),
     ('allow_discussions',            '1'),
     ('use_captcha',                  '0'),
     ('allow_messaging',              '0'),
@@ -568,6 +580,10 @@ CREATE TABLE users (
     -- while the admin's library_allow_contact option is on — so the default
     -- never exposes anyone until an admin deliberately enables the feature.
     library_contact_ok INTEGER NOT NULL DEFAULT 1,
+    -- The BGG profile / collection link (or bare username) this member last
+    -- synced their library from, as they typed it — pre-filled next time, so
+    -- nobody has to go and find it again. NULL until their first sync.
+    bgg_collection TEXT,
     -- The theme and language this person chose, remembered on the ACCOUNT as
     -- well as in the browser cookie, so signing in on a second device brings
     -- their choice with them. NULL means "no preference of my own" — follow

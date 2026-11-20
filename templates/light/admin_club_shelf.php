@@ -204,7 +204,9 @@
         </div>
         <div class="field field-bgg_user">
             <label for="cs_bgg_user"><?= e(t('club_shelf_sync_user_label')) ?></label>
-            <input type="text" id="cs_bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…" required>
+            <?php // Pre-filled with the link the shelf was last synced from. ?>
+            <input type="text" id="cs_bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…"
+                   value="<?= e(opt('club_bgg_collection')) ?>" required>
             <p class="field-note"><?= e(t('lib_sync_manual_note')) ?></p>
         </div>
         <?php // WHAT the sync is allowed to do, rather than a bare "are you

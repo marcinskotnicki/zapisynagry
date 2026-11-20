@@ -468,7 +468,9 @@ body.tpl-schematic-compact {
 .tpl-schematic-compact .card label, .tpl-schematic-compact .card .field-note { color: var(--ink-2); }
 .tpl-schematic-compact label { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.76rem; }
 
-.tpl-schematic-compact .comment-add summary {
+/* "> summary": the comment list sits inside this section; a descendant
+   selector also dressed each comment's edit pencil as this header. */
+.tpl-schematic-compact .comment-add > summary {
     display: inline-block;
     cursor: pointer;
     list-style: none;
@@ -481,11 +483,11 @@ body.tpl-schematic-compact {
     text-transform: uppercase;
     font-weight: 700;
 }
-.tpl-schematic-compact .comment-add summary:hover { background: var(--ink); color: var(--paper-2); }
-.tpl-schematic-compact .comment-add summary::-webkit-details-marker { display: none; }
-.tpl-schematic-compact .comment-add summary.has-comments::before { content: "\1F5E9  "; color: var(--chan); }
-.tpl-schematic-compact .comment-add summary.has-comments:hover::before { color: inherit; }
-.tpl-schematic-compact .comment-add summary.has-comments { border-color: var(--chan); }
+.tpl-schematic-compact .comment-add > summary:hover { background: var(--ink); color: var(--paper-2); }
+.tpl-schematic-compact .comment-add > summary::-webkit-details-marker { display: none; }
+.tpl-schematic-compact .comment-add > summary.has-comments::before { content: "\1F5E9  "; color: var(--chan); }
+.tpl-schematic-compact .comment-add > summary.has-comments:hover::before { color: inherit; }
+.tpl-schematic-compact .comment-add > summary.has-comments { border-color: var(--chan); }
 
 .tpl-schematic-compact .comment-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .tpl-schematic-compact .comment-list li {

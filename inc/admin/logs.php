@@ -10,7 +10,15 @@
  * ============================================================================= */
 
 // Event list for the selector (newest first), and which one we're viewing.
-$events  = db_all('SELECT id, name, is_archived, created_at FROM events ORDER BY id DESC');
+require_once __DIR__ . '/../events.php';   // event_date_label(), for the selector
+
+/* With each event's first and last day, so the selector can tell apart
+ * events that share a name — a club running "Wieczór planszówek" every month
+ * has a dozen of them. One query, not one per event. */
+$events  = db_all('SELECT e.id, e.name, e.is_archived, e.created_at,
+                          MIN(d.day_date) AS date_from, MAX(d.day_date) AS date_to
+                     FROM events e LEFT JOIN event_days d ON d.event_id = e.id
+                    GROUP BY e.id ORDER BY e.id DESC');
 $current = current_event();
 
 // Requested scope: an event id, or 0 for the SYSTEM log (site-wide entries,

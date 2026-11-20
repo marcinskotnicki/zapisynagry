@@ -485,7 +485,7 @@ html { scroll-behavior: smooth; }
 .comment-list { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .comment-list li { font-size: 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.5rem; }
 .c-name { font-weight: 600; }
-.comment-add summary { cursor: pointer; color: var(--primary); font-size: 0.9rem; }
+.comment-add > summary { cursor: pointer; color: var(--primary); font-size: 0.9rem; }
 .comment-add form { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
@@ -1601,6 +1601,40 @@ trix-toolbar .trix-button--dialog {
 }
 .c-edit textarea { width: 100%; box-sizing: border-box; margin-bottom: 0.4rem; }
 
+/* ...but on a CARD, the open edit box becomes part of the comment instead of
+   floating over it: the controls leave their corner, the form takes the full
+   width under the text, and the card grows to hold it. A floating panel is cut
+   off by any card that clips its contents — rounded corners (overflow: hidden)
+   or cut corners (clip-path) — which is most of the classic family, plus a few
+   pixels of glass and schematic on a phone. Growing the card cannot be clipped.
+   The delete button steps aside while editing (the pencil closes the box).
+   Browsers without :has() keep the floating panel — the old behaviour. */
+.comment-list li:has(.c-edit[open]) { padding-right: 0.35rem !important; }
+.comment-list .c-actions:has(.c-edit[open]) {
+    position: static;
+    display: flex;
+    /* Full width even where the comment row is itself a flex row (light). */
+    flex: 1 1 100%;
+    width: 100%;
+    margin-top: 0.3rem;
+}
+.comment-list .c-actions:has(.c-edit[open]) .c-del { display: none; }
+/* Block, not flex: browsers wrap a <details>' contents in a box of their own,
+   so flex on .c-edit never reaches the form. As a block, the pencil (inline)
+   keeps to the right and the form fills the width below it. */
+.comment-list .c-edit[open] {
+    display: block;
+    width: 100%;
+    text-align: right;
+}
+.comment-list .c-edit[open] > form {
+    position: static;
+    width: auto;
+    max-width: none;
+    box-sizing: border-box;
+    margin-top: 0.25rem;
+}
+
 /* In the admin list the row is a table cell with room of its own, so the
    controls stay in the normal flow and the edit box opens inline. */
 .row-actions .c-edit { position: static; }
@@ -1736,3 +1770,17 @@ trix-toolbar .trix-button--dialog {
     margin: 0 0.1rem;
 }
 .player-edit:hover { opacity: 1; text-decoration: none; }
+
+/* Poll edit page: the votes under each option, each with "remove vote" —
+   owner/admin only. A name appearing twice under one option is flagged. */
+.poll-vote-list { list-style: none; margin: 0.35rem 0 0.2rem; padding: 0 0 0 0.9rem; flex-basis: 100%; }
+.poll-vote-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; padding: 0.15rem 0; font-size: 0.92rem; }
+.poll-vote-row .inline { margin-left: auto; }
+.poll-vote-time, .poll-vote-email { font-size: 0.82rem; }
+.poll-vote-dup-tag { font-size: 0.75rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 3px;
+                     background: #fff3cd; color: #6b4e00; border: 1px solid #e7c96a; }
+
+/* "Group deleted games": the block below the tables, and the line above each
+   card there naming the table it came from. */
+.deleted-game-origin { margin: 0.2rem 0 0.15rem; font-size: 0.8rem; }
+.table-block-deleted { opacity: 0.92; }

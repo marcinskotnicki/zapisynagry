@@ -305,23 +305,39 @@ function notify_poll_deleted($poll) {
  * address, not the name: names are free text and two people called Marek would
  * otherwise silence each other.
  *
- * The comment text is deliberately NOT quoted in the email. It is written for
- * the people around that table, it can be edited or removed afterwards, and a
- * copy sitting in an inbox cannot be. The mail says where to look.
+ * THE COMMENT ITSELF is in the email, so a reply is not needed just to read
+ * it ("can you bring the expansion?" is read in the inbox). It was left out at
+ * first — a comment can be edited or removed afterwards and the copy in an
+ * inbox cannot — but people asked to see it without visiting the site.
  *
  * @param array  $game         Game row (needs 'id', 'name', 'brings_email').
  * @param string $authorName   Who wrote it, for the body.
  * @param string $authorEmail  Their address, so they are not told about
  *                             themselves; '' when they left none.
+ * @param string $text         The comment, as saved.
  * @return void
  */
-function notify_comment_added($game, $authorName, $authorEmail = '') {
+function notify_comment_added($game, $authorName, $authorEmail = '', $text = '') {
     if (!notify_enabled()) return;
     foreach (notify_comment_recipients($game, $authorEmail) as $addr) {
         send_mail($addr,
             t('ntf_comment_subject', $game['name']),
-            t('ntf_comment_body', $authorName, $game['name']));
+            t('ntf_comment_body', $authorName, $game['name'], notify_quote($text)));
     }
+}
+
+/**
+ * A comment as it goes into an email: each line set off with "> ", the usual
+ * mark for quoted text, so it reads as somebody else's words and not ours.
+ * Trimmed; blank lines kept (as a bare ">").
+ *
+ * @param string $text
+ * @return string
+ */
+function notify_quote($text) {
+    $text = trim(str_replace(["\r\n", "\r"], "\n", (string)$text));
+    if ($text === '') return '';
+    return implode("\n", array_map(function ($l) { return rtrim('> ' . $l); }, explode("\n", $text)));
 }
 
 /**
@@ -352,20 +368,19 @@ function notify_comment_recipients($game, $authorEmail = '') {
  * Somebody commented on a poll you voted in. -> every voter, plus the proposer.
  *
  * Same shape and same reasoning as notify_comment_added() above: the proposer
- * may not have voted, the author is skipped, and the text itself is not
- * carried into the email.
+ * may not have voted, the author is skipped, and the comment is quoted.
  *
  * @param array  $poll         Poll row (needs 'id', 'proposer_email').
  * @param string $authorName
  * @param string $authorEmail
  * @return void
  */
-function notify_poll_comment_added($poll, $authorName, $authorEmail = '') {
+function notify_poll_comment_added($poll, $authorName, $authorEmail = '', $text = '') {
     if (!notify_enabled()) return;
     foreach (notify_poll_comment_recipients($poll, $authorEmail) as $addr) {
         send_mail($addr,
             t('ntf_pollcomment_subject'),
-            t('ntf_pollcomment_body', $authorName));
+            t('ntf_pollcomment_body', $authorName, notify_quote($text)));
     }
 }
 
@@ -533,6 +548,26 @@ function notify_poll_reopened($poll, $gameName) {
         $seen[$key] = true;
         send_mail($addr, t('ntf_pollback_subject', $gameName), $body);
     }
+}
+
+/**
+ * Your vote was removed from a poll (by its owner or an admin, on the poll's
+ * edit page). -> the voter, when the club asks for it (notify_vote_removed,
+ * off by default), they left an address, and they did not opt out of mail
+ * about this poll.
+ *
+ * @param array $poll  polls row.
+ * @param array $vote  The removed poll_votes row, with 'cand_name'.
+ * @return void
+ */
+function notify_vote_removed($poll, $vote) {
+    if (!notify_enabled() || !opt_bool('notify_vote_removed')) return;
+    $to = trim((string)($vote['email'] ?? ''));
+    if ($to === '' || (int)($vote['notify'] ?? 1) === 0) return;
+    if (!function_exists('poll_when_text')) require_once __DIR__ . '/polls.php';
+    $when = poll_when_text($poll);
+    send_mail($to, t('ntf_voterm_subject', $vote['cand_name']),
+        t('ntf_voterm_body', $vote['cand_name'], $when !== '' ? ' (' . $when . ')' : '') . "\n\n" . t('ntf_pollback_open'));
 }
 
 function notify_poll_changed($poll, $what, $emails = null) {

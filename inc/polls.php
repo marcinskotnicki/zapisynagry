@@ -297,7 +297,8 @@ function poll_resolve_candidate($poll, $cand, $reason = 'quota') {
         notify_poll_concluded($voterEmails, $cand['name'], $whenText, $gameId);
         if ($proposerEmail !== '') {
             notify_poll_concluded([$proposerEmail], $cand['name'], $whenText, $gameId,
-                t('ntf_poll_reason_' . $reason, $cand['name'], $winVotes, max(1, (int)$cand['required_players'])));
+                t('ntf_poll_reason_' . $reason, $cand['name'], $winVotes, max(1, (int)$cand['required_players']))
+                . "\n\n" . poll_breakdown_text($snap['games'], $snap['votes']));
         }
     }
     return $gameId;
@@ -440,6 +441,18 @@ function poll_can_manage($poll) {
     require_once __DIR__ . '/verify.php';   // verify_decision()
     if (verify_decision($poll['proposer_user_id'], $poll['proposer_email']) === 'allow') return true;
     return !empty($_SESSION['poll_edit_ok'][(int)$poll['id']]);
+}
+
+/**
+ * May the current visitor remove single votes? Admins always; anybody else
+ * who may manage the poll (its owner) only while the club allows it —
+ * poll_owner_remove_votes, on by default. The caller has already checked that
+ * the visitor may manage THIS poll (edit_poll.php is gated).
+ *
+ * @return bool
+ */
+function poll_can_remove_votes() {
+    return is_admin() || opt_bool('poll_owner_remove_votes');
 }
 
 function poll_can_add_candidate($poll) {
@@ -1084,4 +1097,33 @@ function poll_reopen_options(array $game, array $snap) {
         $out[] = $g;
     }
     return $out;
+}
+
+/**
+ * Who voted for what, for the proposer's "poll decided" email — only theirs;
+ * the voters' copy does not list other people's votes.
+ *
+ *   Rozkład głosów:
+ *   Azul (4/4): Marcin S, Tomasz Z, Kuba, Ania
+ *   Inferno (2/4): Marcin S, Ania
+ *   Century (0/5): —
+ *
+ * Most votes first (the winner, normally), then in the poll's own order. Every
+ * option is listed, the ones nobody chose too.
+ *
+ * @param array $options  poll_games rows (the snapshot's).
+ * @param array $votes    poll_votes rows (the snapshot's), in voting order.
+ * @return string
+ */
+function poll_breakdown_text(array $options, array $votes) {
+    $by = [];
+    foreach ($votes as $v) $by[(int)$v['poll_game_id']][] = trim((string)$v['name']);
+    $rows = [];
+    foreach ($options as $i => $o) {
+        $names = $by[(int)$o['id']] ?? [];
+        $rows[] = ['n' => count($names), 'i' => $i, 'line' => $o['name'] . ' (' . count($names) . '/'
+                   . max(1, (int)$o['required_players']) . '): ' . ($names ? implode(', ', $names) : '—')];
+    }
+    usort($rows, function ($a, $b) { return $b['n'] <=> $a['n'] ?: $a['i'] <=> $b['i']; });
+    return t('ntf_poll_breakdown') . "\n" . implode("\n", array_column($rows, 'line'));
 }

@@ -63,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             log_action('comment_add', 'poll #' . $pollId);
             /* Everyone with a stake in that poll hears about it. Sent AFTER the
              * insert, so a mail never announces a comment that failed to save. */
-            notify_poll_comment_added($target, $name, $authorEmail);
+            notify_poll_comment_added($target, $name, $authorEmail, $comment);
         } else {
             db_run('INSERT INTO comments (game_id, name, user_id, comment) VALUES (?,?,?,?)',
                    [$gameId, $name, $u['id'] ?? null, $comment]);
             log_action('comment_add', $game['name']);
-            notify_comment_added($game, $name, $authorEmail);
+            notify_comment_added($game, $name, $authorEmail, $comment);
         }
     }
 }

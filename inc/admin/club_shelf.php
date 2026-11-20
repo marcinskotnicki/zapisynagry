@@ -185,6 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $flash = t('lib_bgg_bad_user');
                 $flashKind = 'error';
             } else {
+                // Remembered for next time, as typed — even if BGG then fails
+                // to answer (see my_library.php for why).
+                opt_set('club_bgg_collection', mb_substr(trim((string)$_POST['bgg_user']), 0, 300));
                 $why = '';
                 $collection = library_fetch_collection($user, $why);
                 if ($collection === null) {

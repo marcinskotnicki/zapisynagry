@@ -344,7 +344,9 @@ $uid_field = $as_admin
             </div>
             <div class="field field-bgg_user">
                 <label for="bgg_user"><?= e(t('lib_sync_user_label')) ?></label>
-                <input type="text" id="bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…" required>
+                <?php // Pre-filled with the link this library was last synced from. ?>
+                <input type="text" id="bgg_user" name="bgg_user" placeholder="https://boardgamegeek.com/user/…"
+                       value="<?= e((string)($user['bgg_collection'] ?? '')) ?>" required>
                 <p class="field-note"><?= e(t('lib_sync_manual_note')) ?></p>
             </div>
             <?php // WHAT the sync is allowed to do, rather than a bare "are you

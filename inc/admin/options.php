@@ -118,7 +118,7 @@ unset($__oLang);
 
 $OPTION_TOGGLES = [
     'allow_unregistered_add_games', 'allow_unregistered_signup',
-    'allow_polls', 'allow_poll_wait', 'allow_poll_reopen', 'site_polls_enabled', 'allow_discussions',
+    'group_deleted_games', 'allow_polls', 'allow_poll_wait', 'allow_poll_reopen', 'poll_owner_remove_votes', 'notify_vote_removed', 'site_polls_enabled', 'allow_discussions',
     'use_captcha', 'allow_messaging', 'allow_guest_messaging', 'allow_custom_game_links', 'allow_manual_links',
     'allow_player_edit', 'admin_show_player_emails',
     'allow_user_template', 'allow_guest_template', 'allow_user_language', 'allow_guest_language',

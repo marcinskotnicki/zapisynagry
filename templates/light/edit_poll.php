@@ -221,6 +221,50 @@
                         <button type="submit" class="btn btn-small btn-danger"><?= e(t('poll_cand_remove')) ?></button>
                     </form>
                 <?php endif; ?>
+                <?php
+                /* Who voted for it, each with "remove": the fix for a duplicate
+                 * vote (the one-vote-per-address rule cannot see a second vote
+                 * under a different address, or none). The same name twice
+                 * under one option is flagged — it is usually that. Admins
+                 * with "show player emails" on see the address too, which is
+                 * what tells two "Kuba"s apart. Names are shown here even when
+                 * the poll hides them from everyone else: this page is only
+                 * for the poll's owner and the admins. */
+                $vs = $voters[(int)$c['id']] ?? [];
+                $nameCount = [];
+                foreach ($vs as $v) { $k = mb_strtolower(trim((string)$v['name']), 'UTF-8'); $nameCount[$k] = ($nameCount[$k] ?? 0) + 1; }
+                $showEmail = is_admin() && opt_bool('admin_show_player_emails');
+                ?>
+                <?php if ($vs): ?>
+                    <ul class="poll-vote-list">
+                        <?php foreach ($vs as $v): ?>
+                            <?php $dup = $nameCount[mb_strtolower(trim((string)$v['name']), 'UTF-8')] > 1; ?>
+                            <li class="poll-vote-row<?= $dup ? ' poll-vote-dup' : '' ?>">
+                                <?= player_name_html($v) ?>
+                                <?php if ($showEmail && !empty($v['email'])): ?>
+                                    <span class="muted poll-vote-email"><?= e($v['email']) ?></span>
+                                <?php endif; ?>
+                                <span class="muted poll-vote-time"><?= e(date('d.m H:i', strtotime($v['created_at'] . ' UTC'))) ?></span>
+                                <?php if ($dup): ?>
+                                    <span class="poll-vote-dup-tag"><?= e(t('poll_vote_dup')) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($can_remove_votes)): // admins; owners while the club allows it ?>
+                                <form method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>" class="inline"
+                                      onsubmit="return confirm('<?= e(t('poll_vote_remove_confirm')) ?>');">
+                                    <?= $csrf ?>
+                                    <?= antibot_field() ?>
+                                    <input type="hidden" name="action" value="remove_vote">
+                                    <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
+                                    <input type="hidden" name="vote" value="<?= (int)$v['id'] ?>">
+                                    <?php // Plain, not red: one per vote would drown the page, and the
+                                          // red "remove" next to each OPTION (all its votes) must stand out. ?>
+                                    <button type="submit" class="btn btn-small poll-vote-remove"><?= e(t('poll_vote_remove')) ?></button>
+                                </form>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
                 <?php endif; ?>
             </li>
         <?php endforeach; ?>

@@ -256,6 +256,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user === '') {
                 flash_set(t('lib_bgg_bad_user'), 'error');
             } else {
+                /* Remembered as soon as it is a usable BGG user — even if BGG
+                 * then fails to answer, it is still their link, and the retry
+                 * should not mean finding it again. Saved as typed (a link or a
+                 * bare name), on the LIBRARY OWNER's account: an admin syncing
+                 * someone else's library fills in theirs, not the admin's. */
+                db_run('UPDATE users SET bgg_collection = ? WHERE id = ?',
+                       [mb_substr(trim((string)$_POST['bgg_user']), 0, 300), $owner['id']]);
                 $why = '';
                 $collection = library_fetch_collection($user, $why);
                 if ($collection === null) {

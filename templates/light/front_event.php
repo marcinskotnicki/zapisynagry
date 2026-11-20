@@ -154,6 +154,26 @@ require_once __DIR__ . '/../../inc/calendar.php';
     <div class="event-desc"><?= nl2br(e($evDesc)) ?></div>
 <?php endif; ?>
 
+<?php
+/* "Group deleted games" (appearance option, off by default): soft-deleted games
+ * leave their tables and are listed together in one more block below them — a
+ * table of their own for display only, not in the database. Each keeps a note
+ * of the table it came from. A table left holding only deleted games then
+ * reads as empty, which is what it is to anyone signing up. */
+$deletedGroup = [];
+if (group_deleted_games()) {
+    foreach ($tables as $ti => $tbl) {
+        foreach ($tbl['items'] ?? [] as $ii => $item) {
+            if ($item['type'] === 'game' && (int)$item['data']['is_archived'] === 1) {
+                $deletedGroup[] = ['g' => $item['data'], 'table_no' => (int)$tbl['table_number'],
+                                   'origin' => t('table_label', (int)$tbl['table_number'])
+                                       . (!empty($tbl['table_name']) && table_names_enabled() ? ' — ' . $tbl['table_name'] : '')];
+                unset($tables[$ti]['items'][$ii]);
+            }
+        }
+    }
+}
+?>
 <div class="tables">
     <?php foreach ($tables as $tbl): // one block per table on the active day ?>
         <?php // id anchor: the rename edit/cancel links and the post-save redirect
@@ -213,36 +233,9 @@ require_once __DIR__ . '/../../inc/calendar.php';
                             <?php tpl_render('poll_card', ['poll' => $item['data'], 'readonly' => $readonly, 'table_no' => (int)$tbl['table_number']]); ?>
                         <?php else: ?>
                             <?php // table_no is passed for themes that key a colour off the
-                                  // table (schematic). Inert everywhere else — an unused
-                                  // render var costs nothing. It is the table NUMBER, not
-                                  // its row id, so the key matches what the visitor sees
-                                  // and what the timeline can derive. ?>
-                            <?php
-                            // A soft-deleted game shown in FULL: the card itself is
-                            // the ordinary active one (so it can never drift from
-                            // the live version, and no theme fork needs its own
-                            // copy), wrapped here and forced read-only. A deleted
-                            // game cannot be signed up to, edited or commented on,
-                            // and the readonly path already suppresses all of that.
-                            $gDeleted = (int)$item['data']['is_archived'] === 1
-                                     && deleted_games_display() === 'full';
-                            ?>
-                            <?php if ($gDeleted): ?>
-                                <div class="game-deleted">
-                                    <p class="game-deleted-note">
-                                        <?= e(t('game_archived_note')) ?>
-                                        <?php // The way back is offered here rather than
-                                              // inside the card, which is read-only. ?>
-                                        <?php if (!$readonly): ?>
-                                            <a class="btn btn-small" href="bring_back.php?game=<?= (int)$item['data']['id'] ?>" rel="nofollow"><?= e(t('bringback_button')) ?></a>
-                                            <?php if (is_admin()): ?>
-                                                <a class="btn btn-small btn-danger" href="delete_game.php?game=<?= (int)$item['data']['id'] ?>" rel="nofollow"><?= e(t('game_purge_button')) ?></a>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                    </p>
-                            <?php endif; ?>
-                            <?php tpl_render('game_card', ['g' => $item['data'], 'readonly' => $readonly || $gDeleted, 'table_no' => (int)$tbl['table_number']]); ?>
-                            <?php if ($gDeleted): ?></div><?php endif; ?>
+                                  // table (schematic) — the table NUMBER, not its row id, so
+                                  // the key matches what the visitor sees. ?>
+                            <?php tpl_render('game_item', ['g' => $item['data'], 'readonly' => $readonly, 'table_no' => (int)$tbl['table_number']]); ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
@@ -254,6 +247,20 @@ require_once __DIR__ . '/../../inc/calendar.php';
             <?php endif; ?>
         </section>
     <?php endforeach; ?>
+
+    <?php // The deleted games, together, below the real tables (see above).
+          // No number, no rename, no "add a game": it is not a table. ?>
+    <?php if ($deletedGroup): ?>
+        <section class="table-block table-block-deleted" id="table-deleted">
+            <h2 class="table-title"><?= e(t('deleted_games_table')) ?></h2>
+            <div class="game-list">
+                <?php foreach ($deletedGroup as $dg): ?>
+                    <?php tpl_render('game_item', ['g' => $dg['g'], 'readonly' => $readonly,
+                                                   'table_no' => $dg['table_no'], 'origin' => $dg['origin']]); ?>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
 </div>
 
 <?php // Add-table control, or the "table cap reached" note. ?>

@@ -118,6 +118,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('edit_poll.php?poll=' . $pollId);
         }
 
+    } elseif ($action === 'remove_vote') {
+        /* Take one vote off — the fix for a duplicate (the same person voting
+         * twice under different addresses, which the one-vote-per-address rule
+         * cannot see) or a joke entry. Same gate as everything else on this
+         * page: the poll's owner or an admin/moderator. The vote must belong
+         * to THIS poll; an id from another one is refused, not deleted. */
+        antibot_check('click');
+        $vId  = (int)($_POST['vote'] ?? 0);
+        /* Admins always may; the owner only while the club allows it
+         * (poll_owner_remove_votes, on by default). */
+        if (!poll_can_remove_votes()) { redirect('edit_poll.php?poll=' . $pollId); }
+        $vote = $vId ? db_one('SELECT v.*, g.name AS cand_name FROM poll_votes v
+                                 JOIN poll_games g ON g.id = v.poll_game_id
+                                WHERE v.id = ? AND v.poll_id = ?', [$vId, $pollId]) : null;
+        if (!$vote) {
+            $error = t('poll_vote_missing');
+        } else {
+            db_run('DELETE FROM poll_votes WHERE id = ?', [$vId]);
+            log_action('poll_vote_delete', $vote['name'] . ' <- ' . $vote['cand_name'] . ' (poll #' . $pollId . ')');
+            flash_set(t('poll_vote_removed', $vote['name'], $vote['cand_name']));
+            notify_vote_removed($poll, $vote);
+            // Fewer votes never decide a poll, so there is nothing to resolve.
+            redirect('edit_poll.php?poll=' . $pollId);
+        }
+
     } elseif ($action === 'save') {
         antibot_check('form');
         // Poll-level settings (the candidate list is edited by its own buttons).
@@ -300,6 +325,17 @@ tpl_render('edit_poll', [
     'can_restrict_library' => poll_can_restrict_to_library($poll, 0),
     'poll'   => $pollNow,
     'cands'  => $cands,
+    // May this viewer remove votes (see poll_can_remove_votes())? The list
+    // shows either way; only the buttons depend on it.
+    'can_remove_votes' => poll_can_remove_votes(),
+    // Every vote, by option, in voting order — for the per-vote "remove".
+    'voters' => (function () use ($pollId) {
+        $by = [];
+        foreach (db_all('SELECT * FROM poll_votes WHERE poll_id = ? ORDER BY id', [$pollId]) as $v) {
+            $by[(int)$v['poll_game_id']][] = $v;
+        }
+        return $by;
+    })(),
     'day'    => $day,
     'bounds' => start_time_bounds($day),   // clamp the time input when the option says so
     // The stored deadline is absolute; the form edits it as hours-before-start.

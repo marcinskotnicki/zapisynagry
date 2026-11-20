@@ -21,7 +21,10 @@
         <option value="0"<?= (int)$view_id === 0 ? ' selected' : '' ?>><?= e(t('logs_system')) ?></option>
         <?php foreach ($events as $ev): ?>
             <option value="<?= (int)$ev['id'] ?>"<?= (int)$ev['id'] === (int)$view_id ? ' selected' : '' ?>>
-                <?= e($ev['name']) ?><?= (int)$ev['is_archived'] === 0 ? ' (' . e(t('archive_current')) . ')' : '' ?>
+                <?php // "Name — 14.11.2026" (or a from–to range): same-named monthly
+                      // events are otherwise indistinguishable here. No days, no date. ?>
+                <?php $evDates = event_date_label($ev); ?>
+                <?= e($ev['name']) ?><?= $evDates !== '' ? ' — ' . e($evDates) : '' ?><?= (int)$ev['is_archived'] === 0 ? ' (' . e(t('archive_current')) . ')' : '' ?>
             </option>
         <?php endforeach; ?>
     </select>
