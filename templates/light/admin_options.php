@@ -151,6 +151,8 @@ $groupEnd = function () { echo '</div></details>'; };
         $toggle('allow_poll_wait');   // offer "keep voting open until the deadline"
         ?>
         <p class="field-note"><?= e(t('opt_allow_poll_wait_note')) ?></p>
+        <?php $toggle('allow_poll_reopen');   // the "reopen the poll" button on a game a poll became ?>
+        <p class="field-note"><?= e(t('opt_allow_poll_reopen_note')) ?></p>
 
         <?php /* The admin's OWN opinion polls — a separate thing from the game
                  polls above, which belong to an event and become a game. These

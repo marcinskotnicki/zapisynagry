@@ -115,7 +115,7 @@
     background: linear-gradient(#912c2c, #4e2323);
 }
 
-.tpl-classic .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-classic .gc-tabs { display: flex; flex-wrap: wrap; row-gap: 0.25rem; /* a 4th tab (reopen poll) must not be cut off */ gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
 .tpl-classic .gc-tab {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
     padding: 0.2rem 0.5rem; border-radius: 6px; text-decoration: none; color: #fff;

@@ -82,6 +82,11 @@ INSERT INTO options (key, value) VALUES
     --   already chose to wait keeps waiting, since changing the rules of a vote
     --   while people are voting would surprise all of them.
     ('allow_poll_wait',              '1'),
+    -- allow_poll_reopen: a "reopen the poll" button on a game a poll became,
+    --   for its author (same rules as the game's edit/delete buttons), when
+    --   that poll ended at its deadline, was ended by hand, or lost a player
+    --   it needed. OFF by default. See poll_reopen_check() in inc/polls.php.
+    ('allow_poll_reopen',            '0'),
     -- site_polls_enabled: the admin's own opinion polls ("which day suits you
     --   best?"), shown on the front page. Nothing to do with the GAME polls —
     --   those decide what is played at a table; these just ask the club
@@ -734,6 +739,12 @@ CREATE TABLE games (
     comment          TEXT,
     added_by_user_id INTEGER,                     -- NULL if added while unregistered
     is_archived      INTEGER NOT NULL DEFAULT 0,  -- soft-deleted ("keep archived")
+    -- The poll this game came from, as JSON: its poll, option and vote rows
+    -- exactly as they were when it was decided, plus why it ended — so the
+    -- game can go BACK to being that poll with the original ids (by itself:
+    -- polls.revert_mode; or by its author: allow_poll_reopen). NULL for a game
+    -- that was added directly.
+    poll_snapshot    TEXT,
     created_at       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (table_id)         REFERENCES game_tables(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id)         REFERENCES events(id)      ON DELETE CASCADE,
@@ -916,6 +927,15 @@ CREATE TABLE polls (
     -- occasional mails: comments, the result) because a busy poll can mean a
     -- lot of these, so it is opt-in per poll and OFF by default.
     notify_votes     INTEGER NOT NULL DEFAULT 0,
+    -- What happens when somebody leaves the game this poll turns into and it
+    -- drops below the winning option's minimum. Only for a poll decided by an
+    -- option REACHING its minimum (not by the deadline, nor ended by hand):
+    --   'off'             nothing; the game stays a player short (DEFAULT)
+    --   'before_deadline' it becomes the poll again, if voting had not closed
+    --   'extend'          the same, and if voting HAD closed, it reopens for an
+    --                     hour — unless the game starts within the hour.
+    -- See poll_revert_on_leave() in inc/polls.php.
+    revert_mode      TEXT NOT NULL DEFAULT 'off',
     proposer_user_id INTEGER,
     comment          TEXT,
     start_time       TEXT NOT NULL,              -- 'HH:MM'

@@ -210,10 +210,15 @@ function notify_promoted($playerEmail, $gameName, $gameId = 0) {
  * because the data is gone afterwards. We de-duplicate and drop blanks here so
  * the caller can pass a raw list.
  *
- * @param string[] $emails    Voter emails + proposer email (may contain dups/blanks).
+ * @param string[] $emails    Recipients (may contain dups/blanks). Called once for
+ *                            the voters, and once more for the proposer alone.
  * @param string   $gameName  The game the poll resolved into.
+ * @param string   $when      Day and time, '' for the shorter wording.
+ * @param int      $gameId    For the calendar links; 0 for none.
+ * @param string   $extra     One more paragraph for this copy (the proposer's:
+ *                            why the poll ended); '' for none.
  */
-function notify_poll_concluded($emails, $gameName, $when = '', $gameId = 0) {
+function notify_poll_concluded($emails, $gameName, $when = '', $gameId = 0, $extra = '') {
     if (!notify_enabled()) return;
     /* WHEN, not just what. Somebody at a club running several events may have
      * voted in more than one poll, and "the game X is now scheduled" tells them
@@ -224,6 +229,9 @@ function notify_poll_concluded($emails, $gameName, $when = '', $gameId = 0) {
     $body = $when !== ''
         ? t('ntf_poll_body_when', $gameName, $when)
         : t('ntf_poll_body', $gameName);
+    /* An extra paragraph for this copy — the proposer's says why the poll
+     * ended. Before the calendar links, which close the message. */
+    if ($extra !== '') $body .= "\n\n" . $extra;
     /* The moment a poll resolves is exactly when somebody learns they are
      * playing, so the calendar links belong here too — when the club has them
      * switched on. calendar_email_block() answers '' otherwise, and a caller
@@ -464,6 +472,67 @@ function notify_poll_option_added($poll, $candName, $adderName, $adderIsOwner, $
         t('ntf_polladd_subject', $candName),
         t('ntf_polladd_body', $adderName !== '' ? $adderName : t('ntf_someone'), $candName,
           $when !== '' ? ' (' . $when . ')' : ''));
+}
+
+/**
+ * The game a poll became has turned back into that poll, because somebody left
+ * and it fell below the minimum. -> everybody still voting in it, and the
+ * proposer (when they want mail about it) — never the person who left, who
+ * knows, and whose votes are gone anyway.
+ *
+ * Says who left, which game, the minimum it fell below and, when there is
+ * one, until when voting runs — it may just have been reopened for an hour.
+ *
+ * @param array  $poll      The restored polls row.
+ * @param string $gameName
+ * @param int    $need      The minimum it fell below.
+ * @param array  $leaver    The removed players row.
+ * @return void
+ */
+function notify_poll_reverted($poll, $gameName, $need, array $leaver) {
+    if (!notify_enabled() || !$poll) return;
+    $to = notify_poll_voter_emails((int)$poll['id']);
+    if (!empty($poll['proposer_email']) && notify_wants($poll['notify_owner'] ?? 1)) $to[] = $poll['proposer_email'];
+    $gone = strtolower(trim((string)($leaver['email'] ?? '')));
+    if (!function_exists('poll_when_text')) require_once __DIR__ . '/polls.php';
+    $when = poll_when_text($poll);
+    $body = t('ntf_pollback_body', $leaver['name'] ?? t('ntf_someone'), $gameName,
+              $when !== '' ? ' (' . $when . ')' : '', (int)$need);
+    if (!empty($poll['deadline'])) $body .= "\n\n" . t('ntf_pollback_deadline', substr((string)$poll['deadline'], 0, 16));
+    $body .= "\n\n" . t('ntf_pollback_open');
+    $seen = [];
+    foreach ($to as $addr) {
+        $key = strtolower(trim((string)$addr));
+        if ($key === '' || $key === $gone || isset($seen[$key])) continue;
+        $seen[$key] = true;
+        send_mail($addr, t('ntf_pollback_subject', $gameName), $body);
+    }
+}
+
+/**
+ * The author turned the game back into the poll by hand (reopen_poll.php).
+ * -> everybody voting in it again — the game's players among them — but not
+ * the author, who did it. Says until when voting now runs.
+ *
+ * @param array  $poll      The restored polls row.
+ * @param string $gameName
+ * @return void
+ */
+function notify_poll_reopened($poll, $gameName) {
+    if (!notify_enabled() || !$poll) return;
+    if (!function_exists('poll_when_text')) require_once __DIR__ . '/polls.php';
+    $when = poll_when_text($poll);
+    $body = t('ntf_pollreopen_body', $gameName, $when !== '' ? ' (' . $when . ')' : '');
+    if (!empty($poll['deadline'])) $body .= "\n\n" . t('ntf_pollback_deadline', substr((string)$poll['deadline'], 0, 16));
+    $body .= "\n\n" . t('ntf_pollback_open');
+    $author = strtolower(trim((string)($poll['proposer_email'] ?? '')));
+    $seen = [];
+    foreach (notify_poll_voter_emails((int)$poll['id']) as $addr) {
+        $key = strtolower(trim((string)$addr));
+        if ($key === '' || $key === $author || isset($seen[$key])) continue;
+        $seen[$key] = true;
+        send_mail($addr, t('ntf_pollback_subject', $gameName), $body);
+    }
 }
 
 function notify_poll_changed($poll, $what, $emails = null) {

@@ -164,6 +164,19 @@
             </div>
         <?php endif; ?>
 
+        <?php /* If somebody leaves the game this poll turns into: nothing, or
+               * back to the poll (see poll_revert_on_leave()). Off by default. */ ?>
+        <div class="field field-revert_mode">
+            <label for="p_revert"><?= e(t('poll_revert_mode')) ?></label>
+            <select id="p_revert" name="revert_mode">
+                <?php foreach (poll_revert_modes() as $rm): ?>
+                    <option value="<?= e($rm) ?>"<?= poll_revert_mode_clean($draft['revert_mode'] ?? 'off') === $rm ? ' selected' : '' ?>><?= e(t('poll_revert_' . $rm)) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('poll_revert_mode_note')) ?></p>
+        </div>
+
+
         <?php if (email_require_mode() === 2): // per-poll rule: proposer decides (their own email then required too) ?>
             <div class="field field-check field-require_email">
                 <label>

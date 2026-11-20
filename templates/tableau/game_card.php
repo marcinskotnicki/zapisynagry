@@ -72,6 +72,10 @@ $chan = table_chan_class($table_no ?? null);
                 <div class="gc-tabs">
                     <a class="gc-tab gc-tab-del" href="delete_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('delete')) ?></a>
                     <a class="gc-tab" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
+                    <?php // A game a poll became, whose poll can still come back (see poll_reopen_check()). ?>
+                    <?php if (game_can_reopen_poll($g)): ?>
+                        <a class="gc-tab gc-tab-reopen" href="reopen_poll.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('poll_reopen_button')) ?></a>
+                    <?php endif; ?>
                     <?php // Admin-only: move this game to another table on the same day.
                           // Guarded again server-side in move_item.php. ?>
                     <?php if (is_admin()): ?>

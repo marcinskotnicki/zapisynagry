@@ -45,8 +45,10 @@
     <?php foreach ($logs as $row): ?>
         <tr>
             <td data-label="<?= e(t('logs_when')) ?>" class="nowrap"><?= e($row['created_at']) ?></td>
-            <td data-label="<?= e(t('logs_action')) ?>"><?= e($row['action']) ?></td>
-            <td data-label="<?= e(t('logs_detail')) ?>"><?= e($row['detail']) ?></td>
+            <?php // The readable name; the stored key stays in the tooltip, for
+                  // anyone matching it against the code or an older log. ?>
+            <td data-label="<?= e(t('logs_action')) ?>" title="<?= e($row['action']) ?>"><?= e(log_action_label($row['action'])) ?></td>
+            <td data-label="<?= e(t('logs_detail')) ?>"><?= e(log_detail_text($row)) ?></td>
             <td data-label="<?= e(t('logs_actor')) ?>"><?= e($row['actor_name']) ?><?php if (!empty($row['account_name'])): // the acting ACCOUNT, when logged in ?> <span class="muted">@<?= e($row['account_name']) ?></span><?php endif; ?></td>
             <td data-label="<?= e(t('logs_ip')) ?>" class="nowrap"><?= e($row['ip']) ?></td>
         </tr>

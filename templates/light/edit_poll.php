@@ -23,6 +23,10 @@
  *      (0 = none), since that's how the form edits it.
  *    $error  — message above the forms, or null.
  *    $csrf   — hidden CSRF field.
+ *    $reopen — set only by reopen_poll.php: ['game_id', 'deadline_moved',
+ *      'back']. The same form then turns a GAME back into its poll: it posts
+ *      there, says so, and lists the options read-only (each row carries its
+ *      'votes'), since they do not exist as a poll yet.
  * ============================================================================= */
 ?>
 <?php // NOT card-narrow: that caps at 380px, which suits a login box or a
@@ -31,8 +35,12 @@
       // add_poll, which are plain .card. classic was the only theme that
       // looked right, and only because its own .content > .card override
       // outranks .card-narrow and widened every narrow card on that theme. ?>
+<?php $reopen = $reopen ?? null; ?>
 <div class="card">
-    <h1><?= e(t('poll_edit_title')) ?></h1>
+    <h1><?= e(t($reopen ? 'poll_reopen_title' : 'poll_edit_title')) ?></h1>
+    <?php if ($reopen): ?>
+        <p class="muted"><?= e(t('poll_reopen_intro')) ?></p>
+    <?php endif; ?>
 
     <?php if (!empty($error)): ?>
         <p class="msg msg-error"><?= e($error) ?></p>
@@ -43,14 +51,19 @@
           // list, so it needs form="poll-settings" to reach back up to this form.
           // Wrapping the candidate list inside this form instead would nest the
           // per-candidate remove forms, which isn't valid HTML. ?>
-    <form id="poll-settings" method="post" action="edit_poll.php?poll=<?= (int)$poll['id'] ?>"
+    <form id="poll-settings" method="post" action="<?= $reopen ? 'reopen_poll.php?game=' . (int)$reopen['game_id'] : 'edit_poll.php?poll=' . (int)$poll['id'] ?>"
         data-day-date="<?= e($day['day_date'] ?? '') ?>"
         data-day-start="<?= e($day['start_time'] ?? '') ?>"
         data-grace-hours="<?= (int)opt_int('overnight_grace_hours') ?>">
         <?= $csrf ?>
         <?= antibot_field() ?>
-        <input type="hidden" name="action" value="save">
-        <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
+        <?php if ($reopen): ?>
+            <input type="hidden" name="action" value="reopen">
+            <input type="hidden" name="game" value="<?= (int)$reopen['game_id'] ?>">
+        <?php else: ?>
+            <input type="hidden" name="action" value="save">
+            <input type="hidden" name="poll" value="<?= (int)$poll['id'] ?>">
+        <?php endif; ?>
 
         <?php // Proposer details, same pair the game edit form offers. Changing
               // the email moves the verification target for a guest-made poll,
@@ -82,6 +95,9 @@
                   // Moving the start time above shifts this along with it. ?>
             <label for="p_deadline"><?= e(t('poll_deadline_hours')) ?></label>
             <input type="number" id="p_deadline" name="deadline_hours" min="0" value="<?= (int)($deadline_hours ?? 0) ?>">
+            <?php if (!empty($reopen['deadline_moved'])): // the old one had passed: say so ?>
+                <p class="field-note poll-reopen-moved"><?= e(t('poll_reopen_deadline_moved')) ?></p>
+            <?php endif; ?>
             <?php // Filled in by initPollDeadlinePreview() in js/scripts.js. ?>
             <p class="field-note poll-deadline-preview"></p>
         </div>
@@ -162,11 +178,24 @@
                 <p class="field-note"><?= e(t('poll_wait_deadline_note')) ?></p>
             </div>
         <?php endif; ?>
+
+        <?php /* If somebody leaves the game this poll turns into: nothing, or
+               * back to the poll (see poll_revert_on_leave()). Off by default. */ ?>
+        <div class="field field-revert_mode">
+            <label for="p_revert"><?= e(t('poll_revert_mode')) ?></label>
+            <select id="p_revert" name="revert_mode">
+                <?php foreach (poll_revert_modes() as $rm): ?>
+                    <option value="<?= e($rm) ?>"<?= poll_revert_mode_clean($poll['revert_mode'] ?? 'off') === $rm ? ' selected' : '' ?>><?= e(t('poll_revert_' . $rm)) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="field-note"><?= e(t('poll_revert_mode_note')) ?></p>
+        </div>
+
     </form>
 
     <?php // ---- Candidates ---------------------------------------------- ?>
     <h2><?= e(t('poll_candidates')) ?></h2>
-    <p class="muted"><?= e(t('poll_edit_note')) ?></p>
+    <p class="muted"><?= e(t($reopen ? 'poll_reopen_options_note' : 'poll_edit_note')) ?></p>
 
     <ul class="poll-cand-list">
         <?php foreach ($cands as $c): ?>
@@ -174,8 +203,9 @@
                 <span class="poll-cand-name"><?= e($c['name']) ?></span>
                 <span class="muted">
                     <?= e(t('poll_needs', (int)$c['required_players'])) ?>
-                    — <?= (int)poll_candidate_votes((int)$c['id']) ?> <?= e(t('poll_votes_label')) ?>
+                    — <?= (int)($c['votes'] ?? poll_candidate_votes((int)$c['id'])) ?> <?= e(t('poll_votes_label')) ?>
                 </span>
+                <?php if (!$reopen): // a poll being reopened has no options to edit yet ?>
                 <?php // Change this option's details — the same form it was
                       // added with. A link, not a form: it opens an editor
                       // rather than performing the change here. ?>
@@ -191,12 +221,19 @@
                         <button type="submit" class="btn btn-small btn-danger"><?= e(t('poll_cand_remove')) ?></button>
                     </form>
                 <?php endif; ?>
+                <?php endif; ?>
             </li>
         <?php endforeach; ?>
     </ul>
 
     <?php // Adding a candidate leaves this page, so it reads as its own action
           // above the save/cancel pair rather than sitting among them. ?>
+    <?php if ($reopen): ?>
+        <div class="form-actions">
+            <button type="submit" form="poll-settings" class="btn btn-primary"><?= e(t('poll_reopen_submit')) ?></button>
+            <a class="btn" href="<?= e($reopen['back']) ?>"><?= e(t('cancel')) ?></a>
+        </div>
+    <?php else: ?>
     <p class="poll-form-add">
         <a class="btn btn-danger" href="add_poll_game.php?poll=<?= (int)$poll['id'] ?>"><?= e(t('poll_add_game')) ?></a>
     </p>
@@ -204,4 +241,5 @@
         <button type="submit" form="poll-settings" class="btn btn-primary"><?= e(t('save')) ?></button>
         <a class="btn" href="index.php#poll-<?= (int)$poll['id'] ?>"><?= e(t('cancel')) ?></a>
     </div>
+    <?php endif; ?>
 </div>

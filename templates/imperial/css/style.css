@@ -138,7 +138,7 @@ body.tpl-imperial {
     box-shadow: 0 3px 14px rgba(0, 0, 0, .55);
     padding-bottom: 0.6rem;
 }
-.tpl-imperial .gc-tabs { display: flex; gap: 0.25rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-imperial .gc-tabs { display: flex; flex-wrap: wrap; row-gap: 0.25rem; /* a 4th tab (reopen poll) must not be cut off */ gap: 0.25rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
 .tpl-imperial .gc-tab {
     font-family: var(--font-stamp);
     font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;

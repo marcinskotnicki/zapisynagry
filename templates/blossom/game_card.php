@@ -167,6 +167,10 @@
             <?php if ($canButtons): ?>
                 <div class="bl-actions">
                     <a class="btn btn-small" href="edit_game.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('edit')) ?></a>
+                    <?php // A game a poll became, whose poll can still come back (see poll_reopen_check()). ?>
+                    <?php if (game_can_reopen_poll($g)): ?>
+                        <a class="btn btn-small btn-reopen-poll" href="reopen_poll.php?game=<?= (int)$g['id'] ?>" rel="nofollow"><?= e(t('poll_reopen_button')) ?></a>
+                    <?php endif; ?>
                     <?php // Re-checked server-side in move_item.php — hiding a button
                           // is a courtesy, not a permission check. ?>
                     <?php if (is_admin()): ?>

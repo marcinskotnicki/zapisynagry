@@ -196,7 +196,7 @@ body.tpl-ironworks {
 }
 .tpl-ironworks .game-deleted .gc-info { background: linear-gradient(180deg, #4a2a2a, #2a1616); }
 
-.tpl-ironworks .gc-tabs { display: flex; gap: 0.3rem; padding: 0.4rem 0.4rem 0; margin-bottom: 0.25rem; justify-content: flex-start; }
+.tpl-ironworks .gc-tabs { display: flex; flex-wrap: wrap; row-gap: 0.25rem; /* a 4th tab (reopen poll) must not be cut off */ gap: 0.3rem; padding: 0.4rem 0.4rem 0; margin-bottom: 0.25rem; justify-content: flex-start; }
 .tpl-ironworks .gc-tab {
     font-size: 0.6rem;
     font-weight: 700;

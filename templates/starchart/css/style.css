@@ -208,7 +208,7 @@ body.tpl-starchart {
 .tpl-starchart .sh-weight.weight-4 { background: #f0a06a; }
 .tpl-starchart .sh-weight.weight-5 { background: var(--magenta-lit); }
 
-.tpl-starchart .gc-tabs { display: flex; gap: 0.3rem; padding: 0.45rem 0.45rem 0; margin-bottom: 0.25rem; justify-content: flex-start; }
+.tpl-starchart .gc-tabs { display: flex; flex-wrap: wrap; row-gap: 0.25rem; /* a 4th tab (reopen poll) must not be cut off */ gap: 0.3rem; padding: 0.45rem 0.45rem 0; margin-bottom: 0.25rem; justify-content: flex-start; }
 .tpl-starchart .gc-tab {
     font-size: 0.62rem;
     font-weight: 700;

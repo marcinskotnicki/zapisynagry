@@ -33,7 +33,7 @@ if (!$event || (int)$event['is_archived'] === 1 || !verify_can_end_poll($poll)) 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $newGameId = poll_force_resolve($pollId);
+    $newGameId = poll_force_resolve($pollId, 'manual');
     log_action('poll_ended_early', 'Poll #' . $pollId . ($newGameId ? ' -> game #' . $newGameId : ' (no winner)'));
     if ($newGameId) {
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $newGameId);

@@ -1094,6 +1094,63 @@ function log_action_is_system($action) {
 }
 
 /**
+ * Should a game card show "reopen the poll"? The card checks permission (the
+ * same rule as its edit/delete buttons); this checks the rest — see
+ * poll_reopen_check(). Cheap for the common case: a game that did not come
+ * from a poll stops at the first test, without loading anything.
+ *
+ * @param array $g  The card's game (with 'players' when the card has them).
+ * @return bool
+ */
+function game_can_reopen_poll($g) {
+    if (empty($g['poll_snapshot']) || !opt_bool('allow_poll_reopen')) return false;
+    require_once __DIR__ . '/polls.php';
+    return poll_reopen_check($g, isset($g['players']) && is_array($g['players']) ? count($g['players']) : null) !== null;
+}
+
+/**
+ * The readable name of a log action, in the viewer's language: 'logact_<key>'
+ * from the language file (or the admin's own wording for it). An action with
+ * no entry — one added later, or a name no longer written but still in old
+ * rows — shows its raw key rather than nothing.
+ *
+ * Translated when SHOWN, not when written: a guest browsing in English can be
+ * the one whose page visit resolves a poll, and the admin reading the log in
+ * Polish should not then see that row in English.
+ *
+ * @param string $action  logs.action
+ * @return string
+ */
+function log_action_label($action) {
+    $key = 'logact_' . $action;
+    if (isset(lang_overrides()[$key]) || isset($GLOBALS['LANG'][$key])) return t($key);
+    return (string)$action;
+}
+
+/**
+ * The Details cell of a log row, in the viewer's language where the row was
+ * written in a form that can be read back.
+ *
+ * poll_resolved rows are written by poll_resolve_candidate() as
+ *   "reason=quota poll=#3 game=#12 votes=4/4 | <winning game's name>"
+ * (reason: quota | deadline | manual) and shown as a sentence saying which game
+ * won and why. Anything else — every other action, and poll_resolved rows from
+ * before this format, which hold only the game's name — is shown as stored.
+ *
+ * @param array $row  logs row (action, detail).
+ * @return string     Plain text; the template escapes it.
+ */
+function log_detail_text($row) {
+    $detail = (string)($row['detail'] ?? '');
+    if (($row['action'] ?? '') === 'poll_resolved'
+        && preg_match('/^reason=(quota|deadline|manual) poll=#(\d+) game=#(\d+) votes=(\d+)\/(\d+) \| (.*)$/s', $detail, $m)) {
+        return t('logs_poll_' . $m[1], $m[6], (int)$m[4], (int)$m[5])
+             . ' (' . t('logs_poll_ids', (int)$m[2], (int)$m[3]) . ')';
+    }
+    return $detail;
+}
+
+/**
  * Write an audit-log entry.
  *
  * Most callers only pass action + detail; actor and event default to the

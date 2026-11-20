@@ -20,6 +20,7 @@ require_once __DIR__ . '/inc/verify.php';
 require_once __DIR__ . '/inc/captcha.php';
 require __DIR__ . '/inc/mail.php';
 require __DIR__ . '/inc/notify.php';
+require_once __DIR__ . '/inc/polls.php';   // poll_revert_on_leave()
 
 $playerId = (int)($_GET['player'] ?? $_POST['player'] ?? 0);
 $player   = $playerId ? db_one('SELECT * FROM players WHERE id = ?', [$playerId]) : null;
@@ -75,6 +76,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $wasConfirmed = ((int)$player['is_reserve'] === 0);
         db_run('DELETE FROM players WHERE id = ?', [$playerId]);
+        log_action('player_delete', $player['name'] . ' <- ' . $game['name']);
+
+        /* A game that came from a poll may now turn back into it (when the
+         * poll asked for that and it is below its minimum). Before reserves
+         * move up, which is safe: a game with anyone on its reserve list
+         * still has its minimum after one player leaves, so the two never
+         * both happen. When it does turn back, the owner's "somebody
+         * resigned" mail is skipped — the poll-is-back email says so, and the
+         * game it would be about no longer exists. */
+        $back = poll_revert_on_leave((int)$player['game_id'], $player);
+        if ($back) {
+            redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), $back['game'] ? '#game-' : '#poll-')
+                     . ($back['game'] ?: $back['poll']));
+        }
         notify_resign($game, $player['name']);
         if ($wasConfirmed) {
             // A confirmed seat just freed up — pull the earliest reserve(s) in,
@@ -85,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 notify_promoted($pe, $game['name'], (int)$game['id']);
             }
         }
-        log_action('player_delete', $player['name'] . ' <- ' . $game['name']);
         redirect(front_url($activeDay, (int)($day['event_id'] ?? 0), '#game-') . $player['game_id']);
     }
 }

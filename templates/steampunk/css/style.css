@@ -133,7 +133,7 @@ body.tpl-steampunk {
 .tpl-steampunk .game-deleted .gc-info{
     background: linear-gradient(#522121, var(--walnut));
 }
-.tpl-steampunk .gc-tabs { display: flex; gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
+.tpl-steampunk .gc-tabs { display: flex; flex-wrap: wrap; row-gap: 0.25rem; /* a 4th tab (reopen poll) must not be cut off */ gap: 0.3rem; padding: 0.35rem 0.4rem 0; justify-content: flex-start; }
 .tpl-steampunk .gc-tab {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 0.2rem 0.5rem; border-radius: 2px; text-decoration: none;

@@ -198,6 +198,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run('UPDATE polls SET others_from_library = ? WHERE id = ?', [$othersLib, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' others_from_library -> ' . $othersLib);
             }
+            // What happens if somebody leaves the game this poll becomes.
+            // Only when the form sent it — absent is not "do nothing".
+            if (array_key_exists('revert_mode', $_POST)) {
+                $revert = poll_revert_mode_clean($_POST['revert_mode']);
+                if ($revert !== poll_revert_mode_clean($poll['revert_mode'] ?? 'off')) {
+                    db_run('UPDATE polls SET revert_mode = ? WHERE id = ?', [$revert, $pollId]);
+                    log_action('poll_edit', 'Poll #' . $pollId . ' revert_mode -> ' . $revert);
+                }
+            }
             if ($notifyVotes !== (int)($poll['notify_votes'] ?? 0)) {
                 db_run('UPDATE polls SET notify_votes = ? WHERE id = ?', [$notifyVotes, $pollId]);
                 log_action('poll_edit', 'Poll #' . $pollId . ' notify_votes -> ' . $notifyVotes);

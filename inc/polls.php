@@ -93,7 +93,7 @@ function poll_check_resolve($pollId) {
     $cands = db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$pollId]);
     foreach ($cands as $c) {
         if (poll_candidate_votes($c['id']) >= (int)$c['required_players']) {
-            return poll_resolve_candidate($poll, $c);
+            return poll_resolve_candidate($poll, $c, 'quota');
         }
     }
     return null;
@@ -107,11 +107,22 @@ function poll_check_resolve($pollId) {
  * Runs in a TRANSACTION so the three steps (create game, assign players, delete
  * poll) are all-or-nothing — a failure rolls back and leaves the poll intact.
  *
- * @param array $poll  The polls row.
- * @param array $cand  The winning poll_games row.
+ * @param array  $poll    The polls row.
+ * @param array  $cand    The winning poll_games row.
+ * @param string $reason  WHY it is resolving, for the log: 'quota' (a game
+ *                        reached the votes it needed), 'deadline' (time ran
+ *                        out; the leader wins) or 'manual' (ended early).
  * @return int|null
  */
-function poll_resolve_candidate($poll, $cand) {
+function poll_resolve_candidate($poll, $cand, $reason = 'quota') {
+    if (!in_array($reason, ['quota', 'deadline', 'manual'], true)) $reason = 'quota';
+    // Counted now: the votes go with the poll when it is deleted below.
+    $winVotes = poll_candidate_votes((int)$cand['id']);
+    /* May this game go back to being the poll if somebody leaves it? Only
+     * when the proposer asked for it AND the poll was decided by an option
+     * reaching its minimum — a deadline or an early end may have picked a game
+     * that never had its minimum, so "dropping below it" means nothing. */
+    $armed = $reason === 'quota' && poll_revert_mode_clean($poll['revert_mode'] ?? 'off') !== 'off';
     db()->beginTransaction();
     try {
         // 1) Create the real game from candidate details + poll-level attributes.
@@ -119,15 +130,19 @@ function poll_resolve_candidate($poll, $cand) {
         db_run(
             'INSERT INTO games
              (table_id,event_id,day_id,name,length_minutes,weight,max_players,start_time,
-              thumbnail,bgg_id,language,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,
+              thumbnail,bgg_id,language,link,manual_link,brings_name,brings_email,brings_user_id,explain_rules,require_email,comment,added_by_user_id,
               from_club,notify_owner)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
                 $poll['table_id'], $poll['event_id'], $poll['day_id'],
                 $cand['name'], $cand['length_minutes'], $cand['weight'], $cand['max_players'],
                 $poll['start_time'],
                 $cand['thumbnail'] ?: null, $cand['bgg_id'] ?: null,
                 $cand['language'] ?: null,
+                /* The game's own link and its rules link. Both are entered on
+                 * the option, and both used to be dropped right here, so the
+                 * game a poll became had neither. */
+                ($cand['link'] ?? '') ?: null, ($cand['manual_link'] ?? '') ?: null,
                 $poll['proposer_name'] ?: null, $poll['proposer_email'] ?: null,
                 $poll['proposer_user_id'], $poll['explain_rules'],
                 (int)($poll['require_email'] ?? 0),   // the email rule survives resolution
@@ -148,17 +163,19 @@ function poll_resolve_candidate($poll, $cand) {
         $voters = db_all('SELECT * FROM poll_votes WHERE poll_game_id = ? ORDER BY id', [$cand['id']]);
         $max = (int)$cand['max_players'];
         $i = 0;
+        /* notify carries over too: a voter who said "no emails about this"
+         * used to be opted back in the moment they became a player. */
         $stmt = db()->prepare(
-            'INSERT INTO players (game_id,name,email,knows_rules,is_reserve,user_id) VALUES (?,?,?,?,?,?)'
+            'INSERT INTO players (game_id,name,email,notify,knows_rules,is_reserve,user_id) VALUES (?,?,?,?,?,?,?)'
         );
         $notifyEmails = [];                       // gather before the poll (and its votes) vanish
         foreach ($voters as $v) {
             if (!empty($v['email'])) $notifyEmails[] = $v['email'];   // for the conclusion email
             $isReserve = ($i >= $max) ? 1 : 0;    // first $max voters confirmed, rest reserve
             $i++;
-            $stmt->execute([$gameId, $v['name'], $v['email'], $v['knows_rules'], $isReserve, $v['user_id']]);
+            $stmt->execute([$gameId, $v['name'], $v['email'], (int)($v['notify'] ?? 1), $v['knows_rules'], $isReserve, $v['user_id']]);
         }
-        if (!empty($poll['proposer_email'])) $notifyEmails[] = $poll['proposer_email'];
+        // (The proposer is mailed separately below, with why it ended.)
 
         // 3) Removing the poll cascades its candidates and votes away.
         /* THE FINAL TALLY, as the first comment on the game.
@@ -175,6 +192,28 @@ function poll_resolve_candidate($poll, $cand) {
          * Read BEFORE the delete below: removing the poll cascades its
          * candidates and votes away, so this is the last moment the numbers
          * exist at all. */
+        /* The poll exactly as it stands, for poll_revert_on_leave() — taken
+         * here, inside the transaction and before the delete, because this is
+         * the last moment the rows exist. Whole rows (SELECT *), so a column
+         * added to these tables later is kept without touching this. */
+        /* Taken for EVERY resolution, not just the ones that may turn back by
+         * themselves: the author's "reopen the poll" button (when the club
+         * offers it) needs it too, for polls ended by the deadline or by hand.
+         * 'reason' says which, so the automatic turn-back can keep to polls
+         * decided by reaching the minimum. */
+        $snap = [
+            'v'      => 2,
+            'reason' => $reason,
+            'winner' => (int)$cand['id'],
+            'poll'   => db_one('SELECT * FROM polls WHERE id = ?', [$poll['id']]),
+            'games'  => db_all('SELECT * FROM poll_games WHERE poll_id = ? ORDER BY id', [$poll['id']]),
+            'votes'  => db_all('SELECT * FROM poll_votes WHERE poll_id = ? ORDER BY id', [$poll['id']]),
+        ];
+        /* The automatic first comment: the final tally (when the proposer
+         * shows results), and — when the game can still turn back into the
+         * poll — a line saying so, since the game card has nowhere else to say
+         * it (every theme draws its own card). */
+        $lines = [];
         if (!empty($poll['show_results'])) {
             $tally = db_all(
                 'SELECT g.name AS name, COUNT(v.id) AS votes
@@ -186,10 +225,13 @@ function poll_resolve_candidate($poll, $cand) {
                 [$poll['id']]
             );
             if ($tally) {
-                $lines = [];
                 foreach ($tally as $row) {
                     $lines[] = $row['name'] . ' — ' . (int)$row['votes'];
                 }
+            }
+        }
+        $revertNote = $armed ? poll_revert_note($poll, $cand) : '';
+        if ($lines || $revertNote !== '') {
                 /* THE HEADING GOES IN THE NAME FIELD, not the body.
                  *
                  * Still no user_id — nobody said this, and attributing it to
@@ -206,8 +248,10 @@ function poll_resolve_candidate($poll, $cand) {
                  * same line — fine for a one-line remark, but here it ran the
                  * first result straight on from "Poll results:". nl2br() turns
                  * this into the break. */
-                       [$gameId, t('poll_results_heading'), null, "\n" . implode("\n", $lines)]);
-            }
+                       [$gameId, $lines ? t('poll_results_heading') : t('poll_revert_comment_heading'), null,
+                        "\n" . implode("\n", $lines) . ($lines && $revertNote !== '' ? "\n\n" : '') . $revertNote]);
+                // Remembered, so turning back into the poll can drop it.
+                $snap['auto_comment_id'] = (int)db()->lastInsertId();
         }
 
         // Move the poll's discussion onto the game it became, so the thread
@@ -216,6 +260,8 @@ function poll_resolve_candidate($poll, $cand) {
             db_run('INSERT INTO comments (game_id, name, user_id, comment, created_at) VALUES (?,?,?,?,?)',
                    [$gameId, $pc['name'], $pc['user_id'], $pc['comment'], $pc['created_at']]);
         }
+        db_run('UPDATE games SET poll_snapshot = ? WHERE id = ?',
+               [json_encode($snap, JSON_UNESCAPED_UNICODE), $gameId]);
         db_run('DELETE FROM polls WHERE id = ?', [$poll['id']]);
         db()->commit();
     } catch (Throwable $ex) {
@@ -223,7 +269,12 @@ function poll_resolve_candidate($poll, $cand) {
         return null;
     }
 
-    log_action('poll_resolved', $cand['name']);
+    /* Written in a fixed form the Logs tab reads back and words in the
+     * viewer's language (see log_detail_text()): why it resolved, which game
+     * won and with how many votes. The name goes LAST — it can contain
+     * anything, including the separators. */
+    log_action('poll_resolved', 'reason=' . $reason . ' poll=#' . (int)$poll['id'] . ' game=#' . $gameId
+        . ' votes=' . $winVotes . '/' . max(1, (int)$cand['required_players']) . ' | ' . $cand['name']);
     // Notify outside the transaction (sending mail shouldn't be able to roll back
     // a committed resolution). function_exists guard: notify.php may not be loaded
     // in every entry point that can resolve a poll.
@@ -235,7 +286,19 @@ function poll_resolve_candidate($poll, $cand) {
          * Assembled defensively: a missing day row gives an empty string and
          * the shorter wording, rather than a sentence with a gap in it. */
         $whenText = poll_when_text($poll);
-        notify_poll_concluded($notifyEmails, $cand['name'], $whenText, $gameId);
+        /* The proposer gets their own copy, with one more line: WHY it ended
+         * — a game reaching its minimum, the deadline, or somebody ending it.
+         * Theirs is the poll, so theirs is the question "why now?". A
+         * proposer who also voted gets only this copy, not both. */
+        $proposerEmail = trim((string)($poll['proposer_email'] ?? ''));
+        $voterEmails = array_filter($notifyEmails, function ($e) use ($proposerEmail) {
+            return $proposerEmail === '' || strcasecmp(trim((string)$e), $proposerEmail) !== 0;
+        });
+        notify_poll_concluded($voterEmails, $cand['name'], $whenText, $gameId);
+        if ($proposerEmail !== '') {
+            notify_poll_concluded([$proposerEmail], $cand['name'], $whenText, $gameId,
+                t('ntf_poll_reason_' . $reason, $cand['name'], $winVotes, max(1, (int)$cand['required_players'])));
+        }
     }
     return $gameId;
 }
@@ -528,15 +591,16 @@ function poll_pick_winner($pollId) {
  * Resolve a poll RIGHT NOW to its current leader (deadline hit, or the proposer
  * ended it early). Reuses poll_resolve_candidate(), so voters become players and
  * the poll is cleaned up exactly like a threshold resolution.
- * @param int $pollId
+ * @param int    $pollId
+ * @param string $reason  'deadline' (the sweep) or 'manual' (ended early) — for the log.
  * @return int|null  The new game id, or null (no such poll / no candidates / failure).
  */
-function poll_force_resolve($pollId) {
+function poll_force_resolve($pollId, $reason = 'deadline') {
     $poll = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
     if (!$poll) return null;
     $winner = poll_pick_winner($pollId);
     if (!$winner) return null;                     // a poll with zero candidates can't resolve
-    return poll_resolve_candidate($poll, $winner);
+    return poll_resolve_candidate($poll, $winner, $reason);
 }
 
 /**
@@ -551,7 +615,7 @@ function poll_resolve_expired() {
     );
     $n = 0;
     foreach ($due as $row) {
-        if (poll_force_resolve((int)$row['id'])) $n++;
+        if (poll_force_resolve((int)$row['id'], 'deadline')) $n++;
     }
     return $n;
 }
@@ -579,6 +643,9 @@ function poll_resolve_expired() {
  * @return int               Unix timestamp.
  */
 function poll_start_ts($dayRow, $startTime) {
+    // day_rel_min() and hhmm_to_min() live in events.php, which not every
+    // caller has loaded (the reopen and turn-back checks can run without it).
+    if (!function_exists('day_rel_min')) require_once __DIR__ . '/events.php';
     $base = strtotime((($dayRow['day_date'] ?? '') ?: date('Y-m-d')) . ' 00:00');
     return $base + day_rel_min($startTime, hhmm_to_min($dayRow['start_time'])) * 60;
 }
@@ -619,4 +686,402 @@ function poll_deadline_hours($poll, $dayRow) {
     if (empty($poll['deadline'])) return 0;
     $diff = poll_start_ts($dayRow, $poll['start_time']) - strtotime($poll['deadline']);
     return max(0, (int)round($diff / 3600));
+}
+
+/* =============================================================================
+ *  BACK TO THE POLL — when somebody leaves a game a poll turned into.
+ * -----------------------------------------------------------------------------
+ *  A proposer can ask (polls.revert_mode) that, if the game their poll became
+ *  drops below the winning option's minimum because somebody left, it turns
+ *  back into the poll: every option, every remaining vote, the discussion —
+ *  minus the person who left and all of their votes. Then everybody still in
+ *  it is told, and voting carries on.
+ *
+ *  HOW IT IS REMEMBERED. When such a poll is decided by an option reaching its
+ *  minimum, poll_resolve_candidate() stores the poll's rows as JSON on the new
+ *  game (games.poll_snapshot) before deleting them. Turning back re-inserts
+ *  them WITH THEIR ORIGINAL IDS — AUTOINCREMENT never hands an id out twice, so
+ *  they are free — which means the poll is at the same address as before.
+ *
+ *  WHAT WINS when the game changed in the meantime: the game. Its time, table,
+ *  owner and details go back onto the poll and the winning option; its player
+ *  list becomes that option's votes (people who signed up directly included,
+ *  people who left earlier — while a reserve kept it full — not); comments
+ *  written on the game move to the poll.
+ * ============================================================================= */
+
+/** @return string[] The stored values, in the order the form lists them. */
+function poll_revert_modes() {
+    return ['off', 'before_deadline', 'extend'];
+}
+
+/**
+ * A submitted or stored value, made safe: anything unknown is 'off'.
+ * @param mixed $v
+ * @return string
+ */
+function poll_revert_mode_clean($v) {
+    $v = (string)$v;
+    return in_array($v, poll_revert_modes(), true) ? $v : 'off';
+}
+
+/**
+ * The line added to a resolved game's automatic comment saying it may still
+ * turn back into the poll. '' when the poll did not ask for that.
+ *
+ * @param array $poll  polls row (revert_mode, deadline).
+ * @param array $cand  The winning option (required_players).
+ * @return string
+ */
+function poll_revert_note($poll, $cand) {
+    $mode = poll_revert_mode_clean($poll['revert_mode'] ?? 'off');
+    $need = max(1, (int)($cand['required_players'] ?? 1));
+    if ($mode === 'extend') return t('poll_revert_note_extend', $need);
+    if ($mode === 'before_deadline') {
+        return !empty($poll['deadline'])
+            ? t('poll_revert_note_until', $need, substr((string)$poll['deadline'], 0, 16))
+            : t('poll_revert_note', $need);
+    }
+    return '';
+}
+
+/**
+ * MAY it turn back, and with what deadline? The timing rules, on their own so
+ * they can be checked directly.
+ *
+ *   - never once the game has started;
+ *   - no deadline, or one still ahead: yes, with that deadline;
+ *   - the deadline has passed:
+ *       'before_deadline' -> no;
+ *       'extend'          -> yes, with voting reopened for an hour — unless the
+ *                            game starts within the hour, when it stays a game
+ *                            (an hour of voting would run past the start).
+ *
+ * @param string      $mode      poll_revert_modes() value.
+ * @param string|null $deadline  The poll's 'Y-m-d H:i:s', or null for none.
+ * @param int         $startTs   When the game starts.
+ * @param int         $now
+ * @return string|null|false  The deadline to store (null = none), or FALSE for
+ *                            "stays a game".
+ */
+function poll_revert_deadline($mode, $deadline, $startTs, $now) {
+    $mode = poll_revert_mode_clean($mode);
+    if ($mode === 'off' || $now >= $startTs) return false;
+    if ($deadline === null || $deadline === '') return null;
+    if (strtotime($deadline) > $now) return $deadline;
+    if ($mode !== 'extend') return false;
+    if ($startTs - $now < 3600) return false;
+    return date('Y-m-d H:i:s', $now + 3600);
+}
+
+/**
+ * Are these two rows (votes, players — anything with user_id, email, name) the
+ * same person? Used to find all the votes of somebody who left, and to match
+ * the game's players to the votes they came from.
+ *
+ * By ACCOUNT when both have one; else by EMAIL when both have one; by NAME
+ * only when NEITHER side has an account or an address — two people with the
+ * same name and no contact details voting in the same poll is unlikely, and
+ * it is the only thing there is to go on. A side with contact details never
+ * matches one without on name alone.
+ *
+ * @param array $a
+ * @param array $b
+ * @return bool
+ */
+function poll_same_person($a, $b) {
+    $au = (int)($a['user_id'] ?? 0);
+    $bu = (int)($b['user_id'] ?? 0);
+    if ($au > 0 && $bu > 0) return $au === $bu;
+    $ae = strtolower(trim((string)($a['email'] ?? '')));
+    $be = strtolower(trim((string)($b['email'] ?? '')));
+    if ($ae !== '' && $be !== '') return $ae === $be;
+    if ($au > 0 || $bu > 0 || $ae !== '' || $be !== '') return false;
+    $an = trim((string)($a['name'] ?? ''));
+    return $an !== '' && mb_strtolower($an, 'UTF-8') === mb_strtolower(trim((string)($b['name'] ?? '')), 'UTF-8');
+}
+
+/**
+ * Insert $row into $table using only the columns the table has now, so a
+ * snapshot taken by an older or newer version still goes back in.
+ *
+ * @param string $table  A fixed table name (never user input).
+ * @param array  $row
+ * @return int  The row id.
+ */
+function poll_restore_row($table, array $row) {
+    static $cols = [];
+    if (!isset($cols[$table])) {
+        $cols[$table] = array_flip(array_column(db_all('PRAGMA table_info(' . $table . ')'), 'name'));
+    }
+    $row = array_intersect_key($row, $cols[$table]);
+    db_run('INSERT INTO ' . $table . ' (' . implode(',', array_keys($row)) . ') VALUES ('
+           . implode(',', array_fill(0, count($row), '?')) . ')', array_values($row));
+    return (int)db()->lastInsertId();
+}
+
+/**
+ * Put a game back as the poll it came from: the rows in its snapshot, with
+ * the game's later changes, its players as the winning option's votes and its
+ * comments, minus everything $leaver cast (when given). Then the game goes.
+ * One transaction: either all of it happens or none of it.
+ *
+ * Shared by the automatic turn-back (somebody left) and the author's
+ * "reopen the poll" button (reopen_poll.php).
+ *
+ * @param array      $game       games row.
+ * @param array      $snap       Its decoded poll_snapshot.
+ * @param array      $overrides  polls columns to set on the way back (the
+ *                               deadline; on a reopen, everything the author
+ *                               changed in the form).
+ * @param array|null $leaver     Players row whose votes all go, or null.
+ * @return int|null  The poll id, or null when it could not be done.
+ */
+function poll_restore_from_game(array $game, array $snap, array $overrides = [], ?array $leaver = null) {
+    $gameId  = (int)$game['id'];
+    $pollRow = $snap['poll'];
+    $pollId  = (int)$pollRow['id'];
+    $winner  = null;
+    foreach ($snap['games'] as $g) {
+        if ((int)$g['id'] === (int)($snap['winner'] ?? 0)) $winner = $g;
+    }
+    if (!$winner) return null;
+    if (db_val('SELECT 1 FROM polls WHERE id = ?', [$pollId])) return null;   // never twice
+
+
+    db()->beginTransaction();
+    try {
+        // 1) The poll, with what the game says now.
+        $pollRow = array_merge(poll_row_from_game($pollRow, $game), $overrides);
+        poll_restore_row('polls', $pollRow);
+
+        // 2) The options; the winner with the game's current details.
+        foreach ($snap['games'] as $g) {
+            if ((int)$g['id'] === (int)$winner['id']) {
+                $g = array_merge($g, [
+                    'name' => $game['name'], 'length_minutes' => $game['length_minutes'], 'weight' => $game['weight'],
+                    'max_players' => $game['max_players'], 'thumbnail' => $game['thumbnail'], 'bgg_id' => $game['bgg_id'],
+                    'language' => $game['language'], 'link' => $game['link'], 'manual_link' => $game['manual_link'],
+                    'from_club' => $game['from_club'],
+                ]);
+            }
+            poll_restore_row('poll_games', $g);
+        }
+
+        // 3) Votes. For the winner: the game's players, in sign-up order, each
+        //    on the vote it came from where there is one (same id, same time),
+        //    with what the player row says now.
+        $winnerVotes = array_values(array_filter($snap['votes'] ?? [], function ($v) use ($winner) {
+            return (int)$v['poll_game_id'] === (int)$winner['id'];
+        }));
+        $used = [];
+        foreach (db_all('SELECT * FROM players WHERE game_id = ? ORDER BY id', [(int)$gameId]) as $p) {
+            $vote = null;
+            foreach ($winnerVotes as $i => $v) {
+                if (empty($used[$i]) && poll_same_person($v, $p)) { $vote = $v; $used[$i] = true; break; }
+            }
+            $vote = array_merge($vote ?? ['created_at' => $p['created_at']], [
+                'poll_game_id' => (int)$winner['id'], 'poll_id' => $pollId,
+                'name' => $p['name'], 'email' => $p['email'], 'notify' => $p['notify'],
+                'knows_rules' => $p['knows_rules'], 'user_id' => $p['user_id'],
+            ]);
+            poll_restore_row('poll_votes', $vote);
+        }
+        //    For the others: as they were, minus everything the leaver cast.
+        foreach ($snap['votes'] ?? [] as $v) {
+            if ((int)$v['poll_game_id'] === (int)$winner['id'] || ($leaver && poll_same_person($v, $leaver))) continue;
+            poll_restore_row('poll_votes', $v);
+        }
+
+        // 4) The discussion, without the automatic results comment.
+        foreach (db_all('SELECT * FROM comments WHERE game_id = ? ORDER BY id', [(int)$gameId]) as $c) {
+            if ((int)$c['id'] === (int)($snap['auto_comment_id'] ?? 0)) continue;
+            db_run('INSERT INTO poll_comments (poll_id, name, user_id, comment, created_at) VALUES (?,?,?,?,?)',
+                   [$pollId, $c['name'], $c['user_id'], $c['comment'], $c['created_at']]);
+        }
+
+        // 5) The game goes (its players and comments with it).
+        db_run('DELETE FROM games WHERE id = ?', [(int)$gameId]);
+        db()->commit();
+    } catch (Throwable $ex) {
+        if (db()->inTransaction()) db()->rollBack();
+        return null;
+    }
+    return $pollId;
+
+}
+
+/**
+ * Somebody just left game $gameId (their player row is already gone, and any
+ * reserve already moved up). If the game came from a poll that asked for it,
+ * and it is now below the winning option's minimum, turn it back into that
+ * poll. See the section comment above for what is kept and what wins.
+ *
+ * Afterwards: the voters and the proposer are emailed (not the person who
+ * left), and if another option still has its minimum once that person's votes
+ * are gone, it wins straight away like any vote would make it.
+ *
+ * @param int   $gameId
+ * @param array $leaver  The removed players row (name, email, user_id).
+ * @return array|null  ['poll' => id, 'game' => id of a game it then became,
+ *                     or null] — or null when nothing happened.
+ */
+function poll_revert_on_leave($gameId, array $leaver) {
+    $game = db_one('SELECT * FROM games WHERE id = ?', [(int)$gameId]);
+    if (!$game || empty($game['poll_snapshot']) || (int)$game['is_archived'] === 1) return null;
+    $snap = json_decode((string)$game['poll_snapshot'], true);
+    if (!is_array($snap) || empty($snap['poll']['id']) || empty($snap['games'])) return null;
+
+    $pollRow = $snap['poll'];
+    $mode = poll_revert_mode_clean($pollRow['revert_mode'] ?? 'off');
+    $winner = null;
+    foreach ($snap['games'] as $g) {
+        if ((int)$g['id'] === (int)($snap['winner'] ?? 0)) $winner = $g;
+    }
+    if (!$winner || $mode === 'off') return null;
+    // Only a poll decided by an option REACHING its minimum turns back by
+    // itself. (Snapshots from before 'reason' was recorded were only ever
+    // taken for those.)
+    if (($snap['reason'] ?? 'quota') !== 'quota') return null;
+    $need = max(1, (int)$winner['required_players']);
+    if ((int)db_val('SELECT COUNT(*) FROM players WHERE game_id = ?', [(int)$gameId]) >= $need) return null;
+
+    $day = db_one('SELECT * FROM event_days WHERE id = ?', [(int)$game['day_id']]);
+    if (!$day) return null;
+    $deadline = poll_revert_deadline($mode, $pollRow['deadline'] ?? null,
+                                     poll_start_ts($day, $game['start_time']), time());
+    if ($deadline === false) return null;
+
+    $pollId = (int)$pollRow['id'];
+    $extended = $deadline !== null && $deadline !== ($pollRow['deadline'] ?? null);
+    if (!poll_restore_from_game($game, $snap, ['deadline' => $deadline], $leaver)) return null;
+
+    log_action('poll_reverted', $game['name'] . ' -> poll #' . $pollId . ' (' . $leaver['name'] . ')'
+        . ($extended ? ' deadline -> ' . $deadline : ''));
+
+    $poll = db_one('SELECT * FROM polls WHERE id = ?', [$pollId]);
+    if (function_exists('notify_poll_reverted')) {
+        notify_poll_reverted($poll, $game['name'], $need, $leaver);
+    }
+    // Another option may still have its minimum without the leaver's votes.
+    $newGame = poll_check_resolve($pollId);
+    return ['poll' => $pollId, 'game' => $newGame ?: null];
+}
+
+/**
+ * The poll row as it would come back: the snapshot's row with what the game
+ * says now — where it is, when, who runs it, its description. Used for the
+ * restore itself and to fill the reopen form, so the two agree.
+ *
+ * @param array $pollRow  The snapshot's polls row.
+ * @param array $game     games row.
+ * @return array
+ */
+function poll_row_from_game(array $pollRow, array $game) {
+    return array_merge($pollRow, [
+        'table_id' => $game['table_id'], 'event_id' => $game['event_id'], 'day_id' => $game['day_id'],
+        'start_time' => $game['start_time'], 'comment' => $game['comment'],
+        'explain_rules' => $game['explain_rules'], 'require_email' => $game['require_email'],
+        'notify_owner' => $game['notify_owner'],
+        'proposer_name' => $game['brings_name'], 'proposer_email' => $game['brings_email'],
+        'proposer_user_id' => $game['brings_user_id'],
+    ]);
+}
+
+/* =============================================================================
+ *  REOPENING BY HAND — the author's "reopen the poll" button on a game.
+ * -----------------------------------------------------------------------------
+ *  Offered (when the club switches it on: allow_poll_reopen) on a game a poll
+ *  became, to whoever may edit that game, while it has not started — unless
+ *  reopening could only end in the same game again at once: the winning option
+ *  still has its minimum and the poll would not wait for its deadline. That is
+ *  the case for a poll decided by reaching the minimum that nobody has left.
+ *  The author then checks the poll's settings (the deadline above all) on a
+ *  form before anything changes: reopen_poll.php.
+ * ============================================================================= */
+
+/**
+ * Should game $game offer "reopen the poll"? Returns what the reopen needs, or
+ * null for no. Permission is the caller's: this answers only "is there a poll
+ * to go back to, and would going back mean anything".
+ *
+ * @param array    $game         games row (with poll_snapshot).
+ * @param int|null $playerCount  Players on it, when the caller has them (a
+ *                               game card does); null to count.
+ * @param int|null $now
+ * @return array|null  ['snap', 'winner', 'need', 'day', 'start_ts'].
+ */
+function poll_reopen_check(array $game, $playerCount = null, $now = null) {
+    if (!opt_bool('allow_poll_reopen')) return null;
+    if (empty($game['poll_snapshot']) || (int)($game['is_archived'] ?? 0) === 1) return null;
+    $snap = json_decode((string)$game['poll_snapshot'], true);
+    if (!is_array($snap) || empty($snap['poll']['id']) || empty($snap['games'])) return null;
+    $winner = null;
+    foreach ($snap['games'] as $g) {
+        if ((int)$g['id'] === (int)($snap['winner'] ?? 0)) $winner = $g;
+    }
+    if (!$winner) return null;
+    static $days = [];
+    $dayId = (int)$game['day_id'];
+    if (!array_key_exists($dayId, $days)) $days[$dayId] = db_one('SELECT * FROM event_days WHERE id = ?', [$dayId]);
+    $day = $days[$dayId];
+    if (!$day) return null;
+    $now = $now ?? time();
+    $startTs = poll_start_ts($day, $game['start_time']);
+    if ($now >= $startTs) return null;                       // it has started
+    $need  = max(1, (int)$winner['required_players']);
+    $count = $playerCount ?? (int)db_val('SELECT COUNT(*) FROM players WHERE game_id = ?', [(int)$game['id']]);
+    $waits = (int)($snap['poll']['wait_for_deadline'] ?? 0) === 1 && !empty($snap['poll']['deadline']);
+    if ($count >= $need && !$waits) return null;             // it would only decide itself again
+    return ['snap' => $snap, 'winner' => $winner, 'need' => $need, 'day' => $day, 'start_ts' => $startTs];
+}
+
+/**
+ * The "hours before the start" to put in the reopen form's deadline field.
+ *
+ *   - the poll's own deadline, when it is still ahead;
+ *   - no deadline, when it never had one;
+ *   - when it has PASSED: the club's default, if that still leaves at least
+ *     an hour of voting; otherwise the most hours before the start that do;
+ *     0 (no deadline) when not even that fits.
+ *
+ * @param array $pollRow  As poll_row_from_game() gives it.
+ * @param array $day      event_days row.
+ * @param int   $startTs
+ * @param int   $now
+ * @return array  [hours, moved] — moved: the stored deadline had passed.
+ */
+function poll_reopen_deadline_hours(array $pollRow, array $day, $startTs, $now) {
+    $deadline = $pollRow['deadline'] ?? null;
+    if ($deadline === null || $deadline === '') return [0, false];
+    if (strtotime($deadline) > $now) return [poll_deadline_hours($pollRow, $day), false];
+    $def = opt_int('poll_default_deadline_hours');
+    if ($def > 0 && $startTs - $def * 3600 >= $now + 3600) return [$def, true];
+    return [max(0, (int)floor(($startTs - $now - 3600) / 3600)), true];
+}
+
+/**
+ * The reopen form's option list: the snapshot's options with the winner as
+ * the game is now, each with the votes it will have — the game's players for
+ * the winner, the stored votes for the rest.
+ *
+ * @param array $game
+ * @param array $snap
+ * @return array  poll_games-like rows, each with 'votes'.
+ */
+function poll_reopen_options(array $game, array $snap) {
+    $players = (int)db_val('SELECT COUNT(*) FROM players WHERE game_id = ?', [(int)$game['id']]);
+    $out = [];
+    foreach ($snap['games'] as $g) {
+        if ((int)$g['id'] === (int)$snap['winner']) {
+            $g['name']  = $game['name'];
+            $g['votes'] = $players;
+        } else {
+            $g['votes'] = count(array_filter($snap['votes'] ?? [], function ($v) use ($g) {
+                return (int)$v['poll_game_id'] === (int)$g['id'];
+            }));
+        }
+        $out[] = $g;
+    }
+    return $out;
 }

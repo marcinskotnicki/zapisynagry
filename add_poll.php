@@ -59,6 +59,7 @@ if (!isset($_SESSION['poll_draft']) || (int)($_SESSION['poll_draft']['table_id']
         'others_library'=> 0,           // opt-in: others may only add from MY library
         'wait_deadline' => 0,           // opt-in: run to the deadline instead of ending on the first full candidate
         'notify_votes'  => 0,           // opt-in: email me about every vote (and options others add)
+        'revert_mode'   => 'off',       // if somebody leaves the game it becomes: nothing / back to the poll
         // Voting closes this many hours BEFORE the poll's start; admin default,
         // overridable per poll on the form. 0 = no automatic deadline.
         'deadline_hours' => opt_int('poll_default_deadline_hours'),
@@ -100,6 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Only while the club sends notifications at all — the box is not on the
     // form otherwise, and a hand-built POST must not store a promise of mail.
     $draft['notify_votes'] = notify_enabled() && isset($_POST['notify_votes']) ? 1 : 0;
+    // Unknown values (a hand-built POST) fall back to "do nothing".
+    $draft['revert_mode'] = poll_revert_mode_clean($_POST['revert_mode'] ?? 'off');
 
     if ($do === 'addgame') {
         redirect('add_poll_game.php?table=' . $tableId);   // go append a candidate
@@ -146,8 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_run(
                     'INSERT INTO polls
                      (table_id,event_id,day_id,proposer_name,proposer_email,proposer_user_id,
-                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline,notify_owner,notify_votes)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      comment,start_time,explain_rules,require_email,allow_others_add,show_results,others_from_library,add_self,wait_for_deadline,deadline,notify_owner,notify_votes,revert_mode)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [
                         $tableId, $event['id'], $day['id'],
                         $draft['name'] !== '' ? $draft['name'] : null,
@@ -163,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         notify_flag_from_post($_POST),
                         // ...and the per-vote ones, asked separately.
                         (int)($draft['notify_votes'] ?? 0),
+                        poll_revert_mode_clean($draft['revert_mode'] ?? 'off'),
                     ]
                 );
                 $pollId = (int)db()->lastInsertId();
